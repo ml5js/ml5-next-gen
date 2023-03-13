@@ -11,7 +11,7 @@ training/lstm/data/t
 .cache
 /public
 /static
-/dist
+dist
 /dist_examples
 
 website/translated_docs
