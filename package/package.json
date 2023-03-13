@@ -1,0 +1,21 @@
+{
+  "name": "ml5-nerualnetwork-test-build",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+  },
+  "keywords": [
+    "ML5"
+  ],
+  "author": "Ziyuan Lin",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ziyuan-linn/ml5-neuralnetwork-test-build.git"
+  },
+  "devDependencies": {
+    "webpack": "^5.76.1",
+    "webpack-cli": "^5.0.1"
+  }
+}
