@@ -19,7 +19,7 @@ npm run build
 This will create a build in the dist folder.
 
 
-Open `test/index.html` in the browser to see the build working.
+Open `test/index.html` in the browser to see the build working, running an example from the ml5 website.
 
 
 ## Process
