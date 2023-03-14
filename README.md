@@ -9,9 +9,31 @@ nvm install 18.15
 nvm use 18
 ```
 
+
+To build the library, run the following commands:
+```
+cd package
+npm install
+npm run build
+```
+This will create a build in the dist folder.
+
+
+Open `test/index.html` in the browser to see the build working.
+
+
 ## Process
-I built the library using Webpack:
+I am building the library using Webpack:
 ```
 npm install --save-dev webpack webpack cli
 ```
-Then I created package.json using `npm init`.
+
+I also created package.json using `npm init` and set up a basic config file for a library build named `webpack.config.js`. I configured package.json so I could run webpack with `npm run build`.
+
+
+
+From the original ml5 library's `src` folder, I copied over all source files from the `NeuralNetwork` directory and necessary dependency files from `utils` directory. I then installed `@tensorflow/tfjs@4.2.0`, `@tensorflow/tfjs-vis@1.5.1`, and `axios@1.3.4` with npm. 
+
+At this point, the library can be built without error. I was only getting an error about exceeding recommended size limit. For the build, I am using the latest version of node and npm dependencies. It seems like NeuralNetwork does not have any problems with that.
+
+
