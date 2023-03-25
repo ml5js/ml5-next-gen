@@ -1,5 +1,5 @@
 # ml5-neuralnetwork-test-build
-This repo is a test to see what it would take to build only the NeuralNetwork feature of the ml5 library.
+This is a test repo to see what it would take to build only the NeuralNetwork feature of the ml5 library.
 
 ## Setup
 This build uses node version 18.15.0 and npm version.
