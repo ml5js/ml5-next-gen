@@ -9,11 +9,11 @@
   "keywords": [
     "ML5"
   ],
-  "author": "Ziyuan Lin",
+  "author": "ml5",
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ziyuan-linn/ml5-neuralnetwork-test-build.git"
+    "url": ""
   },
   "devDependencies": {
     "webpack": "^5.76.1",
