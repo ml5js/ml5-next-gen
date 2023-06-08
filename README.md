@@ -19,7 +19,7 @@ npm run build
 This will create the build in the dist folder.
 
 
-Open `test/index.html` in the browser to see the build running an example from the ml5 website.
+Open `examples/NeuralNetwork/index.html` in the browser to see the build running an example from the ml5 website.
 
 
 ## Process
