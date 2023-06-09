@@ -12,7 +12,6 @@ nvm use 18
 
 To build the library, run the following commands:
 ```
-cd package
 npm install
 npm run build
 ```
@@ -21,8 +20,14 @@ This will create the build in the dist folder.
 
 Open `examples/NeuralNetwork/index.html` in the browser to see the build running an example from the ml5 website.
 
+## Code Formatting
+To keep the coding style consistent, we will be using the prettier formatter.
+
+
 
 ## Process
+This section explains how this repository was creates and is for reference purposes only. The steps outlines in this section do not need to be followed by contributors.
+
 I am building the library using Webpack, which was installed with:
 ```
 npm install --save-dev webpack webpack cli
