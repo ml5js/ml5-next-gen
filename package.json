@@ -14,7 +14,7 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ml5js/ml5-neuralnetwork-test-build"
+    "url": "https://github.com/ml5js/ml5-next-gen"
   },
   "devDependencies": {
     "prettier": "2.8.8",
