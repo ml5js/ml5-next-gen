@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --config webpack.config.js",
+    "build": "webpack --config webpack.config.js --env production",
+    "develop": "webpack --config webpack.config.js",
+    "start": "webpack serve --config webpack.config.js",
     "format": "prettier --write \"**/*.js\""
   },
   "keywords": [
@@ -17,9 +19,11 @@
     "url": "https://github.com/ml5js/ml5-next-gen"
   },
   "devDependencies": {
+    "html-webpack-plugin": "^5.5.3",
     "prettier": "2.8.8",
     "webpack": "^5.76.1",
-    "webpack-cli": "^5.0.1"
+    "webpack-cli": "^5.0.1",
+    "webpack-dev-server": "^4.15.1"
   },
   "dependencies": {
     "@tensorflow/tfjs": "^4.2.0",
