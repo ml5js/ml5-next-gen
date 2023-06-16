@@ -57,6 +57,17 @@ npx prettier --write path/to/file
 
 For more options with the command line, refer to the [Prettier Documentation](https://prettier.io/docs/en/cli.html)
 
+## Building the Library
+
+To build the ml5 library for production, run the following commands
+
+```
+npm install
+npm run build
+```
+
+This will create a production version of the library in `/dist` directory.
+
 ## Process
 
 _This section explains how this repository was creates and is for reference purposes only. The steps outlines in this section do not need to be followed by contributors._
