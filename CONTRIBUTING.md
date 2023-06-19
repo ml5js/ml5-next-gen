@@ -8,16 +8,26 @@ nvm install 18.15
 nvm use 18
 ```
 
-To build the library, run the following commands:
+To start the development server, run the following commands:
 
 ```
 npm install
-npm run build
+npm start
 ```
 
-This will create the build in the dist folder.
+You should see something similar to this in the terminal:
 
-Open `examples/NeuralNetwork/index.html` in the browser to see the build running an example from the ml5 website.
+```
+[webpack-dev-server] Project is running at:
+[webpack-dev-server] Loopback: http://localhost:8080/
+...
+...
+webpack 5.76.1 compiled successfully in 8360 ms
+```
+
+A local server have been started and hosts a built version of the ml5 library at http://localhost:8080/ml5.js. While the server is running, Webpack will automatically rebuild the library if you change and save any file in the `/src` folder.
+
+Open `examples/NeuralNetwork/index.html` in the browser to see the live build of `ml5.js` working in some example code.
 
 ## Code Formatting
 
@@ -46,6 +56,17 @@ npx prettier --write path/to/file
 ```
 
 For more options with the command line, refer to the [Prettier Documentation](https://prettier.io/docs/en/cli.html)
+
+## Building the Library
+
+To build the ml5 library for production, run the following commands
+
+```
+npm install
+npm run build
+```
+
+This will create a production version of the library in `/dist` directory.
 
 ## Process
 

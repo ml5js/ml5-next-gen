@@ -1,4 +1,4 @@
-# ml5-neuralnetwork-test-build
+# ml5-next-gen
 
 Welcome to the next-generation repo for the ml5.js project! Due to the complexities inherent in updating all the dependencies in [the original repo](https://github.com/ml5js/ml5-library), we're exploring rebuilding from the ground up. This fresh repository allows us to migrate over classes and functions one at a time. This is very much a work in progress and is currently in its early, experimental stage. We appreciate your patience as we work towards refining this next evolution of the ml5.js project. Stay tuned!
 
@@ -12,13 +12,23 @@ nvm install 18.15
 nvm use 18
 ```
 
-To build the library, run the following commands:
+To start the development server, run the following commands:
 
 ```
 npm install
-npm run build
+npm start
 ```
 
-This will create the build in the dist folder.
+You should see something similar to this in the terminal:
 
-Open `examples/NeuralNetwork/index.html` in the browser to see the build running an example from the ml5 website.
+```
+[webpack-dev-server] Project is running at:
+[webpack-dev-server] Loopback: http://localhost:8080/
+...
+...
+webpack 5.76.1 compiled successfully in 8360 ms
+```
+
+A local server have been started and hosts a built version of the ml5 library at http://localhost:8080/ml5.js. While the server is running, Webpack will automatically rebuild the library if you change and save any file in the `/src` folder.
+
+Open `examples/NeuralNetwork/index.html` in the browser to see the live build of `ml5.js` working in some example code.
