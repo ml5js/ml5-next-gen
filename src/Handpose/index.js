@@ -8,7 +8,6 @@
  * Ported and integrated from all the hard work by: https://github.com/tensorflow/tfjs-models/tree/master/handpose
  */
 import * as tf from "@tensorflow/tfjs";
-import model from "@mediapipe/hands";
 import * as handPoseDetection from "@tensorflow-models/hand-pose-detection";
 import { EventEmitter } from "events";
 import callCallback from "../utils/callcallback";
@@ -45,7 +44,7 @@ class Handpose extends EventEmitter {
     const modelConfig = {
       ...this.config,
       runtime: "mediapipe",
-      solutionPath: "../node_modules/@mediapipe/hands",
+      solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
     };
 
     this.model = await handPoseDetection.createDetector(
