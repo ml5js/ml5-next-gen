@@ -22,6 +22,15 @@
   "dependencies": {
     "@tensorflow/tfjs": "^4.2.0",
     "@tensorflow/tfjs-vis": "^1.5.1",
+    "@tensorflow-models/body-segmentation": "^1.0.1",
     "axios": "^1.3.4"
+  },
+  "overrides": {
+    "@tensorflow-models/body-segmentation":{
+      "@mediapipe/selfie_segmentation": "~0.1.0",
+      "@tensorflow/tfjs-backend-webgl": "^3.13.0",
+      "@tensorflow/tfjs-converter": "^3.13.0",
+      "@tensorflow/tfjs-core": "^3.13.0"
+    }
   }
 }
