@@ -4,7 +4,7 @@ _Version 1.0 of the ml5.js license was adopted and last updated on May 10, 2021.
 
 ## Purpose
 
-This license gives everyone as much permission to work with this software as possible as long as they comply with the ml5.js [Code of Conduct](README.md), while protecting contributors from liability.
+This license gives everyone as much permission to work with this software as possible as long as they comply with the ml5.js [Code of Conduct](https://github.com/ml5js/Code-of-Conduct), while protecting contributors from liability.
 
 ## Acceptance
 
@@ -20,7 +20,7 @@ Each contribution to this software is licensed under this license for three year
 
 ## Code of Conduct
 
-You must use this software in compliance with the ml5.js [Code of Conduct](README.md) as it exists at the time of your use. This includes cooperating with any investigations of your compliance with the ml5.js Code of Conduct.
+You must use this software in compliance with the ml5.js [Code of Conduct](https://github.com/ml5js/Code-of-Conduct) as it exists at the time of your use. This includes cooperating with any investigations of your compliance with the ml5.js Code of Conduct.
 
 ## Notices
 
