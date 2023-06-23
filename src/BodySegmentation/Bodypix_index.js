@@ -12,13 +12,15 @@
  */
 
 // @ts-check
-import * as tf from '@tensorflow/tfjs';
-import * as bp from '@tensorflow-models/body-pix';
+import * as bodySegmentation from '@tensorflow-models/body-segmentation';
+import '@tensorflow/tfjs-core';
+import '@tensorflow/tfjs-converter';
+import '@tensorflow/tfjs-backend-webgl';
 import callCallback from '../utils/callcallback';
 import generatedImageResult from '../utils/generatedImageResult';
 import handleArguments from '../utils/handleArguments';
 import p5Utils from '../utils/p5Utils';
-import BODYPIX_PALETTE from './BODYPIX_PALETTE';
+import PALETTE from './PALETTE';
 import { mediaReady } from '../utils/imageUtilities';
 
 /**
@@ -29,7 +31,7 @@ import { mediaReady } from '../utils/imageUtilities';
  * @typedef {Object} BodyPixOptions
  * @property {import('@tensorflow-models/body-pix/dist/mobilenet').MobileNetMultiplier} [multiplier]
  * @property {import('@tensorflow-models/body-pix/dist/mobilenet').OutputStride} [outputStride]
- * @property {number} [segmentationThreshold]
+ * @property {number} [quantBytes]
  * @property {BodyPixPalette} [palette]
  * @property {boolean} [returnTensors]
  */
@@ -40,7 +42,7 @@ import { mediaReady } from '../utils/imageUtilities';
 const DEFAULTS = {
   "multiplier": 0.75,
   "outputStride": 16,
-  "segmentationThreshold": 0.5,
+  "quantBytes": 2,
   "palette": BODYPIX_PALETTE,
   "returnTensors": false,
 }
@@ -60,7 +62,7 @@ class BodyPix {
     this.config = {
       multiplier: options.multiplier || DEFAULTS.multiplier,
       outputStride: options.outputStride || DEFAULTS.outputStride,
-      segmentationThreshold: options.segmentationThreshold || DEFAULTS.segmentationThreshold,
+      quantBytes: options.quantBytes || DEFAULTS.quantBytes,
       palette: options.palette || DEFAULTS.palette,
       returnTensors: options.returnTensors || DEFAULTS.returnTensors
     }
@@ -73,7 +75,8 @@ class BodyPix {
    * @return {Promise<BodyPix>}
    */
   async loadModel() {
-    this.model = await bp.load(this.config.multiplier);
+    this.model = bodySegmentation.SupportedModels.BodyPix;
+    this.segmenter = await bodySegmentation.createSegmenter(this.model,this.config);
     this.modelReady = true;
     return this;
   }
