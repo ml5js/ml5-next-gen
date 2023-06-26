@@ -24,16 +24,16 @@ module.exports = function (env, argv) {
       static: [
         {
           directory: resolve(__dirname, "dist"),
-          publicPath: '/dist',
+          publicPath: "/dist",
           watch: true,
         },
         {
           directory: resolve(__dirname, "examples"),
-          publicPath: '/examples',
+          publicPath: "/examples",
           watch: true,
-        }
+        },
       ],
-      open: '/examples'
+      open: "/examples",
     },
     plugins: [
       new HtmlWebpackPlugin({
