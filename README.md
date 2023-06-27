@@ -29,6 +29,6 @@ You should see something similar to this in the terminal:
 webpack 5.76.1 compiled successfully in 8360 ms
 ```
 
-A local server have been started and hosts a built version of the ml5 library at http://localhost:8080/ml5.js. While the server is running, Webpack will automatically rebuild the library if you change and save any file in the `/src` folder.
+A local server have been started and hosts a built version of the ml5 library at http://localhost:8080/dist/ml5.js. While the server is running, Webpack will automatically rebuild the library if you change and save any file in the `/src` folder.
 
-Open `examples/NeuralNetwork/index.html` in the browser to see the live build of `ml5.js` working in some example code.
+A webpage at http://localhost:8080/examples/ should automatically open with the directory listing of the example directory. Select one of the directories to test run `ml5.js` in some example code.
