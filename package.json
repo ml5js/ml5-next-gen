@@ -26,19 +26,18 @@
     "webpack-dev-server": "^4.15.1"
   },
   "dependencies": {
+    "@tensorflow-models/body-segmentation": "^1.0.1",
     "@mediapipe/hands": "^0.4.1675469240",
     "@mediapipe/pose": "^0.5.1675469404",
     "@tensorflow-models/hand-pose-detection": "^2.0.0",
     "@tensorflow-models/pose-detection": "^2.1.0",
     "@tensorflow/tfjs": "^4.2.0",
     "@tensorflow/tfjs-vis": "^1.5.1",
-    "@tensorflow-models/body-segmentation": "^1.0.1",
     "axios": "^1.3.4"
   },
-  "peerDependencies": {
-    "@mediapipe/selfie_segmentation": "~0.1.0",
-    "@tensorflow/tfjs-backend-webgl": "^3.13.0",
-    "@tensorflow/tfjs-converter": "^3.13.0",
-    "@tensorflow/tfjs-core": "^3.13.0"
+  "overrides": {
+    "@tensorflow-models/body-segmentation": {
+      "@tensorflow/tfjs-core": "^4.2.0"
+    }
   }
 }
