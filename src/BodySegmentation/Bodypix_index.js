@@ -20,7 +20,7 @@ import callCallback from '../utils/callcallback';
 import generatedImageResult from '../utils/generatedImageResult';
 import handleArguments from '../utils/handleArguments';
 import p5Utils from '../utils/p5Utils';
-import PALETTE from './PALETTE';
+import BODYPIX_PALETTE from './PALETTE';
 import { mediaReady } from '../utils/imageUtilities';
 
 /**
@@ -29,23 +29,49 @@ import { mediaReady } from '../utils/imageUtilities';
 
 /**
  * @typedef {Object} BodyPixOptions
+ * @property {string}[architecture] -Can be either MobileNetV1 or ResNet 50.
  * @property {import('@tensorflow-models/body-pix/dist/mobilenet').MobileNetMultiplier} [multiplier]
  * @property {import('@tensorflow-models/body-pix/dist/mobilenet').OutputStride} [outputStride]
  * @property {number} [quantBytes]
  * @property {BodyPixPalette} [palette]
  * @property {boolean} [returnTensors]
+ * @property {boolean} [multiSegmentation]
+ * @property {boolean} [segmentBodyParts]
+ * @property {boolean} [flipHorizontal]
+ * @property {string} [internalResolution]
+ * @property {number} [segmentationThreshold]
+ * @property {number} [maxDetections]
+ * @property {number} [scoreThreshold]
+ * @property {number} [nmsRadius]
  */
 
 /**
  * @type {BodyPixOptions}
  */
 const DEFAULTS = {
+  //can we let the users decide which architecture to use?
+  //two defaults?
+  "architecture": "ResNet50",
   "multiplier": 0.75,
-  "outputStride": 16,
+  "outputStride": 32,
   "quantBytes": 2,
-  "palette": BODYPIX_PALETTE,
   "returnTensors": false,
+  "flipHorizontal": false,
+  "internalResolution": "medium",
+  "segmentationThreshold": 0.7,
+  "maxDetections": 10,
+  "scoreThreshold": 0.3,
+  "nmsRadius": 20,
+  "palette": BODYPIX_PALETTE
 }
+//Add notes for the params later!
+
+//Should I add multiSeg params?
+//Some ideas in mind:
+//if multiSegmentation is True, add two extra items to SEGDEFAULTS
+//Similar operations when we want to use MobileNet as the architecture 
+//(extra param: multiplier)
+
 
 class BodyPix {
   /**
@@ -58,14 +84,24 @@ class BodyPix {
     this.video = video;
     this.model = null;
     this.modelReady = false;
-    this.modelPath = ''
+    this.modelPath = '';
     this.config = {
+      architecture: options.architecture || DEFAULTS.architecture,
       multiplier: options.multiplier || DEFAULTS.multiplier,
       outputStride: options.outputStride || DEFAULTS.outputStride,
       quantBytes: options.quantBytes || DEFAULTS.quantBytes,
       palette: options.palette || DEFAULTS.palette,
+      multiSegmentation: options.multiSegmentation,
+      segmentBodyParts: options.segmentBodyParts,
+      flipHorizontal: options.flipHorizontal || DEFAULTS.flipHorizontal,
+      internalResolution: options.internalResolution || DEFAULTS.internalResolution,
+      segmentationThreshold: options.segmentationThreshold || DEFAULTS.segmentationThreshold,
+      maxDetections: options.maxDetections || DEFAULTS.maxDetections,
+      scoreThreshold: options.scoreThreshold || DEFAULTS.maxDetections,
+      nmsRadius: options.nmsRadius || DEFAULTS.nmsRadius,
       returnTensors: options.returnTensors || DEFAULTS.returnTensors
     }
+    this
 
     this.ready = callCallback(this.loadModel(), callback);
   }
@@ -117,6 +153,7 @@ class BodyPix {
     return result;
   }
 
+
   /**
    * @typedef {Object} SegmentationResult
    * @property {{data: Uint8Array | Int32Array, width: number, height: number}} segmentation
@@ -144,12 +181,15 @@ class BodyPix {
     this.config.palette = segmentationOptions.palette || this.config.palette;
     this.config.outputStride = segmentationOptions.outputStride || this.config.outputStride;
     this.config.segmentationThreshold = segmentationOptions.segmentationThreshold || this.config.segmentationThreshold;
+    this.config.multiSegmentation = segmentationOptions.multiSegmentation;
+    //what if the argument does not contain multiSegmentation?
+    this.config.segmentBodyParts = segmentationOptions.segmentBodyParts
 
-    const segmentation = await this.model.estimatePartSegmentation(imgToSegment, this.config.outputStride, this.config.segmentationThreshold);
-
+    const segmentation = await this.segmenter.segmentPeople(imgToSegment, this.config.multiSegmentation, this.config.segmentBodyParts);
     const bodyPartsMeta = this.bodyPartsSpec(this.config.palette);
     const colorsArray = Object.keys(bodyPartsMeta).map(part => bodyPartsMeta[part].color)
 
+//Code above has been updated
     const result = {
       segmentation,
       raw: {
@@ -167,7 +207,7 @@ class BodyPix {
       partMask: null,
       bodyParts: bodyPartsMeta
     };
-    result.raw.backgroundMask = bp.toMaskImageData(segmentation, true);
+    result.raw.backgroundMask = bodySegmentation.toBinaryMask(segmentation, true);
     result.raw.personMask = bp.toMaskImageData(segmentation, false);
     result.raw.partMask = bp.toColoredPartImageData(segmentation, colorsArray);
 
