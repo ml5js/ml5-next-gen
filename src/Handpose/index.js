@@ -91,7 +91,7 @@ class Handpose extends EventEmitter {
 const handpose = (...inputs) => {
   const { video, options = {}, callback } = handleArguments(...inputs);
   const instance = new Handpose(video, options, callback);
-  return callback ? instance : instance.ready;
+  return instance;
 };
 
 export default handpose;
