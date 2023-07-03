@@ -5,7 +5,7 @@
 
 /*
  * Handpose: Palm detector and hand-skeleton finger tracking in the browser
- * Ported and integrated from all the hard work by: https://github.com/tensorflow/tfjs-models/tree/master/handpose
+ * Ported and integrated from all the hard work by: https://github.com/tensorflow/tfjs-models/tree/master/hand-pose-detection
  */
 import * as tf from "@tensorflow/tfjs";
 import * as handPoseDetection from "@tensorflow-models/hand-pose-detection";
@@ -18,16 +18,13 @@ class Handpose extends EventEmitter {
   /**
    * Create Handpose.
    * @param {HTMLVideoElement} [video] - An HTMLVideoElement.
-   * @param {object} [options] - An object with options.
+   * @param {Object} [options] - An object with options.
    * @param {function} [callback] - A callback to be called when the model is ready.
    */
   constructor(video, options, callback) {
     super();
 
     this.video = video;
-    /**
-     * @type {null|handposeCore.HandPose}
-     */
     this.model = null;
     this.modelReady = false;
     this.config = options;
@@ -40,17 +37,15 @@ class Handpose extends EventEmitter {
    * @return {this} the Handpose model.
    */
   async loadModel() {
-    const mediaPipeHands = handPoseDetection.SupportedModels.MediaPipeHands;
+    const pipeline = handPoseDetection.SupportedModels.MediaPipeHands;
     const modelConfig = {
+      runtime: "mediapipe", // use MediaPipe runtime by default
+      solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/hands", // fetch model from mediapipe server
       ...this.config,
-      runtime: "mediapipe",
-      solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
     };
 
-    this.model = await handPoseDetection.createDetector(
-      mediaPipeHands,
-      modelConfig
-    );
+    this.model = await handPoseDetection.createDetector(pipeline, modelConfig);
+
     this.modelReady = true;
 
     if (this.video) {
@@ -61,6 +56,8 @@ class Handpose extends EventEmitter {
   }
 
   /**
+   * @param {*} [inputOr] - An HMTL or p5.js image, video, or canvas element to run the prediction on.
+   * @param {function} [cb] - A callback function to handle the predictions.
    * @return {Promise<handposeCore.AnnotatedPrediction[]>} an array of predictions.
    */
   async predict(inputOr, cb) {
@@ -72,9 +69,7 @@ class Handpose extends EventEmitter {
     const { flipHorizontal } = this.config;
     const predictions = await this.model.estimateHands(image, flipHorizontal);
     const result = predictions;
-    // Soon, we will remove the 'predict' event and prefer the 'hand' event. During
-    // the interim period, we will both events.
-    this.emit("predict", result);
+
     this.emit("hand", result);
 
     if (this.video) {
@@ -89,6 +84,10 @@ class Handpose extends EventEmitter {
   }
 }
 
+/**
+ * exposes handpose class through function
+ * @returns {Object|Promise<Boolean>} A new handpose instance
+ */
 const handpose = (...inputs) => {
   const { video, options = {}, callback } = handleArguments(...inputs);
   const instance = new Handpose(video, options, callback);

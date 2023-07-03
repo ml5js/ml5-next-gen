@@ -8,7 +8,7 @@ function setup() {
   video.size(width, height);
 
   const options = { maxHands: 2 };
-  handpose = ml5.handpose(video, options, modelReady);
+  handpose = ml5.handpose(video, options);
 
   // This sets up an event that fills the global variable "predictions"
   // with an array every time new hand poses are detected
