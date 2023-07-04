@@ -14,6 +14,8 @@
 // @ts-check
 import * as tf from '@tensorflow/tfjs';
 import * as bodySegmentation from '@tensorflow-models/body-segmentation';
+//why was the line below deleted?
+//import * as tf from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-converter';
 import '@tensorflow/tfjs-backend-webgl';
@@ -70,6 +72,10 @@ const DEFAULTS = {
 //Should I add multiSeg params?
 //Some ideas in mind:
 //if multiSegmentation is True, add two extra items to SEGDEFAULTS
+
+//"minKeypointScore": 0.3,
+//"refineSteps": 10,
+
 //Similar operations when we want to use MobileNet as the architecture 
 //(extra param: multiplier)
 
@@ -299,8 +305,10 @@ class BodyPix {
 
     this.config.outputStride = segmentationOptions.outputStride || this.config.outputStride;
     this.config.segmentationThreshold = segmentationOptions.segmentationThreshold || this.config.segmentationThreshold;
+    this.config.multiSegmentation = segmentationOptions.multiSegmentation;
 
-    const segmentation = await this.model.estimatePersonSegmentation(imgToSegment, this.config.outputStride, this.config.segmentationThreshold)
+    const segmentation = await this.segmenter.segmentPeople(imgToSegment, this.config.multiSegmentation, this.config.segmentBodyParts);
+    //const segmentation = await this.model.estimatePersonSegmentation(imgToSegment, this.config.outputStride, this.config.segmentationThreshold)
 
     const result = {
       segmentation,
@@ -315,8 +323,12 @@ class BodyPix {
       personMask: null,
       backgroundMask: null,
     };
-    result.raw.backgroundMask = bp.toMaskImageData(segmentation, true);
-    result.raw.personMask = bp.toMaskImageData(segmentation, false);
+    
+    //result.raw.backgroundMask = bp.toMaskImageData(segmentation, true);
+    //result.raw.personMask = bp.toMaskImageData(segmentation, false);
+
+    result.raw.backgroundMask = bodySegmentation.toBinaryMask(segmentation, true);
+    result.raw.personMask = bodySegmentation.toBinaryMask(segmentation, false);
 
     // TODO: consider returning the canvas with the bp.drawMask()
     // const bgMaskCanvas = document.createElement('canvas');
