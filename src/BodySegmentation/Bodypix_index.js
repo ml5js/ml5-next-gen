@@ -12,6 +12,7 @@
  */
 
 // @ts-check
+import * as tf from '@tensorflow/tfjs';
 import * as bodySegmentation from '@tensorflow-models/body-segmentation';
 import '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-converter';
@@ -130,28 +131,28 @@ class BodyPix {
     return [r, g, b]
   }
 
-  /**
-   * Returns a bodyPartsSpec object
-   * @param {Array} colorOptions - an array of [r,g,b] colors
-   * @return {object} an object with the bodyParts by color and id
-   */
-  /* eslint class-methods-use-this: "off" */
-  bodyPartsSpec(colorOptions) {
-    const result = colorOptions !== undefined || Object.keys(colorOptions).length >= 24 ? colorOptions : this.config.palette;
+  // /**
+  //  * Returns a bodyPartsSpec object
+  //  * @param {Array} colorOptions - an array of [r,g,b] colors
+  //  * @return {object} an object with the bodyParts by color and id
+  //  */
+  // /* eslint class-methods-use-this: "off" */
+  // bodyPartsSpec(colorOptions) {
+  //   const result = colorOptions !== undefined || Object.keys(colorOptions).length >= 24 ? colorOptions : this.config.palette;
 
-    // Check if we're getting p5 colors, make sure they are rgb
-    const p5 = p5Utils.p5Instance;
-    if (p5 && result !== undefined && Object.keys(result).length >= 24) {
-      // Ensure the p5Color object is an RGB array
-      Object.keys(result).forEach(part => {
-        if (result[part].color instanceof p5.Color) {
-          result[part].color = this.p5Color2RGB(result[part].color);
-        }
-      });
-    }
+  //   // Check if we're getting p5 colors, make sure they are rgb
+  //   const p5 = p5Utils.p5Instance;
+  //   if (p5 && result !== undefined && Object.keys(result).length >= 24) {
+  //     // Ensure the p5Color object is an RGB array
+  //     Object.keys(result).forEach(part => {
+  //       if (result[part].color instanceof p5.Color) {
+  //         result[part].color = this.p5Color2RGB(result[part].color);
+  //       }
+  //     });
+  //   }
 
-    return result;
-  }
+  //   return result;
+  // }
 
 
   /**
@@ -186,10 +187,10 @@ class BodyPix {
     this.config.segmentBodyParts = segmentationOptions.segmentBodyParts
 
     const segmentation = await this.segmenter.segmentPeople(imgToSegment, this.config.multiSegmentation, this.config.segmentBodyParts);
-    const bodyPartsMeta = this.bodyPartsSpec(this.config.palette);
-    const colorsArray = Object.keys(bodyPartsMeta).map(part => bodyPartsMeta[part].color)
+    //const bodyPartsMeta = this.bodyPartsSpec(this.config.palette);
+    //const colorsArray = Object.keys(bodyPartsMeta).map(part => bodyPartsMeta[part].color)
 
-//Code above has been updated
+
     const result = {
       segmentation,
       raw: {
@@ -205,11 +206,14 @@ class BodyPix {
       personMask: null,
       backgroundMask: null,
       partMask: null,
-      bodyParts: bodyPartsMeta
+      //bodyParts: bodyPartsMeta
     };
-    result.raw.backgroundMask = bodySegmentation.toBinaryMask(segmentation, true);
-    result.raw.personMask = bp.toMaskImageData(segmentation, false);
-    result.raw.partMask = bp.toColoredPartImageData(segmentation, colorsArray);
+    //How can we let the user DIY the color of the mask
+    //and get rid of personMask and backgroundMask
+    //need to modify the structure of the color palette later
+    result.raw.backgroundMask = bodySegmentation.toBinaryMask(segmentation);
+    result.raw.personMask = bodySegmentation.toBinaryMask(segmentation, {r: 0, g: 0, b: 0, a: 255},  {r: 0, g: 0, b: 0, a: 0});
+    result.raw.partMask = bodySegmentation.toColoredMask(segmentation, bodySegmentation.bodyPixMaskValueToRainbowColor);
 
     const {
       personMask,
