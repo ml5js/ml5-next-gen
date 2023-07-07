@@ -1,9 +1,13 @@
 const { resolve } = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = function (env, argv) {
-  const common = {
+  return {
     context: __dirname,
     entry: "./src/index.js",
+
+    mode: env.production ? "production" : "development",
+    devtool: env.production ? "source-map" : "inline-source-map",
     output: {
       filename: "ml5.js",
       path: resolve(__dirname, "dist"),
@@ -14,11 +18,6 @@ module.exports = function (env, argv) {
         export: "default",
       },
     },
-  };
-
-  const dev = {
-    mode: "development",
-    devtool: "inline-source-map",
     devServer: {
       port: 8080,
       allowedHosts: "all",
@@ -36,16 +35,10 @@ module.exports = function (env, argv) {
       ],
       open: "/examples",
     },
+    plugins: [
+      new HtmlWebpackPlugin({
+        title: "ml5",
+      }),
+    ],
   };
-
-  const prod = {
-    mode: "production",
-    devtool: "source-map",
-  };
-
-  if (env.production) {
-    return { ...common, ...prod };
-  } else {
-    return { ...common, ...dev };
-  }
 };
