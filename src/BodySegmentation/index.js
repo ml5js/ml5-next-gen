@@ -425,6 +425,7 @@ class BodyPix {
  * @return {BodyPix | Promise<BodyPix>}
  */
 const bodyPix = (...inputs) => {
+  console.log("Inputs passed to model!");
   const args = handleArguments(...inputs);
   const instance = new BodyPix(args.video, args.options || {}, args.callback);
   return args.callback ? instance : instance.ready;
