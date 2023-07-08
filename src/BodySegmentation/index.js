@@ -18,6 +18,7 @@ import '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-converter';
 import '@tensorflow/tfjs-backend-webgl';
 import callCallback from '../utils/callcallback';
+import ML5Callback from '../utils/callcallback';
 import generatedImageResult from '../utils/generatedImageResult';
 import handleArguments from '../utils/handleArguments';
 import p5Utils from '../utils/p5Utils';
@@ -109,7 +110,6 @@ class BodyPix {
     }
     this.ready = callCallback(this.loadModel(), callback);
   }
-
   /**
    * Load the model and set it to this.model
    * @return {Promise<BodyPix>}
@@ -425,7 +425,7 @@ class BodyPix {
  * @return {BodyPix | Promise<BodyPix>}
  */
 const bodyPix = (...inputs) => {
-  console.log("Inputs passed to model!");
+  console.log("Hey");
   const args = handleArguments(...inputs);
   const instance = new BodyPix(args.video, args.options || {}, args.callback);
   return args.callback ? instance : instance.ready;
