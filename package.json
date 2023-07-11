@@ -37,7 +37,8 @@
   },
   "overrides": {
     "@tensorflow-models/body-segmentation": {
-      "@tensorflow/tfjs-core": "^4.2.0"
+      "@tensorflow/tfjs-core": "^3.21.0",
+      "@tensorflow/tfjs-backend-webgl": "^3.13.0"
     }
   }
 }

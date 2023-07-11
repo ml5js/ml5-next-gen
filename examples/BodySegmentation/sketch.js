@@ -19,7 +19,6 @@ async function setup() {
   video = await getVideo();
   // load bodyPix with video
   bodypix = await ml5.bodyPix(options)
-  bodypix.sayhi();
 }
 
 // when the dom is loaded, call make();
@@ -29,22 +28,21 @@ window.addEventListener('DOMContentLoaded', function() {
 
 function videoReady() {
   // run the segmentation on the video, handle the results in a callback
-  //console.log(typeof(bodypix));
   bodypix.segmentWithParts(video, gotImage, options);
-}
 
-// function gotImage(err, result){
-//   if(err) {
-//     console.log(err);
-//     return;
-//   }
-//   segmentation = result;
-//   ctx.drawImage(video, 0, 0, width, height);
-//   const maskBackground = imageDataToCanvas(result.raw.backgroundMask.data, result.raw.backgroundMask.width, result.raw.backgroundMask.height)
-//   ctx.drawImage(maskBackground, 0, 0, width, height);
+}
+function gotImage(err, result) {
+  if (err) {
+    console.log(err);
+    return;
+  }
+  segmentation = result;
+  ctx.drawImage(video, 0, 0, width, height);
+  const maskBackground = imageDataToCanvas(result.raw.backgroundMask.data, result.raw.backgroundMask.width, result.raw.backgroundMask.height)
+  ctx.drawImage(maskBackground, 0, 0, width, height);
     
-//   bodypix.segmentWithParts(video, gotImage, options);
-// }
+  bodypix.segment(video, gotImage, options);
+}
 
 // Helper Functions
 async function getVideo(){
