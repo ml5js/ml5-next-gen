@@ -55,7 +55,7 @@ const DEFAULTS = {
   //can we let the users decide which architecture to use?
   //two defaults?
   "architecture": "ResNet50",
-  "multiplier": 0.75,
+  "multiplier": 1,
   "outputStride": 32,
   "quantBytes": 2,
   "returnTensors": false,
@@ -116,7 +116,7 @@ class BodyPix {
    */
   async loadModel() {
     this.model = bodySegmentation.SupportedModels.BodyPix;
-    this.segmenter = await bodySegmentation.createSegmenter(this.model,this.config);
+    this.segmenter = await bodySegmentation.createSegmenter(this.model, this.config);
     this.modelReady = true;
     return this;
   }
@@ -189,7 +189,7 @@ class BodyPix {
     //what if the argument does not contain multiSegmentation?
     this.config.segmentBodyParts = segmentationOptions.segmentBodyParts || true
 
-    const segmentation = await this.segmenter.segmentPeople(imgToSegment, {multiSegmentation: this.config.multiSegmentation, segmentBodyParts:this.config.segmentBodyParts});
+    const segmentation = await this.segmenter.segmentPeople(imgToSegment, { multiSegmentation: this.config.multiSegmentation, segmentBodyParts: this.config.segmentBodyParts });
     //will use default function instead
     //const bodyPartsMeta = this.bodyPartsSpec(this.config.palette);
     //const colorsArray = Object.keys(bodyPartsMeta).map(part => bodyPartsMeta[part].color)
@@ -217,8 +217,8 @@ class BodyPix {
     //and get rid of personMask and backgroundMask
     //need to modify the structure of the color palette later
     result.raw.backgroundMask = bodySegmentation.toBinaryMask(segmentation);
-    result.raw.personMask = bodySegmentation.toBinaryMask(segmentation, {r: 0, g: 0, b: 0, a: 255},  {r: 0, g: 0, b: 0, a: 0});
-    result.raw.partMask = bodySegmentation.toColoredMask(segmentation, bodySegmentation.bodyPixMaskValueToRainbowColor,{r: 255, g: 255, b: 255, a: 255});
+    result.raw.personMask = bodySegmentation.toBinaryMask(segmentation, { r: 0, g: 0, b: 0, a: 255 }, { r: 0, g: 0, b: 0, a: 0 });
+    result.raw.partMask = bodySegmentation.toColoredMask(segmentation, bodySegmentation.bodyPixMaskValueToRainbowColor, { r: 255, g: 255, b: 255, a: 255 });
 
 
     const {
@@ -227,11 +227,11 @@ class BodyPix {
       partMask,
     } = tf.tidy(() => {
       let image; /** @type {ImageData} */;
-      for (const value of segmentation){
+      for (const value of segmentation) {
         const mask = value.mask;
         image = mask.toImageData();
         // const tensor = await mask.toTensor();
-  
+
         // const res = tensor.dataToGPU();
       }
 
@@ -334,7 +334,7 @@ class BodyPix {
       personMask: null,
       backgroundMask: null,
     };
-    
+
     //result.raw.backgroundMask = bp.toMaskImageData(segmentation, true);
     //result.raw.personMask = bp.toMaskImageData(segmentation, false);
 
