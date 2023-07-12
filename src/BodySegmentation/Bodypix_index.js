@@ -54,7 +54,7 @@ const DEFAULTS = {
   //can we let the users decide which architecture to use?
   //two defaults?
   "architecture": "ResNet50",
-  "multiplier": 0.75,
+  "multiplier": 1,
   "outputStride": 32,
   "quantBytes": 2,
   "returnTensors": false,
@@ -114,6 +114,7 @@ class BodyPix {
     this.model = bodySegmentation.SupportedModels.BodyPix;
     this.segmenter = await bodySegmentation.createSegmenter(this.model,this.config);
     this.modelReady = true;
+    console.log("Model Ready!")
     return this;
   }
 
@@ -152,7 +153,6 @@ class BodyPix {
 
     return result;
   }
-
 
   /**
    * @typedef {Object} SegmentationResult
@@ -255,7 +255,6 @@ class BodyPix {
     })
 
 
-
     const personMaskRes = await generatedImageResult(personMask, this.config);
     const bgMaskRes = await generatedImageResult(backgroundMask, this.config);
     const partMaskRes = await generatedImageResult(partMask, this.config);
@@ -287,6 +286,7 @@ class BodyPix {
    * @return {Promise<SegmentationResult>}
    */
   async segmentWithParts(...args) {
+    //console.log("SegmentWithParts started!")
     const { options = this.config, callback, image = this.video } = handleArguments(...args);
 
     if (!image) {
