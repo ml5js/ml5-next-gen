@@ -7,7 +7,7 @@ function setup() {
   video = createCapture(VIDEO);
   video.size(width, height);
 
-  const options = { maxHands: 2 };
+  const options = {};
   handpose = ml5.handpose(video, options, modelReady);
 
   // This sets up an event that fills the global variable "predictions"

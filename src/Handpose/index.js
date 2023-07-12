@@ -39,9 +39,10 @@ class Handpose extends EventEmitter {
   async loadModel() {
     const pipeline = handPoseDetection.SupportedModels.MediaPipeHands;
     const modelConfig = {
-      runtime: "mediapipe", // use MediaPipe runtime by default
+      maxHands: this.config?.maxHands ?? 2, // detect up to 2 hands by default
+      runtime: this.config?.runtime ?? "mediapipe", // use MediaPipe runtime by default
+      modelType: this.config?.modelType ?? "full", // use full version of the model by default
       solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/hands", // fetch model from mediapipe server
-      ...this.config,
     };
 
     this.model = await handPoseDetection.createDetector(pipeline, modelConfig);
@@ -66,10 +67,11 @@ class Handpose extends EventEmitter {
       throw new Error("No input image found.");
     }
     await mediaReady(image, false);
-    const { flipHorizontal } = this.config;
-    const predictions = await this.model.estimateHands(image, {
-      flipHorizontal,
-    });
+    const options = {
+      flipHorizontal: this.config?.flipHorizontal ?? false, // do not horizontally flip the prediction by default
+    };
+    const predictions = await this.model.estimateHands(image, options);
+    //TODO: customize the output for easier use
     const result = predictions;
 
     this.emit("hand", result);
