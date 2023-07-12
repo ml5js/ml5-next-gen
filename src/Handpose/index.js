@@ -67,7 +67,9 @@ class Handpose extends EventEmitter {
     }
     await mediaReady(image, false);
     const { flipHorizontal } = this.config;
-    const predictions = await this.model.estimateHands(image, flipHorizontal);
+    const predictions = await this.model.estimateHands(image, {
+      flipHorizontal,
+    });
     const result = predictions;
 
     this.emit("hand", result);
