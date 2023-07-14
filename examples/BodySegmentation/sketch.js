@@ -19,38 +19,37 @@ async function setup() {
   video = await getVideo();
   // load bodyPix with video
   bodypix = await ml5.bodyPix(options)
-  bodypix.sayhi();
+  //bodypix.loadModel();
 }
 
 // when the dom is loaded, call make();
-window.addEventListener('DOMContentLoaded', function() {
+window.addEventListener('DOMContentLoaded', function () {
   setup();
 });
 
 function videoReady() {
   // run the segmentation on the video, handle the results in a callback
-  //console.log(typeof(bodypix));
-  bodypix.segmentWithParts(video, gotImage, options);
+  // bodypix.segmentWithParts(video, gotImage, options);
 }
 
-// function gotImage(err, result){
-//   if(err) {
-//     console.log(err);
-//     return;
-//   }
-//   segmentation = result;
-//   ctx.drawImage(video, 0, 0, width, height);
-//   const maskBackground = imageDataToCanvas(result.raw.backgroundMask.data, result.raw.backgroundMask.width, result.raw.backgroundMask.height)
-//   ctx.drawImage(maskBackground, 0, 0, width, height);
+function gotImage(err, result){
+  if(err) {
+    console.log(err);
+    return;
+  }
+  segmentation = result;
+  ctx.drawImage(video, 0, 0, width, height);
+  const maskBackground = imageDataToCanvas(result.raw.backgroundMask.data, result.raw.backgroundMask.width, result.raw.backgroundMask.height)
+  ctx.drawImage(maskBackground, 0, 0, width, height);
     
-//   bodypix.segmentWithParts(video, gotImage, options);
-// }
+  bodypix.segment(video, gotImage, options);
+}
 
 // Helper Functions
-async function getVideo(){
+async function getVideo() {
   // Grab elements, create settings, etc.
   const videoElement = document.createElement('video');
-  videoElement.setAttribute("style", "display: none;"); 
+  videoElement.setAttribute("style", "display: none;");
   videoElement.width = width;
   videoElement.height = height;
   videoElement.onloadeddata = videoReady;
@@ -77,15 +76,15 @@ function imageDataToCanvas(imageData, x, y) {
   const imgData = ctx.createImageData(x, y);
   const { data } = imgData;
 
-  for (let i = 0; i < x * y * 4; i += 1 ) data[i] = arr[i];
+  for (let i = 0; i < x * y * 4; i += 1) data[i] = arr[i];
   ctx.putImageData(imgData, 0, 0);
 
   return ctx.canvas;
 };
 
-function createCanvas(w, h){
-  const canvas = document.createElement("canvas"); 
-  canvas.width  = w;
+function createCanvas(w, h) {
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
   canvas.height = h;
   document.body.appendChild(canvas);
   return canvas;
