@@ -22,7 +22,7 @@ import ML5Callback from '../utils/callcallback';
 import generatedImageResult from '../utils/generatedImageResult';
 import handleArguments from '../utils/handleArguments';
 import p5Utils from '../utils/p5Utils';
-import BODYPIX_PALETTE from './PALETTE';
+import PALETTE from './PALETTE';
 import { mediaReady } from '../utils/imageUtilities';
 
 /**
@@ -65,7 +65,7 @@ const DEFAULTS = {
   "maxDetections": 10,
   "scoreThreshold": 0.3,
   "nmsRadius": 20,
-  "palette": BODYPIX_PALETTE
+  "palette": PALETTE,
 }
 //Add notes for the params later!
 
