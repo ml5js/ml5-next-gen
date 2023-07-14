@@ -6,8 +6,9 @@ const width = 480;
 const height = 360;
 
 const options = {
-  outputStride: 32, // 8, 16, or 32, default is 16
-  segmentationThreshold: 0.3 // 0 - 1, defaults to 0.5 
+  outputStride: 32,  //16 or 32 for ResNet, 
+  multiSegmentation: false,
+  segmentBodyParts: true
 }
 
 async function setup() {
@@ -18,6 +19,7 @@ async function setup() {
   video = await getVideo();
   // load bodyPix with video
   bodypix = await ml5.bodyPix(options)
+  //bodypix.loadModel();
 }
 
 // when the dom is loaded, call make();
@@ -27,11 +29,11 @@ window.addEventListener('DOMContentLoaded', function () {
 
 function videoReady() {
   // run the segmentation on the video, handle the results in a callback
-  bodypix.segment(video, gotImage, options);
+  // bodypix.segmentWithParts(video, gotImage, options);
 }
 
-function gotImage(err, result) {
-  if (err) {
+function gotImage(err, result){
+  if(err) {
     console.log(err);
     return;
   }
@@ -39,7 +41,7 @@ function gotImage(err, result) {
   ctx.drawImage(video, 0, 0, width, height);
   const maskBackground = imageDataToCanvas(result.raw.backgroundMask.data, result.raw.backgroundMask.width, result.raw.backgroundMask.height)
   ctx.drawImage(maskBackground, 0, 0, width, height);
-
+    
   bodypix.segment(video, gotImage, options);
 }
 

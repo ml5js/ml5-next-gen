@@ -31,21 +31,14 @@ import { mediaReady } from '../utils/imageUtilities';
 
 /**
  * @typedef {Object} BodyPixOptions
- * @property {string}[architecture] -Can be either MobileNetV1 or ResNet 50.
- * @property {import('@tensorflow-models/body-pix/dist/mobilenet').MobileNetMultiplier} [multiplier]
- * @property {import('@tensorflow-models/body-pix/dist/mobilenet').OutputStride} [outputStride]
+ * @property {import('@tensorflow-models/body-segmentation/dist/body_pix/impl/types').BodyPixArchitecture}[architecture] -Can be either MobileNetV1 or ResNet 50.
+ * @property {import('@tensorflow-models/body-segmentation/dist/body_pix/impl/types').BodyPixMultiplier} [multiplier]
+ * @property {import('@tensorflow-models/body-segmentation/dist/body_pix/impl/types').BodyPixOutputStride} [outputStride]
  * @property {number} [quantBytes]
- * @property {BodyPixPalette} [palette]
  * @property {boolean} [returnTensors]
  * @property {boolean} [multiSegmentation]
  * @property {boolean} [segmentBodyParts]
- * @property {boolean} [flipHorizontal]
- * @property {string} [internalResolution]
- * @property {number} [segmentationThreshold]
- * @property {number} [maxDetections]
- * @property {number} [scoreThreshold]
- * @property {number} [nmsRadius]
- 
+
  */
 
 /**
@@ -59,13 +52,6 @@ const DEFAULTS = {
   "outputStride": 32,
   "quantBytes": 2,
   "returnTensors": false,
-  "flipHorizontal": false,
-  "internalResolution": "medium",
-  "segmentationThreshold": 0.7,
-  "maxDetections": 10,
-  "scoreThreshold": 0.3,
-  "nmsRadius": 20,
-  "palette": PALETTE,
 }
 //Add notes for the params later!
 
@@ -97,15 +83,15 @@ class BodyPix {
       multiplier: options.multiplier || DEFAULTS.multiplier,
       outputStride: options.outputStride || DEFAULTS.outputStride,
       quantBytes: options.quantBytes || DEFAULTS.quantBytes,
-      palette: options.palette || DEFAULTS.palette,
+      // palette: options.palette || DEFAULTS.palette,
       multiSegmentation: options.multiSegmentation,
       segmentBodyParts: options.segmentBodyParts,
-      flipHorizontal: options.flipHorizontal || DEFAULTS.flipHorizontal,
-      internalResolution: options.internalResolution || DEFAULTS.internalResolution,
-      segmentationThreshold: options.segmentationThreshold || DEFAULTS.segmentationThreshold,
-      maxDetections: options.maxDetections || DEFAULTS.maxDetections,
-      scoreThreshold: options.scoreThreshold || DEFAULTS.maxDetections,
-      nmsRadius: options.nmsRadius || DEFAULTS.nmsRadius,
+      // flipHorizontal: options.flipHorizontal || DEFAULTS.flipHorizontal, // true when webcam is on;
+      // internalResolution: options.internalResolution || DEFAULTS.internalResolution,
+      // segmentationThreshold: options.segmentationThreshold || DEFAULTS.segmentationThreshold,
+      // maxDetections: options.maxDetections || DEFAULTS.maxDetections,
+      // scoreThreshold: options.scoreThreshold || DEFAULTS.maxDetections,
+      // nmsRadius: options.nmsRadius || DEFAULTS.nmsRadius,
       returnTensors: options.returnTensors || DEFAULTS.returnTensors
     }
     this.ready = callCallback(this.loadModel(), callback);
@@ -118,45 +104,45 @@ class BodyPix {
     this.model = bodySegmentation.SupportedModels.BodyPix;
     this.segmenter = await bodySegmentation.createSegmenter(this.model, this.config);
     this.modelReady = true;
+    // console.log("model ready!")
     return this;
   }
 
-  /**
-   * Returns an rgb array
-   * @param {Object} p5ColorObj - a p5.Color obj
-   * @return {Array} an [r,g,b] array
-   */
-  /* eslint class-methods-use-this: "off" */
-  p5Color2RGB(p5ColorObj) {
-    const regExp = /\(([^)]+)\)/;
-    const match = regExp.exec(p5ColorObj.toString('rgb'));
-    const [r, g, b] = match[1].split(',')
-    return [r, g, b]
-  }
+  // /**
+  //  * Returns an rgb array
+  //  * @param {Object} p5ColorObj - a p5.Color obj
+  //  * @return {Array} an [r,g,b] array
+  //  */
+  // /* eslint class-methods-use-this: "off" */
+  // p5Color2RGB(p5ColorObj) {
+  //   const regExp = /\(([^)]+)\)/;
+  //   const match = regExp.exec(p5ColorObj.toString('rgb'));
+  //   const [r, g, b] = match[1].split(',')
+  //   return [r, g, b]
+  // }
 
-  /**
-   * Returns a bodyPartsSpec object
-   * @param {Array} colorOptions - an array of [r,g,b] colors
-   * @return {object} an object with the bodyParts by color and id
-   */
-  /* eslint class-methods-use-this: "off" */
-  bodyPartsSpec(colorOptions) {
-    const result = colorOptions !== undefined || Object.keys(colorOptions).length >= 24 ? colorOptions : this.config.palette;
+  // /**
+  //  * Returns a bodyPartsSpec object
+  //  * @param {Array} colorOptions - an array of [r,g,b] colors
+  //  * @return {object} an object with the bodyParts by color and id
+  //  */
+  // /* eslint class-methods-use-this: "off" */
+  // bodyPartsSpec(colorOptions) {
+  //   const result = colorOptions !== undefined || Object.keys(colorOptions).length >= 24 ? colorOptions : this.config.palette;
 
-    // Check if we're getting p5 colors, make sure they are rgb
-    const p5 = p5Utils.p5Instance;
-    if (p5 && result !== undefined && Object.keys(result).length >= 24) {
-      // Ensure the p5Color object is an RGB array
-      Object.keys(result).forEach(part => {
-        if (result[part].color instanceof p5.Color) {
-          result[part].color = this.p5Color2RGB(result[part].color);
-        }
-      });
-    }
+  //   // Check if we're getting p5 colors, make sure they are rgb
+  //   const p5 = p5Utils.p5Instance;
+  //   if (p5 && result !== undefined && Object.keys(result).length >= 24) {
+  //     // Ensure the p5Color object is an RGB array
+  //     Object.keys(result).forEach(part => {
+  //       if (result[part].color instanceof p5.Color) {
+  //         result[part].color = this.p5Color2RGB(result[part].color);
+  //       }
+  //     });
+  //   }
 
-    return result;
-  }
-
+  //   return result;
+  // }
 
   /**
    * @typedef {Object} SegmentationResult
@@ -182,14 +168,15 @@ class BodyPix {
     await this.ready;
     await mediaReady(imgToSegment, true);
 
-    this.config.palette = segmentationOptions.palette || this.config.palette;
+    //this.config.palette = segmentationOptions.palette || this.config.palette;
     this.config.outputStride = segmentationOptions.outputStride || this.config.outputStride;
-    this.config.segmentationThreshold = segmentationOptions.segmentationThreshold || this.config.segmentationThreshold;
+    //this.config.segmentationThreshold = segmentationOptions.segmentationThreshold || this.config.segmentationThreshold;
     this.config.multiSegmentation = segmentationOptions.multiSegmentation || false;
     //what if the argument does not contain multiSegmentation?
     this.config.segmentBodyParts = segmentationOptions.segmentBodyParts || true
-
     const segmentation = await this.segmenter.segmentPeople(imgToSegment, { multiSegmentation: this.config.multiSegmentation, segmentBodyParts: this.config.segmentBodyParts });
+
+
     //will use default function instead
     //const bodyPartsMeta = this.bodyPartsSpec(this.config.palette);
     //const colorsArray = Object.keys(bodyPartsMeta).map(part => bodyPartsMeta[part].color)
@@ -220,30 +207,23 @@ class BodyPix {
     result.raw.personMask = bodySegmentation.toBinaryMask(segmentation, { r: 0, g: 0, b: 0, a: 255 }, { r: 0, g: 0, b: 0, a: 0 });
     result.raw.partMask = bodySegmentation.toColoredMask(segmentation, bodySegmentation.bodyPixMaskValueToRainbowColor, { r: 255, g: 255, b: 255, a: 255 });
 
+    //tf.tidy() cannot handle async functions, converting segmentation to ImageData here
+    const segImageData = await segmentation[0].mask.toImageData();
 
     const {
       personMask,
       backgroundMask,
       partMask,
     } = tf.tidy(() => {
-      let image; /** @type {ImageData} */;
-      for (const value of segmentation) {
-        const mask = value.mask;
-        image = mask.toImageData();
-        // const tensor = await mask.toTensor();
-
-        // const res = tensor.dataToGPU();
-      }
-
       let normTensor = tf.browser.fromPixels(imgToSegment);
       // create a tensor from the input image
-      const alpha = tf.ones([image.height, image.width, 1]).tile([1, 1, 1]).mul(255)
+      const alpha = tf.ones([segImageData.height, segImageData.width, 1]).tile([1, 1, 1]).mul(255)
       normTensor = normTensor.concat(alpha, 2)
 
       // create a tensor from the segmentation
-      let maskPersonTensor = tf.tensor(image.data, [segmentation.height, segmentation.width, 1]);
-      let maskBackgroundTensor = tf.tensor(segmentation.data, [segmentation.height, segmentation.width, 1]);
-      let partTensor = tf.tensor([...result.raw.partMask.data], [segmentation.height, segmentation.width, 4]);
+      let maskPersonTensor = tf.tensor(segImageData.data, [segImageData.height, segImageData.width, 1]);
+      let maskBackgroundTensor = tf.tensor(segImageData.data, [segImageData.height, segImageData.width, 1]);
+      let partTensor = tf.tensor([...result.raw.partMask.data], [segImageData.height, segImageData.width, 4]);
 
       // multiply the segmentation and the inputImage
       maskPersonTensor = tf.cast(maskPersonTensor.add(0.2).sign().relu().mul(normTensor), 'int32')
@@ -257,7 +237,6 @@ class BodyPix {
         partMask: partTensor
       }
     })
-
 
 
     const personMaskRes = await generatedImageResult(personMask, this.config);
@@ -361,7 +340,7 @@ class BodyPix {
     } = tf.tidy(() => {
       let normTensor = tf.browser.fromPixels(imgToSegment);
       // create a tensor from the input image
-      const alpha = tf.ones([segmentation.height, segmentation.width, 1]).tile([1, 1, 1]).mul(255)
+      const alpha = tf.ones([segImageData.height, segImageData.width, 1]).tile([1, 1, 1]).mul(255)
       normTensor = normTensor.concat(alpha, 2)
       // normTensor.print();
 
@@ -425,7 +404,6 @@ class BodyPix {
  * @return {BodyPix | Promise<BodyPix>}
  */
 const bodyPix = (...inputs) => {
-  console.log("Hey");
   const args = handleArguments(...inputs);
   const instance = new BodyPix(args.video, args.options || {}, args.callback);
   return args.callback ? instance : instance.ready;
