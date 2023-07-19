@@ -4,7 +4,9 @@ Welcome to the next-generation repo for the ml5.js project! Due to the complexit
 
 ## Setup
 
-This build uses node version 18.15.0 and npm version.
+This build uses node version 18.15.0.
+We use [Yarn](https://yarnpkg.com/) instead of npm to help us better manage dependencies from TensorFlow.js. Yarn is a newer package manager that is very similar to NPM. [Here is a cheat sheet](https://www.digitalocean.com/community/tutorials/nodejs-npm-yarn-cheatsheet) for npm vs Yarn commands.
+
 [Install nvm](https://github.com/nvm-sh/nvm#installing-and-updating) and run the following commands：
 
 ```
