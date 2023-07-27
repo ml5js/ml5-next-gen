@@ -22,7 +22,7 @@ import ML5Callback from '../utils/callcallback';
 import generatedImageResult from '../utils/generatedImageResult';
 import handleArguments from '../utils/handleArguments';
 import p5Utils from '../utils/p5Utils';
-import BODYPIX_PALETTE from './PALETTE';
+import PALETTE from './PALETTE';
 import { mediaReady } from '../utils/imageUtilities';
 /**
  * @typedef {Record<string, {color: [number, number, number], id: number}>} BodyPixPalette
@@ -164,7 +164,7 @@ class BodyPix {
    */
   async segmentWithPartsInternal(imgToSegment, segmentationOptions) {
     // estimatePartSegmentation
-    await this.ready;  
+    await this.ready;
     await mediaReady(imgToSegment, true);
 
     //this.config.palette = segmentationOptions.palette || this.config.palette;
