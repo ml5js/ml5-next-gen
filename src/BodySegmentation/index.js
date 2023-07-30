@@ -187,7 +187,7 @@ class BodyPix {
       partMask: null,
       tensor: null
     };
-  
+
     // const result = {
     //   segmentation,
     //   raw: {
@@ -217,8 +217,8 @@ class BodyPix {
     result.partMask = await bodySegmentation.toColoredMask(segmentation, bodySegmentation.bodyPixMaskValueToRainbowColor, { r: 255, g: 255, b: 255, a: 255 });
     result.tensor = await segmentation[0].mask.toTensor();
 
- 
-  
+
+
     // const {
     //   personMask,
     //   backgroundMask,
@@ -312,26 +312,40 @@ class BodyPix {
 
     const segmentation = await this.segmenter.segmentPeople(imgToSegment, this.config.multiSegmentation, this.config.segmentBodyParts);
     //const segmentation = await this.model.estimatePersonSegmentation(imgToSegment, this.config.outputStride, this.config.segmentationThreshold)
+    const segImageData = await segmentation[0].mask.toImageData();
 
     const result = {
       segmentation,
-      raw: {
-        personMask: null,
-        backgroundMask: null,
-      },
-      tensor: {
-        personMask: null,
-        backgroundMask: null,
-      },
       personMask: null,
       backgroundMask: null,
+      //partMask: null,
+      tensor: null
     };
+
+
+    // const result = {
+    //   segmentation,
+    //   raw: {
+    //     personMask: null,
+    //     backgroundMask: null,
+    //   },
+    //   tensor: {
+    //     personMask: null,
+    //     backgroundMask: null,
+    //   },
+    //   personMask: null,
+    //   backgroundMask: null,
+    // };
 
     //result.raw.backgroundMask = bp.toMaskImageData(segmentation, true);
     //result.raw.personMask = bp.toMaskImageData(segmentation, false);
+    result.personMask = await bodySegmentation.toBinaryMask(segmentation, { r: 0, g: 0, b: 0, a: 255 }, { r: 0, g: 0, b: 0, a: 0 });
+    result.backgroundMask = await bodySegmentation.toBinaryMask(segmentation);
+    result.tensor = await segmentation[0].mask.toTensor();
 
-    result.raw.backgroundMask = bodySegmentation.toBinaryMask(segmentation, true);
-    result.raw.personMask = bodySegmentation.toBinaryMask(segmentation, false);
+
+    // result.raw.backgroundMask = bodySegmentation.toBinaryMask(segmentation, true);
+    // result.raw.personMask = bodySegmentation.toBinaryMask(segmentation, false);
 
     // TODO: consider returning the canvas with the bp.drawMask()
     // const bgMaskCanvas = document.createElement('canvas');
@@ -347,43 +361,44 @@ class BodyPix {
     // result.backgroundMask = bgMaskCanvas;
     // result.featureMask = featureMaskCanvas;
 
-    const {
-      personMask,
-      backgroundMask
-    } = tf.tidy(() => {
-      let normTensor = tf.browser.fromPixels(imgToSegment);
-      // create a tensor from the input image
-      const alpha = tf.ones([segImageData.height, segImageData.width, 1]).tile([1, 1, 1]).mul(255)
-      normTensor = normTensor.concat(alpha, 2)
-      // normTensor.print();
+    // const {
+    //   personMask,
+    //   backgroundMask
+    // } = tf.tidy(() => {
+    //   let normTensor = tf.browser.fromPixels(imgToSegment);
+    //   // create a tensor from the input image
+    //   const alpha = tf.ones([segImageData.height, segImageData.width, 1]).tile([1, 1, 1]).mul(255)
+    //   normTensor = normTensor.concat(alpha, 2)
+    //   // normTensor.print();
 
-      // create a tensor from the segmentation
-      let maskPersonTensor = tf.tensor(segmentation.data, [segmentation.height, segmentation.width, 1]);
-      let maskBackgroundTensor = tf.tensor(segmentation.data, [segmentation.height, segmentation.width, 1]);
+    //   // create a tensor from the segmentation
+    //   let maskPersonTensor = tf.tensor(segmentation.data, [segmentation.height, segmentation.width, 1]);
+    //   let maskBackgroundTensor = tf.tensor(segmentation.data, [segmentation.height, segmentation.width, 1]);
 
-      // multiply the segmentation and the inputImage
-      maskPersonTensor = tf.cast(maskPersonTensor.neg().add(1).mul(normTensor), 'int32')
-      maskBackgroundTensor = tf.cast(maskBackgroundTensor.mul(normTensor), 'int32')
+    //   // multiply the segmentation and the inputImage
+    //   maskPersonTensor = tf.cast(maskPersonTensor.neg().add(1).mul(normTensor), 'int32')
+    //   maskBackgroundTensor = tf.cast(maskBackgroundTensor.mul(normTensor), 'int32')
 
-      return {
-        personMask: maskPersonTensor,
-        backgroundMask: maskBackgroundTensor,
-      }
-    })
+    //   return {
+    //     personMask: maskPersonTensor,
+    //     backgroundMask: maskBackgroundTensor,
+    //   }
+    // })
 
-    const personMaskRes = await generatedImageResult(personMask, this.config);
-    const bgMaskRes = await generatedImageResult(backgroundMask, this.config);
+    // const personMaskRes = await generatedImageResult(personMask, this.config);
+    // const bgMaskRes = await generatedImageResult(backgroundMask, this.config);
 
-    // if p5 exists, return p5 image. otherwise, return the pixels.
-    result.personMask = personMaskRes.image || personMaskRes.raw;
-    result.backgroundMask = bgMaskRes.image || bgMaskRes.raw;
+    // // if p5 exists, return p5 image. otherwise, return the pixels.
+    // result.personMask = personMaskRes.image || personMaskRes.raw;
+    // result.backgroundMask = bgMaskRes.image || bgMaskRes.raw;
 
-    if (this.config.returnTensors) {
-      // return tensors
-      result.tensor.personMask = personMask;
-      result.tensor.backgroundMask = backgroundMask;
-    }
+    // if (this.config.returnTensors) {
+    //   // return tensors
+    //   result.tensor.personMask = personMask;
+    //   result.tensor.backgroundMask = backgroundMask;
+    // }
 
+    console.log(result);
     return result;
 
   }
