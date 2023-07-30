@@ -17,7 +17,7 @@ async function setup() {
   ctx = canvas.getContext('2d');
   // get the video
   video = await getVideo();
-  console.log(typeof(video));
+  console.log(typeof (video));
   // load bodyPix with video
   bodypix = await ml5.bodyPix(options)
 }
@@ -38,11 +38,18 @@ function gotImage(err, result) {
     return;
   }
   segmentation = result;
+
+  //mask background by drawing full video to screen and drawing black mask onto background portions
   ctx.drawImage(video, 0, 0, width, height);
   const maskBackground = imageDataToCanvas(result.backgroundMask.data, result.backgroundMask.width, result.backgroundMask.height)
   ctx.drawImage(maskBackground, 0, 0, width, height);
-    
   bodypix.segmentWithParts(video, gotImage, options);
+
+  // mask person instead of background
+  // ctx.drawImage(video, 0, 0, width, height);
+  // const maskPerson = imageDataToCanvas(result.personMask.data, result.personMask.width, result.personMask.height)
+  // ctx.drawImage(maskPerson, 0, 0, width, height);
+  // bodypix.segmentWithParts(video, gotImage, options);
 }
 
 // Helper Functions
