@@ -26,7 +26,9 @@
     "webpack-dev-server": "^4.15.1"
   },
   "dependencies": {
+    "@mediapipe/face_mesh": "^0.4.1633559619",
     "@mediapipe/hands": "^0.4.1675469240",
+    "@tensorflow-models/face-landmarks-detection": "^1.0.2",
     "@tensorflow-models/hand-pose-detection": "^2.0.0",
     "@tensorflow/tfjs": "^4.2.0",
     "@tensorflow/tfjs-vis": "^1.5.1",
