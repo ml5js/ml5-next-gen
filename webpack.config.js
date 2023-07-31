@@ -40,5 +40,30 @@ module.exports = function (env, argv) {
         title: "ml5",
       }),
     ],
+    resolve: {
+      fallback: {
+        crypto: false,
+        fs: false,
+        path: false,
+      },
+    },
+    module: {
+      rules: [
+        {
+          test: /llama2\.wasm$/,
+          type: "asset/inline",
+        },
+        {
+          test: /llama2\.data$/,
+          type: "asset/inline",
+          generator: {
+            dataUrl: {
+              encoding: "base64",
+              mimetype: "application/octet-stream",
+            },
+          },
+        },
+      ],
+    },
   };
 };
