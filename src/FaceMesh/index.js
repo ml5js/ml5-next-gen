@@ -37,11 +37,55 @@ class FaceMesh extends EventEmitter {
    * @return {this} the FaceMesh model.
    */
   async loadModel() {
-    console.log('You would load the face-landmarks-detection model here');
+    // console.log('You would load the face-landmarks-detection model here');
+    const pipeline = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
+    const modelConfig = {
+      runtime: 'mediapipe', // or 'tfjs'
+      solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh',
+    };
+
+    this.model = await faceLandmarksDetection.createDetector(pipeline, modelConfig);
+
+    this.modelReady = true;
+
+    if (this.video) {
+      this.predict();
+    }
+
     return this;
-  }
 }
 
+/**
+   * @param {*} [inputOr] - An HMTL or p5.js image, video, or canvas element to run the prediction on.
+   * @param {function} [cb] - A callback function to handle the predictions.
+   * @return {Promise<handposeCore.AnnotatedPrediction[]>} an array of predictions.
+   */
+  async predict(inputOr, cb) {
+    const { image, callback } = handleArguments(this.video, inputOr, cb);
+    if (!image) {
+      throw new Error("No input image found.");
+    }
+    await mediaReady(image, false);
+    const options = {
+      flipHorizontal: this.config?.flipHorizontal ?? false, // do not horizontally flip the prediction by default
+    };
+    const predictions = await this.model.estimateFaces(image, options);
+    //TODO: customize the output for easier use
+    const result = predictions;
+
+    this.emit("face", result);
+
+    if (this.video) {
+      return tf.nextFrame().then(() => this.predict());
+    }
+
+    if (typeof callback === "function") {
+      callback(result);
+    }
+
+    return result;
+  }
+}
 
 /**
  * exposes FaceMesh class through function

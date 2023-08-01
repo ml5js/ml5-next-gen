@@ -11,9 +11,9 @@ function setup() {
 
   // This sets up an event that fills the global variable "predictions"
   // with an array every time new predictions are made
-  //facemesh.on("face", results => {
-  //  predictions = results;
-  //});
+  facemesh.on("face", results => {
+   predictions = results;
+  });
 
   // Hide the video element, and just show the canvas
   //video.hide();
@@ -27,20 +27,22 @@ function draw() {
   image(video, 0, 0, width, height);
 
   // We call function to draw all keypoints
-  //drawKeypoints();
+  drawKeypoints();
 }
 
 // A function to draw ellipses over the detected keypoints
 function drawKeypoints() {
+  // console.log(predictions)
   for (let i = 0; i < predictions.length; i += 1) {
-    const keypoints = predictions[i].scaledMesh;
-
+    // const keypoints = predictions[i].scaledMesh;
+    const face = predictions[i];
     // Draw facial keypoints.
-    for (let j = 0; j < keypoints.length; j += 1) {
-      const [x, y] = keypoints[j];
+    for (let j = 0; j < face.keypoints.length; j += 1) {
+      const keypoint = face.keypoints[j];
 
       fill(0, 255, 0);
-      ellipse(x, y, 5, 5);
+      noStroke();
+      ellipse(keypoint.x, keypoint.y, 5, 5);
     }
   }
 }
