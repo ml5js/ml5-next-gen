@@ -26,13 +26,37 @@ function modelReady() {
 function draw() {
   image(video, 0, 0, width, height);
 
+  //We call function to draw bounding box
+  drawBoxes();
   // We call function to draw all keypoints
   drawKeypoints();
+  //We call function to draw all facial features
+  //drawLandmarks
+}
+
+// A function to draw bounding boxes
+function drawBoxes(){
+  for (let i = 0; i < predictions.length; i += 1){
+    // console.log(predictions[0].box)
+
+    // const [_height,_width,_xMax,_xMin,_yMax,_yMin] = predictions[0].box
+    // console.log(_height)
+
+    const x = predictions[0].box.xMin;
+    const y = predictions[0].box.yMin;
+    const rectWidth = predictions[0].box.width;
+    const rectHeight = predictions[0].box.height;
+
+    stroke(0, 255, 0);
+    strokeWeight(5);
+    noFill();
+    rect(x,y,rectWidth,rectHeight);
+  }
 }
 
 // A function to draw ellipses over the detected keypoints
 function drawKeypoints() {
-  // console.log(predictions)
+  // console.log(predictions);
   for (let i = 0; i < predictions.length; i += 1) {
     // const keypoints = predictions[i].scaledMesh;
     const face = predictions[i];
@@ -46,3 +70,13 @@ function drawKeypoints() {
     }
   }
 }
+
+// A function to draw all facial features over the detected keypoints
+function drawLandmarks(){
+  if (predictions.length > 0){
+    for (let i = 0; i < predictions.length; i += 1) {
+      
+    }
+  }
+}
+
