@@ -18,7 +18,7 @@ import { mediaReady } from "../utils/imageUtilities";
 class PoseDetection extends EventEmitter {
   /**
    * @typedef {Object} options
-   * @property {string} modelType - Optional. specify what model variant to load from. Default: 'SINGLEPOSE_LIGHTNING'.
+   * @property {string} modelType - Optional. specify what model variant to load from. Default: 'MULTIPOSE_LIGHTNING'.
    * @property {boolean} enableSmoothing - Optional. Whether to use temporal filter to smooth keypoints across frames. Default: true.
    * @property {string} modelUrl - Optional. A string that specifies custom url of the model. Default to load from tf.hub.
    * @property {number} minPoseScore - Optional. The minimum confidence score for a pose to be detected. Default: 0.25.
