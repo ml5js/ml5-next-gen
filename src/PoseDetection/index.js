@@ -63,6 +63,7 @@ class PoseDetection extends EventEmitter {
       trackerType: this.config.trackerType ?? "boundingBox",
       trackerConfig: this.config.trackerConfig,
     };
+    // use multi-pose lightning model by default
     switch (this.config.modelType) {
       case "SINGLEPOSE_LIGHTNING":
         modelConfig.modelType =
@@ -71,7 +72,8 @@ class PoseDetection extends EventEmitter {
       case "SINGLEPOSE_THUNDER":
         modelConfig.modelType =
           bodyPoseDetection.movenet.modelType.SINGLEPOSE_THUNDER;
-      case "MULTIPOSE_LIGHTNING":
+        break;
+      default:
         modelConfig.modelType =
           bodyPoseDetection.movenet.modelType.MULTIPOSE_LIGHTNING;
     }
@@ -87,18 +89,7 @@ class PoseDetection extends EventEmitter {
     return this;
   }
 
-  //Add named keypoints to a MoveNet pose object
-  // mapParts(pose) {
-  //   const newPose = JSON.parse(JSON.stringify(pose));
-  //   newPose.keypoints.forEach((keypoint) => {
-  //     newPose[keypoint.part] = {
-  //       x: keypoint.position.x,
-  //       y: keypoint.position.y,
-  //       confidence: keypoint.score,
-  //     };
-  //   });
-  //   return newPose;
-  // }
+  //TODO: Add named keypoints to a MoveNet pose object
 
   /**
    * Given an image or video, returns an array of objects containing pose estimations
@@ -114,8 +105,7 @@ class PoseDetection extends EventEmitter {
     await mediaReady(image, false);
     const result = await this.model.estimatePoses(image);
 
-    //Add named keypoints to each pose object
-    //const result = poses.map((pose) => this.mapParts(pose));
+    // TODO: Add named keypoints to each pose object
 
     this.emit("pose", result);
 
