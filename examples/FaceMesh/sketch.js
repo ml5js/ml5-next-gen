@@ -28,10 +28,13 @@ function draw() {
 
   //We call function to draw bounding box
   drawBoxes();
-  // We call function to draw all keypoints
-  // drawKeypoints();
+  //We call function to draw all keypoints
+  drawKeypoints();
   //We call function to draw all facial features
   drawLandmarks();
+  //We call function to draw certain facial features
+  //We have faceOval,rightEyebrow, leftEyebrow, rightEye, leftEye, lips
+  drawFeatures();
 }
 
 // A function to draw bounding boxes
@@ -47,7 +50,7 @@ function drawBoxes(){
     const rectWidth = predictions[0].box.width;
     const rectHeight = predictions[0].box.height;
 
-    stroke(0, 255, 0);
+    stroke(255, 0, 0);
     strokeWeight(5);
     noFill();
     rect(x,y,rectWidth,rectHeight);
@@ -78,15 +81,36 @@ function drawLandmarks(){
       const face = predictions[i];
       for (let j = 0; j < face.keypoints.length; j += 1) {
         const keypoint = face.keypoints[j];
-        // console.log(Object.keys(keypoint)[3]);
         
         if (Object.keys(keypoint)[3]!=null) {
-          fill(0, 255, 0);
+          fill(0, 0, 255);
           noStroke();
-          ellipse(keypoint.x, keypoint.y, 5, 5)
+          ellipse(keypoint.x, keypoint.y, 5, 5);
         };
       }
     }
   }
 }
 
+//A function to draw certain facial features, this example is for lips
+//We have faceOval,rightEyebrow, leftEyebrow, rightEye, leftEye, lips
+function drawFeatures(){
+  if (predictions.length > 0){
+    for (let i = 0; i < predictions.length; i += 1) {
+      const face = predictions[i];
+      for (let j = 0; j < face.keypoints.length; j += 1) {
+        // console.log(Object.values(keypoint)[3]); //The name of all facial features
+        const keypoint = face.keypoints[j];
+        
+        if (Object.values(keypoint)[3]=="lips") {
+          fill(255, 255, 0);
+          //draw keypoints
+          noStroke();
+          ellipse(keypoint.x, keypoint.y, 5, 5);
+          //draw shapes
+          
+        };
+      }
+    }
+  }      
+}
