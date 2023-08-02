@@ -29,18 +29,18 @@ function draw() {
   //We call function to draw bounding box
   drawBoxes();
   // We call function to draw all keypoints
-  drawKeypoints();
+  // drawKeypoints();
   //We call function to draw all facial features
-  //drawLandmarks
+  drawLandmarks();
 }
 
 // A function to draw bounding boxes
 function drawBoxes(){
   for (let i = 0; i < predictions.length; i += 1){
-    // console.log(predictions[0].box)
+    // console.log(predictions[0].box);
 
-    // const [_height,_width,_xMax,_xMin,_yMax,_yMin] = predictions[0].box
-    // console.log(_height)
+    // const [_height,_width,_xMax,_xMin,_yMax,_yMin] = predictions[0].box;
+    // console.log(_height);
 
     const x = predictions[0].box.xMin;
     const y = predictions[0].box.yMin;
@@ -75,7 +75,17 @@ function drawKeypoints() {
 function drawLandmarks(){
   if (predictions.length > 0){
     for (let i = 0; i < predictions.length; i += 1) {
-      
+      const face = predictions[i];
+      for (let j = 0; j < face.keypoints.length; j += 1) {
+        const keypoint = face.keypoints[j];
+        // console.log(Object.keys(keypoint)[3]);
+        
+        if (Object.keys(keypoint)[3]!=null) {
+          fill(0, 255, 0);
+          noStroke();
+          ellipse(keypoint.x, keypoint.y, 5, 5)
+        };
+      }
     }
   }
 }
