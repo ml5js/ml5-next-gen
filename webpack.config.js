@@ -40,5 +40,11 @@ module.exports = function (env, argv) {
         title: "ml5",
       }),
     ],
+    resolve: {
+      fallback: {
+        fs: false,
+        util: false
+      },
+    },
   };
 };
