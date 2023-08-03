@@ -40,8 +40,10 @@ class FaceMesh extends EventEmitter {
     // console.log('You would load the face-landmarks-detection model here');
     const pipeline = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
     const modelConfig = {
-      runtime: 'mediapipe', // or 'tfjs'
+      runtime: 'mediapipe',
       solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh',
+      maxFaces: this.config?.maxFaces ?? 1, // detect up to 1 face by default
+      refineLandmarks: this.config?.refineLandmarks ?? false, // no refined Landmarks by defult
     };
 
     this.model = await faceLandmarksDetection.createDetector(pipeline, modelConfig);

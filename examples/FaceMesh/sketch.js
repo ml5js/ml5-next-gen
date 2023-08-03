@@ -7,7 +7,13 @@ function setup() {
   video = createCapture(VIDEO);
   video.size(width, height);
 
-  facemesh = ml5.facemesh(video, modelReady);
+  const options = {maxFaces: 2, 
+    refineLandmarks: true, 
+    flipHorizontal: false, 
+    // color: (0, 255, 0),
+  };
+
+  facemesh = ml5.facemesh(video, options, modelReady);
 
   // This sets up an event that fills the global variable "predictions"
   // with an array every time new predictions are made
