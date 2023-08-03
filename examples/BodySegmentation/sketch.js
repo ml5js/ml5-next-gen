@@ -15,23 +15,17 @@ async function setup() {
   // create a canvas to draw to
   canvas = createCanvas(width, height);
   ctx = canvas.getContext('2d');
-  // get the video
+
   video = await getVideo();
-  console.log(typeof (video));
-  // load bodyPix with video
-  bodypix = await ml5.bodyPix(options)
-  //bodypix.loadModel();
+
+  bodypix = await ml5.bodyPix(options);
+  bodypix.segmentWithParts(video, gotImage);
 }
 
 // when the dom is loaded, call make();
 window.addEventListener('DOMContentLoaded', function () {
   setup();
 });
-
-function videoReady() {
-  // run the segmentation on the video, handle the results in a callback
-  // bodypix.segmentWithParts(video, gotImage, options);
-}
 
 function gotImage(err, result) {
   if (err) {
@@ -70,7 +64,6 @@ async function getVideo() {
   videoElement.setAttribute("style", "display: none;");
   videoElement.width = width;
   videoElement.height = height;
-  videoElement.onloadeddata = videoReady;
   document.body.appendChild(videoElement);
 
   // Create a webcam capture

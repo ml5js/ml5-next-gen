@@ -18,22 +18,17 @@ import '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-converter';
 import '@tensorflow/tfjs-backend-webgl';
 import callCallback from '../utils/callcallback';
-import ML5Callback from '../utils/callcallback';
 import generatedImageResult from '../utils/generatedImageResult';
 import handleArguments from '../utils/handleArguments';
 import p5Utils from '../utils/p5Utils';
-import PALETTE from './PALETTE';
 import { mediaReady } from '../utils/imageUtilities';
-/**
- * @typedef {Record<string, {color: [number, number, number], id: number}>} BodyPixPalette
- */
+
 
 /**
  * @typedef {Object} BodyPixOptions
  * @property {import('@tensorflow-models/body-segmentation/dist/body_pix/impl/types').BodyPixArchitecture}[architecture] -Can be either MobileNetV1 or ResNet 50.
  * @property {import('@tensorflow-models/body-segmentation/dist/body_pix/impl/types').BodyPixMultiplier} [multiplier]
  * @property {import('@tensorflow-models/body-segmentation/dist/body_pix/impl/types').BodyPixOutputStride} [outputStride]
- * 
  * @property {number} [quantBytes]
  * @property {boolean} [returnTensors]
  * @property {boolean} [multiSegmentation]
@@ -55,12 +50,6 @@ const DEFAULTS = {
 }
 //Add notes for the params later!
 
-//Should I add multiSeg params?
-//Some ideas in mind:
-//if multiSegmentation is True, add two extra items to SEGDEFAULTS
-
-//"minKeypointScore": 0.3,
-//"refineSteps": 10,
 
 //Similar operations when we want to use MobileNet as the architecture 
 //(extra param: multiplier)
@@ -78,12 +67,12 @@ class BodyPix {
     this.model = null;
     this.modelReady = false;
     this.modelPath = '';
+    // TODO: make the code more consise here?
     this.config = {
       architecture: options.architecture || DEFAULTS.architecture,
       multiplier: options.multiplier || DEFAULTS.multiplier,
       outputStride: options.outputStride || DEFAULTS.outputStride,
       quantBytes: options.quantBytes || DEFAULTS.quantBytes,
-      // palette: options.palette || DEFAULTS.palette,
       multiSegmentation: options.multiSegmentation,
       segmentBodyParts: options.segmentBodyParts,
       // flipHorizontal: options.flipHorizontal || DEFAULTS.flipHorizontal, // true when webcam is on;
@@ -104,53 +93,18 @@ class BodyPix {
     this.model = bodySegmentation.SupportedModels.BodyPix;
     this.segmenter = await bodySegmentation.createSegmenter(this.model, this.config);
     this.modelReady = true;
-    // console.log("model ready!")
     return this;
   }
 
-  // /**
-  //  * Returns an rgb array
-  //  * @param {Object} p5ColorObj - a p5.Color obj
-  //  * @return {Array} an [r,g,b] array
-  //  */
-  // /* eslint class-methods-use-this: "off" */
-  // p5Color2RGB(p5ColorObj) {
-  //   const regExp = /\(([^)]+)\)/;
-  //   const match = regExp.exec(p5ColorObj.toString('rgb'));
-  //   const [r, g, b] = match[1].split(',')
-  //   return [r, g, b]
-  // }
-
-  // /**
-  //  * Returns a bodyPartsSpec object
-  //  * @param {Array} colorOptions - an array of [r,g,b] colors
-  //  * @return {object} an object with the bodyParts by color and id
-  //  */
-  // /* eslint class-methods-use-this: "off" */
-  // bodyPartsSpec(colorOptions) {
-  //   const result = colorOptions !== undefined || Object.keys(colorOptions).length >= 24 ? colorOptions : this.config.palette;
-
-  //   // Check if we're getting p5 colors, make sure they are rgb
-  //   const p5 = p5Utils.p5Instance;
-  //   if (p5 && result !== undefined && Object.keys(result).length >= 24) {
-  //     // Ensure the p5Color object is an RGB array
-  //     Object.keys(result).forEach(part => {
-  //       if (result[part].color instanceof p5.Color) {
-  //         result[part].color = this.p5Color2RGB(result[part].color);
-  //       }
-  //     });
-  //   }
-
-  //   return result;
-  // }
 
   /**
    * @typedef {Object} SegmentationResult
    * @property {{maskValueToLabel: Function, mask: Object}} segmentation
-   * @property {ImageData}personMask - will be a p5 Image if p5 is available,
-   * or an array of pixel values otherwise.
-   * @property {ImageData}backgroundMask
-   * @property {ImageData}partMask
+   * @property {p5.Image | Uint8ClampedArray} personMask - will be a p5 Image if p5 is available,
+   * or imageData otherwise.
+   * @property {p5.Image | Uint8ClampedArray} backgroundMask - backgroundMask
+   * @property {p5.Image | Uint8ClampedArray} partMask - partMask which plots 24 parts of your body.
+   * @property {{personMask: ImageData, backgroundMask: ImageData, partMask?: ImageData}} raw
    * @property {tf.Tensor | null} tensor -
    * return the Tensor objects for the person and the background if option `returnTensors` is true.
    */
@@ -159,7 +113,6 @@ class BodyPix {
    * Segments the image with partSegmentation, return result object
    * @param {InputImage} [imgToSegment]
    * @param {BodyPixOptions} [segmentationOptions] - config params for the segmentation
-   *    includes outputStride, segmentationThreshold
    * @return {Promise<SegmentationResult>} a result object with image, raw, bodyParts
    */
   async segmentWithPartsInternal(imgToSegment, segmentationOptions) {
@@ -167,107 +120,38 @@ class BodyPix {
     await this.ready;
     await mediaReady(imgToSegment, true);
 
-    //this.config.palette = segmentationOptions.palette || this.config.palette;
+
     this.config.outputStride = segmentationOptions.outputStride || this.config.outputStride;
     //this.config.segmentationThreshold = segmentationOptions.segmentationThreshold || this.config.segmentationThreshold;
     this.config.multiSegmentation = segmentationOptions.multiSegmentation || false;
-    //what if the argument does not contain multiSegmentation?
     this.config.segmentBodyParts = segmentationOptions.segmentBodyParts || true
     const segmentation = await this.segmenter.segmentPeople(imgToSegment, { multiSegmentation: this.config.multiSegmentation, segmentBodyParts: this.config.segmentBodyParts });
-    const segImageData = await segmentation[0].mask.toImageData();
+    // const segImageData = await segmentation[0].mask.toImageData();
 
-    //will use default function instead
-    //const bodyPartsMeta = this.bodyPartsSpec(this.config.palette);
-    //const colorsArray = Object.keys(bodyPartsMeta).map(part => bodyPartsMeta[part].color)
 
     const result = {
       segmentation,
+      raw: {
+        personMask: null,
+        backgroundMask: null,
+        partMask: null
+      },
       personMask: null,
       backgroundMask: null,
       partMask: null,
       tensor: null
     };
 
-    // const result = {
-    //   segmentation,
-    //   raw: {
-    //     personMask: null,
-    //     backgroundMask: null,
-    //     partMask: null
-    //   },
-    //   tensor: {
-    //     personMask: null,
-    //     backgroundMask: null,
-    //     partMask: null,
-    //   },
-    //   personMask: null,
-    //   backgroundMask: null,
-    //   partMask: null,
-    //   bodyParts: bodySegmentation.bodyPixMaskValueToRainbowColor
-    // };
-    //TBD: 
-    //How can we let the user DIY the color of the mask
-    //and get rid of personMask and backgroundMask
-    //need to modify the structure of the color palette later
 
-    //result.raw.backgroundMask = bodySegmentation.toBinaryMask(segmentation);
-    //result.raw.personMask = bodySegmentation.toBinaryMask(segmentation, { r: 0, g: 0, b: 0, a: 255 }, { r: 0, g: 0, b: 0, a: 0 });
-    result.personMask = await bodySegmentation.toBinaryMask(segmentation, { r: 0, g: 0, b: 0, a: 255 }, { r: 0, g: 0, b: 0, a: 0 });
-    result.backgroundMask = await bodySegmentation.toBinaryMask(segmentation);
-    result.partMask = await bodySegmentation.toColoredMask(segmentation, bodySegmentation.bodyPixMaskValueToRainbowColor, { r: 255, g: 255, b: 255, a: 255 });
-    result.tensor = await segmentation[0].mask.toTensor();
-
-
-
-    // const {
-    //   personMask,
-    //   backgroundMask,
-    //   partMask,
-    // } = tf.tidy(() => {
-    //   // console.log(imgToSegment.width,imgToSegment.height);
-    //   let test = new ImageData(480, 360);
-    //   console.log()
-    //   let normTensor = tf.browser.fromPixels(test);
-    //   // create a tensor from the input image
-    //   const alpha = tf.ones([segImageData.height, segImageData.width, 1]).tile([1, 1, 1]).mul(255)
-    //   console.log("alpha:",alpha.shape,"\n","img:",imgToSegment.videoWidth,imgToSegment.videoHeight,"\n","seg:",segImageData.height,segImageData.width,"\n","norm:",normTensor.shape);
-    //   normTensor = normTensor.concat(alpha, 2)
-
-    //   // create a tensor from the segmentation
-    //   let maskPersonTensor = tf.tensor(segImageData.data, [segImageData.height, segImageData.width, 1]);
-    //   let maskBackgroundTensor = tf.tensor(segImageData.data, [segImageData.height, segImageData.width, 1]);
-    //   let partTensor = tf.tensor([...result.raw.partMask.data], [segImageData.height, segImageData.width, 4]);
-
-    //   // multiply the segmentation and the inputImage
-    //   maskPersonTensor = tf.cast(maskPersonTensor.add(0.2).sign().relu().mul(normTensor), 'int32')
-    //   maskBackgroundTensor = tf.cast(maskBackgroundTensor.add(0.2).sign().neg().relu().mul(normTensor), 'int32')
-    //   // TODO: handle removing background 
-    //   partTensor = tf.cast(partTensor, 'int32')
-
-    //   return {
-    //     personMask: maskPersonTensor,
-    //     backgroundMask: maskBackgroundTensor,
-    //     partMask: partTensor
-    //   }
-    // })
-
-
-    // const personMaskRes = await generatedImageResult(personMask, this.config);
-    // const bgMaskRes = await generatedImageResult(backgroundMask, this.config);
-    //const partMaskRes = await generatedImageResult(partMask, this.config);
-
-    // if p5 exists, return p5 image. otherwise, return the pixels.
-    // result.personMask = personMaskRes.image || personMaskRes.raw;
-    // result.backgroundMask = bgMaskRes.image || bgMaskRes.raw;
-    //result.partMask = partMaskRes.image || partMaskRes.raw;
-
-    // if (this.config.returnTensors) {
-    //   return tensors
-    //   result.tensor.personMask = personMask;
-    //   result.tensor.backgroundMask = backgroundMask;
-    //   result.tensor.partMask = partMask;
-    // }
-    console.log(result);
+    result.raw.personMask = await bodySegmentation.toBinaryMask(segmentation, { r: 0, g: 0, b: 0, a: 255 }, { r: 0, g: 0, b: 0, a: 0 });
+    result.raw.backgroundMask = await bodySegmentation.toBinaryMask(segmentation);
+    result.raw.partMask = await bodySegmentation.toColoredMask(segmentation, bodySegmentation.bodyPixMaskValueToRainbowColor, { r: 255, g: 255, b: 255, a: 255 });
+    if (this.config.returnTensors){
+      result.tensor = await segmentation[0].mask.toTensor();
+    }
+    result.personMask = await generatedImageResult(result.raw.personMask);
+    result.backgroundMask = await generatedImageResult(result.raw.backgroundMask);
+    result.partMask = await generatedImageResult(result.raw.partMask);
     return result;
 
   }
@@ -311,94 +195,20 @@ class BodyPix {
     this.config.multiSegmentation = segmentationOptions.multiSegmentation;
 
     const segmentation = await this.segmenter.segmentPeople(imgToSegment, this.config.multiSegmentation, this.config.segmentBodyParts);
-    //const segmentation = await this.model.estimatePersonSegmentation(imgToSegment, this.config.outputStride, this.config.segmentationThreshold)
     const segImageData = await segmentation[0].mask.toImageData();
 
     const result = {
       segmentation,
       personMask: null,
       backgroundMask: null,
-      //partMask: null,
       tensor: null
     };
 
 
-    // const result = {
-    //   segmentation,
-    //   raw: {
-    //     personMask: null,
-    //     backgroundMask: null,
-    //   },
-    //   tensor: {
-    //     personMask: null,
-    //     backgroundMask: null,
-    //   },
-    //   personMask: null,
-    //   backgroundMask: null,
-    // };
-
-    //result.raw.backgroundMask = bp.toMaskImageData(segmentation, true);
-    //result.raw.personMask = bp.toMaskImageData(segmentation, false);
     result.personMask = await bodySegmentation.toBinaryMask(segmentation, { r: 0, g: 0, b: 0, a: 255 }, { r: 0, g: 0, b: 0, a: 0 });
     result.backgroundMask = await bodySegmentation.toBinaryMask(segmentation);
     result.tensor = await segmentation[0].mask.toTensor();
 
-
-    // result.raw.backgroundMask = bodySegmentation.toBinaryMask(segmentation, true);
-    // result.raw.personMask = bodySegmentation.toBinaryMask(segmentation, false);
-
-    // TODO: consider returning the canvas with the bp.drawMask()
-    // const bgMaskCanvas = document.createElement('canvas');
-    // bgMaskCanvas.width = segmentation.width;
-    // bgMaskCanvas.height = segmentation.height;
-    // bp.drawMask(bgMaskCanvas, imgToSegment, result.maskBackground, 1, 3, false);
-
-    // const featureMaskCanvas = document.createElement('canvas');
-    // featureMaskCanvas.width = segmentation.width;
-    // featureMaskCanvas.height = segmentation.height;
-    // bp.drawMask(featureMaskCanvas, imgToSegment, result.maskPerson, 1, 3, false);
-
-    // result.backgroundMask = bgMaskCanvas;
-    // result.featureMask = featureMaskCanvas;
-
-    // const {
-    //   personMask,
-    //   backgroundMask
-    // } = tf.tidy(() => {
-    //   let normTensor = tf.browser.fromPixels(imgToSegment);
-    //   // create a tensor from the input image
-    //   const alpha = tf.ones([segImageData.height, segImageData.width, 1]).tile([1, 1, 1]).mul(255)
-    //   normTensor = normTensor.concat(alpha, 2)
-    //   // normTensor.print();
-
-    //   // create a tensor from the segmentation
-    //   let maskPersonTensor = tf.tensor(segmentation.data, [segmentation.height, segmentation.width, 1]);
-    //   let maskBackgroundTensor = tf.tensor(segmentation.data, [segmentation.height, segmentation.width, 1]);
-
-    //   // multiply the segmentation and the inputImage
-    //   maskPersonTensor = tf.cast(maskPersonTensor.neg().add(1).mul(normTensor), 'int32')
-    //   maskBackgroundTensor = tf.cast(maskBackgroundTensor.mul(normTensor), 'int32')
-
-    //   return {
-    //     personMask: maskPersonTensor,
-    //     backgroundMask: maskBackgroundTensor,
-    //   }
-    // })
-
-    // const personMaskRes = await generatedImageResult(personMask, this.config);
-    // const bgMaskRes = await generatedImageResult(backgroundMask, this.config);
-
-    // // if p5 exists, return p5 image. otherwise, return the pixels.
-    // result.personMask = personMaskRes.image || personMaskRes.raw;
-    // result.backgroundMask = bgMaskRes.image || bgMaskRes.raw;
-
-    // if (this.config.returnTensors) {
-    //   // return tensors
-    //   result.tensor.personMask = personMask;
-    //   result.tensor.backgroundMask = backgroundMask;
-    // }
-
-    console.log(result);
     return result;
 
   }
@@ -434,7 +244,7 @@ class BodyPix {
 const bodyPix = (...inputs) => {
   const args = handleArguments(...inputs);
   const instance = new BodyPix(args.video, args.options || {}, args.callback);
-  return args.callback ? instance : instance.ready;
+  return instance;
 }
 
 export default bodyPix;
