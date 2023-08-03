@@ -83,29 +83,48 @@ class P5Util {
     });
   };
 
-  /**
-   * convert raw bytes to blob object
-   * @param {number[] | Uint8ClampedArray | ArrayLike<number>} raws
+  // /**
+  //  * convert raw bytes to blob object
+  //  * @param {number[] | Uint8ClampedArray | ArrayLike<number>} raws
+  //  * @param {number} width
+  //  * @param {number} height
+  //  * @returns {Promise<Blob>}
+  //  */
+  // async rawToBlob(raws, width, height) {
+  //   const arr = Array.from(raws)
+  //   const canvas = document.createElement('canvas'); // Consider using offScreenCanvas when it is ready?
+  //   const ctx = canvas.getContext('2d');
+
+  //   canvas.width = width;
+  //   canvas.height = height;
+
+  //   const imgData = ctx.createImageData(width, height);
+  //   const {data} = imgData;
+
+  //   for (let i = 0; i < width * height * 4; i += 1) data[i] = arr[i];
+  //   ctx.putImageData(imgData, 0, 0);
+
+  //   return this.getBlob(canvas);
+  // };
+
+    /**
+   * convert ImageData to blob object
+   * @param {ImageData} segmentationResult
    * @param {number} width
    * @param {number} height
    * @returns {Promise<Blob>}
    */
-  async rawToBlob(raws, width, height) {
-    const arr = Array.from(raws)
-    const canvas = document.createElement('canvas'); // Consider using offScreenCanvas when it is ready?
-    const ctx = canvas.getContext('2d');
+    async ImageDataToBlob(segmentationResult, width, height) {
+      const canvas = document.createElement('canvas'); // Consider using offScreenCanvas when it is ready?
+      const ctx = canvas.getContext('2d');
+  
+      canvas.width = width;
+      canvas.height = height;
+  
+      ctx.putImageData(segmentationResult, 0, 0);
 
-    canvas.width = width;
-    canvas.height = height;
-
-    const imgData = ctx.createImageData(width, height);
-    const {data} = imgData;
-
-    for (let i = 0; i < width * height * 4; i += 1) data[i] = arr[i];
-    ctx.putImageData(imgData, 0, 0);
-
-    return this.getBlob(canvas);
-  };
+      return this.getBlob(canvas);
+    };
 
   /**
    * Convert Blob to P5.Image

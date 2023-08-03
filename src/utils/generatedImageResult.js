@@ -3,10 +3,9 @@ import p5Utils from './p5Utils';
 
 /**
 * @typedef {Object} GeneratedImageResult
-* @property {Uint8ClampedArray} raw - an array of all pixel values
+* @property {ImageData} segmentationResult - raw segmentation results
 * @property {Blob} blob - image blob
 * @property {p5.Image | null} image - p5 Image, if p5 is available.
-* @property {tf.Tensor3D} [tensor] - the original tensor, if `returnTensors` is true.
 */
 
 /**
@@ -17,18 +16,13 @@ import p5Utils from './p5Utils';
  *
  * Accepts options as an object with property `returnTensors` so that models can pass this.config.
  *
- * @param {tf.Tensor3D} tensor
- * @param {{ returnTensors: boolean }} options
+ * @param {ImageData} 
  * @return {Promise<GeneratedImageResult>}
  */
-export default async function generatedImageResult(tensor, options) {
-  const raw = await tf.browser.toPixels(tensor); // or tensor.data()??
-  const [height, width] = tensor.shape;
-  const blob = await p5Utils.rawToBlob(raw, width, height);
+export default async function generatedImageResult(segmentationResult) {
+  const height = segmentationResult.height;
+  const width = segmentationResult.width;
+  const blob = await p5Utils.ImageDataToBlob(segmentationResult, width, height);
   const image = await p5Utils.blobToP5Image(blob);
-  if (options.returnTensors) {
-    return { tensor, raw, blob, image };
-  }
-  tensor.dispose();
-  return { raw, blob, image };
+  return { segmentationResult, blob, image };
 }
