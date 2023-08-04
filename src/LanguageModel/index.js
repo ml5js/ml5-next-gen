@@ -53,6 +53,11 @@ class LanguageModel extends EventEmitter {
     this.words = [];
     this.finished = true;
 
+    // for compatibility with p5's preload()
+    if (typeof window === 'object' && typeof window._incrementPreload === 'function') {
+      window._incrementPreload();
+    }
+
     this.ready = callCallback(this.loadModel(), callback);
   }
 
@@ -141,6 +146,11 @@ class LanguageModel extends EventEmitter {
     await this.llama2.ccall('register_callback', null, [ 'number' ], [ onTokenCallback ]);
 
     //console.log('loadModel done');
+
+    // for compatibility with p5's preload()
+    if (typeof window === 'object' && typeof window._decrementPreload === 'function') {
+      window._decrementPreload();
+    }
   }
 
   async generate(prompt, optionsOrCb, cb) {

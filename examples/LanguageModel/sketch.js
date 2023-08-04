@@ -4,12 +4,15 @@ let curWord = 0;
 let curX = 0;
 let curY = 20;
 
+function preload() {
+  lm = ml5.languageModel('TinyStories-15M');
+}
+
 function setup() {
   createCanvas(400, 400);
   frameRate(15);
   background(0);
-
-  lm = ml5.languageModel('TinyStories-15M', onModelLoaded);
+  select('#generate').mouseClicked(generateText);
 }
 
 function draw() {
@@ -27,12 +30,6 @@ function draw() {
     curX += wordWidth;
     curWord++;
   }
-}
-
-function onModelLoaded() {
-  console.log('Model loaded');
-  select('#generate').removeAttribute('disabled');
-  select('#generate').mouseClicked(generateText);
 }
 
 function generateText() {

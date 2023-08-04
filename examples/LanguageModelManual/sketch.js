@@ -1,10 +1,13 @@
 let lm;
 let numOptions = 40;
 
-async function setup() {
-  noCanvas();
+function preload() {
+  lm = ml5.languageModel('TinyStories-15M', onModelLoaded);
+}
 
-  lm = await ml5.languageModel('TinyStories-15M', onModelLoaded);
+function setup() {
+  noCanvas();
+  select('#generate').mouseClicked(generateText);
 }
 
 function draw() {
@@ -12,8 +15,6 @@ function draw() {
 
 function onModelLoaded() {
   console.log('Model loaded');
-  select('#generate').removeAttribute('disabled');
-  select('#generate').mouseClicked(generateText);
 }
 
 function generateText() {
