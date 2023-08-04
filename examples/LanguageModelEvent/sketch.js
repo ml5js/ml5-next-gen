@@ -35,8 +35,8 @@ function generateText() {
 }
 
 
-function onToken(lm) {
-  console.log('token', lm.tokens[lm.tokens.length-1]);
+function onToken(token, lm) {
+  console.log('token', token);
 }
 
 function onWord(word, lm) {
@@ -57,6 +57,6 @@ function onWord(word, lm) {
   pop();
 }
 
-function onFinsh(lm) {
-  console.log('Generation finished', lm.out);
+function onFinsh(out, lm) {
+  console.log('Generation finished', out);
 }

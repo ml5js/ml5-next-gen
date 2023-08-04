@@ -109,7 +109,7 @@ class LanguageModel extends EventEmitter {
       }
 
       // on-token event
-      this.emit('token', this);
+      this.emit('token', this.tokens[this.tokens.length-1], this);
 
       // redo word tokenization
       const wordDelimiters = ' .,:;"“?!\n';
@@ -131,7 +131,7 @@ class LanguageModel extends EventEmitter {
         if (this.promiseResolve) {
           this.promiseResolve(this.out);
         }
-        this.emit('finsh', this);
+        this.emit('finsh', this.out, this);
         if (this.callback) {
           this.callback(this.out, this);
         }
