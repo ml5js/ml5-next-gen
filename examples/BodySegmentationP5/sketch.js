@@ -42,6 +42,7 @@ function draw() {
 }
 
 function gotResults(err, result) {
+  console.log("gotResults is called the", i,"th time.");
   if (err) {
     console.log(err);
     return;
@@ -50,4 +51,6 @@ function gotResults(err, result) {
   image(video, 0, 0, width, height);
   tint(255, 120) // for controlling mask transparency
   image(segmentation.partMask, 0, 0, width, height);
+  bodypix.segmentWithParts(video, gotResults, options);
+  
 }
