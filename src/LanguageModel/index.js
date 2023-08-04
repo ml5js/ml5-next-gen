@@ -108,10 +108,7 @@ class LanguageModel extends EventEmitter {
         this.out += tokenStr;
       }
 
-      // on-token callback/event
-      if (this.callback) {
-        this.callback(this);
-      }
+      // on-token event
       this.emit('token', this);
 
       // redo word tokenization
@@ -128,13 +125,16 @@ class LanguageModel extends EventEmitter {
         this.emit('word', this.words[i], this);
       }
 
-      // on-finished promise/event
+      // on-finished promise/event/callback
       if (this.finished) {
         // fulfill the promise returned by generate()
         if (this.promiseResolve) {
           this.promiseResolve(this.out);
         }
         this.emit('finsh', this);
+        if (this.callback) {
+          this.callback(this.out, this);
+        }
       }
     }, 'viifi');
 
