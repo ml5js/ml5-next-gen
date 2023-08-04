@@ -18,7 +18,7 @@ function onModelLoaded() {
 
 function generateText() {
   let prompt = select('#prompt').value();
-  console.log('Prompt: ' + prompt);
+  console.log('Prompt is "' + prompt + '"');
 
   select('#prompt').remove();
   select('#generate').remove();

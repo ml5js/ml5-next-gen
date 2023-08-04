@@ -23,7 +23,7 @@ function onModelLoaded() {
 
 function generateText() {
   let prompt = select('#prompt').value();
-  console.log('Prompt: ' + prompt);
+  console.log('Prompt is "' + prompt + '"');
 
   let options = {
     temperature: 0.9
@@ -36,10 +36,11 @@ function generateText() {
 
 
 function onToken(token, lm) {
-  console.log('token', token);
+  //console.log('Token', token);
 }
 
 function onWord(word, lm) {
+  //console.log('Word "' + word + '"');
   push();
   translate(width/2, height/2);
   rotate(radians(angle));
@@ -58,5 +59,5 @@ function onWord(word, lm) {
 }
 
 function onFinsh(out, lm) {
-  console.log('Generation finished', out);
+  console.log('Generation finished');
 }
