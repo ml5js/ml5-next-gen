@@ -37,21 +37,22 @@ function gotImage(err, result) {
   //mask background by drawing full video to screen and drawing black mask onto background portions
 
   // ctx.drawImage(video, 0, 0, width, height);
-  // const maskBackground = imageDataToCanvas(result.backgroundMask.data, result.backgroundMask.width, result.backgroundMask.height)
+  // const maskBackground = imageDataToCanvas(result.raw.backgroundMask.data, result.raw.backgroundMask.width, result.raw.backgroundMask.height)
   // ctx.drawImage(maskBackground, 0, 0, width, height);
   // bodypix.segmentWithParts(video, gotImage, options);
 
   // mask person instead of background
 
   // ctx.drawImage(video, 0, 0, width, height);
-  // const maskPerson = imageDataToCanvas(result.personMask.data, result.personMask.width, result.personMask.height)
+  // const maskPerson = imageDataToCanvas(result.raw.personMask.data, result.raw.personMask.width, result.raw.personMask.height)
   // ctx.drawImage(maskPerson, 0, 0, width, height);
   // bodypix.segmentWithParts(video, gotImage, options);
 
   //draw colorful 24 part segmentation mask
 
   ctx.drawImage(video, 0, 0, width, height);
-  const maskParts = imageDataToCanvas(result.partMask.data, result.partMask.width, result.partMask.height)
+  console.log(result.raw.partMask);
+  const maskParts = imageDataToCanvas(result.raw.partMask.data, result.raw.partMask.width, result.raw.partMask.height)
   ctx.globalAlpha = 0.4; // for controlling opacity of bodyparts mask
   ctx.drawImage(maskParts, 0, 0, width, height);
   bodypix.segmentWithParts(video, gotImage, options);

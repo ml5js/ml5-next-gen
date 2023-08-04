@@ -149,9 +149,14 @@ class BodyPix {
     if (this.config.returnTensors){
       result.tensor = await segmentation[0].mask.toTensor();
     }
-    result.personMask = await generatedImageResult(result.raw.personMask);
-    result.backgroundMask = await generatedImageResult(result.raw.backgroundMask);
-    result.partMask = await generatedImageResult(result.raw.partMask);
+    const personMaskRes = await generatedImageResult(result.raw.personMask);
+    const bgMaskRes = await generatedImageResult(result.raw.backgroundMask);
+    const partMaskRes = await generatedImageResult(result.raw.partMask);
+
+    result.personMask = personMaskRes.image || result.raw.personMask;
+    result.backgroundMask = bgMaskRes.image || result.raw.backgroundMask;
+    result.partMask = partMaskRes.image || result.raw.partMask;
+
     return result;
 
   }
