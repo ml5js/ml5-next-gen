@@ -131,7 +131,7 @@ class LanguageModel extends EventEmitter {
         if (this.promiseResolve) {
           this.promiseResolve(this.out);
         }
-        this.emit('finsh', this.out, this);
+        this.emit('finish', this.out, this);
         if (this.callback) {
           this.callback(this.out, this);
         }
