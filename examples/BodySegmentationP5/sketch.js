@@ -27,11 +27,12 @@ const options = {
 
 function setup() {
   bodypix = ml5.bodyPix(options);
-  createCanvas(320, 240);
+  createCanvas(480, 360);
   // load up your video
   video = createCapture(VIDEO);
   video.size(width, height);
-  // video.hide(); // Hide the video element, and just show the canvas
+  video.hide(); // Hide the video element, and just show the canvas
+  //frameRate(50);
 }
 
 function videoReady() {
@@ -70,7 +71,6 @@ function videoReady() {
 
 function draw() {
   //background(255, 0, 0);
-  image(video, 0, 0, width, height)
   bodypix.segmentWithParts(video, gotResults, options);
 
 }
@@ -82,6 +82,7 @@ function gotResults(err, result) {
     return;
   }
   segmentation = result;
+  image(video, 0, 0, width, height)
 
   // GH: segmentation.partMask is an ImageData object
   // it appears like p5 can't draw those to the canvas directly
