@@ -62,7 +62,6 @@ function draw() {
 
 function draw() {
   //background(255, 0, 0);
-  image(video, 0, 0, width, height)
   bodypix.segmentWithParts(video, gotResults, options);
 
 }
