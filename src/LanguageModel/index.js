@@ -5,7 +5,6 @@
 
 import { EventEmitter } from "events";
 import callCallback from "../utils/callcallback";
-import handleArguments from "../utils/handleArguments";
 
 import Llama2 from './llama2.js';
 import Llama2Wasm from './llama2.wasm';
@@ -13,11 +12,11 @@ import Llama2Data from './llama2.data';
 
 
 class LanguageModel extends EventEmitter {
-  constructor(optionsOrCb, cb) {
+  constructor(modelNameOrOptions, callback) {
     super();
 
     this.options = {
-      modelUrl: 'https://huggingface.co/karpathy/tinyllamas/resolve/main/stories15M.bin',  // if set, model.bin will be preloaded from provided URL (assumed to be embedded in llama2.data if not)
+      modelUrl: '',          // if set, model.bin will be preloaded from provided URL (assumed to be embedded in llama2.data if not)
       tokenizerUrl: '',      // if set, tokenizer.bin will be preloaded from provided URL (assumed to be embedded in llama2.data if not)
       steps: 0,              // how many tokens to generate (defaults to model's maximum)
       temperature: 0.9,      // 0.0 = (deterministic) argmax sampling, 1.0 = baseline
@@ -25,17 +24,28 @@ class LanguageModel extends EventEmitter {
     };
 
     // handle arguments
-    let callback;
-    if (typeof optionsOrCb === 'function') {
-      callback = optionsOrCb;
-    } else {
-      if (typeof optionsOrCb === 'object') {
-        this.options.modelUrl = (typeof optionsOrCb.modelUrl === 'string') ? optionsOrCb.modelUrl : this.options.modelUrl;
-        this.options.tokenizerUrl = (typeof optionsOrCb.tokenizerUrl === 'string') ? optionsOrCb.tokenizerUrl : this.options.tokenizerUrl;
+    if (typeof modelNameOrOptions === 'string') {
+      switch (modelNameOrOptions) {
+        // see https://huggingface.co/karpathy/tinyllamas for TinyStories-*
+        case 'TinyStories-15M':
+          this.options.modelUrl = 'https://huggingface.co/karpathy/tinyllamas/resolve/main/stories15M.bin';
+          break;
+        case 'TinyStories-42M':
+          this.options.modelUrl = 'https://huggingface.co/karpathy/tinyllamas/resolve/main/stories42M.bin';
+          break;
+        case 'TinyStories-110M':
+          this.options.modelUrl = 'https://huggingface.co/karpathy/tinyllamas/resolve/main/stories110M.bin';
+          break;
+        default:
+          throw 'Unrecognized model ' + modelNameOrUrl + ', try e.g. TinyStories-15M';
       }
-      if (typeof cb === 'function') {
-        callback = cb;
-      }
+    } else if (typeof modelNameOrUrl === 'object') {
+        this.options.modelUrl = (typeof modelNameOrOptions.modelUrl === 'string') ? modelNameOrOptions.modelUrl : this.options.modelUrl;
+        this.options.tokenizerUrl = (typeof modelNameOrOptions.tokenizerUrl === 'string') ? modelNameOrOptions.tokenizerUrl : this.options.tokenizerUrl;
+    }
+
+    if (!this.options.modelUrl) {
+      throw 'You need to provide the name of the model to load, e.g. TinyStories-15M';
     }
 
     this.out = '';
@@ -279,9 +289,8 @@ class LanguageModel extends EventEmitter {
  * exposes LanguageModel class through function
  * @returns {Object|Promise<Boolean>} A new LanguageModel instance
  */
-const languageModel = (...inputs) => {
-  const { options = {}, callback } = handleArguments(...inputs);
-  const instance = new LanguageModel(options, callback);
+const languageModel = (modelNameOrOptions, callback) => {
+  const instance = new LanguageModel(modelNameOrOptions, callback);
   return instance;
 };
 

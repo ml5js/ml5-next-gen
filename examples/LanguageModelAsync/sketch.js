@@ -3,7 +3,7 @@ let lm;
 async function setup() {
   noCanvas();
 
-  lm = await ml5.languageModel();
+  lm = await ml5.languageModel('TinyStories-15M');
   console.log('Model loaded');
 
   select('#generate').mouseClicked(generateText);

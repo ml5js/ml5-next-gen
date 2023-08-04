@@ -4,7 +4,7 @@ let numOptions = 40;
 async function setup() {
   noCanvas();
 
-  lm = await ml5.languageModel(onModelLoaded);
+  lm = await ml5.languageModel('TinyStories-15M', onModelLoaded);
 }
 
 function draw() {

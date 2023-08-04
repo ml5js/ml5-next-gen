@@ -7,7 +7,7 @@ function setup() {
   createCanvas(400, 400);
   background(0);
 
-  lm = ml5.languageModel(onModelLoaded);
+  lm = ml5.languageModel('TinyStories-15M', onModelLoaded);
 }
 
 function draw() {
