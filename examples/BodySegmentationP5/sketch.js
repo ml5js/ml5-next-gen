@@ -11,6 +11,7 @@ BodyPix
 let bodypix;
 let video;
 let segmentation;
+let i = 1;
 
 const options = {
   outputStride: 32,  //16 or 32 for ResNet, 
@@ -25,31 +26,31 @@ const options = {
 // }
 
 function setup() {
-
+  bodypix = ml5.bodyPix(options);
   createCanvas(320, 240);
-
   // load up your video
   video = createCapture(VIDEO, videoReady);
   video.size(width, height);
-  bodypix = ml5.bodyPix(options);
-  // console.log('bodypix is', bodypix);
   // video.hide(); // Hide the video element, and just show the canvas
 }
 
 function videoReady() {
-  // GH: workaround for the preload issue()
-  let checkIfBodypixIsReady = function() {
-    if (typeof bodypix == 'object' && bodypix.ready) {
-      bodypix.segmentWithParts(video, gotResults, options); 
-      // console.log('Yay');     
-    } else {
-      setTimeout(checkIfBodypixIsReady, 500);
-    }
-  }
-  checkIfBodypixIsReady();
+  bodypix.segmentWithParts(video, gotResults, options);
+//   // GH: workaround for the preload issue()
+//   let checkIfBodypixIsReady = function() {
+//     if (typeof bodypix == 'object' && bodypix.ready) {
+//       bodypix.segmentWithParts(video, gotResults, options); 
+//       // console.log('Yay');     
+//     } else {
+//       setTimeout(checkIfBodypixIsReady, 500);
+//     }
+//   }
+//   checkIfBodypixIsReady();
+  
 }
 
 function gotResults(err, result) {
+  console.log("gotResults is called the", i,"th time.");
   if (err) {
     console.log(err);
     return;
@@ -61,6 +62,6 @@ function gotResults(err, result) {
   // GH: segmentation.partMask is an ImageData object
   // it appears like p5 can't draw those to the canvas directly
   image(segmentation.partMask, 0, 0, width, height);
-
   bodypix.segmentWithParts(video, gotResults, options);
+  i = i + 1;
 }
