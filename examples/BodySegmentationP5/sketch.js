@@ -29,39 +29,64 @@ function setup() {
   bodypix = ml5.bodyPix(options);
   createCanvas(320, 240);
   // load up your video
-  video = createCapture(VIDEO, videoReady);
+  video = createCapture(VIDEO);
   video.size(width, height);
   // video.hide(); // Hide the video element, and just show the canvas
 }
 
 function videoReady() {
   bodypix.segmentWithParts(video, gotResults, options);
-//   // GH: workaround for the preload issue()
-//   let checkIfBodypixIsReady = function() {
-//     if (typeof bodypix == 'object' && bodypix.ready) {
-//       bodypix.segmentWithParts(video, gotResults, options); 
-//       // console.log('Yay');     
-//     } else {
-//       setTimeout(checkIfBodypixIsReady, 500);
-//     }
+  //   // GH: workaround for the preload issue()
+  //   let checkIfBodypixIsReady = function() {
+  //     if (typeof bodypix == 'object' && bodypix.ready) {
+  //       bodypix.segmentWithParts(video, gotResults, options); 
+  //       // console.log('Yay');     
+  //     } else {
+  //       setTimeout(checkIfBodypixIsReady, 500);
+  //     }
+  //   }
+  //   checkIfBodypixIsReady();
+
+}
+
+// function gotResults(err, result) {
+//   console.log("gotResults is called the", i, "th time.");
+//   if (err) {
+//     console.log(err);
+//     return;
 //   }
-//   checkIfBodypixIsReady();
-  
+//   segmentation = result;
+
+//   background(255, 0, 0);
+//   image(video, 0, 0, width, height)
+//   // GH: segmentation.partMask is an ImageData object
+//   // it appears like p5 can't draw those to the canvas directly
+//   tint(255, 100) // for controlling mask transparency
+//   image(segmentation.partMask, 0, 0, width, height);
+//   bodypix.segmentWithParts(video, gotResults, options);
+//   i = i + 1;
+// }
+
+
+function draw() {
+  //background(255, 0, 0);
+  image(video, 0, 0, width, height)
+  bodypix.segmentWithParts(video, gotResults, options);
+
 }
 
 function gotResults(err, result) {
-  console.log("gotResults is called the", i,"th time.");
+  console.log("gotResults is called the", i, "th time.");
   if (err) {
     console.log(err);
     return;
   }
   segmentation = result;
 
-  background(255, 0, 0);
-  image(video, 0, 0, width, height)
   // GH: segmentation.partMask is an ImageData object
   // it appears like p5 can't draw those to the canvas directly
+  tint(255, 120) // for controlling mask transparency
   image(segmentation.partMask, 0, 0, width, height);
-  bodypix.segmentWithParts(video, gotResults, options);
+  //bodypix.segmentWithParts(video, gotResults, options);
   i = i + 1;
 }
