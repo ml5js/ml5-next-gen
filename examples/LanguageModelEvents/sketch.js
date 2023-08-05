@@ -59,6 +59,6 @@ function onWord(word, lm) {
   pop();
 }
 
-function onFinsh(out, lm) {
+function onFinsh(text, lm) {
   console.log('Generation finished');
 }

@@ -48,7 +48,7 @@ class LanguageModel extends EventEmitter {
       throw 'You need to provide the name of the model to load, e.g. TinyStories-15M';
     }
 
-    this.out = '';
+    this.text = '';
     this.tokens = [];
     this.words = [];
     this.finished = true;
@@ -110,7 +110,7 @@ class LanguageModel extends EventEmitter {
       if (this.options.stopOnBosOrEos && (token == 1 || token == 2)) {
         this.finished = true;
       } else {
-        this.out += tokenStr;
+        this.text += tokenStr;
       }
 
       // on-token event
@@ -120,9 +120,9 @@ class LanguageModel extends EventEmitter {
       const wordDelimiters = ' .,:;"“?!\n';
       const re = new RegExp('(?=[' + wordDelimiters + '])|(?<=[' + wordDelimiters + '])', 'g');
       const prevNumWords = this.words.length;
-      this.words = this.out.split(re);
+      this.words = this.text.split(re);
       // ignore the last word if we can't be certain it's complete
-      if (!wordDelimiters.includes(this.out.slice(-1)) && !this.finished) {
+      if (!wordDelimiters.includes(this.text.slice(-1)) && !this.finished) {
         this.words.pop();
       }
       // on-word event
@@ -134,11 +134,11 @@ class LanguageModel extends EventEmitter {
       if (this.finished) {
         // fulfill the promise returned by generate()
         if (this.promiseResolve) {
-          this.promiseResolve(this.out);
+          this.promiseResolve(this.text);
         }
-        this.emit('finish', this.out, this);
+        this.emit('finish', this.text, this);
         if (this.callback) {
-          this.callback(this.out, this);
+          this.callback(this.text, this);
         }
       }
     }, 'viifi');
@@ -175,12 +175,12 @@ class LanguageModel extends EventEmitter {
     // if there are any outstanding requests, resolve them
     // with the output received so far
     if (this.promiseResolve) {
-      this.promiseResolve(this.out);
+      this.promiseResolve(this.text);
     }
 
     await this.llama2.ccall('set_parameters', null, [ 'number', 'number' ], [ this.options.temperature, this.options.steps ]);
 
-    this.out = '';
+    this.text = '';
     this.tokens = [{ index: 1, str: '<s>', probability: 1 }];
     this.words = [];
     this.finished = false;
@@ -230,12 +230,12 @@ class LanguageModel extends EventEmitter {
     // if there are any outstanding requests, resolve them
     // with the output received so far
     if (this.promiseResolve) {
-      this.promiseResolve(this.out);
+      this.promiseResolve(this.text);
     }
 
     await this.llama2.ccall('set_parameters', null, [ 'number', 'number' ], [ this.options.temperature, this.options.steps ]);
 
-    this.out = '';
+    this.text = '';
     this.tokens = [];
     this.words = [];
     this.finished = true;

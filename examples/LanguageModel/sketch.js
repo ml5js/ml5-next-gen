@@ -42,8 +42,8 @@ function generateText() {
   lm.generate(prompt, options, gotText);
 }
 
-function gotText(out, lm) {
-  console.log('Model returned "' + out + '"');
+function gotText(text, lm) {
+  console.log('Model returned "' + text + '"');
   // lm.words contains the output broken up in words
   words = lm.words;
   curWord = 0;
