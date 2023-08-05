@@ -48,6 +48,7 @@ class LanguageModel extends EventEmitter {
       throw 'You need to provide the name of the model to load, e.g. TinyStories-15M';
     }
 
+    this.prompt = '';
     this.text = '';
     this.tokens = [];
     this.words = [];
@@ -180,6 +181,7 @@ class LanguageModel extends EventEmitter {
 
     await this.llama2.ccall('set_parameters', null, [ 'number', 'number' ], [ this.options.temperature, this.options.steps ]);
 
+    this.prompt = prompt;
     this.text = '';
     this.tokens = [{ index: 1, str: '<s>', probability: 1 }];
     this.words = [];
@@ -235,6 +237,7 @@ class LanguageModel extends EventEmitter {
 
     await this.llama2.ccall('set_parameters', null, [ 'number', 'number' ], [ this.options.temperature, this.options.steps ]);
 
+    this.prompt = prompt;
     this.text = '';
     this.tokens = [];
     this.words = [];
