@@ -75,7 +75,7 @@ function mouseReleased() {
 }
 
 // Step 9: define a function to handle the results of your classification
-function gotResults(error, results) {
+function gotResults(results) {
   label = results[0].label;
   console.log(results);
 }
