@@ -36,12 +36,12 @@ function generateText() {
 }
 
 
-function onToken(token, lm) {
-  //console.log('Token', token);
+function onToken(lm) {
+  console.log('Token', lm.tokens.slice(-1));
 }
 
-function onWord(word, lm) {
-  //console.log('Word "' + word + '"');
+function onWord(lm) {
+  console.log('Word "' + lm.words.slice(-1) + '"');
   push();
   translate(width/2, height/2);
   rotate(radians(angle));
@@ -55,10 +55,10 @@ function onWord(word, lm) {
   fill(255);
   textAlign(CENTER);
   textSize(10);
-  text(word, 0, 0);
+  text(lm.words.slice(-1), 0, 0);
   pop();
 }
 
-function onFinsh(text, lm) {
-  console.log('Generation finished');
+function onFinsh(lm) {
+  console.log('Model returned "' + lm.text + '"');
 }

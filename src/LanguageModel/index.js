@@ -115,20 +115,20 @@ class LanguageModel extends EventEmitter {
       }
 
       // on-token event
-      this.emit('token', this.tokens[this.tokens.length-1], this);
+      this.emit('token', this);
 
       // redo word tokenization
       const wordDelimiters = ' .,:;"“?!\n';
       const re = new RegExp('(?=[' + wordDelimiters + '])|(?<=[' + wordDelimiters + '])', 'g');
-      const prevNumWords = this.words.length;
-      this.words = this.text.split(re);
+      const newWords = this.text.split(re);
       // ignore the last word if we can't be certain it's complete
       if (!wordDelimiters.includes(this.text.slice(-1)) && !this.finished) {
-        this.words.pop();
+        newWords.pop();
       }
-      // on-word event
-      for (let i=prevNumWords; i < this.words.length; i++) {
-        this.emit('word', this.words[i], this);
+      // on-word events
+      for (let i=this.words.length; i < newWords.length; i++) {
+        this.words[i] = newWords[i];
+        this.emit('word', this);
       }
 
       // on-finished promise/event/callback
@@ -137,9 +137,9 @@ class LanguageModel extends EventEmitter {
         if (this.promiseResolve) {
           this.promiseResolve(this.text);
         }
-        this.emit('finish', this.text, this);
+        this.emit('finish', this);
         if (this.callback) {
-          this.callback(this.text, this);
+          this.callback(this);
         }
       }
     }, 'viifi');
