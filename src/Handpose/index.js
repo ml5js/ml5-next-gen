@@ -16,18 +16,16 @@ import { mediaReady } from "../utils/imageUtilities";
 class Handpose {
   /**
    * Create Handpose.
-   * @param {HTMLVideoElement} [video] - An HTMLVideoElement.
    * @param {Object} [options] - An object with options.
    * @param {function} [callback] - A callback to be called when the model is ready.
    */
   constructor(options, callback) {
     this.model = null;
-    this.modelReady = false;
     this.config = options;
+    this.ready = callCallback(this.loadModel(), callback);
+    //flags for detectStart() and detectStop()
     this.detecting = false;
     this.signalStop = false;
-
-    this.ready = callCallback(this.loadModel(), callback);
   }
 
   /**
@@ -44,7 +42,6 @@ class Handpose {
     };
 
     this.model = await handPoseDetection.createDetector(pipeline, modelConfig);
-    this.modelReady = true;
 
     return this;
   }
@@ -76,7 +73,7 @@ class Handpose {
   }
 
   /**
-   * Continuously output predictions through a callback function
+   * Repeatedly output predictions through a callback function
    * @param {*} [media] - An HMTL or p5.js image, video, or canvas element to run the prediction on.
    * @param {function} [callback] - A callback function to handle the predictions.
    * @returns {Promise<Array>} an array of predictions.
@@ -94,8 +91,16 @@ class Handpose {
     );
     const { image, callback } = argumentObject;
 
-    await mediaReady(image, false);
+    //Throw an error if detectStart is called more than once before detectStop
+    if (this.detecting) {
+      console.warn(
+        "Detect start has already been called. Call detectStop() before calling detectStart() again."
+      );
+      return;
+    }
+    this.detecting = true;
 
+    await mediaReady(image, false);
     while (!this.signalStop) {
       const options = {
         flipHorizontal: this.config?.flipHorizontal ?? false,
@@ -107,7 +112,9 @@ class Handpose {
       // wait for the frame to update
       await tf.nextFrame();
     }
+
     this.signalStop = false;
+    this.detecting = false;
   }
 
   /**
