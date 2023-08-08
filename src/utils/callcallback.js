@@ -3,7 +3,6 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-
 /**
  * Most ml5 methods accept a callback function which will be
  * called with the arguments (error, result).
@@ -29,11 +28,11 @@ export default function callCallback(promise, callback) {
   return new Promise((resolve, reject) => {
     promise
       .then((result) => {
-        callback(undefined, result);
+        callback(result);
         resolve(result);
       })
       .catch((error) => {
-        callback(error);
+        callback(undefined, error);
         reject(error);
       });
   });
