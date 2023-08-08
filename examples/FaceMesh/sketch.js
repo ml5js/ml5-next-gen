@@ -1,17 +1,23 @@
 let facemesh;
 let video;
 let predictions = [];
+var maxFaces_value = 1
 
 function setup() {
   createCanvas(640, 480);
   video = createCapture(VIDEO);
   video.size(width, height);
 
-  const options = {maxFaces: 2, 
+  document.getElementById("button_maxFaces").onclick = function(){
+    var maxFaces_value = document.getElementById("maxFaces").value;
+  }
+
+  const options = {maxFaces: maxFaces_value, 
     refineLandmarks: true, 
     flipHorizontal: false, 
     // color: (0, 255, 0),
   };
+  console.log(options.maxFaces)
 
   facemesh = ml5.facemesh(video, options, modelReady);
 
