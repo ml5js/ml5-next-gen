@@ -73,7 +73,7 @@ function draw() {
 }
 
 // Step 9: define a function to handle the results of your classification
-function handleResults(error, results) {
+function handleResults(results, error) {
   if (error) {
     console.error(error);
     return;
