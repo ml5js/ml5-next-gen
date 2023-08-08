@@ -41,15 +41,14 @@ function draw() {
   //We call function to draw certain facial features
   //We have faceOval,rightEyebrow, leftEyebrow, rightEye, leftEye, lips
   drawFeatures();
+  //Interactive Elements
+  mask();
 }
 
 // A function to draw bounding boxes
 function drawBoxes(){
   for (let i = 0; i < predictions.length; i += 1){
-    // console.log(predictions[0].box);
-
-    // const [_height,_width,_xMax,_xMin,_yMax,_yMin] = predictions[0].box;
-    // console.log(_height);
+    // console.log(predictions[0].box); 
 
     const x = predictions[0].box.xMin;
     const y = predictions[0].box.yMin;
@@ -113,10 +112,35 @@ function drawFeatures(){
           //draw keypoints
           noStroke();
           ellipse(keypoint.x, keypoint.y, 5, 5);
-          //draw shapes
           
         };
       }
     }
   }      
 }
+
+//Find the points
+function nearestPoints(){
+
+}
+
+//Interactive Elements
+function mask(){
+  if (predictions.length > 0){
+    for (let i = 0; i < predictions.length; i += 1) {
+      const face = predictions[i];
+      for (let j = 0; j < face.keypoints.length; j += 1) {
+        // console.log(Object.values(keypoint)[3]); //The name of all facial features
+        const keypoint = face.keypoints[4];
+          push()
+          fill(255, 0, 0);
+          //draw rednose
+          noStroke();
+          ellipse(keypoint.x, keypoint.y, 40, 40);
+          pop()
+          
+      }
+    }
+  }
+}
+
