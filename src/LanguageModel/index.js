@@ -19,7 +19,8 @@ class LanguageModel extends EventEmitter {
       modelUrl: '',          // if set, model.bin will be preloaded from provided URL (assumed to be embedded in llama2.data if not)
       tokenizerUrl: '',      // if set, tokenizer.bin will be preloaded from provided URL (assumed to be embedded in llama2.data if not)
       steps: 0,              // how many tokens to generate (defaults to model's maximum)
-      temperature: 0.9,      // 0.0 = (deterministic) argmax sampling, 1.0 = baseline
+      temperature: 1.0,      // 0.0 = (deterministic) argmax sampling, 1.0 = baseline, don't set higher
+      topp: 0.9,             // p value in top-p (nucleus) sampling, 0 = off
       stopOnBosOrEos: true,  // stop when encountering beginning-of-sequence or end-of-sequence token
     };
 
@@ -164,6 +165,7 @@ class LanguageModel extends EventEmitter {
       if (typeof optionsOrCb === 'object') {
         this.options.steps = (typeof optionsOrCb.steps === 'number') ? optionsOrCb.steps : this.options.steps;
         this.options.temperature = (typeof optionsOrCb.temperature === 'number') ? optionsOrCb.temperature : this.options.temperature;
+        this.options.topp = (typeof optionsOrCb.topp === 'number') ? optionsOrCb.topp : this.options.topp;
         this.options.stopOnBosOrEos = (typeof optionsOrCb.stopOnBosOrEos == 'boolean') ? optionsOrCb.stopPropagation : this.options.stopOnBosOrEos;
       }
       if (typeof cb === 'function') {
@@ -179,7 +181,7 @@ class LanguageModel extends EventEmitter {
       this.promiseResolve(this.text);
     }
 
-    await this.llama2.ccall('set_parameters', null, [ 'number', 'number' ], [ this.options.temperature, this.options.steps ]);
+    await this.llama2.ccall('set_parameters', null, [ 'number', 'number', 'number' ], [ this.options.temperature, this.options.topp, this.options.steps ]);
 
     this.prompt = prompt;
     this.text = '';
@@ -220,6 +222,7 @@ class LanguageModel extends EventEmitter {
       if (typeof optionsOrCb === 'object') {
         this.options.steps = (typeof optionsOrCb.steps === 'number') ? optionsOrCb.steps : this.options.steps;
         this.options.temperature = (typeof optionsOrCb.temperature === 'number') ? optionsOrCb.temperature : this.options.temperature;
+        this.options.topp = (typeof optionsOrCb.topp === 'number') ? optionsOrCb.topp : this.options.topp;
         this.options.stopOnBosOrEos = (typeof optionsOrCb.stopOnBosOrEos == 'boolean') ? optionsOrCb.stopPropagation : this.options.stopOnBosOrEos;
       }
       if (typeof cb === 'function') {
@@ -235,7 +238,7 @@ class LanguageModel extends EventEmitter {
       this.promiseResolve(this.text);
     }
 
-    await this.llama2.ccall('set_parameters', null, [ 'number', 'number' ], [ this.options.temperature, this.options.steps ]);
+    await this.llama2.ccall('set_parameters', null, [ 'number', 'number', 'number' ], [ this.options.temperature, this.options.topp, this.options.steps ]);
 
     this.prompt = prompt;
     this.text = '';
