@@ -18,6 +18,8 @@ class Handpose {
    * Create Handpose.
    * @param {Object} [options] - An object with options.
    * @param {function} [callback] - A callback to be called when the model is ready.
+   *
+   * @private
    */
   constructor(options, callback) {
     this.model = null;
@@ -31,6 +33,8 @@ class Handpose {
   /**
    * Load the model and set it to this.model
    * @return {this} the Handpose model.
+   *
+   * @private
    */
   async loadModel() {
     const pipeline = handPoseDetection.SupportedModels.MediaPipeHands;
@@ -126,7 +130,7 @@ class Handpose {
 }
 
 /**
- * exposes handpose class through function
+ * Factory function that returns a Handpose instance
  * @returns {Object} A new handpose instance
  */
 const handpose = (...inputs) => {
