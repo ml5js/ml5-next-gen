@@ -82,12 +82,8 @@ function gotResults(err, result) {
     return;
   }
   segmentation = result;
-  image(video, 0, 0, width, height)
-
-  // GH: segmentation.partMask is an ImageData object
-  // it appears like p5 can't draw those to the canvas directly
+  image(video, 0, 0, width, height);
   tint(255, 120) // for controlling mask transparency
   image(segmentation.partMask, 0, 0, width, height);
-  //bodypix.segmentWithParts(video, gotResults, options);
   i = i + 1;
 }
