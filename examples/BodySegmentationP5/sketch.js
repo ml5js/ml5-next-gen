@@ -11,7 +11,6 @@ BodyPix
 let bodypix;
 let video;
 let segmentation;
-let i = 1;
 
 const options = {
   outputStride: 32,  //16 or 32 for ResNet, 
@@ -41,27 +40,8 @@ function draw() {
 
 }
 
-// function gotResults(err, result) {
-//   console.log("gotResults is called the", i, "th time.");
-//   if (err) {
-//     console.log(err);
-//     return;
-//   }
-//   segmentation = result;
-
-//   background(255, 0, 0);
-//   image(video, 0, 0, width, height)
-//   // GH: segmentation.partMask is an ImageData object
-//   // it appears like p5 can't draw those to the canvas directly
-//   tint(255, 100) // for controlling mask transparency
-//   image(segmentation.partMask, 0, 0, width, height);
-//   bodypix.segmentWithParts(video, gotResults, options);
-//   i = i + 1;
-// }
-
 
 function draw() {
-  //background(255, 0, 0);
   bodypix.segmentWithParts(video, gotResults, options);
 
 }
