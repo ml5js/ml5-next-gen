@@ -14,9 +14,6 @@
 // @ts-check
 import * as tf from '@tensorflow/tfjs';
 import * as bodySegmentation from '@tensorflow-models/body-segmentation';
-import '@tensorflow/tfjs-core';
-import '@tensorflow/tfjs-converter';
-import '@tensorflow/tfjs-backend-webgl';
 import callCallback from '../utils/callcallback';
 import generatedImageResult from '../utils/generatedImageResult';
 import handleArguments from '../utils/handleArguments';
@@ -26,13 +23,12 @@ import { mediaReady } from '../utils/imageUtilities';
 
 /**
  * @typedef {Object} BodyPixOptions
- * @property {import('@tensorflow-models/body-segmentation/dist/body_pix/impl/types').BodyPixArchitecture}[architecture] -Can be either MobileNetV1 or ResNet 50.
- * @property {import('@tensorflow-models/body-segmentation/dist/body_pix/impl/types').BodyPixMultiplier} [multiplier]
- * @property {import('@tensorflow-models/body-segmentation/dist/body_pix/impl/types').BodyPixOutputStride} [outputStride]
- * @property {number} [quantBytes]
- * @property {boolean} [returnTensors]
- * @property {boolean} [multiSegmentation]
- * @property {boolean} [segmentBodyParts]
+ * @property {import('@tensorflow-models/body-segmentation/dist/body_pix/impl/types').BodyPixArchitecture}[architecture] -Can be either MobileNetV1 or ResNet 50. By default, using ResNet 50
+ * @property {import('@tensorflow-models/body-segmentation/dist/body_pix/impl/types').BodyPixMultiplier} [multiplier] - 0.5 or 0.75 or 1, this is used only by MobileNet
+ * @property {import('@tensorflow-models/body-segmentation/dist/body_pix/impl/types').BodyPixOutputStride} [outputStride] -8 and 16 for MobileNet V1, 16 and 32 for ResNet 50.
+ * @property {number} [quantBytes] - can be 1, 2 or 4. Bigger number leads to better accuracy and larger model size. By default, this is set to 2.
+ * @property {boolean} [returnTensors] - whether a corresponding tensor will be returned in the output. By default, this is set to false
+ * @property {boolean} [multiSegmentation] - If set to true, each person is segmented in a separate output; otherwose all people in one segmentation. By default, set to false
 
  */
 
@@ -40,19 +36,14 @@ import { mediaReady } from '../utils/imageUtilities';
  * @type {BodyPixOptions}
  */
 const DEFAULTS = {
-  //can we let the users decide which architecture to use?
-  //two defaults?
   "architecture": "ResNet50",
   "multiplier": 1,
-  "outputStride": 32,
+  "outputStride": 16,
   "quantBytes": 2,
   "returnTensors": false,
+  "multiSegmentation": false
 }
-//Add notes for the params later!
 
-
-//Similar operations when we want to use MobileNet as the architecture 
-//(extra param: multiplier)
 
 
 class BodyPix {
@@ -66,22 +57,13 @@ class BodyPix {
     this.video = video;
     this.model = null;
     this.modelReady = false;
-    this.modelPath = '';
-    // TODO: make the code more consise here?
     this.config = {
       architecture: options.architecture || DEFAULTS.architecture,
       multiplier: options.multiplier || DEFAULTS.multiplier,
       outputStride: options.outputStride || DEFAULTS.outputStride,
       quantBytes: options.quantBytes || DEFAULTS.quantBytes,
-      multiSegmentation: options.multiSegmentation,
-      segmentBodyParts: options.segmentBodyParts,
-      // flipHorizontal: options.flipHorizontal || DEFAULTS.flipHorizontal, // true when webcam is on;
-      // internalResolution: options.internalResolution || DEFAULTS.internalResolution,
-      // segmentationThreshold: options.segmentationThreshold || DEFAULTS.segmentationThreshold,
-      // maxDetections: options.maxDetections || DEFAULTS.maxDetections,
-      // scoreThreshold: options.scoreThreshold || DEFAULTS.maxDetections,
-      // nmsRadius: options.nmsRadius || DEFAULTS.nmsRadius,
-      returnTensors: options.returnTensors || DEFAULTS.returnTensors
+      returnTensors: options.returnTensors || DEFAULTS.returnTensors,
+      multiSegmentation: options.multiSegmentation || false,
     }
     this.ready = callCallback(this.loadModel(), callback);
   }
@@ -112,22 +94,14 @@ class BodyPix {
   /**
    * Segments the image with partSegmentation, return result object
    * @param {InputImage} [imgToSegment]
-   * @param {BodyPixOptions} [segmentationOptions] - config params for the segmentation
+   * @param {BodyPixOptions} [options] - config params for the segmentation
    * @return {Promise<SegmentationResult>} a result object with image, raw, bodyParts
    */
-  async segmentWithPartsInternal(imgToSegment, segmentationOptions) {
+  async segmentWithPartsInternal(imgToSegment, options) {
     // estimatePartSegmentation
     await this.ready;
     await mediaReady(imgToSegment, true);
-
-
-    this.config.outputStride = segmentationOptions.outputStride || this.config.outputStride;
-    //this.config.segmentationThreshold = segmentationOptions.segmentationThreshold || this.config.segmentationThreshold;
-    this.config.multiSegmentation = segmentationOptions.multiSegmentation || false;
-    this.config.segmentBodyParts = segmentationOptions.segmentBodyParts || true
-    const segmentation = await this.segmenter.segmentPeople(imgToSegment, { multiSegmentation: this.config.multiSegmentation, segmentBodyParts: this.config.segmentBodyParts });
-    // const segImageData = await segmentation[0].mask.toImageData();
-
+    const segmentation = await this.segmenter.segmentPeople(imgToSegment, { multiSegmentation: this.config.multiSegmentation, segmentBodyParts: true });
 
     const result = {
       segmentation,
@@ -186,33 +160,38 @@ class BodyPix {
   /**
    * Segments the image with personSegmentation, return result object
    * @param {InputImage} imgToSegment
-   * @param {BodyPixOptions} segmentationOptions - config params for the segmentation
+   * @param {BodyPixOptions} options - config params for the segmentation
    *    includes outputStride, segmentationThreshold
    * @return {Promise<SegmentationResult>} a result object with maskBackground, maskPerson, raw
    */
-  async segmentInternal(imgToSegment, segmentationOptions) {
+  async segmentInternal(imgToSegment, options) {
 
     await this.ready;
     await mediaReady(imgToSegment, true);
-
-    this.config.outputStride = segmentationOptions.outputStride || this.config.outputStride;
-    this.config.segmentationThreshold = segmentationOptions.segmentationThreshold || this.config.segmentationThreshold;
-    this.config.multiSegmentation = segmentationOptions.multiSegmentation;
-
-    const segmentation = await this.segmenter.segmentPeople(imgToSegment, this.config.multiSegmentation, this.config.segmentBodyParts);
-    const segImageData = await segmentation[0].mask.toImageData();
+    const segmentation = await this.segmenter.segmentPeople(imgToSegment, { multiSegmentation: this.config.multiSegmentation, segmentBodyParts: false });
 
     const result = {
       segmentation,
+      raw: {
+        personMask: null,
+        backgroundMask: null,
+      },
       personMask: null,
       backgroundMask: null,
       tensor: null
     };
 
 
-    result.personMask = await bodySegmentation.toBinaryMask(segmentation, { r: 0, g: 0, b: 0, a: 255 }, { r: 0, g: 0, b: 0, a: 0 });
-    result.backgroundMask = await bodySegmentation.toBinaryMask(segmentation);
-    result.tensor = await segmentation[0].mask.toTensor();
+    result.raw.personMask = await bodySegmentation.toBinaryMask(segmentation, { r: 0, g: 0, b: 0, a: 255 }, { r: 0, g: 0, b: 0, a: 0 });
+    result.raw.backgroundMask = await bodySegmentation.toBinaryMask(segmentation);
+    if (this.config.returnTensors){
+      result.tensor = await segmentation[0].mask.toTensor();
+    }
+    const personMaskRes = await generatedImageResult(result.raw.personMask);
+    const bgMaskRes = await generatedImageResult(result.raw.backgroundMask);
+
+    result.personMask = personMaskRes.image || result.raw.personMask;
+    result.backgroundMask = bgMaskRes.image || result.raw.backgroundMask;
 
     return result;
 
