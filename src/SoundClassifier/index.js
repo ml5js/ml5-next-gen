@@ -1,4 +1,4 @@
-// Copyright (c) 2019 ml5
+// Copyright (c) 2019-2023 ml5
 //
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
