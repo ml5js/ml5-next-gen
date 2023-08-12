@@ -46,6 +46,7 @@ class SoundClassifier {
     }
 
     async loadModel(options) {
+        tf.setBackend('webgpu')
         this.model = await this.modelToUse.load(options, this.modelUrl);
         return this;
     }
