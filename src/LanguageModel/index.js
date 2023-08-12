@@ -20,7 +20,7 @@ class LanguageModel extends EventEmitter {
       tokenizerUrl: '',      // if set, tokenizer.bin will be preloaded from provided URL (assumed to be embedded in llama2.data if not)
       maxTokens: 0,          // how many tokens to generate (defaults to model's maximum)
       temperature: 1.0,      // 0.0 = (deterministic) argmax sampling, 1.0 = baseline, don't set higher
-      topp: 0.9,             // p value in top-p (nucleus) sampling, 0 = off
+      topp: 0,               // p value in top-p (nucleus) sampling, 0 = off
       stopOnBosOrEos: true,  // stop when encountering beginning-of-sequence or end-of-sequence token
     };
 
