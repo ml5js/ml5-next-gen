@@ -164,8 +164,22 @@ class LanguageModel extends EventEmitter {
     } else {
       if (typeof optionsOrCb === 'object') {
         this.options.maxTokens = (typeof optionsOrCb.maxTokens === 'number') ? optionsOrCb.maxTokens : this.options.maxTokens;
-        this.options.temperature = (typeof optionsOrCb.temperature === 'number') ? optionsOrCb.temperature : this.options.temperature;
-        this.options.topp = (typeof optionsOrCb.topp === 'number') ? optionsOrCb.topp : this.options.topp;
+        if (typeof optionsOrCb.temperature === 'number') {
+          this.options.temperature = optionsOrCb.temperature;
+          // disable top-p unless explicitly provided
+          if (typeof optionsOrCb.topp !== 'number' && this.options.topp != 0) {
+            this.options.topp = 0;
+            console.log('Disabling top-p sampling');
+          }
+        }
+        if (typeof optionsOrCb.topp === 'number') {
+          this.options.topp = optionsOrCb.topp;
+          // set temperature to 1.0 unless explicity provided
+          if (typeof optionsOrCb.temperature !== 'number' && this.options.temperature != 1) {
+            this.options.temperature = 1;
+            console.log('Using temperature 1.0 for top-p sampling');
+          }
+        }
         this.options.stopOnBosOrEos = (typeof optionsOrCb.stopOnBosOrEos == 'boolean') ? optionsOrCb.stopPropagation : this.options.stopOnBosOrEos;
       }
       if (typeof cb === 'function') {
@@ -173,6 +187,13 @@ class LanguageModel extends EventEmitter {
       } else {
         this.callback = null;
       }
+    }
+
+    // https://peterchng.com/blog/2023/05/02/token-selection-strategies-top-k-top-p-and-temperature/
+    // https://docs.cohere.com/docs/controlling-generation-with-top-k-top-p
+    // https://huggingface.co/blog/how-to-generate
+    if (this.options.temperature != 1 && this.options.topp != 0) {
+      console.log('Generating with temperature ' + this.options.temperature + ' and top-p ' + this.options.topp + '. Note: it\'s recommended to only tweak one, and leave the other at it\'s default value.');
     }
 
     // if there are any outstanding requests, resolve them
@@ -221,8 +242,22 @@ class LanguageModel extends EventEmitter {
     } else {
       if (typeof optionsOrCb === 'object') {
         this.options.maxTokens = (typeof optionsOrCb.maxTokens === 'number') ? optionsOrCb.maxTokens : this.options.maxTokens;
-        this.options.temperature = (typeof optionsOrCb.temperature === 'number') ? optionsOrCb.temperature : this.options.temperature;
-        this.options.topp = (typeof optionsOrCb.topp === 'number') ? optionsOrCb.topp : this.options.topp;
+        if (typeof optionsOrCb.temperature === 'number') {
+          this.options.temperature = optionsOrCb.temperature;
+          // disable top-p unless explicitly provided
+          if (typeof optionsOrCb.topp !== 'number') {
+            this.options.topp = 0;
+            console.log('Disabling top-p sampling');
+          }
+        }
+        if (typeof optionsOrCb.topp === 'number') {
+          this.options.topp = optionsOrCb.topp;
+          // set temperature to 1.0 unless explicity provided
+          if (typeof optionsOrCb.temperature !== 'number') {
+            this.options.temperature = 1;
+            console.log('Using temperature 1.0 for top-p sampling');
+          }
+        }
         this.options.stopOnBosOrEos = (typeof optionsOrCb.stopOnBosOrEos == 'boolean') ? optionsOrCb.stopPropagation : this.options.stopOnBosOrEos;
       }
       if (typeof cb === 'function') {
@@ -230,6 +265,13 @@ class LanguageModel extends EventEmitter {
       } else {
         this.callback = null;
       }
+    }
+
+    // https://peterchng.com/blog/2023/05/02/token-selection-strategies-top-k-top-p-and-temperature/
+    // https://docs.cohere.com/docs/controlling-generation-with-top-k-top-p
+    // https://huggingface.co/blog/how-to-generate
+    if (this.options.temperature != 1 && this.options.topp != 0) {
+      console.log('Generating with temperature ' + this.options.temperature + ' and top-p ' + this.options.topp + '. Note: it\'s recommended to only tweak one, and leave the other at it\'s default value.');
     }
 
     // if there are any outstanding requests, resolve them
