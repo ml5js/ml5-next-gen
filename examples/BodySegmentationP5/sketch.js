@@ -13,49 +13,46 @@ let video;
 let segmentation;
 
 const options = {
-  outputStride: 32,  //16 or 32 for ResNet, 
+  outputStride: 32,  
   multiSegmentation: false,
-  segmentBodyParts: true
+  segmentBodyParts: true,
+  flipHorizontal: true
 }
 
-
-function setup() {
-  bodypix = ml5.bodyPix(options);
-  createCanvas(480, 360);
-  // load up your video
+function preload(){
+  createCanvas(640, 480);
+  // Create the video
   video = createCapture(VIDEO);
   video.size(width, height);
-  video.hide(); // Hide the video element, and just show the canvas
-  //frameRate(50);
+  video.hide();
+  bodypix = ml5.bodyPix(video, options, modelReady);
 }
 
-function videoReady() {
-  bodypix.segmentWithParts(video, gotResults, options);
-}
+function setup() {
 
 
-
-function draw() {
-  bodypix.segmentWithParts(video, gotResults, options);
-
-}
-
-
-function draw() {
-  bodypix.segmentWithParts(video, gotResults, options);
-
-}
-
-function gotResults(err, result) {
-  console.log("gotResults is called the", i, "th time.");
-  if (err) {
-    console.log(err);
-    return;
-  }
-  segmentation = result;
-  image(video, 0, 0, width, height);
-  tint(255, 120) // for controlling mask transparency
-  image(segmentation.partMask, 0, 0, width, height);
-  bodypix.segmentWithParts(video, gotResults, options);
+  // Load the model and attach an event
+  // bodypix = ml5.bodyPix(video, options, modelReady);
+  //console.log(bodypix);
+  //bodypix.segment(video);
+  bodypix.on("bodypix", gotResults);
+  //console.log("hey");
   
 }
+
+// Event for body segmentation
+function gotResults(result) {
+  // Save the latest part mask from the model in global variable "segmentation"
+  segmentation = result;
+  //Draw the video
+  image(video, 0, 0, width, height);
+  image(segmentation.partMask, 0, 0, width, height);
+  tint(255, 128);
+}
+
+// Event when model is loaded
+function modelReady(){
+  console.log("Model Ready!");
+}
+
+

@@ -3,78 +3,71 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-/* eslint prefer-destructuring: ["error", {AssignmentExpression: {array: false}}] */
-/* eslint no-await-in-loop: "off" */
-
 /*
  * BodyPix: Real-time Person Segmentation in the Browser
- * Ported and integrated from all the hard work by: https://github.com/tensorflow/tfjs-models/tree/master/body-pix
+ * Ported and integrated from all the hard work by: https://github.com/tensorflow/tfjs-models/tree/master/body-segmentation/src/body_pix
  */
 
-// @ts-check
 import * as tf from '@tensorflow/tfjs';
 import * as bodySegmentation from '@tensorflow-models/body-segmentation';
+import { EventEmitter } from "events";
 import callCallback from '../utils/callcallback';
 import generatedImageResult from '../utils/generatedImageResult';
 import handleArguments from '../utils/handleArguments';
 import p5Utils from '../utils/p5Utils';
 import { mediaReady } from '../utils/imageUtilities';
 
+// TODO:
+// Return something that the user can refer to, color -- bodypartname
+// fix preload issue
+// try drawmask() function
+// add mediapipe option
 
-/**
- * @typedef {Object} BodyPixOptions
- * @property {import('@tensorflow-models/body-segmentation/dist/body_pix/impl/types').BodyPixArchitecture}[architecture] -Can be either MobileNetV1 or ResNet 50. By default, using ResNet 50
- * @property {import('@tensorflow-models/body-segmentation/dist/body_pix/impl/types').BodyPixMultiplier} [multiplier] - 0.5 or 0.75 or 1, this is used only by MobileNet
- * @property {import('@tensorflow-models/body-segmentation/dist/body_pix/impl/types').BodyPixOutputStride} [outputStride] -8 and 16 for MobileNet V1, 16 and 32 for ResNet 50.
- * @property {number} [quantBytes] - can be 1, 2 or 4. Bigger number leads to better accuracy and larger model size. By default, this is set to 2.
- * @property {boolean} [returnTensors] - whether a corresponding tensor will be returned in the output. By default, this is set to false
- * @property {boolean} [multiSegmentation] - If set to true, each person is segmented in a separate output; otherwose all people in one segmentation. By default, set to false
-
- */
-
-/**
- * @type {BodyPixOptions}
- */
-const DEFAULTS = {
-  "architecture": "ResNet50",
-  "multiplier": 1,
-  "outputStride": 16,
-  "quantBytes": 2,
-  "returnTensors": false,
-  "multiSegmentation": false
-}
-
-
-
-class BodyPix {
+class BodyPix extends EventEmitter{
   /**
    * Create BodyPix.
      * @param {HTMLVideoElement} [video] - An HTMLVideoElement.
-     * @param {BodyPixOptions} [options] - An object with options.
-     * @param {ML5Callback<BodyPix>} [callback] - A callback to be called when the model is ready.
+     * @param {object} [options] - An object with options.
+     * @param {function} [callback] - A callback to be called when the model is ready.
    */
   constructor(video, options, callback) {
+    super();
+
     this.video = video;
     this.model = null;
     this.modelReady = false;
-    this.config = {
-      architecture: options.architecture || DEFAULTS.architecture,
-      multiplier: options.multiplier || DEFAULTS.multiplier,
-      outputStride: options.outputStride || DEFAULTS.outputStride,
-      quantBytes: options.quantBytes || DEFAULTS.quantBytes,
-      returnTensors: options.returnTensors || DEFAULTS.returnTensors,
-      multiSegmentation: options.multiSegmentation || false,
-    }
+    this.config = options;
+
+    // support p5 preload
+    if (typeof window === 'object' && typeof window._incrementPreload === 'function') {
+      window._incrementPreload();
+    }   
     this.ready = callCallback(this.loadModel(), callback);
   }
   /**
    * Load the model and set it to this.model
-   * @return {Promise<BodyPix>}
+   * @return {this} the Bodypix model.
    */
   async loadModel() {
-    this.model = bodySegmentation.SupportedModels.BodyPix;
-    this.segmenter = await bodySegmentation.createSegmenter(this.model, this.config);
+    const pipeline = bodySegmentation.SupportedModels.BodyPix;
+    const modelConfig = {
+      architecture: this.config?.architecture ?? "ResNet50", // MobileNetV1 or ResNet 50
+      multiplier: this.config?.multiplier ?? 1, // 0.5, 0.75 or 1, only for MobileNetV1
+      outputStride: this.config?.outputStride ?? 16, // 8 or 16 for MobileNetV1, 16 or 32 for ResNet50
+      quantBytes: this.config?.quantBytes ?? 2, //1, 2 or 4, accuracy and model siz increase correspondingly
+    }
+    await tf.setBackend("webgl");
+    this.model = await bodySegmentation.createSegmenter(pipeline, modelConfig);
     this.modelReady = true;
+    if (this.video){
+      this.segment();
+    }
+
+    // support p5 preload
+    if (typeof window === 'object' && typeof window._decrementPreload === 'function') {
+      window._decrementPreload();
+    }
+  
     return this;
   }
 
@@ -94,14 +87,24 @@ class BodyPix {
   /**
    * Segments the image with partSegmentation, return result object
    * @param {InputImage} [imgToSegment]
-   * @param {BodyPixOptions} [options] - config params for the segmentation
+   * @param {function} [cb] - config params for the segmentation
    * @return {Promise<SegmentationResult>} a result object with image, raw, bodyParts
    */
-  async segmentWithPartsInternal(imgToSegment, options) {
-    // estimatePartSegmentation
-    await this.ready;
-    await mediaReady(imgToSegment, true);
-    const segmentation = await this.segmenter.segmentPeople(imgToSegment, { multiSegmentation: this.config.multiSegmentation, segmentBodyParts: true });
+  async segment(imgToSegment, cb) {
+    const { image, callback } = handleArguments(this.video, imgToSegment, cb);
+    if (!image) {
+      throw new Error(
+        'No input image provided. If you want to classify a video, pass the video element in the constructor.'
+      );
+    }
+    await mediaReady(image, false);
+    const options = {
+      multiSegmentation: this.config?.multiSegmentation ?? false, // whether we need multiple outputs when multiple people detected
+      segmentBodyParts: this.config?.segmentBodyParts ?? true, // if bodyparts are segmented
+      flipHorizontal: this.config?.flipHorizontal ?? false, // set to true for webcam
+    }
+
+    const segmentation = await this.model.segmentPeople(image, options);
 
     const result = {
       segmentation,
@@ -119,7 +122,9 @@ class BodyPix {
 
     result.raw.personMask = await bodySegmentation.toBinaryMask(segmentation, { r: 0, g: 0, b: 0, a: 255 }, { r: 0, g: 0, b: 0, a: 0 });
     result.raw.backgroundMask = await bodySegmentation.toBinaryMask(segmentation);
-    result.raw.partMask = await bodySegmentation.toColoredMask(segmentation, bodySegmentation.bodyPixMaskValueToRainbowColor, { r: 255, g: 255, b: 255, a: 255 });
+    if (this.config.segmentBodyParts){
+      result.raw.partMask = await bodySegmentation.toColoredMask(segmentation, bodySegmentation.bodyPixMaskValueToRainbowColor, { r: 255, g: 255, b: 255, a: 255 });
+    }
     if (this.config.returnTensors){
       result.tensor = await segmentation[0].mask.toTensor();
     }
@@ -131,94 +136,20 @@ class BodyPix {
     result.backgroundMask = bgMaskRes.image || result.raw.backgroundMask;
     result.partMask = partMaskRes.image || result.raw.partMask;
 
-    return result;
+    this.emit("bodypix", result);
+    //console.log(result);
 
-  }
-
-  /**
-   * Segments the image with partSegmentation
-   *
-   * Takes any of the following params:
-   * - an image to segment
-   * - config params for the segmentation, includes palette, outputStride, segmentationThreshold
-   * - a callback function that handles the results of the function.
-   * @param {(InputImage | BodyPixOptions | ML5Callback<SegmentationResult>[])} [args]
-   * @return {Promise<SegmentationResult>}
-   */
-  async segmentWithParts(...args) {
-    const { options = this.config, callback, image = this.video } = handleArguments(...args);
-
-    if (!image) {
-      throw new Error(
-        'No input image provided. If you want to classify a video, pass the video element in the constructor.'
-      );
+    if (this.video){
+      return tf.nextFrame().then(() => this.segment());
     }
 
-    return callCallback(this.segmentWithPartsInternal(image, options), callback);
-  }
-
-  /**
-   * Segments the image with personSegmentation, return result object
-   * @param {InputImage} imgToSegment
-   * @param {BodyPixOptions} options - config params for the segmentation
-   *    includes outputStride, segmentationThreshold
-   * @return {Promise<SegmentationResult>} a result object with maskBackground, maskPerson, raw
-   */
-  async segmentInternal(imgToSegment, options) {
-
-    await this.ready;
-    await mediaReady(imgToSegment, true);
-    const segmentation = await this.segmenter.segmentPeople(imgToSegment, { multiSegmentation: this.config.multiSegmentation, segmentBodyParts: false });
-
-    const result = {
-      segmentation,
-      raw: {
-        personMask: null,
-        backgroundMask: null,
-      },
-      personMask: null,
-      backgroundMask: null,
-      tensor: null
-    };
-
-
-    result.raw.personMask = await bodySegmentation.toBinaryMask(segmentation, { r: 0, g: 0, b: 0, a: 255 }, { r: 0, g: 0, b: 0, a: 0 });
-    result.raw.backgroundMask = await bodySegmentation.toBinaryMask(segmentation);
-    if (this.config.returnTensors){
-      result.tensor = await segmentation[0].mask.toTensor();
+    if (typeof callback === "function"){
+      callback(result);
     }
-    const personMaskRes = await generatedImageResult(result.raw.personMask);
-    const bgMaskRes = await generatedImageResult(result.raw.backgroundMask);
-
-    result.personMask = personMaskRes.image || result.raw.personMask;
-    result.backgroundMask = bgMaskRes.image || result.raw.backgroundMask;
 
     return result;
 
   }
-
-  /**
-   * Segments the image with personSegmentation
-   *
-   * Takes any of the following params:
-   * - an image to segment
-   * - config params for the segmentation, includes outputStride, segmentationThreshold
-   * - a callback function that handles the results of the function.
-   * @param {(InputImage | BodyPixOptions | ML5Callback<SegmentationResult>)[]} [args]
-   * @return {Promise<SegmentationResult>}
-   */
-  async segment(...args) {
-    const { options = this.config, callback, image = this.video } = handleArguments(...args);
-
-    if (!image) {
-      throw new Error(
-        'No input image provided. If you want to classify a video, pass the video element in the constructor.'
-      );
-    }
-
-    return callCallback(this.segmentInternal(image, options), callback);
-  }
-
 }
 
 /**
@@ -226,9 +157,9 @@ class BodyPix {
  * @return {BodyPix | Promise<BodyPix>}
  */
 const bodyPix = (...inputs) => {
-  const args = handleArguments(...inputs);
-  const instance = new BodyPix(args.video, args.options || {}, args.callback);
+  const { video, options = {}, callback } = handleArguments(...inputs);
+  const instance = new BodyPix(video, options, callback);
   return instance;
-}
+};
 
 export default bodyPix;
