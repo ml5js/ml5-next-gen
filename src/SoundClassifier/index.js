@@ -78,10 +78,13 @@ const soundClassifier = (modelName, optionsOrCallback, cb) => {
         .require('string', 'Please specify a model to use. E.g: "SpeechCommands18w"');
 
     let model = string;
+    console.log(model) // 'SpeechCommands18w'
     // TODO: I think we should delete this. -Linda
+    // when deleted, error message: Unsupported URL scheme in metadata URL:...
     if (model.indexOf('http') === -1) {
         model = model.toLowerCase();
     }
+    console.log(model) // ''speechcommands18w'
 
     const instance = new SoundClassifier(model, options, callback);
     return callback ? instance : instance.ready;
