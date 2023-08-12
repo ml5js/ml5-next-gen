@@ -19,24 +19,23 @@ const options = {
   flipHorizontal: true
 }
 
-function preload(){
-  createCanvas(640, 480);
+// function preload(){
+//   createCanvas(480, 360);
+//   // Create the video
+//   video = createCapture(VIDEO);
+//   video.size(width, height);
+//   video.hide();
+//   bodypix = ml5.bodyPix(video, options, modelReady);
+// }
+
+function setup() {
+  createCanvas(480, 360);
   // Create the video
   video = createCapture(VIDEO);
   video.size(width, height);
   video.hide();
   bodypix = ml5.bodyPix(video, options, modelReady);
-}
-
-function setup() {
-
-
-  // Load the model and attach an event
-  // bodypix = ml5.bodyPix(video, options, modelReady);
-  //console.log(bodypix);
-  //bodypix.segment(video);
   bodypix.on("bodypix", gotResults);
-  //console.log("hey");
   
 }
 

@@ -37,11 +37,7 @@ class BodyPix extends EventEmitter{
     this.model = null;
     this.modelReady = false;
     this.config = options;
-
-    // support p5 preload
-    if (typeof window === 'object' && typeof window._incrementPreload === 'function') {
-      window._incrementPreload();
-    }   
+ 
     this.ready = callCallback(this.loadModel(), callback);
   }
   /**
@@ -63,11 +59,6 @@ class BodyPix extends EventEmitter{
       this.segment();
     }
 
-    // support p5 preload
-    if (typeof window === 'object' && typeof window._decrementPreload === 'function') {
-      window._decrementPreload();
-    }
-  
     return this;
   }
 
