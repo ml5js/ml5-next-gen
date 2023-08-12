@@ -40,7 +40,7 @@ class LanguageModel extends EventEmitter {
         default:
           throw 'Unrecognized model ' + modelNameOrUrl + ', try e.g. TinyStories-15M';
       }
-    } else if (typeof modelNameOrUrl === 'object') {
+    } else if (typeof modelNameOrOptions === 'object') {
         this.options.modelUrl = (typeof modelNameOrOptions.modelUrl === 'string') ? modelNameOrOptions.modelUrl : this.options.modelUrl;
         this.options.tokenizerUrl = (typeof modelNameOrOptions.tokenizerUrl === 'string') ? modelNameOrOptions.tokenizerUrl : this.options.tokenizerUrl;
     }
