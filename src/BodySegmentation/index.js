@@ -14,13 +14,14 @@ import { EventEmitter } from "events";
 import callCallback from '../utils/callcallback';
 import generatedImageResult from '../utils/generatedImageResult';
 import handleArguments from '../utils/handleArguments';
-import p5Utils from '../utils/p5Utils';
+import BODYPIX_PALETTE from './BODYPIX_PALETTE';
 import { mediaReady } from '../utils/imageUtilities';
 
 // TODO:
 // Return something that the user can refer to, color -- bodypartname
 // try drawmask() function
 // add mediapipe option
+
 
 class BodyPix extends EventEmitter{
   /**
@@ -72,6 +73,7 @@ class BodyPix extends EventEmitter{
    * @property {{personMask: ImageData, backgroundMask: ImageData, partMask?: ImageData}} raw
    * @property {tf.Tensor | null} tensor -
    * return the Tensor objects for the person and the background if option `returnTensors` is true.
+   * @property {Object} bodyParts - An object that maps body parts to id and RGB color.
    */
 
   /**
@@ -106,7 +108,8 @@ class BodyPix extends EventEmitter{
       personMask: null,
       backgroundMask: null,
       partMask: null,
-      tensor: null
+      tensor: null,
+      bodyParts: BODYPIX_PALETTE
     };
 
 

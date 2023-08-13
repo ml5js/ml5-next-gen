@@ -13,7 +13,7 @@ let video;
 let segmentation;
 
 const options = {
-  outputStride: 16,  
+  outputStride: 16,  //adjust the output stride and see which one works best!
   multiSegmentation: false,
   segmentBodyParts: true,
   flipHorizontal: true
