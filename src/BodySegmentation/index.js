@@ -19,7 +19,6 @@ import { mediaReady } from '../utils/imageUtilities';
 
 // TODO:
 // Return something that the user can refer to, color -- bodypartname
-// fix preload issue
 // try drawmask() function
 // add mediapipe option
 
@@ -128,7 +127,6 @@ class BodyPix extends EventEmitter{
     result.partMask = partMaskRes.image || result.raw.partMask;
 
     this.emit("bodypix", result);
-    //console.log(result);
 
     if (this.video){
       return tf.nextFrame().then(() => this.segment());

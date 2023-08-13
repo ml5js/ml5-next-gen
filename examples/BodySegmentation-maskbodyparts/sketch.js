@@ -13,20 +13,12 @@ let video;
 let segmentation;
 
 const options = {
-  outputStride: 32,  
+  outputStride: 16,  //adjust the output stride and see which one works best!
   multiSegmentation: false,
   segmentBodyParts: true,
   flipHorizontal: true
 }
 
-// function preload(){
-//   createCanvas(480, 360);
-//   // Create the video
-//   video = createCapture(VIDEO);
-//   video.size(width, height);
-//   video.hide();
-//   bodypix = ml5.bodyPix(video, options, modelReady);
-// }
 
 function setup() {
   createCanvas(480, 360);
