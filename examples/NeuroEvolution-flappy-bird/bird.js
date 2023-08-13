@@ -5,7 +5,7 @@ class Bird {
       this.brain = brain;
     } else {
       this.brain = ml5.neuralNetwork({
-        inputs: 5,
+        inputs: 4,
         outputs: ["flap", "no flap"],
         task: "classification",
         neuroEvolution: true,
@@ -29,7 +29,7 @@ class Bird {
   think(pipes) {
     let nextPipe = null;
     for (let pipe of pipes) {
-      if (pipe.x > this.x) {
+      if (pipe.x + pipe.w > this.x) {
         nextPipe = pipe;
         break;
       }
@@ -39,7 +39,6 @@ class Bird {
       this.y / height,
       this.velocity / height,
       nextPipe.top / height,
-      nextPipe.bottom / height,
       (nextPipe.x - this.x) / width,
     ];
 
@@ -59,12 +58,11 @@ class Bird {
     this.velocity += this.gravity;
     this.y += this.velocity;
     // Dampen velocity
-    this.velocity *= 0.9;
+    this.velocity *= 0.95;
 
     // Handle the "floor"
-    if (this.y > height) {
-      this.y = height;
-      this.velocity = 0;
+    if (this.y > height || this.y < 0) {
+      this.alive = false;
     }
 
     this.fitness++;

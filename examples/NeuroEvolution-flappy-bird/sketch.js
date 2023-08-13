@@ -15,8 +15,8 @@ function draw() {
   background(255);
 
   for (let i = pipes.length - 1; i >= 0; i--) {
-    pipes[i].show();
     pipes[i].update();
+    pipes[i].show();
     if (pipes[i].offscreen()) {
       pipes.splice(i, 1);
     }
@@ -35,15 +35,13 @@ function draw() {
     }
   }
 
-  if (frameCount % 75 == 0) {
+  if (frameCount % 100 == 0) {
     pipes.push(new Pipe());
   }
 
   if (allBirdsDead()) {
     normalizeFitness();
     reproduction();
-    pipes = [];
-    pipes.push(new Pipe());
   }
 }
 
@@ -62,7 +60,7 @@ function reproduction() {
     let parentA = weightedSelection();
     let parentB = weightedSelection();
     let child = parentA.brain.crossover(parentB.brain);
-    child.mutate(0.1);
+    child.mutate(0.01);
     nextBirds[i] = new Bird(child);
   }
   birds = nextBirds;
