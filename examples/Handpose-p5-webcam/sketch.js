@@ -2,17 +2,25 @@ let handpose;
 let video;
 let hands = [];
 
+function preload() {
+  // Load the handpose model.
+  handpose = ml5.handpose();
+}
+
 function setup() {
   createCanvas(640, 480);
+  fill(0, 255, 0);
+  noStroke();
   // Create the webcam video and hide it
   video = createCapture(VIDEO);
   video.size(width, height);
   video.hide();
-  handpose = ml5.handpose(video, modelReady);
+  // start detecting hands from the webcam video
+  handpose.detectStart(video, gotHands);
 }
 
 function draw() {
-  // Draw the video
+  // Draw the webcam video
   image(video, 0, 0, width, height);
 
   // Draw all the tracked hand points
@@ -20,20 +28,13 @@ function draw() {
     let hand = hands[i];
     for (let j = 0; j < hand.keypoints.length; j++) {
       let keypoint = hand.keypoints[j];
-      fill(0, 255, 0);
-      noStroke();
       circle(keypoint.x, keypoint.y, 10);
     }
   }
 }
 
-function modelReady() {
-  console.log("Model ready!");
-  handpose.detectStart(video, gotHands);
-}
-
-// Callback function for when handpose outputs hand landmark points
+// Callback function for when handpose outputs data
 function gotHands(results) {
-  // save the output to the "hands" array
+  // save the output to the hands variable
   hands = results;
 }

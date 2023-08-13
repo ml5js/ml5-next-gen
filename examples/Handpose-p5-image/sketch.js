@@ -1,0 +1,34 @@
+let handpose;
+let video;
+let hands = [];
+
+function preload() {
+  //load the image to be detected
+  img = loadImage("hand.jpg");
+  // Load the handpose model.
+  handpose = ml5.handpose();
+}
+
+function setup() {
+  createCanvas(640, 480);
+  fill(0, 255, 0);
+  noStroke();
+  // Draw the image
+  image(img, 0, 0);
+  // start detecting hands from the webcam video
+  handpose.detect(img, gotHands);
+}
+
+// Callback function for when handpose outputs data
+function gotHands(results) {
+  // save the output to the hands variable
+  hands = results;
+  // Draw all the hand keypoints
+  for (let i = 0; i < hands.length; i++) {
+    let hand = hands[i];
+    for (let j = 0; j < hand.keypoints.length; j++) {
+      let keypoint = hand.keypoints[j];
+      circle(keypoint.x, keypoint.y, 10);
+    }
+  }
+}
