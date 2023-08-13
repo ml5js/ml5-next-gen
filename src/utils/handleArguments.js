@@ -23,9 +23,10 @@ import * as tf from "@tensorflow/tfjs";
  */
 export const isVideo = (img) => {
   // Must guard all instanceof checks on DOM elements in order to run in node.
-  return typeof (HTMLVideoElement) !== 'undefined' &&
-    img instanceof HTMLVideoElement;
-}
+  return (
+    typeof HTMLVideoElement !== "undefined" && img instanceof HTMLVideoElement
+  );
+};
 
 /**
  * Check if a variable is an HTMLAudioElement.
@@ -33,9 +34,10 @@ export const isVideo = (img) => {
  * @returns {img is HTMLAudioElement}
  */
 export const isAudio = (img) => {
-  return typeof (HTMLAudioElement) !== 'undefined' &&
-    img instanceof HTMLAudioElement;
-}
+  return (
+    typeof HTMLAudioElement !== "undefined" && img instanceof HTMLAudioElement
+  );
+};
 
 /**
  * Check if a variable is an HTMLCanvasElement.
@@ -43,9 +45,10 @@ export const isAudio = (img) => {
  * @returns {img is HTMLCanvasElement}
  */
 export const isCanvas = (img) => {
-  return typeof (HTMLCanvasElement) !== 'undefined' &&
-    img instanceof HTMLCanvasElement;
-}
+  return (
+    typeof HTMLCanvasElement !== "undefined" && img instanceof HTMLCanvasElement
+  );
+};
 
 /**
  * Check if a variable is an HTMLImageElement.
@@ -53,9 +56,10 @@ export const isCanvas = (img) => {
  * @returns {img is HTMLImageElement}
  */
 export const isImg = (img) => {
-  return typeof (HTMLImageElement) !== 'undefined' &&
-    img instanceof HTMLImageElement;
-}
+  return (
+    typeof HTMLImageElement !== "undefined" && img instanceof HTMLImageElement
+  );
+};
 
 /**
  * Check if a variable is a p5.Image or other p5.Element.
@@ -63,8 +67,8 @@ export const isImg = (img) => {
  * @returns {img is p5.Element | p5.Image}
  */
 export const isP5Image = (img) => {
-  return 'elt' in img || 'canvas' in img;
-}
+  return "elt" in img || "canvas" in img;
+};
 
 /**
  * Check if a variable is an instance of ImageData,
@@ -74,17 +78,18 @@ export const isP5Image = (img) => {
  * @returns {img is ImageData}
  */
 export const isImageData = (img) => {
-  if (typeof (ImageData) === 'undefined') {
+  if (typeof ImageData === "undefined") {
     return (
-      typeof img === 'object' &&
+      typeof img === "object" &&
       // TODO: figure out TensorFlow issues with Uint8ClampedArray vs. Uint8Array
-      (img.data instanceof Uint8ClampedArray || img.data instanceof Uint8Array) &&
-      typeof img.width === 'number' &&
-      typeof img.height === 'number'
-    )
+      (img.data instanceof Uint8ClampedArray ||
+        img.data instanceof Uint8Array) &&
+      typeof img.width === "number" &&
+      typeof img.height === "number"
+    );
   }
   return img instanceof ImageData;
-}
+};
 
 /**
  * Check if an unknown variable is a TensorFlow tensor with rank 3.
@@ -93,7 +98,7 @@ export const isImageData = (img) => {
  */
 export const isTensor3D = (img) => {
   return img instanceof tf.Tensor && img.rank === 3;
-}
+};
 
 /**
  * Check if an image is one of HTMLImageElement, HTMLCanvasElement, HTMLVideoElement
@@ -102,7 +107,7 @@ export const isTensor3D = (img) => {
  */
 export const isImageElement = (img) => {
   return !!img && (isCanvas(img) || isImg(img) || isVideo(img));
-}
+};
 
 /**
  * Check that the provided image is an acceptable format and return it.
@@ -115,7 +120,7 @@ export const getImageElement = (img) => {
   if (isImageElement(img)) {
     return img;
   }
-  if (typeof img === 'object') {
+  if (typeof img === "object") {
     if (isImageElement(img.canvas)) {
       return img.canvas;
     }
@@ -124,7 +129,7 @@ export const getImageElement = (img) => {
     }
   }
   return null;
-}
+};
 
 /**
  * For methods which accept multiple optional arguments, a specific argument might be passed in multiple positions.
@@ -209,13 +214,13 @@ class ArgHelper {
           if (isVideo(element)) {
             this.set({
               audio: element,
-              video: element
+              video: element,
             });
           }
         }
         // TODO: handle p5.sound
         if (isAudio(arg)) {
-            this.set({ audio: arg });
+          this.set({ audio: arg });
         }
         // Check for arrays
         else if (Array.isArray(arg)) {
@@ -241,7 +246,7 @@ class ArgHelper {
    * @param {boolean} warn
    */
   set(values, warn = true) {
-    Object.keys(values).forEach(property => {
+    Object.keys(values).forEach((property) => {
       if (warn && this.has(property)) {
         console.warn(
           `Received multiple ${property} arguments, but only a single ${property} is supported.
@@ -285,4 +290,4 @@ class ArgHelper {
  */
 export default function handleArguments(...args) {
   return new ArgHelper(...args);
-};
+}

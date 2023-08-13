@@ -5,29 +5,29 @@ class NeuralNetworkUtils {
 
   /**
    * normalizeValue
-   * @param {*} value 
-   * @param {*} min 
-   * @param {*} max 
+   * @param {*} value
+   * @param {*} min
+   * @param {*} max
    */
   // eslint-disable-next-line class-methods-use-this
   normalizeValue(value, min, max) {
-    return ((value - min) / (max - min))
+    return (value - min) / (max - min);
   }
 
   /**
    * unNormalizeValue
-   * @param {*} value 
-   * @param {*} min 
-   * @param {*} max 
+   * @param {*} value
+   * @param {*} min
+   * @param {*} max
    */
   // eslint-disable-next-line class-methods-use-this
   unnormalizeValue(value, min, max) {
-    return ((value * (max - min)) + min)
+    return value * (max - min) + min;
   }
 
   /**
    * getMin
-   * @param {*} _array 
+   * @param {*} _array
    */
   // eslint-disable-next-line no-unused-vars, class-methods-use-this
   getMin(_array) {
@@ -39,7 +39,7 @@ class NeuralNetworkUtils {
 
   /**
    * getMax
-   * @param {*} _array 
+   * @param {*} _array
    */
   // eslint-disable-next-line no-unused-vars, class-methods-use-this
   getMax(_array) {
@@ -65,46 +65,46 @@ class NeuralNetworkUtils {
 
   /**
    * zipArrays
-   * @param {*} arr1 
-   * @param {*} arr2 
+   * @param {*} arr1
+   * @param {*} arr2
    */
   // eslint-disable-next-line no-unused-vars, class-methods-use-this
   zipArrays(arr1, arr2) {
     if (arr1.length !== arr2.length) {
-      console.error('arrays do not have the same length')
+      console.error("arrays do not have the same length");
       return [];
     }
 
     const output = [...new Array(arr1.length).fill(null)].map((item, idx) => {
       return {
         ...arr1[idx],
-        ...arr2[idx]
-      }
-    })
+        ...arr2[idx],
+      };
+    });
 
     return output;
   }
 
   /**
    * createLabelsFromArrayValues
-   * @param {*} incoming 
-   * @param {*} prefix 
+   * @param {*} incoming
+   * @param {*} prefix
    */
   // eslint-disable-next-line class-methods-use-this
   createLabelsFromArrayValues(incoming, prefix) {
     let labels;
     if (Array.isArray(incoming)) {
-      labels = incoming.map((v, idx) => `${prefix}_${idx}`)
+      labels = incoming.map((v, idx) => `${prefix}_${idx}`);
     }
     return labels;
   }
 
   /**
-   * takes an array and turns it into a json object 
+   * takes an array and turns it into a json object
    * where the labels are the keys and the array values
    * are the object values
-   * @param {*} incoming 
-   * @param {*} labels 
+   * @param {*} incoming
+   * @param {*} labels
    */
   // eslint-disable-next-line class-methods-use-this
   formatDataAsObject(incoming, labels) {
@@ -116,36 +116,37 @@ class NeuralNetworkUtils {
         result[label] = item;
       });
       return result;
-    } else if (typeof incoming === 'object') {
+    } else if (typeof incoming === "object") {
       result = incoming;
       return result;
     }
 
-    throw new Error('input provided is not supported or does not match your output label specifications')
+    throw new Error(
+      "input provided is not supported or does not match your output label specifications"
+    );
   }
 
   /**
    * returns a datatype of the value as string
-   * @param {*} val 
+   * @param {*} val
    */
   // eslint-disable-next-line class-methods-use-this
   getDataType(val) {
     let dtype = typeof val;
 
-    if (dtype === 'object') {
+    if (dtype === "object") {
       if (Array.isArray(val)) {
-        dtype = 'array'
+        dtype = "array";
       }
     }
 
     return dtype;
   }
-
 }
 
 const neuralNetworkUtils = () => {
   const instance = new NeuralNetworkUtils();
   return instance;
-}
+};
 
 export default neuralNetworkUtils();
