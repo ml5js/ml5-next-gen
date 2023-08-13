@@ -1,9 +1,9 @@
 class Bird {
   constructor(brain) {
-    // A bird's brain receives 5 inputs and classifies them into one of two labels
     if (brain) {
       this.brain = brain;
     } else {
+      // A bird's brain receives 4 inputs and classifies them into one of two labels
       this.brain = ml5.neuralNetwork({
         inputs: 4,
         outputs: ["flap", "no flap"],

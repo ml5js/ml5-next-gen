@@ -7,7 +7,6 @@ function setup() {
     birds[i] = new Bird();
   }
   pipes.push(new Pipe());
-
   ml5.tf.setBackend("cpu");
 }
 
@@ -59,7 +58,7 @@ function reproduction() {
   for (let i = 0; i < birds.length; i++) {
     let parentA = weightedSelection();
     let parentB = weightedSelection();
-    let child = parentA.brain.crossover(parentB.brain);
+    let child = parentA.crossover(parentB);
     child.mutate(0.01);
     nextBirds[i] = new Bird(child);
   }
@@ -91,5 +90,6 @@ function weightedSelection() {
   }
   // Undo moving to the next element since the finish has been reached
   index--;
-  return birds[index];
+  // Instead of returning the entire Bird object, just the brain is returned
+  return birds[index].brain;
 }
