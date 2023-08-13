@@ -1,12 +1,16 @@
 class Bird {
-  constructor() {
+  constructor(brain) {
     // A bird's brain receives 5 inputs and classifies them into one of two labels
-    this.brain = ml5.neuralNetwork({
-      inputs: 5,
-      outputs: ["flap", "no flap"],
-      task: "classification",
-      neuroEvolution: true,
-    });
+    if (brain) {
+      this.brain = brain;
+    } else {
+      this.brain = ml5.neuralNetwork({
+        inputs: 5,
+        outputs: ["flap", "no flap"],
+        task: "classification",
+        neuroEvolution: true,
+      });
+    }
 
     // The bird's position (x will be constant)
     this.x = 50;
@@ -16,6 +20,10 @@ class Bird {
     this.velocity = 0;
     this.gravity = 0.5;
     this.flapForce = -10;
+
+    // Adding a fitness
+    this.fitness = 0;
+    this.alive = true;
   }
 
   think(pipes) {
@@ -58,12 +66,14 @@ class Bird {
       this.y = height;
       this.velocity = 0;
     }
+
+    this.fitness++;
   }
 
   show() {
     strokeWeight(2);
     stroke(0);
-    fill(127);
+    fill(127, 200);
     circle(this.x, this.y, 16);
   }
 }
