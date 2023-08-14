@@ -1,4 +1,4 @@
-// Copyright (c) 2020 ml5
+// Copyright (c) 2020-2023 ml5
 //
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
@@ -38,7 +38,7 @@ function gotResults(result) {
   //Draw the video
   image(video, 0, 0, width, height);
   image(segmentation.personMask, 0, 0, width, height);
-  tint(255, 128);
+  tint(255, 128); //opacity tuning
 }
 
 // Event when model is loaded

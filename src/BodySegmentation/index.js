@@ -1,4 +1,4 @@
-// Copyright (c) 2019 ml5
+// Copyright (c) 2019-2023 ml5
 //
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
@@ -18,8 +18,6 @@ import BODYPIX_PALETTE from './BODYPIX_PALETTE';
 import { mediaReady } from '../utils/imageUtilities';
 
 // TODO:
-// Return something that the user can refer to, color -- bodypartname
-// try drawmask() function
 // add mediapipe option
 
 
