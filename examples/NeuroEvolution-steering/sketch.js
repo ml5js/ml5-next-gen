@@ -5,10 +5,10 @@ let target;
 
 function setup() {
   createCanvas(640, 240);
-  ml5.tf.setBackend("cpu");
   for (let i = 0; i < 50; i++) {
     vehicles[i] = new Vehicle(random(width), random(height));
   }
+  ml5.tf.setBackend("cpu");
   target = createVector(random(width), random(height));
   timeSlider = createSlider(1, 20, 1);
 }
