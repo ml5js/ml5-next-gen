@@ -113,6 +113,7 @@ class DiyNeuralNetwork {
    * @param {*} callback
    */
   init(callback) {
+    tf.setBackend("webgl");
     // check if the a static model should be built based on the inputs and output properties
     if (this.options.noTraining === true) {
       this.createLayersNoTraining();
