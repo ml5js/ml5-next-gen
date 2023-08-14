@@ -78,10 +78,9 @@ class PoseDetection extends EventEmitter {
           bodyPoseDetection.movenet.modelType.MULTIPOSE_LIGHTNING;
     }
     // Load the detector model
-    await tf.setBackend("webgl");
+    await tf.ready();
     this.model = await bodyPoseDetection.createDetector(pipeline, modelConfig);
     this.modelReady = true;
-
     if (this.video) {
       this.predict();
     }

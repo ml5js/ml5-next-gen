@@ -44,7 +44,7 @@ class Handpose extends EventEmitter {
       modelType: this.config?.modelType ?? "full", // use full version of the model by default
       solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/hands", // fetch model from mediapipe server
     };
-
+    await tf.ready();
     this.model = await handPoseDetection.createDetector(pipeline, modelConfig);
 
     this.modelReady = true;
