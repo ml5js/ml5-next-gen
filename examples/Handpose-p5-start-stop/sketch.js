@@ -12,6 +12,7 @@ function preload() {
 function setup() {
   createCanvas(640, 480);
   fill(0, 255, 0);
+  textSize(25);
   noStroke();
   // Create the webcam video and hide it
   video = createCapture(VIDEO);
@@ -31,11 +32,17 @@ function draw() {
       circle(keypoint.x, keypoint.y, 10);
     }
   }
+
+  text("Press mouse to toggle detection", 10, 30);
+  if (isDetecting) {
+    text("Detecting", 10, 60);
+  } else {
+    text("Not detecting", 10, 60);
+  }
 }
 
 //toggle detection when mouse is pressed
 function mousePressed() {
-  console.log("mousePressed");
   toggleDetection();
 }
 
@@ -48,8 +55,6 @@ function toggleDetection() {
     handpose.detectStart(video, gotHands);
     isDetecting = true;
   }
-  console.log("isDetecting: " + isDetecting);
-  console.log(handpose);
 }
 
 // Callback function for when handpose outputs data

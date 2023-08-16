@@ -1,4 +1,4 @@
-// Copyright (c) 2023 ml5
+// Copyright (c) 2020-2023 ml5
 //
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
@@ -30,6 +30,8 @@ class Handpose {
 
     this.ready = callCallback(this.loadModel(), callback);
 
+    this.detectMedia = null;
+    this.detectCallback = null;
     //flags for detectStart() and detectStop()
     this.detecting = false;
     this.signalStop = false;
@@ -58,7 +60,7 @@ class Handpose {
   }
 
   /**
-   * Asynchronously output a single prediction result when called
+   * Asynchronously output a single hand prediction result when called
    * @param {*} [media] - An HMTL or p5.js image, video, or canvas element to run the prediction on.
    * @param {function} [callback] - A callback function to handle the predictions.
    * @returns {Promise<Array>} an array of predictions.
@@ -84,12 +86,12 @@ class Handpose {
   }
 
   /**
-   * Repeatedly output predictions through a callback function
+   * Repeatedly output hand predictions through a callback function
    * @param {*} [media] - An HMTL or p5.js image, video, or canvas element to run the prediction on.
    * @param {function} [callback] - A callback function to handle the predictions.
    * @returns {Promise<Array>} an array of predictions.
    */
-  async detectStart(...inputs) {
+  detectStart(...inputs) {
     // Parse out the input parameters
     const argumentObject = handleArguments(...inputs);
     argumentObject.require(
@@ -100,39 +102,46 @@ class Handpose {
       "callback",
       "A callback function argument is required for detectStart()."
     );
-    const { image, callback } = argumentObject;
+    this.detectMedia = argumentObject.image;
+    this.detectCallback = argumentObject.callback;
 
-    //Throw an error if detectStart is called more than once before detectStop
-    if (this.detecting) {
-      console.warn(
-        "Detect start has already been called. Call detectStop() before calling detectStart() again."
-      );
-      return;
+    this.signalStop = false;
+    if (!this.detecting) {
+      this.detecting = true;
+      this.detectLoop();
     }
-    this.detecting = true;
+  }
 
-    await mediaReady(image, false);
+  /**
+   * Stop the detection loop before next frame update
+   */
+  detectStop() {
+    if (this.detecting) this.signalStop = true;
+  }
+
+  /**
+   * Internal function to call estimateHands in a loop
+   *
+   * @private
+   */
+  async detectLoop() {
+    await mediaReady(this.detectMedia, false);
     while (!this.signalStop) {
       const options = {
         flipHorizontal: this.config?.flipHorizontal ?? false,
       };
-      const predictions = await this.model.estimateHands(image, options);
+      const predictions = await this.model.estimateHands(
+        this.detectMedia,
+        options
+      );
       //TODO: customize the output for easier use
       const result = predictions;
-      callback(result);
+      this.detectCallback(result);
       // wait for the frame to update
       await tf.nextFrame();
     }
-
-    this.signalStop = false;
     this.detecting = false;
-  }
-
-  /**
-   * Stop the detection loop before next frame
-   */
-  detectStop() {
-    this.signalStop = true;
+    this.signalStop = false;
   }
 
   /**
