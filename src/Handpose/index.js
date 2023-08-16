@@ -7,6 +7,7 @@
  * Handpose: Palm detector and hand-skeleton finger tracking in the browser
  * Ported and integrated from all the hard work by: https://github.com/tensorflow/tfjs-models/tree/master/hand-pose-detection
  */
+
 import * as tf from "@tensorflow/tfjs";
 import * as handPoseDetection from "@tensorflow-models/hand-pose-detection";
 import callCallback from "../utils/callcallback";
@@ -15,9 +16,22 @@ import { mediaReady } from "../utils/imageUtilities";
 
 class Handpose {
   /**
+   * An options object to configure Handpose settings
+   * @typedef {Object} configOptions
+   * @property {number} maxHands - The maximum number of hands to detect. Defaults to 2.
+   * @property {string} modelType - The model to use. "lite" or "full"(default).
+   * @property {boolean} flipHorizontal - Flip the result horizontally. Defaults to false.
+   * @property {string} runtime - The runtime to use. "mediapipe"(default) or "tfjs".
+   *
+   * // For using custom or offline models
+   * @property {string} solutionPath - The file path or URL to the model.
+   * @property {string} detectorModelUrl - The file path or URL to the hand detector model when using "tfjs" runtime.
+   * @property {string} landmarkModelUrl - The file path or URL to the hand landmark model when using "mediapipe" runtime.
+   */
+  /**
    * Create Handpose.
-   * @param {Object} [options] - An object with options.
-   * @param {function} [callback] - A callback to be called when the model is ready.
+   * @param {configOptions} options - An object with options.
+   * @param {function} callback - A callback to be called when the model is ready.
    *
    * @private
    */
@@ -27,14 +41,15 @@ class Handpose {
 
     this.model = null;
     this.config = options;
-
-    this.ready = callCallback(this.loadModel(), callback);
-
+    this.runtimeConfig = {};
     this.detectMedia = null;
     this.detectCallback = null;
+
     //flags for detectStart() and detectStop()
     this.detecting = false;
     this.signalStop = false;
+
+    this.ready = callCallback(this.loadModel(), callback);
   }
 
   /**
@@ -45,14 +60,24 @@ class Handpose {
    */
   async loadModel() {
     const pipeline = handPoseDetection.SupportedModels.MediaPipeHands;
+    //filter out model config options
     const modelConfig = {
-      maxHands: this.config?.maxHands ?? 2, // detect up to 2 hands by default
-      runtime: this.config?.runtime ?? "mediapipe", // use MediaPipe runtime by default
-      modelType: this.config?.modelType ?? "full", // use full version of the model by default
-      solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/hands", // fetch model from mediapipe server
+      maxHands: this.config?.maxHands ?? 2,
+      runtime: this.config?.runtime ?? "mediapipe",
+      modelType: this.config?.modelType ?? "full",
+      solutionPath:
+        this.config?.solutionPath ??
+        "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
+      detectorModelUrl: this.config?.detectorModelUrl,
+      landmarkModelUrl: this.config?.landmarkModelUrl,
     };
+    this.runtimeConfig = {
+      flipHorizontal: this.config?.flipHorizontal ?? false,
+    };
+
     await tf.ready();
     this.model = await handPoseDetection.createDetector(pipeline, modelConfig);
+
     // for compatibility with p5's preload()
     if (this.p5PreLoadExists) window._decrementPreload();
 
@@ -66,6 +91,7 @@ class Handpose {
    * @returns {Promise<Array>} an array of predictions.
    */
   async detect(...inputs) {
+    //Parse out the input parameters
     const argumentObject = handleArguments(...inputs);
     argumentObject.require(
       "image",
@@ -74,11 +100,10 @@ class Handpose {
     const { image, callback } = argumentObject;
 
     await mediaReady(image, false);
-
-    const options = {
-      flipHorizontal: this.config?.flipHorizontal ?? false,
-    };
-    const predictions = await this.model.estimateHands(image, options);
+    const predictions = await this.model.estimateHands(
+      image,
+      this.runtimeConfig
+    );
     //TODO: customize the output for easier use
     const result = predictions;
     if (typeof callback === "function") callback(result);
@@ -127,12 +152,9 @@ class Handpose {
   async detectLoop() {
     await mediaReady(this.detectMedia, false);
     while (!this.signalStop) {
-      const options = {
-        flipHorizontal: this.config?.flipHorizontal ?? false,
-      };
       const predictions = await this.model.estimateHands(
         this.detectMedia,
-        options
+        this.runtimeConfig
       );
       //TODO: customize the output for easier use
       const result = predictions;
