@@ -1,4 +1,4 @@
-class Vehicle {
+class Creature {
   constructor(x, y, brain) {
     this.position = createVector(x, y);
     this.velocity = createVector(0, 0);
@@ -11,7 +11,7 @@ class Vehicle {
       this.brain = brain;
     } else {
       this.brain = ml5.neuralNetwork({
-        inputs: 2,
+        inputs: 5,
         outputs: 2,
         task: "regression",
         neuroEvolution: true,
@@ -19,21 +19,20 @@ class Vehicle {
     }
   }
 
-  eat(food) {
-    let d = p5.Vector.dist(this.position, food);
-    if (d < 10) {
-      this.fitness++;
-      target = createVector(random(width), random(height));
-    }
-  }
-
-  think(food) {
-    let v = p5.Vector.sub(food, this.position);
+  seek(target) {
+    let v = p5.Vector.sub(target.position, this.position);
+    let distance = v.mag();
     v.normalize();
-    let inputs = [v.x, v.y];
+    let inputs = [
+      v.x,
+      v.y,
+      distance / width,
+      this.velocity.x / this.maxspeed,
+      this.velocity.y / this.maxspeed,
+    ];
 
     // Predicting the force to apply
-    const outputs = this.brain.predictSync(inputs);
+    let outputs = this.brain.predictSync(inputs);
     let angle = outputs[0].value * TWO_PI;
     let magnitude = outputs[1].value;
     let force = p5.Vector.fromAngle(angle).setMag(magnitude);
@@ -41,7 +40,7 @@ class Vehicle {
   }
 
   // Method to update location
-  update() {
+  update(target) {
     // Update velocity
     this.velocity.add(this.acceleration);
     // Limit speed
@@ -49,6 +48,11 @@ class Vehicle {
     this.position.add(this.velocity);
     // Reset acceleration to 0 each cycle
     this.acceleration.mult(0);
+
+    let d = p5.Vector.dist(this.position, target.position);
+    if (d < this.r + target.r) {
+      this.fitness++;
+    }
   }
 
   applyForce(force) {
@@ -61,6 +65,7 @@ class Vehicle {
     let angle = this.velocity.heading();
     fill(127);
     stroke(0);
+    strokeWeight(1);
     push();
     translate(this.position.x, this.position.y);
     rotate(angle);
