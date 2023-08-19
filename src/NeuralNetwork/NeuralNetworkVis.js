@@ -23,7 +23,7 @@ class NeuralNetworkVis {
    * @param {*} data
    */
   scatterplot(inputLabel, outputLabel, data) {
-    const values = data.map(item => {
+    const values = data.map((item) => {
       return {
         x: item.xs[inputLabel],
         y: item.ys[outputLabel],
@@ -51,9 +51,9 @@ class NeuralNetworkVis {
   scatterplotAll(inputLabels, outputLabels, data) {
     let values = [];
 
-    inputLabels.forEach(inputLabel => {
-      outputLabels.forEach(outputLabel => {
-        const val = data.map(item => {
+    inputLabels.forEach((inputLabel) => {
+      outputLabels.forEach((outputLabel) => {
+        const val = data.map((item) => {
           return {
             x: item.xs[inputLabel],
             y: item.ys[outputLabel],
@@ -84,7 +84,7 @@ class NeuralNetworkVis {
    * @param {*} data
    */
   barchart(inputLabel, outputLabel, data) {
-    const values = data.map(item => {
+    const values = data.map((item) => {
       return {
         value: item.xs[inputLabel],
         index: item.ys[outputLabel],
@@ -127,7 +127,7 @@ class NeuralNetworkVis {
       {
         height: this.config.height,
         callbacks: ["onEpochEnd"],
-      },
+      }
     );
   }
 }
