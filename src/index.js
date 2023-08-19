@@ -11,5 +11,10 @@ export default Object.assign(
     tfvis,
     neuralNetwork,
     handpose,
+  },
+  {
+    setBackend: (backend) => {
+      tf.setBackend(backend);
+    },
   }
 );
