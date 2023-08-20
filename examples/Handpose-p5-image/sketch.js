@@ -20,7 +20,7 @@ function setup() {
   noStroke();
   // Draw the image
   image(img, 0, 0);
-  // start detecting hands from the webcam video
+  // Detect hands in an image
   handpose.detect(img, gotHands);
 }
 
