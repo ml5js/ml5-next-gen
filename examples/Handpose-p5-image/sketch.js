@@ -24,10 +24,7 @@ function setup() {
   handpose.detect(img, gotHands);
 }
 
-// Callback function for when handpose outputs data
-function gotHands(results) {
-  // save the output to the hands variable
-  hands = results;
+function draw() {
   // Draw all the hand keypoints
   for (let i = 0; i < hands.length; i++) {
     let hand = hands[i];
@@ -36,4 +33,10 @@ function gotHands(results) {
       circle(keypoint.x, keypoint.y, 10);
     }
   }
+}
+
+// Callback function for when handpose outputs data
+function gotHands(results) {
+  // save the output to the hands variable
+  hands = results;
 }
