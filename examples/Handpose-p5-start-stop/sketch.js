@@ -11,7 +11,6 @@ let isDetecting = false;
 function preload() {
   // Load the handpose model.
   handpose = ml5.handpose();
-  console.log("preload");
 }
 
 function setup() {
