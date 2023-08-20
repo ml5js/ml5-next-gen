@@ -106,8 +106,8 @@ class Handpose {
       image,
       this.runtimeConfig
     );
-    //TODO: customize the output for easier use
-    const result = predictions;
+    let result = predictions;
+    result = this.addKeypoints(result);
     if (typeof callback === "function") callback(result);
     return result;
   }
@@ -166,14 +166,40 @@ class Handpose {
         this.detectMedia,
         this.runtimeConfig
       );
-      //TODO: customize the output for easier use
-      const result = predictions;
+      let result = predictions;
+      result = this.addKeypoints(result);
       this.detectCallback(result);
       // wait for the frame to update
       await tf.nextFrame();
     }
     this.detecting = false;
     this.signalStop = false;
+  }
+
+  /**
+   * Return a new array of results with named keypoints added
+   * @param {Array} hands - the original detection results
+   * @return {Array} the detection results with named keypoints added
+   *
+   * @private
+   */
+  addKeypoints(hands) {
+    const result = hands.map((hand) => {
+      for (let i = 0; i < hand.keypoints.length; i++) {
+        let keypoint = hand.keypoints[i];
+        let keypoint3D = hand.keypoints3D[i];
+        hand[keypoint.name] = {
+          x: keypoint.x,
+          y: keypoint.y,
+          x3D: keypoint3D.x,
+          y3D: keypoint3D.y,
+          z3D: keypoint3D.z,
+        };
+      }
+      return hand;
+    });
+    console.log(result);
+    return result;
   }
 
   /**
