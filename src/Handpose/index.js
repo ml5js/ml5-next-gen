@@ -28,6 +28,7 @@ class Handpose {
    * @property {string} detectorModelUrl - The file path or URL to the hand detector model when using "tfjs" runtime.
    * @property {string} landmarkModelUrl - The file path or URL to the hand landmark model when using "mediapipe" runtime.
    */
+
   /**
    * Create Handpose.
    * @param {configOptions} options - An object with options.
@@ -45,9 +46,10 @@ class Handpose {
     this.detectMedia = null;
     this.detectCallback = null;
 
-    //flags for detectStart() and detectStop()
-    this.detecting = false;
-    this.signalStop = false;
+    // flags for detectStart() and detectStop()
+    this.detecting = false; // true when detection loop is running
+    this.signalStop = false; // true when detectStop() is called and detecting is true
+    this.prevCall = ""; // "start" or "stop", used for giving warning messages with detectStart() is called twice in a row
 
     this.ready = callCallback(this.loadModel(), callback);
   }
@@ -135,17 +137,25 @@ class Handpose {
       this.detecting = true;
       this.detectLoop();
     }
+    if (this.prevCall === "start") {
+      console.warn(
+        "detectStart() was called more than once without calling detectStop(). The lastest detectStart() call will be used and the previous calls will be  ignored."
+      );
+    }
+    this.prevCall = "start";
   }
 
   /**
-   * Stop the detection loop before next frame update
+   * Stop the detection loop before next detection loop runs.
    */
   detectStop() {
     if (this.detecting) this.signalStop = true;
+    this.prevCall = "stop";
   }
 
   /**
    * Internal function to call estimateHands in a loop
+   * Can be started by detectStart() and terminated by detectStop()
    *
    * @private
    */
