@@ -1,12 +1,15 @@
-import * as tf from '@tensorflow/tfjs';
+import * as tf from "@tensorflow/tfjs";
 import handleArguments from "../utils/handleArguments";
-import NeuralNetwork from './NeuralNetwork';
-import NeuralNetworkData from './NeuralNetworkData';
-import NeuralNetworkVis from './NeuralNetworkVis';
-import callCallback from '../utils/callcallback';
+import NeuralNetwork from "./NeuralNetwork";
+import NeuralNetworkData from "./NeuralNetworkData";
+import NeuralNetworkVis from "./NeuralNetworkVis";
+import callCallback from "../utils/callcallback";
 
-import nnUtils from './NeuralNetworkUtils';
-import { imgToPixelArray, isInstanceOfSupportedElement } from '../utils/imageUtilities';
+import nnUtils from "./NeuralNetworkUtils";
+import {
+  imgToPixelArray,
+  isInstanceOfSupportedElement,
+} from "../utils/imageUtilities";
 
 const DEFAULTS = {
   inputs: [],
@@ -26,7 +29,7 @@ class DiyNeuralNetwork {
 
     // Is there a better way to handle a different
     // default learning rate for image classification tasks?
-    if (options.task === 'imageClassification') {
+    if (options.task === "imageClassification") {
       DEFAULTS.learningRate = 0.02;
     }
 
@@ -60,10 +63,13 @@ class DiyNeuralNetwork {
     this.normalizeInput = this.normalizeInput.bind(this);
     this.searchAndFormat = this.searchAndFormat.bind(this);
     this.formatInputItem = this.formatInputItem.bind(this);
-    this.convertTrainingDataToTensors = this.convertTrainingDataToTensors.bind(this);
+    this.convertTrainingDataToTensors =
+      this.convertTrainingDataToTensors.bind(this);
     this.formatInputsForPrediction = this.formatInputsForPrediction.bind(this);
-    this.formatInputsForPredictionAll = this.formatInputsForPredictionAll.bind(this);
-    this.isOneHotEncodedOrNormalized = this.isOneHotEncodedOrNormalized.bind(this);
+    this.formatInputsForPredictionAll =
+      this.formatInputsForPredictionAll.bind(this);
+    this.isOneHotEncodedOrNormalized =
+      this.isOneHotEncodedOrNormalized.bind(this);
     // model prep
     this.train = this.train.bind(this);
     this.trainInternal = this.trainInternal.bind(this);
@@ -107,6 +113,7 @@ class DiyNeuralNetwork {
    * @param {*} callback
    */
   init(callback) {
+    tf.setBackend("webgl");
     // check if the a static model should be built based on the inputs and output properties
     if (this.options.noTraining === true) {
       this.createLayersNoTraining();
@@ -128,7 +135,7 @@ class DiyNeuralNetwork {
   createLayersNoTraining() {
     // Create sample data based on options
     const { inputs, outputs, task } = this.options;
-    if (task === 'classification') {
+    if (task === "classification") {
       for (let i = 0; i < outputs.length; i += 1) {
         const inputSample = new Array(inputs).fill(0);
         this.addData(inputSample, [outputs[i]]);
@@ -187,26 +194,26 @@ class DiyNeuralNetwork {
     } else if (inputs.length > 0 && outputs.length > 0) {
       // if the inputs and outputs labels have been defined
       // in the constructor
-      if (inputs.every(item => typeof item === 'string')) {
+      if (inputs.every((item) => typeof item === "string")) {
         inputLabels = inputs;
       }
-      if (outputs.every(item => typeof item === 'string')) {
+      if (outputs.every((item) => typeof item === "string")) {
         outputLabels = outputs;
       }
-    } else if (typeof xInputs === 'object' && typeof yInputs === 'object') {
+    } else if (typeof xInputs === "object" && typeof yInputs === "object") {
       inputLabels = Object.keys(xInputs);
       outputLabels = Object.keys(yInputs);
     } else {
-      inputLabels = nnUtils.createLabelsFromArrayValues(xInputs, 'input');
-      outputLabels = nnUtils.createLabelsFromArrayValues(yInputs, 'output');
+      inputLabels = nnUtils.createLabelsFromArrayValues(xInputs, "input");
+      outputLabels = nnUtils.createLabelsFromArrayValues(yInputs, "output");
     }
 
     // Make sure that the inputLabels and outputLabels are arrays
     if (!(inputLabels instanceof Array)) {
-      throw new Error('inputLabels must be an array');
+      throw new Error("inputLabels must be an array");
     }
     if (!(outputLabels instanceof Array)) {
-      throw new Error('outputLabels must be an array');
+      throw new Error("outputLabels must be an array");
     }
 
     const formattedInputs = this.searchAndFormat(xInputs);
@@ -233,7 +240,11 @@ class DiyNeuralNetwork {
   async loadDataInternal(options) {
     const { dataUrl, inputs, outputs } = options;
 
-    const data = await this.neuralNetworkData.loadDataFromUrl(dataUrl, inputs, outputs);
+    const data = await this.neuralNetworkData.loadDataFromUrl(
+      dataUrl,
+      inputs,
+      outputs
+    );
 
     // once the data are loaded, create the metadata
     // and prep the data for training
@@ -255,7 +266,9 @@ class DiyNeuralNetwork {
     let inputShape;
     if (Array.isArray(inputs) && inputs.length > 0) {
       inputShape =
-        inputs.every(item => typeof item === 'number') && inputs.length > 0 ? inputs : null;
+        inputs.every((item) => typeof item === "number") && inputs.length > 0
+          ? inputs
+          : null;
     }
 
     this.neuralNetworkData.createMetadata(dataRaw, inputShape);
@@ -272,8 +285,10 @@ class DiyNeuralNetwork {
    * @param {*} dataRaw
    */
   prepareForTraining(_dataRaw = null) {
-    const dataRaw = _dataRaw === null ? this.neuralNetworkData.data.raw : _dataRaw;
-    const unnormalizedTrainingData = this.neuralNetworkData.applyOneHotEncodingsToDataRaw(dataRaw);
+    const dataRaw =
+      _dataRaw === null ? this.neuralNetworkData.data.raw : _dataRaw;
+    const unnormalizedTrainingData =
+      this.neuralNetworkData.applyOneHotEncodingsToDataRaw(dataRaw);
     this.data.training = unnormalizedTrainingData;
     this.neuralNetworkData.isWarmedUp = true;
 
@@ -286,7 +301,8 @@ class DiyNeuralNetwork {
    * @param {*} _meta
    */
   normalizeData(_dataRaw = null) {
-    const dataRaw = _dataRaw === null ? this.neuralNetworkData.data.raw : _dataRaw;
+    const dataRaw =
+      _dataRaw === null ? this.neuralNetworkData.data.raw : _dataRaw;
 
     if (!this.neuralNetworkData.isMetadataReady) {
       // if the inputs are defined as an array of [img_width, img_height, channels]
@@ -328,10 +344,10 @@ class DiyNeuralNetwork {
   searchAndFormat(input) {
     let formattedInputs;
     if (Array.isArray(input)) {
-      formattedInputs = input.map(item => this.formatInputItem(item));
-    } else if (typeof input === 'object') {
+      formattedInputs = input.map((item) => this.formatInputItem(item));
+    } else if (typeof input === "object") {
       const newXInputs = Object.assign({}, input);
-      Object.keys(input).forEach(k => {
+      Object.keys(input).forEach((k) => {
         const val = input[k];
         newXInputs[k] = this.formatInputItem(val);
       });
@@ -350,9 +366,15 @@ class DiyNeuralNetwork {
     let formattedInputs;
     if (isInstanceOfSupportedElement(input)) {
       imgToPredict = input;
-    } else if (typeof input === 'object' && isInstanceOfSupportedElement(input.elt)) {
+    } else if (
+      typeof input === "object" &&
+      isInstanceOfSupportedElement(input.elt)
+    ) {
       imgToPredict = input.elt; // Handle p5.js image and video.
-    } else if (typeof input === 'object' && isInstanceOfSupportedElement(input.canvas)) {
+    } else if (
+      typeof input === "object" &&
+      isInstanceOfSupportedElement(input.canvas)
+    ) {
       imgToPredict = input.canvas; // Handle p5.js image and video.
     }
 
@@ -371,7 +393,8 @@ class DiyNeuralNetwork {
    * @param {*} _meta
    */
   convertTrainingDataToTensors(_trainingData = null, _meta = null) {
-    const trainingData = _trainingData === null ? this.data.training : _trainingData;
+    const trainingData =
+      _trainingData === null ? this.data.training : _trainingData;
     const meta = _meta === null ? this.neuralNetworkData.meta : _meta;
 
     return this.neuralNetworkData.convertRawToTensors(trainingData, meta);
@@ -398,8 +421,12 @@ class DiyNeuralNetwork {
       });
     } else if (_input instanceof Object) {
       // TODO: make sure that the input order is preserved!
-      inputData = inputHeaders.map(prop => {
-        return this.isOneHotEncodedOrNormalized(_input[prop], prop, meta.inputs);
+      inputData = inputHeaders.map((prop) => {
+        return this.isOneHotEncodedOrNormalized(
+          _input[prop],
+          prop,
+          meta.inputs
+        );
       });
     }
 
@@ -419,8 +446,8 @@ class DiyNeuralNetwork {
     let output;
 
     if (_input instanceof Array) {
-      if (_input.every(item => Array.isArray(item))) {
-        output = _input.map(item => {
+      if (_input.every((item) => Array.isArray(item))) {
+        output = _input.map((item) => {
           return this.formatInputsForPrediction(item, meta, inputHeaders);
         });
 
@@ -446,7 +473,7 @@ class DiyNeuralNetwork {
     const key = _key;
 
     let output;
-    if (typeof _input !== 'number') {
+    if (typeof _input !== "number") {
       output = _meta[key].legend[input];
     } else {
       output = _input;
@@ -474,23 +501,23 @@ class DiyNeuralNetwork {
     let whileTrainingCb;
     let finishedTrainingCb;
     if (
-      typeof optionsOrCallback === 'object' &&
-      typeof optionsOrWhileTraining === 'function' &&
-      typeof callback === 'function'
+      typeof optionsOrCallback === "object" &&
+      typeof optionsOrWhileTraining === "function" &&
+      typeof callback === "function"
     ) {
       options = optionsOrCallback;
       whileTrainingCb = optionsOrWhileTraining;
       finishedTrainingCb = callback;
     } else if (
-      typeof optionsOrCallback === 'object' &&
-      typeof optionsOrWhileTraining === 'function'
+      typeof optionsOrCallback === "object" &&
+      typeof optionsOrWhileTraining === "function"
     ) {
       options = optionsOrCallback;
       whileTrainingCb = null;
       finishedTrainingCb = optionsOrWhileTraining;
     } else if (
-      typeof optionsOrCallback === 'function' &&
-      typeof optionsOrWhileTraining === 'function'
+      typeof optionsOrCallback === "function" &&
+      typeof optionsOrWhileTraining === "function"
     ) {
       options = {};
       whileTrainingCb = optionsOrCallback;
@@ -519,7 +546,7 @@ class DiyNeuralNetwork {
     };
 
     // if debug mode is true, then use tf vis
-    if (this.options.debug === true || this.options.debug === 'true') {
+    if (this.options.debug === true || this.options.debug === "true") {
       options.whileTraining = [
         this.neuralNetworkVis.trainingVis(),
         {
@@ -568,14 +595,17 @@ class DiyNeuralNetwork {
     if (!this.neuralNetwork.isLayered) {
       this.options.layers = this.createNetworkLayers(
         this.options.layers,
-        this.neuralNetworkData.meta,
+        this.neuralNetworkData.meta
       );
     }
 
     // if the model does not have any layers defined yet
     // then use the default structure
     if (!this.neuralNetwork.isLayered) {
-      this.options.layers = this.addDefaultLayers(this.options.task, this.neuralNetworkData.meta);
+      this.options.layers = this.addDefaultLayers(
+        this.options.task,
+        this.neuralNetworkData.meta
+      );
     }
 
     if (!this.neuralNetwork.isCompiled) {
@@ -609,13 +639,15 @@ class DiyNeuralNetwork {
     }
 
     // set the inputShape
-    layers[0].inputShape = layers[0].inputShape ? layers[0].inputShape : inputUnits;
+    layers[0].inputShape = layers[0].inputShape
+      ? layers[0].inputShape
+      : inputUnits;
     // set the output units
     const lastIndex = layersLength - 1;
     const lastLayer = layers[lastIndex];
     lastLayer.units = lastLayer.units ? lastLayer.units : outputUnits;
 
-    layers.forEach(layer => {
+    layers.forEach((layer) => {
       this.addLayer(tf.layers[layer.type](layer));
     });
 
@@ -662,85 +694,85 @@ class DiyNeuralNetwork {
     let layers;
     switch (task.toLowerCase()) {
       // if the task is classification
-      case 'classification':
+      case "classification":
         layers = [
           {
-            type: 'dense',
+            type: "dense",
             units: this.options.hiddenUnits,
-            activation: 'relu',
+            activation: "relu",
           },
           {
-            type: 'dense',
-            activation: 'softmax',
+            type: "dense",
+            activation: "softmax",
           },
         ];
 
         return this.createNetworkLayers(layers, meta);
       // if the task is regression
-      case 'regression':
+      case "regression":
         layers = [
           {
-            type: 'dense',
+            type: "dense",
             units: this.options.hiddenUnits,
-            activation: 'relu',
+            activation: "relu",
           },
           {
-            type: 'dense',
-            activation: 'sigmoid',
+            type: "dense",
+            activation: "sigmoid",
           },
         ];
         return this.createNetworkLayers(layers, meta);
       // if the task is imageClassification
-      case 'imageclassification':
+      case "imageclassification":
         layers = [
           {
-            type: 'conv2d',
+            type: "conv2d",
             filters: 8,
             kernelSize: 5,
             strides: 1,
-            activation: 'relu',
-            kernelInitializer: 'varianceScaling',
+            activation: "relu",
+            kernelInitializer: "varianceScaling",
           },
           {
-            type: 'maxPooling2d',
+            type: "maxPooling2d",
             poolSize: [2, 2],
             strides: [2, 2],
           },
           {
-            type: 'conv2d',
+            type: "conv2d",
             filters: 16,
             kernelSize: 5,
             strides: 1,
-            activation: 'relu',
-            kernelInitializer: 'varianceScaling',
+            activation: "relu",
+            kernelInitializer: "varianceScaling",
           },
           {
-            type: 'maxPooling2d',
+            type: "maxPooling2d",
             poolSize: [2, 2],
             strides: [2, 2],
           },
           {
-            type: 'flatten',
+            type: "flatten",
           },
           {
-            type: 'dense',
-            kernelInitializer: 'varianceScaling',
-            activation: 'softmax',
+            type: "dense",
+            kernelInitializer: "varianceScaling",
+            activation: "softmax",
           },
         ];
         return this.createNetworkLayers(layers, meta);
 
       default:
-        console.log('no imputUnits or outputUnits defined');
+        console.log("no imputUnits or outputUnits defined");
         layers = [
           {
-            type: 'dense',
+            type: "dense",
             units: this.options.hiddenUnits,
-            activation: 'relu',
+            activation: "relu",
           },
           {
-            type: 'dense',
-            activation: 'sigmoid',
+            type: "dense",
+            activation: "sigmoid",
           },
         ];
         return this.createNetworkLayers(layers, meta);
@@ -752,7 +784,8 @@ class DiyNeuralNetwork {
    * @param {*} _options
    */
   compile(_modelOptions = null, _learningRate = null) {
-    const LEARNING_RATE = _learningRate === null ? this.options.learningRate : _learningRate;
+    const LEARNING_RATE =
+      _learningRate === null ? this.options.learningRate : _learningRate;
 
     let options = {};
 
@@ -761,24 +794,27 @@ class DiyNeuralNetwork {
         ..._modelOptions,
       };
     } else if (
-      this.options.task === 'classification' ||
-      this.options.task === 'imageClassification'
+      this.options.task === "classification" ||
+      this.options.task === "imageClassification"
     ) {
       options = {
-        loss: 'categoricalCrossentropy',
+        loss: "categoricalCrossentropy",
         optimizer: tf.train.sgd,
-        metrics: ['accuracy'],
+        metrics: ["accuracy"],
       };
-    } else if (this.options.task === 'regression') {
+    } else if (this.options.task === "regression") {
       options = {
-        loss: 'meanSquaredError',
+        loss: "meanSquaredError",
         optimizer: tf.train.adam,
-        metrics: ['accuracy'],
+        metrics: ["accuracy"],
       };
     }
 
     options.optimizer = options.optimizer
-      ? this.neuralNetwork.setOptimizerFunction(LEARNING_RATE, options.optimizer)
+      ? this.neuralNetwork.setOptimizerFunction(
+          LEARNING_RATE,
+          options.optimizer
+        )
       : this.neuralNetwork.setOptimizerFunction(LEARNING_RATE, tf.train.sgd);
 
     this.neuralNetwork.compile(options);
@@ -787,9 +823,9 @@ class DiyNeuralNetwork {
     if (this.options.debug) {
       this.neuralNetworkVis.modelSummary(
         {
-          name: 'Model Summary',
+          name: "Model Summary",
         },
-        this.neuralNetwork.model,
+        this.neuralNetwork.model
       );
     }
   }
@@ -869,7 +905,7 @@ class DiyNeuralNetwork {
     if (meta !== null) {
       const labels = Object.keys(meta.outputs);
 
-      const formattedResults = unformattedResults.map(unformattedResult => {
+      const formattedResults = unformattedResults.map((unformattedResult) => {
         return labels.map((item, idx) => {
           // check to see if the data were normalized
           // if not, then send back the values, otherwise
@@ -929,7 +965,7 @@ class DiyNeuralNetwork {
     if (meta !== null) {
       const labels = Object.keys(meta.outputs);
 
-      const formattedResults = unformattedResults.map(unformattedResult => {
+      const formattedResults = unformattedResults.map((unformattedResult) => {
         return labels.map((item, idx) => {
           // check to see if the data were normalized
           // if not, then send back the values, otherwise
@@ -983,7 +1019,7 @@ class DiyNeuralNetwork {
 
     let inputData;
 
-    if (this.options.task === 'imageClassification') {
+    if (this.options.task === "imageClassification") {
       // get the inputData for classification
       // if it is a image type format it and
       // flatten it
@@ -997,7 +1033,10 @@ class DiyNeuralNetwork {
       if (meta.isNormalized) {
         // TODO: check to make sure this property is not static!!!!
         const { min, max } = meta.inputs[headers[0]];
-        inputData = this.neuralNetworkData.normalizeArray(Array.from(inputData), { min, max });
+        inputData = this.neuralNetworkData.normalizeArray(
+          Array.from(inputData),
+          { min, max }
+        );
       } else {
         inputData = Array.from(inputData);
       }
@@ -1014,7 +1053,7 @@ class DiyNeuralNetwork {
       const label = Object.keys(meta.outputs)[0];
       const vals = Object.entries(meta.outputs[label].legend);
 
-      const formattedResults = unformattedResults.map(unformattedResult => {
+      const formattedResults = unformattedResults.map((unformattedResult) => {
         return vals
           .map((item, idx) => {
             return {
@@ -1048,7 +1087,7 @@ class DiyNeuralNetwork {
 
     let inputData;
 
-    if (this.options.task === 'imageClassification') {
+    if (this.options.task === "imageClassification") {
       // get the inputData for classification
       // if it is a image type format it and
       // flatten it
@@ -1062,7 +1101,10 @@ class DiyNeuralNetwork {
       if (meta.isNormalized) {
         // TODO: check to make sure this property is not static!!!!
         const { min, max } = meta.inputs[headers[0]];
-        inputData = this.neuralNetworkData.normalizeArray(Array.from(inputData), { min, max });
+        inputData = this.neuralNetworkData.normalizeArray(
+          Array.from(inputData),
+          { min, max }
+        );
       } else {
         inputData = Array.from(inputData);
       }
@@ -1079,7 +1121,7 @@ class DiyNeuralNetwork {
       const label = Object.keys(meta.outputs)[0];
       const vals = Object.entries(meta.outputs[label].legend);
 
-      const formattedResults = unformattedResults.map(unformattedResult => {
+      const formattedResults = unformattedResults.map((unformattedResult) => {
         return vals
           .map((item, idx) => {
             return {
@@ -1138,7 +1180,7 @@ class DiyNeuralNetwork {
    */
   save(nameOrCb, cb) {
     const { string, callback } = handleArguments(nameOrCb, cb);
-    const modelName = string || 'model';
+    const modelName = string || "model";
 
     // save the model
     this.neuralNetwork.save(modelName, () => {
