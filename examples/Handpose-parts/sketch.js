@@ -29,11 +29,6 @@ function draw() {
   // Draw the webcam video
   image(video, 0, 0, width, height);
 
-  // This circle's size is controlled by a "pinch" gesture
-  fill(0, 255, 0);
-  noStroke();
-  circle(width / 4, height / 4, pinch);
-
   // If there is at least one hand
   if (hands.length > 0) {
     // Find the index finger tip and thumb tip
@@ -41,18 +36,16 @@ function draw() {
     let thumb = hands[0].thumb_tip;
 
     // Draw circles at finger positions
-    noStroke();
-    fill(255);
-    circle(finger.x, finger.y, 16);
-    circle(thumb.x, thumb.y, 16);
-
-    // Draw a line between finger positions
-    stroke(0);
-    strokeWeight(4);
-    line(finger.x, finger.y, thumb.x, thumb.y);
-
+    let centerX = (finger.x + thumb.x) / 2;
+    let centerY = (finger.y + thumb.y) / 2;
     // Calculate the pinch "distance" between finger and thumb
-    pinch = dist(finger.x, finger.y, thumb.x, thumb.y);
+    let pinch = dist(finger.x, finger.y, thumb.x, thumb.y);
+
+    // This circle's size is controlled by a "pinch" gesture
+    fill(0, 255, 0, 200);
+    stroke(0);
+    strokeWeight(2);
+    circle(centerX, centerY, pinch);
   }
 }
 
