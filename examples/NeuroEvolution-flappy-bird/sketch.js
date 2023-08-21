@@ -3,7 +3,9 @@ let pipes = [];
 
 function setup() {
   createCanvas(640, 240);
-  ml5.tf.setBackend("cpu");
+  // cpu is higher performance for tiny neural networks like in this example
+  ml5.setBackend("cpu");
+
   for (let i = 0; i < 200; i++) {
     birds[i] = new Bird();
   }

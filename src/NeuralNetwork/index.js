@@ -113,7 +113,6 @@ class DiyNeuralNetwork {
    * @param {*} callback
    */
   init(callback) {
-    tf.setBackend("cpu");
     // check if the a static model should be built based on the inputs and output properties
     if (this.options.neuroEvolution === true) {
       this.createLayersNoTraining();

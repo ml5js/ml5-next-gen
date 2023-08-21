@@ -1,17 +1,26 @@
 let bloops = [];
 let timeSlider;
+let restartButton;
 let food = [];
 
 function setup() {
   createCanvas(640, 240);
-  ml5.tf.setBackend("cpu");
+  // cpu is higher performance for tiny neural networks like in this example
+  ml5.setBackend("cpu");
+  restart();
+  restartButton = createButton("restart").mousePressed(restart);
+  timeSlider = createSlider(1, 20, 1);
+}
+
+function restart() {
+  bloops = [];
   for (let i = 0; i < 20; i++) {
     bloops[i] = new Creature(random(width), random(height));
   }
+  food = [];
   for (let i = 0; i < 8; i++) {
     food[i] = new Food();
   }
-  timeSlider = createSlider(1, 20, 1);
 }
 
 function draw() {
