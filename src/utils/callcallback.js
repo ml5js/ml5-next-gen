@@ -5,7 +5,7 @@
 
 /**
  * Most ml5 methods accept a callback function which will be
- * called with the arguments (error, result).
+ * called with the arguments (result, error).
  *
  * Generic type T describes the type of the result.
  * @template T
