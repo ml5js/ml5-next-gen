@@ -198,7 +198,6 @@ class Handpose {
       }
       return hand;
     });
-    console.log(result);
     return result;
   }
 

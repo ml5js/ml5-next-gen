@@ -200,7 +200,6 @@ class Bodypose {
       }
       return hand;
     });
-    console.log(result);
     return result;
   }
 
