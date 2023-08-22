@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 /*
-PoseDetection
+Bodypose
 Ported from pose-detection at Tensorflow.js
 */
 
@@ -14,7 +14,7 @@ import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import { mediaReady } from "../utils/imageUtilities";
 
-class PoseDetection {
+class Bodypose {
   /**
    * An options object to configure MoveNet settings
    * @typedef {Object} configOptions
@@ -31,7 +31,7 @@ class PoseDetection {
    */
 
   /**
-   * Create a poseDetection model.
+   * Create a Bodypose model.
    * @param {configOptions} options - Optional. An object describing a model accuracy and performance.
    * @param {function} callback  Optional. A function to run once the model has been loaded.
    *
@@ -221,13 +221,13 @@ class PoseDetection {
 }
 
 /**
- * Factory function that retunts a poseDetection instance
- * @returns {PoseDetection} A PoseDetection instance
+ * Factory function that retunts a Bodypose instance
+ * @returns {Bodypose} A Bodypose instance
  */
-const poseDetection = (...inputs) => {
+const bodypose = (...inputs) => {
   const { options = {}, callback } = handleArguments(...inputs);
-  const instance = new PoseDetection(options, callback);
+  const instance = new Bodypose(options, callback);
   return instance;
 };
 
-export default poseDetection;
+export default bodypose;
