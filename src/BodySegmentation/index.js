@@ -27,6 +27,9 @@ class BodyPix extends EventEmitter {
   constructor(video, options, callback) {
     super();
 
+    // for compatibility with p5's preload()
+    if (this.p5PreLoadExists()) window._incrementPreload();
+
     this.video = video;
     this.model = null;
     this.modelReady = false;
@@ -53,6 +56,9 @@ class BodyPix extends EventEmitter {
     if (this.video) {
       this.segment();
     }
+
+    // for compatibility with p5's preload()
+    if (this.p5PreLoadExists) window._decrementPreload();
 
     return this;
   }
@@ -143,6 +149,21 @@ class BodyPix extends EventEmitter {
     }
 
     return result;
+  }
+
+  /**
+   * Check if p5.js' preload() function is present
+   * @returns {boolean} true if preload() exists
+   *
+   * @private
+   */
+  p5PreLoadExists() {
+    if (typeof window === "undefined") return false;
+    if (typeof window.p5 === "undefined") return false;
+    if (typeof window.p5.prototype === "undefined") return false;
+    if (typeof window.p5.prototype.registerPreloadMethod === "undefined")
+      return false;
+    return true;
   }
 }
 
