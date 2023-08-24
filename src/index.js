@@ -1,5 +1,6 @@
 import neuralNetwork from "./NeuralNetwork";
 import handpose from "./Handpose";
+import facemesh from "./Facemesh";
 import poseDetection from "./PoseDetection";
 import * as tf from "@tensorflow/tfjs";
 import * as tfvis from "@tensorflow/tfjs-vis";
@@ -13,6 +14,7 @@ export default Object.assign(
     tfvis,
     neuralNetwork,
     handpose,
+    facemesh,
     poseDetection,
     setBackend,
   }
