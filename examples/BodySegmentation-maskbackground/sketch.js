@@ -43,3 +43,6 @@ function gotResults(result) {
 function modelReady() {
   console.log("Model ready!");
 }
+
+function draw() {
+}
