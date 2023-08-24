@@ -1,7 +1,7 @@
 let facemesh;
 let video;
 let predictions = [];
-var maxFaces_value = 1
+var maxFaces_value = 1;
 
 function setup() {
   createCanvas(640, 480);
@@ -49,12 +49,12 @@ function draw() {
   drawFeatures();
   //We call function to store basic data for certain facial features
   //We have faceOval,rightEyebrow, leftEyebrow, rightEye, leftEye, lips
-  featuresData();
+  gotFaces(predictions);
   // //Show the index of the points
   // directPoints();
 
-  // //Interactive Elements
-  // mask();
+  //Interactive Elements
+  mask();
 }
 
 // A function to draw bounding boxes
@@ -130,37 +130,65 @@ function drawFeatures(){
   }      
 }
 
-//A function to store basic data for certain facial features, this example is for lips
+//A function to store basic data for faces, giving an example to store certain facial feature for lips
 //We have faceOval,rightEyebrow, leftEyebrow, rightEye, leftEye, lips
-function featuresData(){
-  if (predictions.length > 0){
-    for (let i = 0; i < predictions.length; i += 1) {
-      const face = predictions[i];
+function gotFaces(faces){
+  if (faces.length > 0){
+    for (let i = 0; i < faces.length; i += 1) {
+      const face = faces[i];
+      const fKeypoints = [];
       const fKeypointX = [];
       const fKeypointY = [];
       for (let j = 0; j < face.keypoints.length; j += 1) {
-        // console.log(Object.values(keypoint)[3]); //The name of all facial features
+        //  console.log(Object.values(keypoint)[3]); //The name of all facial features
         const keypoint = face.keypoints[j];
         
+        // //  all faces
+        // console.log(faces);
+        // //  one face
+        // console.log(faces[0])
+
+        // //  bounding box of face, x,y is top left
+        // //  console.log(faces[0].box)
+        // console.log(faces[0].box.xMin, faces[0].box.yMin, faces[0].box.width, faces[0].box.width); 
+        
+        // //  all keypoints
+        // console.log(face.keypoints);
+        // //  one keypoint
+        // //  could use directPoints function to know the seriel number of every keypoints
+        // console.log(face.keypoints[0].x, face.keypoints[0].y);
+
+        //  x,y of a part, the lips as an example
+        //  all of the parts keypoints
         if (Object.values(keypoint)[3]=="lips") {
+          fKeypoints.push(keypoint)
           fKeypointX.push(keypoint.x);
           fKeypointY.push(keypoint.y);
         };
       };
+      // all of the part keypoints
+      console.log(fKeypoints);
+      //  x,y of one part keypoint
+      console.log(fKeypoints[0].x, fKeypoints[0].y)
+      ;
       //Create an example class of important data of facial features
-          const featuresData = {
+          const faceData = {
             lips: {
-              centerX: avg(fKeypointX),
-              centerY: avg(fKeypointY),
+              topLeftX: min(fKeypointX),
+              topLeftY: min(fKeypointY),
               fWidth: length(fKeypointX),
-              fheight: length(fKeypointY),
+              fHeight: length(fKeypointY),
             }
+
+            //the other needed features Data
+
           };
-          // console.log(featuresData);
+          console.log(faceData.lips.topLeftX,faceData.lips.topLeftY, faceData.lips.fWidth, faceData.lips.fHeight);
     };
-    function avg(x){
-      return (max(x)+min(x))/2
-          }
+
+    // function avg(x){
+    //   return (max(x)+min(x))/2
+    //       }
     function length(x){
       return max(x)-min(x)
           }
