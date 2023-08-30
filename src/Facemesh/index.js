@@ -181,14 +181,14 @@ class Facemesh {
     const result = faces.map((face) => {
       for (let i = 0; i < face.keypoints.length; i++) {
         let keypoint = face.keypoints[i];
-        // let keypoint3D = face.keypoints3D[i];
-        face[keypoint.name] = {
+        if (!keypoint.name)continue;
+        if(!face[keypoint.name]) face[keypoint.name] = [];
+        face[keypoint.name].push({
           x: keypoint.x,
           y: keypoint.y,
-        //   x3D: keypoint3D.x,
-        //   y3D: keypoint3D.y,
-        //   z3D: keypoint3D.z,
-        };
+          z: keypoint.z,
+
+        });
       }
       return face;
     });

@@ -46,4 +46,5 @@ function draw() {
 function gotFaces(results) {
   // save the output to the faces variable
   faces = results;
+  console.log(faces);
 }
