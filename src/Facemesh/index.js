@@ -91,7 +91,7 @@ class Facemesh {
     const argumentObject = handleArguments(...inputs);
     argumentObject.require(
       "image",
-      "An html or p5.js image, video, or canvas element argument is required for detectStart()."
+      "An html or p5.js image, video, or canvas element argument is required for detect()."
     );
     const { image, callback } = argumentObject;
 
