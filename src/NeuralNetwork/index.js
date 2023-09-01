@@ -21,7 +21,7 @@ const DEFAULTS = {
   debug: false,
   learningRate: 0.2,
   hiddenUnits: 16,
-  noTraining: false,
+  neuroEvolution: false,
 };
 class DiyNeuralNetwork {
   constructor(options, cb) {
@@ -113,9 +113,8 @@ class DiyNeuralNetwork {
    * @param {*} callback
    */
   init(callback) {
-    tf.setBackend("webgl");
     // check if the a static model should be built based on the inputs and output properties
-    if (this.options.noTraining === true) {
+    if (this.options.neuroEvolution === true) {
       this.createLayersNoTraining();
     }
 

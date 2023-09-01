@@ -17,6 +17,10 @@ let start, end;
 
 function setup() {
   createCanvas(640, 240);
+  // For this example to work across all browsers
+  // "webgl" or "cpu" needs to be set as the backend
+  ml5.setBackend("webgl");
+
   // Step 2: set your neural network options
   let options = {
     task: "classification",
