@@ -34,7 +34,7 @@ function draw() {
     for (let j = 0; j < pose.keypoints.length; j++) {
       let keypoint = pose.keypoints[j];
       // Only draw a circle if the keypoint's confidence is bigger than 0.2
-      if (keypoint.score > 0.2) {
+      if (keypoint.score > 0.1) {
         fill(0, 255, 0);
         noStroke();
         circle(keypoint.x, keypoint.y, 10);
