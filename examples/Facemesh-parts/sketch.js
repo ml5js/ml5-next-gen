@@ -6,10 +6,7 @@
 let facemesh;
 let video;
 let faces = [];
-let options = {maxFaces: 1, 
-  refineLandmarks: false, 
-  flipHorizontal: false, 
-};
+let options = { maxFaces: 1, refineLandmarks: false, flipHorizontal: false };
 
 function preload() {
   // Load the facemesh model.
@@ -35,7 +32,7 @@ function draw() {
 }
 
 // Draw keypoints for specific face element positions
-function drawPartsKeypoints(){
+function drawPartsKeypoints() {
   // If there is at least one face
   if (faces.length > 0) {
     for (let i = 0; i < faces[0].lips.length; i++) {
@@ -47,7 +44,7 @@ function drawPartsKeypoints(){
 }
 
 // Draw bounding box for specific face element positions
-function drawPartsBoundingBox(){
+function drawPartsBoundingBox() {
   // If there is at least one face
   if (faces.length > 0) {
     let lipsX = [];
@@ -56,10 +53,15 @@ function drawPartsBoundingBox(){
       // Find the lips
       let lips = faces[0].lips[i];
       lipsX.push(lips.x);
-      lipsY.push(lips.y)
+      lipsY.push(lips.y);
     }
     noFill();
-    rect(min(lipsX), min(lipsY), max(lipsX) - min(lipsX), max(lipsY) - min(lipsY));
+    rect(
+      min(lipsX),
+      min(lipsY),
+      max(lipsX) - min(lipsX),
+      max(lipsY) - min(lipsY)
+    );
   }
 }
 

@@ -6,10 +6,7 @@
 let facemesh;
 let video;
 let faces = [];
-let options = {maxFaces: 1, 
-  refineLandmarks: false, 
-  flipHorizontal: false, 
-};
+let options = { maxFaces: 1, refineLandmarks: false, flipHorizontal: false };
 
 function preload() {
   // Load the facemesh model.

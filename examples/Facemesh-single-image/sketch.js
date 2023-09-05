@@ -6,10 +6,7 @@
 let facemesh;
 let video;
 let faces = [];
-let options = {maxFaces: 1, 
-  refineLandmarks: false, 
-  flipHorizontal: true, 
-};
+let options = { maxFaces: 1, refineLandmarks: false, flipHorizontal: true };
 
 function preload() {
   //load the image to be detected

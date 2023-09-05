@@ -19,7 +19,7 @@ class Facemesh {
    * An options object to configure Facemesh settings
    * @typedef {Object} configOptions
    * @property {number} maxFacess - The maximum number of faces to detect. Defaults to 2.
-   * @property {boolean} refineLandmarks - Refine the ladmarks. Defaults to false.   
+   * @property {boolean} refineLandmarks - Refine the ladmarks. Defaults to false.
    * @property {boolean} flipHorizontal - Flip the result horizontally. Defaults to false.
    * @property {string} runtime - The runtime to use. "mediapipe"(default) or "tfjs".
    *
@@ -62,17 +62,20 @@ class Facemesh {
     const pipeline = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
     //filter out model config options
     const modelConfig = {
-        runtime: 'mediapipe',
-        solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh',
-        maxFaces: this.config?.maxFaces ?? 1, 
-        refineLandmarks: this.config?.refineLandmarks ?? false,
-      };
+      runtime: "mediapipe",
+      solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh",
+      maxFaces: this.config?.maxFaces ?? 1,
+      refineLandmarks: this.config?.refineLandmarks ?? false,
+    };
     this.runtimeConfig = {
       flipHorizontal: this.config?.flipHorizontal ?? false,
     };
 
     await tf.ready();
-    this.model = await faceLandmarksDetection.createDetector(pipeline, modelConfig);
+    this.model = await faceLandmarksDetection.createDetector(
+      pipeline,
+      modelConfig
+    );
 
     // for compatibility with p5's preload()
     if (this.p5PreLoadExists) window._decrementPreload();
@@ -182,7 +185,7 @@ class Facemesh {
       for (let i = 0; i < face.keypoints.length; i++) {
         let keypoint = face.keypoints[i];
         if (!keypoint.name) continue;
-        if(!face[keypoint.name]) face[keypoint.name] = [];
+        if (!face[keypoint.name]) face[keypoint.name] = [];
         face[keypoint.name].push({
           x: keypoint.x,
           y: keypoint.y,
