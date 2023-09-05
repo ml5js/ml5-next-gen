@@ -9,7 +9,7 @@ let faces = [];
 let options = { maxFaces: 1, refineLandmarks: false, flipHorizontal: false };
 
 function preload() {
-  // Load the facemesh model.
+  // Load the facemesh model
   facemesh = ml5.facemesh(options);
 }
 
@@ -19,7 +19,7 @@ function setup() {
   video = createCapture(VIDEO);
   video.size(width, height);
   video.hide();
-  // start detecting faces from the webcam video
+  // Start detecting faces from the webcam video
   facemesh.detectStart(video, gotFaces);
 }
 
@@ -41,7 +41,7 @@ function draw() {
 
 // Callback function for when facemesh outputs data
 function gotFaces(results) {
-  // save the output to the faces variable
+  // Save the output to the faces variable
   faces = results;
-  console.log(faces);
+  //console.log(faces);
 }

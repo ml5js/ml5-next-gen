@@ -9,9 +9,9 @@ let faces = [];
 let options = { maxFaces: 1, refineLandmarks: false, flipHorizontal: true };
 
 function preload() {
-  //load the image to be detected
+  // Load the image to be detected
   img = loadImage("face.png");
-  // Load the facemesh model.
+  // Load the facemesh model
   facemesh = ml5.facemesh(options);
 }
 
@@ -38,7 +38,7 @@ function draw() {
 
 // Callback function for when facemesh outputs data
 function gotFaces(results) {
-  // save the output to the faces variable
+  // Save the output to the faces variable
   faces = results;
-  console.log(faces);
+  //console.log(faces);
 }
