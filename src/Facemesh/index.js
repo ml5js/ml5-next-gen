@@ -60,7 +60,7 @@ class Facemesh {
    */
   async loadModel() {
     const pipeline = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
-    //filter out model config options
+    // filter out model config options
     const modelConfig = {
       runtime: "mediapipe",
       solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh",
@@ -90,7 +90,7 @@ class Facemesh {
    * @returns {Promise<Array>} an array of predictions.
    */
   async detect(...inputs) {
-    //Parse out the input parameters
+    // Parse out the input parameters
     const argumentObject = handleArguments(...inputs);
     argumentObject.require(
       "image",
@@ -194,7 +194,6 @@ class Facemesh {
       }
       return face;
     });
-    // console.log(result);
     return result;
   }
 
