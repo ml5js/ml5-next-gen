@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 let facemesh;
-let video;
+let img;
 let faces = [];
 let options = { maxFaces: 1, refineLandmarks: false, flipHorizontal: true };
 
