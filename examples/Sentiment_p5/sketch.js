@@ -1,12 +1,12 @@
 let sentiment;
-let statusEl;
+let statusEl; // to display model loading status
 let submitBtn;
 let inputBox;
 let sentimentResult;
 
 function setup() {
     noCanvas();
-    // initialize sentiment
+    // initialize sentiment analysis model
     sentiment = ml5.sentiment('movieReviews', modelReady);
 
     // setup the html environment
@@ -34,4 +34,11 @@ function getSentiment() {
 function modelReady() {
     // model is ready
     statusEl.html('model loaded');
+}
+
+// predicting the sentiment when 'Enter' key is pressed
+function keyPressed() {
+    if (keyCode === ENTER) {
+        getSentiment();
+    }
 }
