@@ -6,7 +6,7 @@
 let facemesh;
 let img;
 let faces = [];
-let options = { maxFaces: 1, refineLandmarks: false, flipHorizontal: true };
+let options = { maxFaces: 1, refineLandmarks: false, flipHorizontal: false };
 
 function preload() {
   // Load the image to be detected
