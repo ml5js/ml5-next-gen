@@ -20,6 +20,11 @@ let label = "training";
 
 function setup() {
   createCanvas(640, 240);
+
+  // For this example to work across all browsers
+  // "webgl" or "cpu" needs to be set as the backend
+  ml5.setBackend("webgl");
+
   rSlider = createSlider(0, 255, 255).position(10, 20);
   gSlider = createSlider(0, 255, 0).position(10, 40);
   bSlider = createSlider(0, 255, 0).position(10, 60);
