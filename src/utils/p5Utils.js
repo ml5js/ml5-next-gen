@@ -118,6 +118,25 @@ class P5Util {
   }
 
   /**
+   * convert ImageData to blob object
+   * @param {ImageData} segmentationResult
+   * @param {number} width
+   * @param {number} height
+   * @returns {Promise<Blob>}
+   */
+  async ImageDataToBlob(segmentationResult, width, height) {
+    const canvas = document.createElement('canvas'); // Consider using offScreenCanvas when it is ready?
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = width;
+    canvas.height = height;
+
+    ctx.putImageData(segmentationResult, 0, 0);
+
+    return this.getBlob(canvas);
+  };
+
+  /**
    * Convert Blob to P5.Image
    * @param {Blob} blob
    * Note: may want to reject instead of returning null.
