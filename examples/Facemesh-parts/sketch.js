@@ -27,41 +27,23 @@ function draw() {
   // Draw the webcam video
   image(video, 0, 0, width, height);
 
+  if (faces.length > 0 && faces[0].lips) {
+    fill(0, 255, 0);
+    rect(faces[0].lips.x, faces[0].lips.y, faces[0].lips.width, faces[0].lips.height);
+  }
+
   drawPartsKeypoints();
-  drawPartsBoundingBox();
 }
 
 // Draw keypoints for specific face element positions
 function drawPartsKeypoints() {
   // If there is at least one face
   if (faces.length > 0) {
-    for (let i = 0; i < faces[0].lips.length; i++) {
-      let lips = faces[0].lips[i];
+    for (let i = 0; i < faces[0].lips.keypoints.length; i++) {
+      let lips = faces[0].lips.keypoints[i];
       fill(0, 255, 0);
       circle(lips.x, lips.y, 5);
     }
-  }
-}
-
-// Draw bounding box for specific face element positions
-function drawPartsBoundingBox() {
-  // If there is at least one face
-  if (faces.length > 0) {
-    let lipsX = [];
-    let lipsY = [];
-    for (let i = 0; i < faces[0].lips.length; i++) {
-      // Find the lips
-      let lips = faces[0].lips[i];
-      lipsX.push(lips.x);
-      lipsY.push(lips.y);
-    }
-    noFill();
-    rect(
-      min(lipsX),
-      min(lipsY),
-      max(lipsX) - min(lipsX),
-      max(lipsY) - min(lipsY)
-    );
   }
 }
 
