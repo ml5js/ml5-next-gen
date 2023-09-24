@@ -16,24 +16,23 @@ import { mediaReady } from "../utils/imageUtilities";
 
 class Handpose {
   /**
-   * An options object to configure Handpose settings
+   * An object for configuring Handpose options.
    * @typedef {Object} configOptions
-   * @property {number} maxHands - The maximum number of hands to detect. Defaults to 2.
-   * @property {string} modelType - The model to use. "lite" or "full"(default).
-   * @property {boolean} flipHorizontal - Flip the result horizontally. Defaults to false.
-   * @property {string} runtime - The runtime to use. "mediapipe"(default) or "tfjs".
+   * @property {number} maxHands - Optional. The maximum number of hands to detect. Default: 2.
+   * @property {string} modelType - Optional. The type of model to use: "lite" or "full". Default: "full".
+   * @property {boolean} flipHorizontal - Optional. Flip the result data horizontally. Default: false.
+   * @property {string} runtime - Optional. The runtime of the model: "mediapipe" or "tfjs". Default: "mediapipe".
    *
    * // For using custom or offline models
-   * @property {string} solutionPath - The file path or URL to the model.
-   * @property {string} detectorModelUrl - The file path or URL to the hand detector model when using "tfjs" runtime.
-   * @property {string} landmarkModelUrl - The file path or URL to the hand landmark model when using "mediapipe" runtime.
+   * @property {string} solutionPath - Optional. The file path or URL to the model. Only used when using "mediapipe" runtime.
+   * @property {string} detectorModelUrl - Optional. The file path or URL to the hand detector model. Only used when using "tfjs" runtime.
+   * @property {string} landmarkModelUrl - Optional. The file path or URL to the hand landmark model Only used when using "tfjs" runtime.
    */
 
   /**
-   * Create Handpose.
-   * @param {configOptions} options - An object with options.
+   * Creates Handpose.
+   * @param {configOptions} options - An object containing Handpose configuration options.
    * @param {function} callback - A callback to be called when the model is ready.
-   *
    * @private
    */
   constructor(options, callback) {
@@ -47,17 +46,16 @@ class Handpose {
     this.detectCallback = null;
 
     // flags for detectStart() and detectStop()
-    this.detecting = false; // true when detection loop is running
-    this.signalStop = false; // true when detectStop() is called and detecting is true
-    this.prevCall = ""; // "start" or "stop", used for giving warning messages with detectStart() is called twice in a row
+    this.detecting = false; // True when detection loop is running
+    this.signalStop = false; // Signal to stop the loop
+    this.prevCall = ""; // Track previous call to detectStart() or detectStop()
 
     this.ready = callCallback(this.loadModel(), callback);
   }
 
   /**
-   * Load the model and set it to this.model
+   * Loads the model.
    * @return {this} the Handpose model.
-   *
    * @private
    */
   async loadModel() {
@@ -87,17 +85,24 @@ class Handpose {
   }
 
   /**
-   * Asynchronously output a single hand prediction result when called
-   * @param {*} [media] - An HMTL or p5.js image, video, or canvas element to run the prediction on.
-   * @param {function} [callback] - A callback function to handle the predictions.
-   * @returns {Promise<Array>} an array of predictions.
+   * A callback function that handles the handpose detection results.
+   * @callback gotHands
+   * @param {Array} results - The detection output.
+   */
+
+  /**
+   * Asynchronously outputs a single hand landmark detection result when called.
+   * Supports both callback and promise.
+   * @param {*} [media] - An HMTL or p5.js image, video, or canvas element to run the detection on.
+   * @param {gotHands} [callback] - Optional. A callback to handle the hand detection result.
+   * @returns {Promise<Array>} The detection result.
    */
   async detect(...inputs) {
     //Parse out the input parameters
     const argumentObject = handleArguments(...inputs);
     argumentObject.require(
       "image",
-      "An html or p5.js image, video, or canvas element argument is required for detectStart()."
+      "An html or p5.js image, video, or canvas element argument is required for detect()."
     );
     const { image, callback } = argumentObject;
 
@@ -113,10 +118,9 @@ class Handpose {
   }
 
   /**
-   * Repeatedly output hand predictions through a callback function
+   * Repeatedly outputs hand predictions through a callback function.
    * @param {*} [media] - An HMTL or p5.js image, video, or canvas element to run the prediction on.
-   * @param {function} [callback] - A callback function to handle the predictions.
-   * @returns {Promise<Array>} an array of predictions.
+   * @param {gotHands} [callback] - A callback to handle the hand detection results.
    */
   detectStart(...inputs) {
     // Parse out the input parameters
@@ -139,14 +143,14 @@ class Handpose {
     }
     if (this.prevCall === "start") {
       console.warn(
-        "detectStart() was called more than once without calling detectStop(). The lastest detectStart() call will be used and the previous calls will be  ignored."
+        "detectStart() was called more than once without calling detectStop(). Only the latest detectStart() call will take effect."
       );
     }
     this.prevCall = "start";
   }
 
   /**
-   * Stop the detection loop before next detection loop runs.
+   * Stops the detection loop before next detection loop runs.
    */
   detectStop() {
     if (this.detecting) this.signalStop = true;
@@ -154,9 +158,8 @@ class Handpose {
   }
 
   /**
-   * Internal function to call estimateHands in a loop
-   * Can be started by detectStart() and terminated by detectStop()
-   *
+   * Calls estimateHands in a loop.
+   * Can be started by detectStart() and terminated by detectStop().
    * @private
    */
   async detectLoop() {
@@ -177,9 +180,9 @@ class Handpose {
   }
 
   /**
-   * Return a new array of results with named keypoints added
-   * @param {Array} hands - the original detection results
-   * @return {Array} the detection results with named keypoints added
+   * Returns a new array of results with named keypoints added.
+   * @param {Array} hands - the original detection results.
+   * @return {Array} the detection results with named keypoints added.
    *
    * @private
    */
@@ -202,9 +205,8 @@ class Handpose {
   }
 
   /**
-   * Check if p5.js' preload() function is present
-   * @returns {boolean} true if preload() exists
-   *
+   * Check if p5.js' preload() function is present in the current environment.
+   * @returns {boolean} True if preload() exists. False otherwise.
    * @private
    */
   p5PreLoadExists() {
@@ -218,8 +220,8 @@ class Handpose {
 }
 
 /**
- * Factory function that returns a Handpose instance
- * @returns {Object} A new handpose instance
+ * Factory function that returns a new Handpose instance.
+ * @returns {Handpose} A new handpose instance.
  */
 const handpose = (...inputs) => {
   const { options = {}, callback } = handleArguments(...inputs);

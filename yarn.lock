@@ -57,6 +57,11 @@
   resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz#b2ac626d6cb9c8718ab459166d4bb405b8ffa78b"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
 
+"@mediapipe/face_mesh@^0.4.1633559619":
+  version "0.4.1633559619"
+  resolved "https://registry.yarnpkg.com/@mediapipe/face_mesh/-/face_mesh-0.4.1633559619.tgz#f917e4448e25bc375a905d1d910f1bca450c5e23"
+  integrity sha512-Vc8cdjxS5+O2gnjWH9KncYpUCVXT0h714KlWAsyqJvJbIgUJBqpppbIx8yWcAzBDxm/5cYSuBI5p5ySIPxzcEg==
+
 "@mediapipe/hands@^0.4.1675469240":
   version "0.4.1675469240"
   resolved "https://registry.yarnpkg.com/@mediapipe/hands/-/hands-0.4.1675469240.tgz#f032b2f5deff5a69430693f94be45dd9854e803f"
@@ -66,6 +71,25 @@
   version "0.5.1675469404"
   resolved "https://registry.yarnpkg.com/@mediapipe/pose/-/pose-0.5.1675469404.tgz#8f81e64c6561b2357a021a134b54de0204bafc72"
   integrity sha512-DFZsNWTsSphRIZppnUCuunzBiHP2FdJXR9ehc7mMi4KG+oPaOH0Em3d6kr7Py+TSyTXC1doH88KcF28k2sBxsQ==
+
+"@mediapipe/selfie_segmentation@~0.1.0":
+  version "0.1.1675465747"
+  resolved "https://registry.yarnpkg.com/@mediapipe/selfie_segmentation/-/selfie_segmentation-0.1.1675465747.tgz#f1f61eb116bf2efc262faf0a49a1829f4bae2712"
+  integrity sha512-IxYxNhwE5VwOm52L1yoFWYLP7q9Pd+NJjzOC5tlepfvEGaY3o9hslhUrx9BgseqdfZtKSDtd/4NfCSMjNzQalA==
+
+"@tensorflow-models/body-segmentation@^1.0.1":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@tensorflow-models/body-segmentation/-/body-segmentation-1.0.2.tgz#3892f87b05e29ead61f66eaefdda113cc19a31b0"
+  integrity sha512-sbPiL8wpqfKqh01of6qguZzU9yLWOQDTwiPEIHFPA/EAjz5T51LKHKIySll+mmteRo/TxNED8pxd9VJ6q2r7kg==
+  dependencies:
+    rimraf "^3.0.2"
+
+"@tensorflow-models/face-landmarks-detection@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@tensorflow-models/face-landmarks-detection/-/face-landmarks-detection-1.0.5.tgz#ef2e6f03e329d9457afbe7fdbf76fa8bd1e54fc1"
+  integrity sha512-54XJPi8g29/MknJ33ZBrLsEzr9kw/dJtrJMMD3xrCrnRlfFQPIKQ5PI2Wml55Fz2p4U2hemzBB0/H+S94JddIQ==
+  dependencies:
+    rimraf "^3.0.2"
 
 "@tensorflow-models/hand-pose-detection@^2.0.0":
   version "2.0.0"
