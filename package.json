@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --config webpack.config.js --env production",
+    "build": "webpack --config webpack.config.js --mode production",
     "develop": "webpack --config webpack.config.js",
-    "start": "webpack serve --config webpack.config.js",
+    "start": "webpack serve --config webpack.config.js --mode development",
     "format": "prettier --write \"**/*.js\""
   },
   "keywords": [
@@ -23,7 +23,8 @@
     "prettier": "2.8.8",
     "webpack": "^5.76.1",
     "webpack-cli": "^5.0.1",
-    "webpack-dev-server": "^4.15.1"
+    "webpack-dev-server": "^4.15.1",
+    "webpack-merge": "^5.9.0"
   },
   "dependencies": {
     "@mediapipe/face_mesh": "^0.4.1633559619",
