@@ -1,22 +1,28 @@
 {
   "name": "ml5-next-gen",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A friendly machine learning library for the web.",
+  "main": "dist/ml5.js",
   "scripts": {
-    "build": "webpack --config webpack.config.js --env production",
-    "develop": "webpack --config webpack.config.js",
-    "start": "webpack serve --config webpack.config.js",
+    "prebuild": "rimraf dist",
+    "build": "webpack --config webpack.config.js --mode production",
+    "start": "webpack serve --config webpack.config.js --mode development",
     "format": "prettier --write \"**/*.js\""
   },
+  "files": [
+    "dist"
+  ],
   "keywords": [
     "ML5"
   ],
   "author": "ml5",
-  "license": "ISC",
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ml5js/ml5-next-gen"
+    "url": "git+https://github.com/ml5js/ml5-next-gen.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ml5js/ml5-next-gen/issues"
   },
   "devDependencies": {
     "html-webpack-plugin": "^5.5.3",
@@ -25,6 +31,7 @@
     "webpack-cli": "^5.0.1",
     "webpack-dev-server": "^4.15.1"
   },
+  "homepage": "https://github.com/ml5js/ml5-next-gen#readme",
   "dependencies": {
     "@mediapipe/face_mesh": "^0.4.1633559619",
     "@mediapipe/hands": "^0.4.1675469240",
