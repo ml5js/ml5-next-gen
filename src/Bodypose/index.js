@@ -9,7 +9,7 @@ Ported from pose-detection at Tensorflow.js
 */
 
 import * as tf from "@tensorflow/tfjs";
-import * as bodyPoseDetection from "@tensorflow-models/pose-detection";
+import * as poseDetection from "@tensorflow-models/pose-detection";
 import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import { mediaReady } from "../utils/imageUtilities";
@@ -36,12 +36,15 @@ class Bodypose {
    * @param {function} callback  - A function to run once the model has been loaded.
    * @private
    */
-  constructor(options, callback) {
+  constructor(modelName, options, callback) {
     // for compatibility with p5's preload()
     if (this.p5PreLoadExists()) window._incrementPreload();
 
+    this.modelName = modelName ?? "MoveNet";
+
     this.model = null;
     this.config = options;
+    this.runtimeConfig = {};
     this.detectMedia = null;
     this.detectCallback = null;
 
@@ -58,34 +61,57 @@ class Bodypose {
    * @return {this} the detector model.
    */
   async loadModel() {
-    const pipeline = bodyPoseDetection.SupportedModels.MoveNet;
-    //Set the config to user defined or default values
-    const modelConfig = {
-      enableSmoothing: this.config.enableSmoothing ?? true,
-      modelUrl: this.config.modelUrl,
-      minPoseScore: this.config.minPoseScore ?? 0.25,
-      multiPoseMaxDimension: this.config.multiPoseMaxDimension ?? 256,
-      enableTracking: this.config.enableTracking ?? true,
-      trackerType: this.config.trackerType ?? "boundingBox",
-      trackerConfig: this.config.trackerConfig,
-    };
-    // use multi-pose lightning model by default
-    switch (this.config.modelType) {
-      case "SINGLEPOSE_LIGHTNING":
-        modelConfig.modelType =
-          bodyPoseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING;
-        break;
-      case "SINGLEPOSE_THUNDER":
-        modelConfig.modelType =
-          bodyPoseDetection.movenet.modelType.SINGLEPOSE_THUNDER;
-        break;
-      default:
-        modelConfig.modelType =
-          bodyPoseDetection.movenet.modelType.MULTIPOSE_LIGHTNING;
+    let pipeline;
+    let modelConfig;
+
+    if (this.modelName === "MoveNet") {
+      pipeline = poseDetection.SupportedModels.MoveNet;
+      //Set the config to user defined or default values
+      modelConfig = {
+        enableSmoothing: this.config.enableSmoothing ?? true,
+        modelUrl: this.config.modelUrl,
+        minPoseScore: this.config.minPoseScore ?? 0.25,
+        multiPoseMaxDimension: this.config.multiPoseMaxDimension ?? 256,
+        enableTracking: this.config.enableTracking ?? true,
+        trackerType: this.config.trackerType ?? "boundingBox",
+        trackerConfig: this.config.trackerConfig,
+      };
+      // use multi-pose lightning model by default
+      switch (this.config.modelType) {
+        case "SINGLEPOSE_LIGHTNING":
+          modelConfig.modelType =
+            poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING;
+          break;
+        case "SINGLEPOSE_THUNDER":
+          modelConfig.modelType =
+            poseDetection.movenet.modelType.SINGLEPOSE_THUNDER;
+          break;
+        default:
+          modelConfig.modelType =
+            poseDetection.movenet.modelType.MULTIPOSE_LIGHTNING;
+      }
+    } else if (this.modelName === "BlazePose") {
+      pipeline = poseDetection.SupportedModels.BlazePose;
+      //Set the config to user defined or default values
+      modelConfig = {
+        runtime: this.config.runtime ?? "mediapipe",
+        enableSmoothing: this.config.enableSmoothing ?? true,
+        enableSegmentation: this.config.enableSegmentation ?? false,
+        smoothSegmentation: this.config.smoothSegmentation ?? true,
+        modelType: this.config.smoothSegmentation ?? "full",
+        solutionPath:
+          this.config.solutionPath ??
+          "https://cdn.jsdelivr.net/npm/@mediapipe/pose",
+        detectorModelUrl: this.config?.detectorModelUrl,
+        landmarkModelUrl: this.config?.landmarkModelUrl,
+      };
+
+      this.runtimeConfig.flipHorizontal = this.config.flipHorizontal ?? false;
     }
+
     // Load the detector model
     await tf.ready();
-    this.model = await bodyPoseDetection.createDetector(pipeline, modelConfig);
+    this.model = await poseDetection.createDetector(pipeline, modelConfig);
 
     // for compatibility with p5's preload()
     if (this.p5PreLoadExists) window._decrementPreload();
@@ -115,7 +141,10 @@ class Bodypose {
     const { image, callback } = argumentObject;
 
     await mediaReady(image, false);
-    const predictions = await this.model.estimatePoses(image);
+    const predictions = await this.model.estimatePoses(
+      image,
+      this.runtimeConfig
+    );
     let result = predictions;
     result = this.addKeypoints(result);
     if (typeof callback === "function") callback(result);
@@ -226,8 +255,8 @@ class Bodypose {
  * @returns {Bodypose} A Bodypose instance.
  */
 const bodypose = (...inputs) => {
-  const { options = {}, callback } = handleArguments(...inputs);
-  const instance = new Bodypose(options, callback);
+  const { string, options = {}, callback } = handleArguments(...inputs);
+  const instance = new Bodypose(string, options, callback);
   return instance;
 };
 
