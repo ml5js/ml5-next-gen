@@ -16,22 +16,33 @@ import { mediaReady } from "../utils/imageUtilities";
 
 class Bodypose {
   /**
-   * An object for configuring MoveNet options.
+   * An object for configuring Bodypose options.
    * @typedef {Object} configOptions
-   * @property {string} modelType - Optional. specify what model variant to load from. Default: "MULTIPOSE_LIGHTNING".
+   * @property {string} modelType - Optional. specify what model variant to load from.
    * @property {boolean} enableSmoothing - Optional. Whether to use temporal filter to smooth keypoints across frames. Default: true.
+   *
+   * Only for when using MoveNet model
    * @property {number} minPoseScore - Optional. The minimum confidence score for a pose to be detected. Default: 0.25.
    * @property {number} multiPoseMaxDimension - Optional. The target maximum dimension to use as the input to the multi-pose model. Must be a mutiple of 32. Default: 256.
    * @property {boolean} enableTracking - Optional. Track each person across the frame with a unique ID. Default: true.
    * @property {string} trackerType - Optional. Specify what type of tracker to use. Default: "boundingBox".
    * @property {Object} trackerConfig - Optional. Specify tracker configurations. Use tf.js settings by default.
    *
-   * //For using custom or offline models
-   * @property {string} modelUrl - Optional. A The file path or URL to the model.
+   * Only for when using BlazePose model
+   * @property {string} runtime - Optional. Either "tfjs" or "mediapipe". Default: "mediapipe"
+   * @property {boolean} enableSegmentation - Optional. A boolean indicating whether to generate the segmentation mask.
+   * @property {boolean} smoothSegmentation - Optional. whether to filters segmentation masks across different input images to reduce jitter.
+   *
+   * For using custom or offline models
+   * @property {string} modelUrl - Optional. The file path or URL to the MoveNet model.
+   * @property {string} solutionPath - Optional. The file path or URL to the mediaPipe BlazePose model.
+   * @property {string} detectorModelUrl - Optional. The file path or URL to the tfjs BlazePose detector model.
+   * @property {string}landmarkModelUrl - Optional. The file path or URL to the tfjs BlazePose landmark model.
    */
 
   /**
    * Creates Bodypose.
+   * @param {string} modelName - Specify a model to use, "MoveNet" or "BlazePose"
    * @param {configOptions} options - An object describing a model accuracy and performance.
    * @param {function} callback  - A function to run once the model has been loaded.
    * @private
@@ -223,13 +234,14 @@ class Bodypose {
    */
   addKeypoints(hands) {
     const result = hands.map((hand) => {
-      for (let i = 0; i < hand.keypoints.length; i++) {
-        let keypoint = hand.keypoints[i];
+      hand.keypoints.forEach((keypoint) => {
         hand[keypoint.name] = {
           x: keypoint.x,
           y: keypoint.y,
+          score: keypoint.score,
         };
-      }
+        if (keypoint.z) hand[keypoint.name].z = keypoint.z;
+      });
       return hand;
     });
     return result;
