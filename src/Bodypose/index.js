@@ -42,17 +42,16 @@ class Bodypose {
 
   /**
    * Creates Bodypose.
-   * @param {string} modelName - Specify a model to use, "MoveNet" or "BlazePose"
+   * @param {string} modelName - Specify a model to use, "MoveNet" or "BlazePose". Default: "MoveNet".
    * @param {configOptions} options - An object describing a model accuracy and performance.
    * @param {function} callback  - A function to run once the model has been loaded.
    * @private
    */
-  constructor(modelName, options, callback) {
+  constructor(modelName = "MoveNet", options, callback) {
     // for compatibility with p5's preload()
     if (this.p5PreLoadExists()) window._incrementPreload();
 
-    this.modelName = modelName ?? "MoveNet";
-
+    this.modelName = modelName;
     this.model = null;
     this.config = options;
     this.runtimeConfig = {};
