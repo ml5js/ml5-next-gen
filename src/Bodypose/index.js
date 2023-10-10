@@ -74,7 +74,29 @@ class Bodypose {
     let pipeline;
     let modelConfig;
 
-    if (this.modelName === "MoveNet") {
+    if (this.modelName === "BlazePose") {
+      pipeline = poseDetection.SupportedModels.BlazePose;
+      //Set the config to user defined or default values
+      modelConfig = {
+        runtime: this.config.runtime ?? "mediapipe",
+        enableSmoothing: this.config.enableSmoothing ?? true,
+        enableSegmentation: this.config.enableSegmentation ?? false,
+        smoothSegmentation: this.config.smoothSegmentation ?? true,
+        modelType: this.config.smoothSegmentation ?? "full",
+        solutionPath:
+          this.config.solutionPath ??
+          "https://cdn.jsdelivr.net/npm/@mediapipe/pose",
+        detectorModelUrl: this.config?.detectorModelUrl,
+        landmarkModelUrl: this.config?.landmarkModelUrl,
+      };
+
+      this.runtimeConfig.flipHorizontal = this.config.flipHorizontal ?? false;
+    } else {
+      if (this.modelName !== "MoveNet") {
+        console.warn(
+          `Expect model name to be "MoveNet" or "BlazePose", but got "${this.modelName}". Using "MoveNet" instead.`
+        );
+      }
       pipeline = poseDetection.SupportedModels.MoveNet;
       //Set the config to user defined or default values
       modelConfig = {
@@ -100,23 +122,6 @@ class Bodypose {
           modelConfig.modelType =
             poseDetection.movenet.modelType.MULTIPOSE_LIGHTNING;
       }
-    } else if (this.modelName === "BlazePose") {
-      pipeline = poseDetection.SupportedModels.BlazePose;
-      //Set the config to user defined or default values
-      modelConfig = {
-        runtime: this.config.runtime ?? "mediapipe",
-        enableSmoothing: this.config.enableSmoothing ?? true,
-        enableSegmentation: this.config.enableSegmentation ?? false,
-        smoothSegmentation: this.config.smoothSegmentation ?? true,
-        modelType: this.config.smoothSegmentation ?? "full",
-        solutionPath:
-          this.config.solutionPath ??
-          "https://cdn.jsdelivr.net/npm/@mediapipe/pose",
-        detectorModelUrl: this.config?.detectorModelUrl,
-        landmarkModelUrl: this.config?.landmarkModelUrl,
-      };
-
-      this.runtimeConfig.flipHorizontal = this.config.flipHorizontal ?? false;
     }
 
     // Load the detector model
