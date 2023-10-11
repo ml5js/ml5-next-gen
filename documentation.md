@@ -375,7 +375,7 @@ TODO (link p5 web editor examples once uploaded)
 
 ## ml5.neuralNetwork
 
-See [old reference](https://learn.ml5js.org/#/reference/neural-network).
+See [old reference](https://learn.ml5js.org/#/reference/neural-network) and Nature of Code [Chapter 10: Neural Networks](https://nature-of-code-2nd-edition.netlify.app/neural-networks/) and [Chapter 11: Neuroevolution](https://nature-of-code-2nd-edition.netlify.app/neuroevolution/)
 
 ---
 
