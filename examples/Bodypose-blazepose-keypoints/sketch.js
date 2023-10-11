@@ -25,7 +25,6 @@ function setup() {
 }
 
 function draw() {
-  console.log(poses);
   // Draw the webcam video
   image(video, 0, 0, width, height);
 
