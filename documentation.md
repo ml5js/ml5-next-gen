@@ -6,7 +6,7 @@ This is a temporary API reference for the next generation ml5 library. The proje
 
 ## ml5.bodyPix
 
-### Descripton
+### Description
 
 As written by the developers of BodyPix:
 
@@ -77,7 +77,7 @@ TODO (link p5 web editor examples once uploaded)
 
 ## ml5.bodypose
 
-### Descripton
+### Description
 
 Bodypose can be used for real-time human pose Estimation.
 
@@ -141,7 +141,7 @@ bodypose.detectStart(media, callback);
 
 **Parameters:**
 
-- **media**: An HMTL or p5.js image, video, or canvas element to run the estimation on.
+- **media**: An HTML or p5.js image, video, or canvas element to run the estimation on.
 - **callback(output, error)**: A callback function to handle the output of the estimation. See below for an example output passed into the callback function:
 
   ```javascript
@@ -182,7 +182,7 @@ bodypose.detect(media, ?callback);
 
 **Parameters:**
 
-- **media**: An HMTL or p5.js image, video, or canvas element to run the estimation on.
+- **media**: An HTML or p5.js image, video, or canvas element to run the estimation on.
 - **callback(output, error)**: OPTIONAL. A callback function to handle the output of the estimation, see output example above.
 
 **Returns:**  
@@ -196,7 +196,7 @@ TODO (link p5 web editor examples once uploaded)
 
 ## ml5.facemesh
 
-### Descripton
+### Description
 
 Facemesh can be used for real-time face landmark Estimation.
 
@@ -218,7 +218,7 @@ const facemesh = ml5.facemesh(?options, ?callback);
   {
       maxFaces: 1,
       refineLandmarks: false,
-      flipHirzontal: false
+      flipHorizontal: false
   }
   ```
 
@@ -239,7 +239,7 @@ facemesh.detectStart(media, callback);
 
 **Parameters:**
 
-- **media**: An HMTL or p5.js image, video, or canvas element to run the estimation on.
+- **media**: An HTML or p5.js image, video, or canvas element to run the estimation on.
 - **callback(output, error)**: A callback function to handle the output of the estimation. See below for an example output passed into the callback function:
 
   ```javascript
@@ -275,7 +275,7 @@ facemesh.detect(media, ?callback);
 
 **Parameters:**
 
-- **media**: An HMTL or p5.js image, video, or canvas element to run the estimation on.
+- **media**: An HTML or p5.js image, video, or canvas element to run the estimation on.
 - **callback(output, error)**: OPTIONAL. A callback function to handle the output of the estimation, see output example above.
 
 **Returns:**  
@@ -289,7 +289,7 @@ TODO (link p5 web editor examples once uploaded)
 
 ## ml5.handpose
 
-### Descripton
+### Description
 
 Handpose can be used for real-time hand Estimation.
 
@@ -336,7 +336,7 @@ handpose.detectStart(media, callback);
 
 **Parameters:**
 
-- **media**: An HMTL or p5.js image, video, or canvas element to run the estimation on.
+- **media**: An HTML or p5.js image, video, or canvas element to run the estimation on.
 - **callback(output, error)**: A callback function to handle the output of the estimation. See below for an example output passed into the callback function:
 
   ```javascript
@@ -376,7 +376,7 @@ handpose.detect(media, ?callback);
 
 **Parameters:**
 
-- **media**: An HMTL or p5.js image, video, or canvas element to run the estimation on.
+- **media**: An HTML or p5.js image, video, or canvas element to run the estimation on.
 - **callback(output, error)**: OPTIONAL. A callback function to handle the output of the estimation, see output example above.
 
 **Returns:**  
