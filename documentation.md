@@ -109,7 +109,7 @@ const bodypose = ml5.bodypose(?modelName, ?options, ?callback);
   }
   ```
 
-  More info on options for MoveNet [here](https://github.com/tensorflow/tfjs-models/tree/master/pose-detection/src/movenet#create-a-detector).
+  [More info on options for MoveNet](https://github.com/tensorflow/tfjs-models/tree/master/pose-detection/src/movenet#create-a-detector).
 
   The default and available options for BlazePose model are:
 
