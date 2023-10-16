@@ -6,7 +6,7 @@ This is a temporary API reference for the next generation ml5 library. The proje
 
 ## ml5.bodyPix
 
-### Descripton
+### Description
 
 As written by the developers of BodyPix:
 
@@ -77,7 +77,7 @@ TODO (link p5 web editor examples once uploaded)
 
 ## ml5.bodypose
 
-### Descripton
+### Description
 
 Bodypose can be used for real-time human pose Estimation.
 
@@ -88,18 +88,18 @@ Bodypose can be used for real-time human pose Estimation.
 This method is used to initialize the bodypose object.
 
 ```javascript
-const bodypose = ml5.bodypose(?options, ?callback);
+const bodypose = ml5.bodypose(?modelName, ?options, ?callback);
 ```
 
 **Parameters:**
 
-- **options**: OPTIONAL. An object to change the default configuration of the model. The default and available options are:
+- **modelName**: OPTIONAL: A string specifying which model to use, "BlazePose" or "MoveNet". MoveNet is an ultra fast and accurate model that detects 17 keypoints of a body. BlazePose can detect 33 keypoints and provides 3D tracking.
+- **options**: OPTIONAL. An object to change the default configuration of the model. The default and available options for MoveNet model are:
 
   ```javascript
   {
     modelType: "MULTIPOSE_LIGHTNING" // "MULTIPOSE_LIGHTNING", "SINGLEPOSE_LIGHTNING", or "SINGLEPOSE_THUNDE"
     enableSmoothing: true,
-
     minPoseScore: 0.25,
     multiPoseMaxDimension: 256,
     enableTracking: true,
@@ -109,7 +109,22 @@ const bodypose = ml5.bodypose(?options, ?callback);
   }
   ```
 
-  More info on options [here](https://github.com/tensorflow/tfjs-models/tree/master/pose-detection/src/movenet#create-a-detector).
+  [More info on options for MoveNet](https://github.com/tensorflow/tfjs-models/tree/master/pose-detection/src/movenet#create-a-detector).
+
+  The default and available options for BlazePose model are:
+
+  ```javascript
+  {
+    runtime: "mediapipe" // "mediapipe" or "tfjs"
+    enableSmoothing: true,
+    modelType: "full", // "lite", "full", or "heavy"
+    detectorModelUrl: undefined, //default to use the tf.hub model
+    landmarkModelUrl: undefined, //default to use the tf.hub model
+    solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/pose",
+  }
+  ```
+
+ [More info on options for MediaPipe BlazePose](https://github.com/tensorflow/tfjs-models/tree/master/pose-detection/src/blazepose_mediapipe) and for TFJS BlazePose [here](https://github.com/tensorflow/tfjs-models/tree/master/pose-detection/src/blazepose_tfjs#create-a-detector).
 
 - **callback(bodypose, error)**: OPTIONAL. A function to run once the model has been loaded. Alternatively, call `ml5.bodyPix()` within the p5 `preload` function.
 
@@ -126,7 +141,7 @@ bodypose.detectStart(media, callback);
 
 **Parameters:**
 
-- **media**: An HMTL or p5.js image, video, or canvas element to run the estimation on.
+- **media**: An HTML or p5.js image, video, or canvas element to run the estimation on.
 - **callback(output, error)**: A callback function to handle the output of the estimation. See below for an example output passed into the callback function:
 
   ```javascript
@@ -167,7 +182,7 @@ bodypose.detect(media, ?callback);
 
 **Parameters:**
 
-- **media**: An HMTL or p5.js image, video, or canvas element to run the estimation on.
+- **media**: An HTML or p5.js image, video, or canvas element to run the estimation on.
 - **callback(output, error)**: OPTIONAL. A callback function to handle the output of the estimation, see output example above.
 
 **Returns:**  
@@ -181,7 +196,7 @@ TODO (link p5 web editor examples once uploaded)
 
 ## ml5.facemesh
 
-### Descripton
+### Description
 
 Facemesh can be used for real-time face landmark Estimation.
 
@@ -203,7 +218,7 @@ const facemesh = ml5.facemesh(?options, ?callback);
   {
       maxFaces: 1,
       refineLandmarks: false,
-      flipHirzontal: false
+      flipHorizontal: false
   }
   ```
 
@@ -224,7 +239,7 @@ facemesh.detectStart(media, callback);
 
 **Parameters:**
 
-- **media**: An HMTL or p5.js image, video, or canvas element to run the estimation on.
+- **media**: An HTML or p5.js image, video, or canvas element to run the estimation on.
 - **callback(output, error)**: A callback function to handle the output of the estimation. See below for an example output passed into the callback function:
 
   ```javascript
@@ -260,7 +275,7 @@ facemesh.detect(media, ?callback);
 
 **Parameters:**
 
-- **media**: An HMTL or p5.js image, video, or canvas element to run the estimation on.
+- **media**: An HTML or p5.js image, video, or canvas element to run the estimation on.
 - **callback(output, error)**: OPTIONAL. A callback function to handle the output of the estimation, see output example above.
 
 **Returns:**  
@@ -274,7 +289,7 @@ TODO (link p5 web editor examples once uploaded)
 
 ## ml5.handpose
 
-### Descripton
+### Description
 
 Handpose can be used for real-time hand Estimation.
 
@@ -321,7 +336,7 @@ handpose.detectStart(media, callback);
 
 **Parameters:**
 
-- **media**: An HMTL or p5.js image, video, or canvas element to run the estimation on.
+- **media**: An HTML or p5.js image, video, or canvas element to run the estimation on.
 - **callback(output, error)**: A callback function to handle the output of the estimation. See below for an example output passed into the callback function:
 
   ```javascript
@@ -361,7 +376,7 @@ handpose.detect(media, ?callback);
 
 **Parameters:**
 
-- **media**: An HMTL or p5.js image, video, or canvas element to run the estimation on.
+- **media**: An HTML or p5.js image, video, or canvas element to run the estimation on.
 - **callback(output, error)**: OPTIONAL. A callback function to handle the output of the estimation, see output example above.
 
 **Returns:**  
