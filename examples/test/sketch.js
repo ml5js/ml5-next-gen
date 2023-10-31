@@ -12,14 +12,8 @@ let bodyPix;
 let video;
 let segmentation;
 
-let canvas;
-let ctx;
-
 let options = {
-  outputStride: 16, //adjust the output stride and see which one works best!
-  multiSegmentation: false,
-  segmentBodyParts: true,
-  architecture: "MobileNetV1",
+  maskType: "background",
 };
 
 function preload() {
@@ -27,28 +21,23 @@ function preload() {
 }
 
 function setup() {
-  canvas = document.getElementById("cvn");
-  ctx = canvas.getContext("2d");
   createCanvas(360, 270);
   // Create the video
   video = createCapture(VIDEO);
   video.size(width, height);
+  video.hide();
 
   bodyPix.detectStart(video, gotResults);
 }
 
-// Event for body segmentation
-function gotResults(result) {
-  // Save the latest part mask from the model in global variable "segmentation"
-  segmentation = result;
-  //Draw the video
-  //console.log(segmentation.personMask);
-  //image(video, 0, 0, width, height);
+function draw() {
   background(255);
   image(video, 0, 0);
-  image(segmentation.personMask, 0, 0, 360, 270);
-
-  ctx.putImageData(segmentation.raw.personMask, 0, 0);
+  if (segmentation) {
+    image(segmentation.mask, 0, 0, 360, 270);
+  }
 }
-
-function draw() {}
+// Event for body segmentation
+function gotResults(result) {
+  segmentation = result;
+}

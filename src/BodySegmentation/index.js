@@ -11,7 +11,6 @@
 import * as tf from "@tensorflow/tfjs";
 import * as bodySegmentation from "@tensorflow-models/body-segmentation";
 import callCallback from "../utils/callcallback";
-import generatedImageResult from "../utils/generatedImageResult";
 import handleArguments from "../utils/handleArguments";
 import BODYPIX_PALETTE from "./BODYPIX_PALETTE";
 import { mediaReady } from "../utils/imageUtilities";
@@ -30,7 +29,6 @@ class BodyPix {
     this.modelName = modelName;
     this.video = video;
     this.model = null;
-    this.modelReady = false;
     this.config = options;
     this.runtimeConfig = {};
     this.detectMedia = null;
@@ -52,13 +50,16 @@ class BodyPix {
         multiplier: this.config.multiplier ?? 1, // 0.5, 0.75 or 1, only for MobileNetV1
         outputStride: this.config.outputStride ?? 16, // 8 or 16 for MobileNetV1, 16 or 32 for ResNet50
         quantBytes: this.config.quantBytes ?? 2, // 1, 2 or 4, accuracy and model siz increase correspondingly
-        maskType: this.config.maskType ?? "background", // "person", "background", or "color"
       };
       this.runtimeConfig = {
-        multiSegmentation: this.config?.multiSegmentation ?? false, // whether we need multiple outputs when multiple people detected
+        maskType: this.config.maskType ?? "background", // "person", "background", or "parts"
+        multiSegmentation: this.config?.multiSegmentation ?? false,
         segmentBodyParts: this.config?.segmentBodyParts ?? true, // if bodyparts are segmented
         flipHorizontal: this.config?.flipHorizontal ?? false, // set to true for webcam
       };
+      if (this.runtimeConfig.maskType === "parts") {
+        // whether we need multiple outputs when multiple people detected
+      }
     } else {
       if (this.modelName !== "SelfieSegmentation") {
         console.warn(
@@ -72,24 +73,74 @@ class BodyPix {
           this.config.solution ??
           "https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation",
         modelType: this.config.modelType ?? "general", // "general" or "landscape"
-
-        maskType: this.config.maskType ?? "background", // "person", "background", or "color"
       };
       this.runtimeConfig = {
+        maskType: this.config.maskType ?? "background", // "person", "background", or "parts"
         flipHorizontal: this.config?.flipHorizontal ?? false, // set to true for webcam
       };
+      if (this.runtimeConfig.maskType === "parts") {
+        this.runtimeConfig.maskType = "person";
+        console.warn(
+          `Selfie Segmentation model does not segment individual body parts, using maskType "person" instead.`
+        );
+      }
     }
 
     await tf.ready();
     this.model = await bodySegmentation.createSegmenter(pipeline, modelConfig);
-    this.modelReady = true;
 
     // for compatibility with p5's preload()
     if (this.p5PreLoadExists) window._decrementPreload();
 
     return this;
   }
+  /**
+   * Calls segmentPeople in a loop.
+   * Can be started by detectStart() and terminated by detectStop().
+   * @private
+   */
+  async detect(...inputs) {
+    const argumentObject = handleArguments(...inputs);
+    argumentObject.require(
+      "image",
+      "An html or p5.js image, video, or canvas element argument is required for detectStart()."
+    );
+    const { image, callback } = argumentObject;
 
+    await mediaReady(image, false);
+
+    const segmentation = await this.model.segmentPeople(
+      image,
+      this.runtimeConfig
+    );
+
+    const result = {};
+    switch (this.runtimeConfig.maskType) {
+      case "person":
+        result.maskImageData = await bodySegmentation.toBinaryMask(
+          segmentation,
+          { r: 0, g: 0, b: 0, a: 255 },
+          { r: 0, g: 0, b: 0, a: 0 }
+        );
+        break;
+      case "background":
+        result.maskImageData = await bodySegmentation.toBinaryMask(
+          segmentation
+        );
+        break;
+      case "parts":
+        result.maskImageData = await bodySegmentation.toColoredMask(
+          segmentation,
+          bodySegmentation.bodyPixMaskValueToRainbowColor,
+          { r: 255, g: 255, b: 255, a: 255 }
+        );
+        result.bodyParts = BODYPIX_PALETTE;
+    }
+    result.mask = this.generateP5Image(result.maskImageData);
+
+    if (callback) callback(result);
+    return result;
+  }
   /**
    * Repeatedly outputs hand predictions through a callback function.
    * @param {*} [media] - An HMTL or p5.js image, video, or canvas element to run the prediction on.
@@ -143,38 +194,29 @@ class BodyPix {
         this.runtimeConfig
       );
 
-      const result = {
-        segmentation,
-        raw: {
-          personMask: null,
-          backgroundMask: null,
-          partMask: null,
-        },
-        personMask: null,
-        backgroundMask: null,
-        partMask: null,
-        bodyParts: BODYPIX_PALETTE,
-      };
-
-      result.raw.personMask = await bodySegmentation.toBinaryMask(
-        segmentation,
-        { r: 0, g: 0, b: 0, a: 255 },
-        { r: 0, g: 0, b: 0, a: 0 }
-      );
-      result.raw.backgroundMask = await bodySegmentation.toBinaryMask(
-        segmentation
-      );
-      if (this.runtimeConfig.segmentBodyParts) {
-        result.raw.partMask = await bodySegmentation.toColoredMask(
-          segmentation,
-          bodySegmentation.bodyPixMaskValueToRainbowColor,
-          { r: 255, g: 255, b: 255, a: 255 }
-        );
+      const result = {};
+      switch (this.runtimeConfig.maskType) {
+        case "person":
+          result.maskImageData = await bodySegmentation.toBinaryMask(
+            segmentation,
+            { r: 0, g: 0, b: 0, a: 255 },
+            { r: 0, g: 0, b: 0, a: 0 }
+          );
+          break;
+        case "background":
+          result.maskImageData = await bodySegmentation.toBinaryMask(
+            segmentation
+          );
+          break;
+        case "parts":
+          result.maskImageData = await bodySegmentation.toColoredMask(
+            segmentation,
+            bodySegmentation.bodyPixMaskValueToRainbowColor,
+            { r: 255, g: 255, b: 255, a: 255 }
+          );
+          result.bodyParts = BODYPIX_PALETTE;
       }
-
-      result.personMask = this.generateP5Image(result.raw.personMask);
-      //result.backgroundMask = await generatedImageResult(result.raw.backgroundMask) || result.raw.backgroundMask;
-      //result.partMask = await generatedImageResult(result.raw.partMask) || result.raw.partMask;
+      result.mask = this.generateP5Image(result.maskImageData);
 
       this.detectCallback(result);
       await tf.nextFrame();
