@@ -237,9 +237,7 @@ class BodyPix {
     if (window?.p5) {
       const img = new p5.Image(imageData.width, imageData.height);
       img.loadPixels();
-      for (let i = 0; i < img.pixels.length; i++) {
-        img.pixels[i] = imageData.data[i];
-      }
+      img.pixels.set(imageData.data, 0);
       img.updatePixels();
       return img;
     } else {
