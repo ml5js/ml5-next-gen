@@ -185,12 +185,19 @@ class Facemesh {
       for (let i = 0; i < face.keypoints.length; i++) {
         let keypoint = face.keypoints[i];
         if (!keypoint.name) continue;
-        if (!face[keypoint.name]) face[keypoint.name] = [];
-        face[keypoint.name].push({
+        if (!face[keypoint.name]) face[keypoint.name] = { keypoints: [] };
+        let namedKeypoint = face[keypoint.name];
+        namedKeypoint.keypoints.push({
           x: keypoint.x,
           y: keypoint.y,
           z: keypoint.z,
         });
+        namedKeypoint.x = (namedKeypoint.x === undefined || keypoint.x < namedKeypoint.x) ? keypoint.x : namedKeypoint.x;
+        namedKeypoint.y = (namedKeypoint.y === undefined || keypoint.y < namedKeypoint.y) ? keypoint.y : namedKeypoint.y;
+        namedKeypoint.width = (namedKeypoint.width === undefined || keypoint.x - namedKeypoint.x > namedKeypoint.width) ? (keypoint.x-namedKeypoint.x) : namedKeypoint.width;
+        namedKeypoint.height = (namedKeypoint.height === undefined || keypoint.y - namedKeypoint.y > namedKeypoint.height) ? (keypoint.y-namedKeypoint.y) : namedKeypoint.height;
+        namedKeypoint.centerX = namedKeypoint.x + namedKeypoint.width / 2;
+        namedKeypoint.centerX = namedKeypoint.y + namedKeypoint.height / 2;
       }
       return face;
     });
