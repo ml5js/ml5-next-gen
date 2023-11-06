@@ -197,7 +197,7 @@ class Facemesh {
         namedKeypoint.width = (namedKeypoint.width === undefined || keypoint.x - namedKeypoint.x > namedKeypoint.width) ? (keypoint.x-namedKeypoint.x) : namedKeypoint.width;
         namedKeypoint.height = (namedKeypoint.height === undefined || keypoint.y - namedKeypoint.y > namedKeypoint.height) ? (keypoint.y-namedKeypoint.y) : namedKeypoint.height;
         namedKeypoint.centerX = namedKeypoint.x + namedKeypoint.width / 2;
-        namedKeypoint.centerX = namedKeypoint.y + namedKeypoint.height / 2;
+        namedKeypoint.centerY = namedKeypoint.y + namedKeypoint.height / 2;
       }
       return face;
     });
