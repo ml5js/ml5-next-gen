@@ -9,13 +9,13 @@
  */
 
 import * as tf from "@tensorflow/tfjs";
-import * as bodySegmentation from "@tensorflow-models/body-segmentation";
+import * as tfBodySegmentation from "@tensorflow-models/body-segmentation";
 import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import BODYPIX_PALETTE from "./BODYPIX_PALETTE";
 import { mediaReady } from "../utils/imageUtilities";
 
-class BodyPix {
+class BodySegmentation {
   /**
    * Create BodyPix.
    * @param {HTMLVideoElement} [video] - An HTMLVideoElement.
@@ -44,7 +44,7 @@ class BodyPix {
     let pipeline;
     let modelConfig;
     if (this.modelName === "BodyPix") {
-      pipeline = bodySegmentation.SupportedModels.BodyPix;
+      pipeline = tfBodySegmentation.SupportedModels.BodyPix;
       modelConfig = {
         architecture: this.config.architecture ?? "ResNet50", // MobileNetV1 or ResNet 50
         multiplier: this.config.multiplier ?? 1, // 0.5, 0.75 or 1, only for MobileNetV1
@@ -66,7 +66,7 @@ class BodyPix {
           `Expect model name to be "BodyPix" or "SelfieSegmentation", but got "${this.modelName}". Using "SelfieSegmentation" instead.`
         );
       }
-      pipeline = bodySegmentation.SupportedModels.MediaPipeSelfieSegmentation;
+      pipeline = tfBodySegmentation.SupportedModels.MediaPipeSelfieSegmentation;
       modelConfig = {
         runtime: this.config.runtime ?? "mediapipe",
         solutionPath:
@@ -87,7 +87,10 @@ class BodyPix {
     }
 
     await tf.ready();
-    this.model = await bodySegmentation.createSegmenter(pipeline, modelConfig);
+    this.model = await tfBodySegmentation.createSegmenter(
+      pipeline,
+      modelConfig
+    );
 
     // for compatibility with p5's preload()
     if (this.p5PreLoadExists) window._decrementPreload();
@@ -117,21 +120,21 @@ class BodyPix {
     const result = {};
     switch (this.runtimeConfig.maskType) {
       case "person":
-        result.maskImageData = await bodySegmentation.toBinaryMask(
+        result.maskImageData = await tfBodySegmentation.toBinaryMask(
           segmentation,
           { r: 0, g: 0, b: 0, a: 255 },
           { r: 0, g: 0, b: 0, a: 0 }
         );
         break;
       case "background":
-        result.maskImageData = await bodySegmentation.toBinaryMask(
+        result.maskImageData = await tfBodySegmentation.toBinaryMask(
           segmentation
         );
         break;
       case "parts":
-        result.maskImageData = await bodySegmentation.toColoredMask(
+        result.maskImageData = await tfBodySegmentation.toColoredMask(
           segmentation,
-          bodySegmentation.bodyPixMaskValueToRainbowColor,
+          tfBodySegmentation.bodyPixMaskValueToRainbowColor,
           { r: 255, g: 255, b: 255, a: 255 }
         );
         result.bodyParts = BODYPIX_PALETTE;
@@ -197,21 +200,21 @@ class BodyPix {
       const result = {};
       switch (this.runtimeConfig.maskType) {
         case "person":
-          result.maskImageData = await bodySegmentation.toBinaryMask(
+          result.maskImageData = await tfBodySegmentation.toBinaryMask(
             segmentation,
             { r: 0, g: 0, b: 0, a: 255 },
             { r: 0, g: 0, b: 0, a: 0 }
           );
           break;
         case "background":
-          result.maskImageData = await bodySegmentation.toBinaryMask(
+          result.maskImageData = await tfBodySegmentation.toBinaryMask(
             segmentation
           );
           break;
         case "parts":
-          result.maskImageData = await bodySegmentation.toColoredMask(
+          result.maskImageData = await tfBodySegmentation.toColoredMask(
             segmentation,
-            bodySegmentation.bodyPixMaskValueToRainbowColor,
+            tfBodySegmentation.bodyPixMaskValueToRainbowColor,
             { r: 255, g: 255, b: 255, a: 255 }
           );
           result.bodyParts = BODYPIX_PALETTE;
@@ -262,13 +265,13 @@ class BodyPix {
 }
 
 /**
- * @param {(HTMLVideoElement | p5.Video | BodyPixOptions |  ML5Callback<BodyPix>)[]} [inputs]
- * @return {BodyPix | Promise<BodyPix>}
+ * Factory function that returns a Facemesh instance
+ * @returns {Object} A new bodySegmentation instance
  */
-const bodyPix = (...inputs) => {
+const bodySegmentation = (...inputs) => {
   const { string, options = {}, callback } = handleArguments(...inputs);
-  const instance = new BodyPix(string, options, callback);
+  const instance = new BodySegmentation(string, options, callback);
   return instance;
 };
 
-export default bodyPix;
+export default bodySegmentation;
