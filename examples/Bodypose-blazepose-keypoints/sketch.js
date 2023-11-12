@@ -8,7 +8,7 @@ let bodypose;
 let poses = [];
 
 function preload() {
-  //Load the bodypose model.
+  // Load the bodypose model
   bodypose = ml5.bodypose("BlazePose");
 }
 
