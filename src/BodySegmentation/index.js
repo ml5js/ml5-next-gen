@@ -239,9 +239,7 @@ class BodySegmentation {
   generateP5Image(imageData) {
     if (window?.p5) {
       const img = new p5.Image(imageData.width, imageData.height);
-      img.loadPixels();
-      img.pixels.set(imageData.data, 0);
-      img.updatePixels();
+      img.drawingContext.putImageData(imageData, 0, 0);
       return img;
     } else {
       return imageData;
