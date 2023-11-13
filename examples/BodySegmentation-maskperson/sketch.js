@@ -17,7 +17,7 @@ let options = {
 };
 
 function preload() {
-  bodyPix = ml5.bodyPix(video, options);
+  bodyPix = ml5.bodySegmentation(video, options);
 }
 
 function setup() {

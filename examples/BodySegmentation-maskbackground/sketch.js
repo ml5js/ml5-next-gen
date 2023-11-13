@@ -3,11 +3,6 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-/* ===
-ml5 Example
-BodyPix
-=== */
-
 let bodyPix;
 let video;
 let segmentation;
@@ -17,7 +12,7 @@ let options = {
 };
 
 function preload() {
-  bodyPix = ml5.bodyPix(video, options);
+  bodyPix = ml5.bodySegmentation(video, options);
 }
 
 function setup() {
