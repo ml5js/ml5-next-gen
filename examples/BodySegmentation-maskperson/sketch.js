@@ -11,17 +11,19 @@ BodyPix
 let bodyPix;
 let video;
 let segmentation;
+let t = 0;
 
 let options = {
   maskType: "person",
 };
 
 function preload() {
-  bodyPix = ml5.bodySegmentation(video, options);
+  bodyPix = ml5.bodySegmentation("SelfieSegmentation", options);
 }
 
 function setup() {
   createCanvas(640, 480);
+  colorMode(HSB, 100);
   // Create the video
   video = createCapture(VIDEO);
   video.size(width, height);
@@ -31,12 +33,15 @@ function setup() {
 }
 
 function draw() {
-  background(255);
-  image(video, 0, 0);
+  t += 0.5;
+  if (t > 100) {
+    t = 0;
+  }
+  background(t, 100, 80);
+
   if (segmentation) {
-    tint(255, 200);
-    image(segmentation, 0, 0, width, height);
-    tint(255, 255);
+    video.mask(segmentation);
+    image(video, 0, 0);
   }
 }
 // callback function for body segmentation

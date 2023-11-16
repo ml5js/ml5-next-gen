@@ -12,7 +12,7 @@ let options = {
 };
 
 function preload() {
-  bodyPix = ml5.bodySegmentation("BodyPix", video, options);
+  bodyPix = ml5.bodySegmentation("BodyPix", options);
 }
 
 function setup() {
@@ -29,9 +29,7 @@ function draw() {
   background(255);
   image(video, 0, 0);
   if (segmentation) {
-    tint(255, 200);
     image(segmentation, 0, 0, width, height);
-    tint(255, 255);
   }
 }
 // callback function for body segmentation
