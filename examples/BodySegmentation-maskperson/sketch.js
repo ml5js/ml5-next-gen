@@ -18,7 +18,7 @@ let options = {
 };
 
 function preload() {
-  bodyPix = ml5.bodySegmentation("BodySegmentation", options);
+  bodyPix = ml5.bodySegmentation("SelfieSegmentation", options);
 }
 
 function setup() {
