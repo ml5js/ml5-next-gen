@@ -143,14 +143,14 @@ class BodySegmentation {
 
     const result = {};
     switch (this.runtimeConfig.maskType) {
-      case "person":
+      case "background":
         result.maskImageData = await tfBodySegmentation.toBinaryMask(
           segmentation,
           { r: 0, g: 0, b: 0, a: 255 },
           { r: 0, g: 0, b: 0, a: 0 }
         );
         break;
-      case "background":
+      case "person":
         result.maskImageData = await tfBodySegmentation.toBinaryMask(
           segmentation
         );
@@ -223,14 +223,14 @@ class BodySegmentation {
 
       const result = {};
       switch (this.runtimeConfig.maskType) {
-        case "person":
+        case "background":
           result.maskImageData = await tfBodySegmentation.toBinaryMask(
             segmentation,
             { r: 0, g: 0, b: 0, a: 255 },
             { r: 0, g: 0, b: 0, a: 0 }
           );
           break;
-        case "background":
+        case "person":
           result.maskImageData = await tfBodySegmentation.toBinaryMask(
             segmentation
           );

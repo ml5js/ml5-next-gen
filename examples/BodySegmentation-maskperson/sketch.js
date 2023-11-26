@@ -11,7 +11,6 @@ BodyPix
 let bodyPix;
 let video;
 let segmentation;
-let t = 0;
 
 let options = {
   maskType: "person",
@@ -23,7 +22,6 @@ function preload() {
 
 function setup() {
   createCanvas(640, 480);
-  colorMode(HSB, 100);
   // Create the video
   video = createCapture(VIDEO);
   video.size(width, height);
@@ -33,11 +31,7 @@ function setup() {
 }
 
 function draw() {
-  t += 0.5;
-  if (t > 100) {
-    t = 0;
-  }
-  background(t, 100, 80);
+  background(0, 255, 0);
 
   if (segmentation) {
     video.mask(segmentation);
