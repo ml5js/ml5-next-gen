@@ -14,11 +14,11 @@ let segmentation;
 let t = 0;
 
 let options = {
-  maskType: "parts",
+  maskType: "person",
 };
 
 function preload() {
-  bodyPix = ml5.bodySegmentation("BodyPix", options);
+  bodyPix = ml5.bodySegmentation("BodySegmentation", options);
 }
 
 function setup() {
