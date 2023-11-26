@@ -22,7 +22,7 @@ class BodySegmentation {
    * @param {object} [options] - An object with options.
    * @param {function} [callback] - A callback to be called when the model is ready.
    */
-  constructor(modelName = "SelfieSegmentation", options, callback) {
+  constructor(modelName, options, callback) {
     // for compatibility with p5's preload()
     if (this.p5PreLoadExists()) window._incrementPreload();
 
@@ -43,6 +43,35 @@ class BodySegmentation {
   async loadModel() {
     let pipeline;
     let modelConfig;
+
+    // select the correct model based on mask type
+    if (!this.modelName) {
+      if (this.config.maskType === "parts") {
+        this.modelName = "BodyPix";
+      } else {
+        this.modelName = "SelfieSegmentation";
+      }
+    } else {
+      if (this.config.maskType === "parts") {
+        if (this.modelName !== "BodyPix") {
+          console.warn(
+            `Expect model name to be "BodyPix" when maskType is "parts", but got "${this.modelName}". Using "BodyPix" instead.`
+          );
+          this.modelName = "BodyPix";
+        }
+      } else {
+        if (
+          this.modelName !== "SelfieSegmentation" &&
+          this.modelName !== "BodyPix"
+        ) {
+          console.warn(
+            `Expect model name to be "SelfieSegmentation" or "BodyPix", but got "${this.modelName}". Using "SelfieSegmentation" instead.`
+          );
+          this.modelName = "SelfieSegmentation";
+        }
+      }
+    }
+
     if (this.modelName === "BodyPix") {
       pipeline = tfBodySegmentation.SupportedModels.BodyPix;
       modelConfig = {
@@ -61,11 +90,6 @@ class BodySegmentation {
         // whether we need multiple outputs when multiple people detected
       }
     } else {
-      if (this.modelName !== "SelfieSegmentation") {
-        console.warn(
-          `Expect model name to be "BodyPix" or "SelfieSegmentation", but got "${this.modelName}". Using "SelfieSegmentation" instead.`
-        );
-      }
       pipeline = tfBodySegmentation.SupportedModels.MediaPipeSelfieSegmentation;
       modelConfig = {
         runtime: this.config.runtime ?? "mediapipe",
