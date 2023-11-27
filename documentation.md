@@ -4,70 +4,88 @@ This is a temporary API reference for the next generation ml5 library. The proje
 
 ---
 
-## ml5.bodyPix
+## ml5.bodySegmentation
 
 ### Description
 
-As written by the developers of BodyPix:
-
-"Bodypix is an open-source machine learning model which allows for person and body-part segmentation in the browser with TensorFlow.js. In computer vision, image segmentation refers to the technique of grouping pixels in an image into semantic areas typically to locate objects and boundaries. The BodyPix model is trained to do this for a person and twenty-four body parts (parts such as the left hand, front right lower leg, or back torso). In other words, BodyPix can classify the pixels of an image into two categories: 1. pixels that represent a person and 2. pixels that represent background. It can further classify pixels representing a person into any one of twenty-four body parts."
+BodySegmentation divides an image input into the people and the background.
 
 ### Methods
 
-#### ml5.bodyPix()
+#### ml5.bodySegmentation()
 
-This method is used to initialize the bodyPix object.
+This method is used to initialize the bodySegmentation object.
 
 ```javascript
-const bodyPix = ml5.bodyPix(?video, ?options, ?callback);
+const bodySegmentation = ml5.bodySegmentation(?modelName, ?options, ?callback);
 ```
 
 **Parameters:**
 
-- **video**: OPTIONAL. An HTMLVideoElement or p5.Video to run the segmentation on.
+- **modelName**: OPTIONAL: A string specifying which model to use, "SelfieSegmentation" or "BodyPix".
 
-- **options**: OPTIONAL. An object to change the default configuration of the model. The default and available options are:
+- **options**: OPTIONAL. An object to change the default configuration of the model. See the example options:
 
   ```javascript
   {
-    architecture: "ResNet50", // "MobileNetV1" or "ResNet50"
-    multiplier: 1, // 0.5, 0.75 or 1
-    outputStride: 16, // 8, 16, or 32
-    quantBytes: 2, //1, 2 or 4
+    runtime: "mediaPipe", // "mediapipe" or "tfjs"
+    modelType: "general", // "general" or "landscape"
+    maskType: :"background", //"background", "body", or "parts" (used to change the type of segmentation mask output)
   }
   ```
 
-  More info on options [here](https://github.com/tensorflow/tfjs-models/tree/master/body-segmentation/src/body_pix#create-a-detector).
+  [More info on options for SelfieSegmentation with mediaPipe runtime](https://github.com/tensorflow/tfjs-models/tree/master/body-segmentation/src/selfie_segmentation_mediapipe#create-a-detector).
+  [More info on options for SelfieSegmentation with tfjs runtime](https://github.com/tensorflow/tfjs-models/tree/master/body-segmentation/src/selfie_segmentation_tfjs#create-a-detector).
 
-- **callback(bodyPix, error)**: OPTIONAL. A function to run once the model has been loaded. Alternatively, call `ml5.bodyPix()` within the p5 `preload` function.
+- **callback(bodySegmentation, error)**: OPTIONAL. A function to run once the model has been loaded. Alternatively, call `ml5.bodySegmentation()` within the p5 `preload` function.
 
 **Returns:**  
-The bodyPix object.
+The bodySegmentation object.
 
-#### bodyPix.segment()
+#### bodySegmentation.detectStart()
 
-This method allows you to run segmentation on an image.
+This method repeatedly outputs segmentation masks on an image media through a callback function.
 
 ```javascript
-bodyPix.segment(?input, callback);
+bodySegmentation.detectStart(media, callback);
 ```
 
 **Parameters:**
 
-- **input**: HTMLImageElement, HTMLVideoElement, ImageData, or HTMLCanvasElement. NOTE: Videos can be added through `ml5.bodyPix`.
+- **media**: An HTML or p5.js image, video, or canvas element to run the segmentation on.
 
-- **callback(output, error)**: A function to handle the output of `bodyPix.segment()`. Likely a function to do something with the segmented image. See below for the output passed into the callback function:
+- **callback(output, error)**: A function to handle the output of `bodySegmentation.detectStart()`. Likely a function to do something with the segmented image. See below for the output passed into the callback function:
 
   ```javascript
   {
-    backgroundMask,
-    bodyParts,
-    partMask,
-    personMask,
-    raw: { backgroundMask, partMask, personMask },
-    segmentation: [{ mask, maskValueToLabel}, ...],
+    mask: {},//A p5 Image object, can be directly passed into p5 image() function
+    maskImageData: {}//A ImageData object
   }
   ```
+
+#### bodySegmentation.detectStop()
+
+This method can be called after a call to `bodySegmentation.detectStart` to stop the repeating pose estimation.
+
+```javascript
+bodySegmentation.detectStop();
+```
+
+#### bodySegmentation.detect()
+
+This method asynchronously outputs a single segmentation mask on an image media when called.
+
+```javascript
+bodySegmentation.detect(media, ?callback);
+```
+
+**Parameters:**
+
+- **media**: An HTML or p5.js image, video, or canvas element to run the segmentation on.
+- **callback(output, error)**: OPTIONAL. A callback function to handle the output of the estimation, see output example above.
+
+**Returns:**  
+A promise that resolves to the segmentation output.
 
 ### Examples
 
@@ -124,9 +142,9 @@ const bodypose = ml5.bodypose(?modelName, ?options, ?callback);
   }
   ```
 
- [More info on options for MediaPipe BlazePose](https://github.com/tensorflow/tfjs-models/tree/master/pose-detection/src/blazepose_mediapipe) and for TFJS BlazePose [here](https://github.com/tensorflow/tfjs-models/tree/master/pose-detection/src/blazepose_tfjs#create-a-detector).
+[More info on options for MediaPipe BlazePose](https://github.com/tensorflow/tfjs-models/tree/master/pose-detection/src/blazepose_mediapipe) and for TFJS BlazePose [here](https://github.com/tensorflow/tfjs-models/tree/master/pose-detection/src/blazepose_tfjs#create-a-detector).
 
-- **callback(bodypose, error)**: OPTIONAL. A function to run once the model has been loaded. Alternatively, call `ml5.bodyPix()` within the p5 `preload` function.
+- **callback(bodypose, error)**: OPTIONAL. A function to run once the model has been loaded. Alternatively, call `ml5.bodypose()` within the p5 `preload` function.
 
 **Returns:**  
 The bodypose object.
