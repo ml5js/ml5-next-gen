@@ -7,7 +7,7 @@ import * as tf from "@tensorflow/tfjs";
 import * as tfvis from "@tensorflow/tfjs-vis";
 import p5Utils from "./utils/p5Utils";
 import setBackend from "./utils/setBackend";
-import bodyPix from "./BodySegmentation";
+import bodySegmentation from "./BodySegmentation";
 import communityStatement from "./utils/communityStatement";
 
 export default Object.assign(
@@ -21,7 +21,7 @@ export default Object.assign(
     facemesh,
     bodypose,
     setBackend,
-    bodyPix,
+    bodySegmentation,
   }
 );
 
