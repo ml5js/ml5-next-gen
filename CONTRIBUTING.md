@@ -70,3 +70,48 @@ yarn run build
 ```
 
 This will create a production version of the library in `/dist` directory.
+
+## Making Releases
+
+_This section is a temporary guide for contributors who wants to make a alpha release manually._
+
+1. Create a new pull request on the main branch to update the SemVer number in `package.json`. For alpha releases, simply increment the trailing number in the SemVer. For example, `"version": "0.20.0-alpha.3"` should be changed to `"version": "0.20.0-alpha.4"`.
+
+2. Merge the pull request.
+
+3. Switch to the main branch and make sure the code is up to date by running the following command:
+
+```
+git checkout main
+git pull
+```
+
+4. Make sure all dependencies have been installed by running the following command:
+
+```
+yarn
+```
+
+5. Build the project with the following command and wait for the build to complete:
+
+```
+yarn run build
+```
+
+6. Run the following command and log in with an npm account that has write access to the ml5 package. You may be redirected to a browser window for authentication.
+
+```
+npm login
+```
+
+7. Publish the package with the following command. You may be redirected to a browser window for authentication.
+
+```
+npm publish --tag alpha --access public
+```
+
+8. The package should now be available at. (Replace [version] with the new SemVer set in step 1).
+
+```
+   https://unpkg.com/ml5@[version]/dist/ml5.js
+```
