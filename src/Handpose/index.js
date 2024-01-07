@@ -65,6 +65,7 @@ class Handpose {
     const modelConfig = handleOptions(this.config, {
       maxHands: {
         type: "number",
+        min: 1,
         default: 2,
       },
       runtime: {

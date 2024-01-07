@@ -26,8 +26,20 @@ function handleOptions(optionsObject, moldObject) {
       switch (type) {
         case "string":
           break;
+
         case "number":
+          const min = moldObject[key].min ?? -Infinity;
+          const max = moldObject[key].max ?? Infinity;
+          if (userValue < min || userValue > max) {
+            console.warn(
+              `The value of ${key} is not within the range of ${min} to ${max}. Using default value ${defaultValue} instead.`
+            );
+            options[key] = defaultValue;
+          } else {
+            options[key] = userValue;
+          }
           break;
+
         case "boolean":
           break;
         case "object":
