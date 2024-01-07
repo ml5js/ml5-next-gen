@@ -41,7 +41,9 @@ function handleOptions(optionsObject, moldObject) {
           break;
 
         case "boolean":
+          options[key] = userValue;
           break;
+
         case "object":
           break;
         default:
