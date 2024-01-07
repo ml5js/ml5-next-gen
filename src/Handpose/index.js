@@ -12,6 +12,7 @@ import * as tf from "@tensorflow/tfjs";
 import * as handPoseDetection from "@tensorflow-models/hand-pose-detection";
 import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
+import handleOptions from "../utils/handleOptions";
 import { mediaReady } from "../utils/imageUtilities";
 
 class Handpose {
@@ -61,16 +62,33 @@ class Handpose {
   async loadModel() {
     const pipeline = handPoseDetection.SupportedModels.MediaPipeHands;
     //filter out model config options
-    const modelConfig = {
-      maxHands: this.config?.maxHands ?? 2,
-      runtime: this.config?.runtime ?? "mediapipe",
-      modelType: this.config?.modelType ?? "full",
-      solutionPath:
-        this.config?.solutionPath ??
-        "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
-      detectorModelUrl: this.config?.detectorModelUrl,
-      landmarkModelUrl: this.config?.landmarkModelUrl,
-    };
+    const modelConfig = handleOptions(this.config, {
+      maxHands: {
+        type: "number",
+        default: 2,
+      },
+      runtime: {
+        type: "string",
+        default: "mediapipe",
+      },
+      modelType: {
+        type: "string",
+        default: "full",
+      },
+      solutionPath: {
+        type: "string",
+        default: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
+      },
+      detectorModelUrl: {
+        type: "string",
+        default: undefined,
+      },
+      landmarkModelUrl: {
+        type: "string",
+        default: undefined,
+      },
+    });
+    console.log(modelConfig);
     this.runtimeConfig = {
       flipHorizontal: this.config?.flipHorizontal ?? false,
     };
