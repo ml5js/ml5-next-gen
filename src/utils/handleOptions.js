@@ -17,43 +17,60 @@ function handleOptions(optionsObject, moldObject) {
 
     if (userValue === undefined) {
       options[key] = defaultValue;
-    } else if (typeof userValue !== type) {
+    } else if (typeof userValue !== type && type !== "enum") {
       console.warn(
         `The value of ${key} is not of type ${type}. Using default value ${defaultValue} instead.`
       );
       options[key] = defaultValue;
     } else {
-      switch (type) {
-        case "number":
-          const min = moldObject[key].min ?? -Infinity;
-          const max = moldObject[key].max ?? Infinity;
-          if (userValue < min || userValue > max) {
-            console.warn(
-              `The value of ${key} is not within the range of ${min} to ${max}. Using default value ${defaultValue} instead.`
-            );
-            options[key] = defaultValue;
-          } else {
-            options[key] = userValue;
-          }
-          break;
-
-        case "boolean":
+      if (type === "enum") {
+        const enums = moldObject[key].enums;
+        const caseInsensitive = moldObject[key].caseInsensitive ?? true;
+        if (caseInsensitive && typeof userValue === "string") {
+          enums.forEach((enumValue) => {
+            if (enumValue.toLowerCase() === userValue.toLowerCase()) {
+              options[key] = enumValue;
+            }
+          });
+        } else {
+          enums.forEach((enumValue) => {
+            if (enumValue === userValue) {
+              options[key] = enumValue;
+            }
+          });
+        }
+        if (options[key] === undefined) {
+          console.warn(
+            `The value of ${key} is one of ${enums.join(
+              ", "
+            )}. Using default value ${defaultValue} instead.`
+          );
+          options[key] = defaultValue;
+        }
+      } else if (type === "number") {
+        const min = moldObject[key].min ?? -Infinity;
+        const max = moldObject[key].max ?? Infinity;
+        if (userValue < min || userValue > max) {
+          console.warn(
+            `The value of ${key} is not within the range of ${min} to ${max}. Using default value ${defaultValue} instead.`
+          );
+          options[key] = defaultValue;
+        } else {
           options[key] = userValue;
-          break;
-
-        case "string":
-          const caseInsensitive = moldObject[key].caseInsensitive ?? true;
-          if (caseInsensitive) {
-            options[key] = userValue.toLowerCase();
-          } else {
-            options[key] = userValue;
-          }
-          break;
-
-        case "object":
-          break;
-        default:
-          throw new Error(`Unknown type ${type} for ${key} in moldObject.`);
+        }
+      } else if (type === "boolean") {
+        options[key] = userValue;
+        break;
+      } else if (type === "string") {
+        const lowercase = moldObject[key].lowercase ?? false;
+        if (lowercase) {
+          options[key] = userValue.toLowerCase();
+        } else {
+          options[key] = userValue;
+        }
+        break;
+      } else {
+        throw new Error(`Unknown type ${type} for ${key} in moldObject.`);
       }
     }
   }

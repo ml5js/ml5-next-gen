@@ -69,11 +69,15 @@ class Handpose {
         default: 2,
       },
       runtime: {
-        type: "string",
+        type: "enum",
+        enums: ["mediapipe", "tfjs"],
+        caseInsensitive: true,
         default: "mediapipe",
       },
       modelType: {
-        type: "string",
+        type: "enum",
+        enums: ["lite", "full"],
+        caseInsensitive: true,
         default: "full",
       },
       solutionPath: {
