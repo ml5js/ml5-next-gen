@@ -24,9 +24,6 @@ function handleOptions(optionsObject, moldObject) {
       options[key] = defaultValue;
     } else {
       switch (type) {
-        case "string":
-          break;
-
         case "number":
           const min = moldObject[key].min ?? -Infinity;
           const max = moldObject[key].max ?? Infinity;
@@ -42,6 +39,15 @@ function handleOptions(optionsObject, moldObject) {
 
         case "boolean":
           options[key] = userValue;
+          break;
+
+        case "string":
+          const caseInsensitive = moldObject[key].caseInsensitive ?? true;
+          if (caseInsensitive) {
+            options[key] = userValue.toLowerCase();
+          } else {
+            options[key] = userValue;
+          }
           break;
 
         case "object":
