@@ -72,7 +72,9 @@ class Handpose {
         type: "enum",
         enums: ["mediapipe", "tfjs"],
         caseInsensitive: true,
-        default: "mediapipe",
+        default: function () {
+          return this.maxHands === 1 ? "tfjs" : "mediapipe";
+        },
       },
       modelType: {
         type: "enum",
