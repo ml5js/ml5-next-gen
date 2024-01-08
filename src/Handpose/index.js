@@ -71,15 +71,11 @@ class Handpose {
       runtime: {
         type: "enum",
         enums: ["mediapipe", "tfjs"],
-        caseInsensitive: true,
-        default: function () {
-          return this.maxHands === 1 ? "tfjs" : "mediapipe";
-        },
+        default: "mediapipe",
       },
       modelType: {
         type: "enum",
         enums: ["lite", "full"],
-        caseInsensitive: true,
         default: "full",
       },
       solutionPath: {
@@ -95,10 +91,12 @@ class Handpose {
         default: undefined,
       },
     });
-    console.log(modelConfig);
-    this.runtimeConfig = {
-      flipHorizontal: this.config?.flipHorizontal ?? false,
-    };
+    this.runtimeConfig = handleOptions(this.config, {
+      flipHorizontal: {
+        type: "boolean",
+        default: false,
+      },
+    });
 
     await tf.ready();
     this.model = await handPoseDetection.createDetector(pipeline, modelConfig);
