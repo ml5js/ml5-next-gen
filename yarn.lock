@@ -115,6 +115,11 @@
   dependencies:
     rimraf "^3.0.2"
 
+"@tensorflow-models/mobilenet@^2.1.0":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@tensorflow-models/mobilenet/-/mobilenet-2.1.1.tgz#5b02c3e99a19534e3b303f57dccf31f85fec7683"
+  integrity sha512-tv4s4UFzG74PkIwl4gT64AyRnCcNUq+s8wSzge+LN/Puc1VUuInZghrobvpNlWjZtVi1x1d1NsBD//TfOr2ssA==
+
 "@tensorflow-models/pose-detection@^2.1.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@tensorflow-models/pose-detection/-/pose-detection-2.1.0.tgz#733ce55dfe4a75d40cb04935e461beacac2e8e4d"

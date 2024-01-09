@@ -9,17 +9,9 @@ import p5Utils from "./utils/p5Utils";
 import setBackend from "./utils/setBackend";
 import bodyPix from "./BodySegmentation";
 import communityStatement from "./utils/communityStatement";
-import imageClassifier from "./ImageClassifier";
-import preloadRegister from "./utils/p5PreloadHelper";
-
-const withPreload = {
-  imageClassifier,
-};
-
 
 export default Object.assign(
   { p5Utils },
-  preloadRegister(withPreload),
   {
     tf,
     tfvis,

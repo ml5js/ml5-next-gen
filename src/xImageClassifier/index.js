@@ -15,7 +15,7 @@ import handleArguments from "../utils/handleArguments";
 import * as darknet from "./darknet";
 import * as doodlenet from "./doodlenet";
 import callCallback from "../utils/callcallback";
-import { mediaReady } from "../utils/imageUtilities";
+import { imgToTensor, mediaReady } from "../utils/imageUtilities";
 
 const DEFAULTS = {
   mobilenet: {
@@ -183,13 +183,13 @@ class ImageClassifier {
 
     /**
    * Classifies the given input (image or video) and continuously classifies each frame of the video.
-   * @param {HTMLVideoElement} inputNumOrCallback -
+   * @param {HTMLImageElement | HTMLCanvasElement | HTMLVideoElement} inputNumOrCallback -
    *    takes any of the following params
    * @param {number} numOrCallback - a number of labels to return for the image classification.
    * @param {function} cb - a callback function that handles the results of the function.
    * @return {function} a promise or the results of a given callback, cb.
    */
-     async classifyStart(inputNumOrCallback, numOrCallback, cb) {
+     async classifyN(inputNumOrCallback, numOrCallback, cb) {
       const { image, number, callback } = handleArguments(this.video, inputNumOrCallback, numOrCallback, cb)
         .require('image', "No input image provided.");
   
@@ -197,16 +197,18 @@ class ImageClassifier {
       const classifyFrame = async () => {
         await mediaReady(image, true);
         const results = await this.classifyInternal(image, number);
-        // Log the classification results
+  
+        // Handle or log the classification results here
         console.log(results);
   
-        // call recursively for continuous classification
+        // Call the classifyFrame function recursively for continuous classification
         requestAnimationFrame(classifyFrame);
       };
   
-      // Start the classification
+      // Start the initial classification
       classifyFrame();
   
+      // Return a promise or handle the results with a callback
       return callCallback(Promise.resolve(), callback);
     }
 
@@ -235,7 +237,7 @@ const imageClassifier = (modelName, videoOrOptionsOrCallback, optionsOrCallback,
   }
 
   const instance = new ImageClassifier(model, video, options, callback);
-  return instance;
+  return callback ? instance : instance.ready;
 };
 
 export default imageClassifier;
