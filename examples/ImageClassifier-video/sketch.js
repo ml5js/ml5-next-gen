@@ -9,7 +9,7 @@ Webcam video classification using MobileNet and p5.js
 This example uses a callback function to display the results
 === */
 
-// Initialize the Image Classifier method with MobileNet. A callback needs to be passed.
+// A variable to initialize the Image Classifier
 let classifier;
 
 // A variable to hold the video we want to classify
