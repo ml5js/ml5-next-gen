@@ -31,12 +31,10 @@ class ImageClassifier {
    * Create an ImageClassifier.
    * @param {string} modelNameOrUrl - The name or the URL of the model to use. Current model name options
    *    are: 'mobilenet', 'darknet', 'darknet-tiny', and 'doodlenet'.
-   * @param {HTMLVideoElement} video - An HTMLVideoElement.
    * @param {object} options - An object with options.
    * @param {function} callback - A callback to be called when the model is ready.
    */
-  constructor(modelNameOrUrl, video, options, callback) {
-    this.video = video;
+  constructor(modelNameOrUrl, options, callback) {
     this.model = null;
     this.mapStringToIndex = [];
     if (typeof modelNameOrUrl === "string") {
@@ -80,6 +78,7 @@ class ImageClassifier {
    * @return {this} The ImageClassifier.
    */
   async loadModel(modelUrl) {
+    await tf.ready();
     if (modelUrl) this.model = await this.loadModelFrom(modelUrl);
     else this.model = await this.modelToUse.load({ version: this.version, alpha: this.alpha });
 
@@ -174,31 +173,31 @@ class ImageClassifier {
    * @return {function} a promise or the results of a given callback, cb.
    */
   async classify(inputNumOrCallback, numOrCallback, cb) {
-    const { image, number, callback } = handleArguments(this.video, inputNumOrCallback, numOrCallback, cb)
+    const { image, number, callback } = handleArguments(inputNumOrCallback, numOrCallback, cb)
       .require('image',
-        "No input image provided. If you want to classify a video, pass the video element in the constructor."
+        "No input image provided. If you want to classify a video, use classifyStart."
       );
     return callCallback(this.classifyInternal(image, number), callback);
   }
 
     /**
-   * Classifies the given input (image or video) and continuously classifies each frame of the video.
-   * @param {HTMLVideoElement} inputNumOrCallback -
+   * Continuously classifies each frame of the given input
+   * @param {HTMLVideoElement | object | function | number} inputNumOrCallback -
    *    takes any of the following params
-   * @param {number} numOrCallback - a number of labels to return for the image classification.
+   * @param {object | function | number} numOrCallback - a number of labels to return for the image classification.
    * @param {function} cb - a callback function that handles the results of the function.
    * @return {function} a promise or the results of a given callback, cb.
    */
      async classifyStart(inputNumOrCallback, numOrCallback, cb) {
-      const { image, number, callback } = handleArguments(this.video, inputNumOrCallback, numOrCallback, cb)
-        .require('image', "No input image provided.");
+      const { image, number, callback } = handleArguments(inputNumOrCallback, numOrCallback, cb)
+        .require('image', "No input provided.");
   
       // Function to classify a single frame
       const classifyFrame = async () => {
         await mediaReady(image, true);
-        const results = await this.classifyInternal(image, number);
-        // Log the classification results
-        console.log(results);
+        await this.classifyInternal(image, number);
+        // call the callback function
+        callCallback(this.classifyInternal(image, number), callback);
   
         // call recursively for continuous classification
         requestAnimationFrame(classifyFrame);
@@ -207,26 +206,15 @@ class ImageClassifier {
       // Start the classification
       classifyFrame();
   
-      return callCallback(Promise.resolve(), callback);
+      return callCallback(this.classifyInternal(image, number), callback);
     }
-
-  /**
-   * Will be deprecated soon in favor of ".classify()" - does the same as .classify()
-   * @param {HTMLImageElement | HTMLCanvasElement | object | function | number} inputNumOrCallback - takes any of the following params
-   * @param {HTMLImageElement | HTMLCanvasElement | object | function | number} numOrCallback - takes any of the following params
-   * @param {function} cb - a callback function that handles the results of the function.
-   * @return {function} a promise or the results of a given callback, cb.
-   */
-  async predict(inputNumOrCallback, numOrCallback, cb) {
-    return this.classify(inputNumOrCallback, numOrCallback || null, cb);
-  }
 }
 
-const imageClassifier = (modelName, videoOrOptionsOrCallback, optionsOrCallback, cb) => {
-  const args = handleArguments(modelName, videoOrOptionsOrCallback, optionsOrCallback, cb)
+const imageClassifier = (modelName, optionsOrCallback, cb) => {
+  const args = handleArguments(modelName, optionsOrCallback, cb)
     .require('string', 'Please specify a model to use. E.g: "MobileNet"');
 
-  const { string, video, options = {}, callback } = args;
+  const { string, options = {}, callback } = args;
 
   let model = string;
   // TODO: I think we should delete this.
@@ -234,7 +222,7 @@ const imageClassifier = (modelName, videoOrOptionsOrCallback, optionsOrCallback,
     model = model.toLowerCase();
   }
 
-  const instance = new ImageClassifier(model, video, options, callback);
+  const instance = new ImageClassifier(model, options, callback);
   return instance;
 };
 
