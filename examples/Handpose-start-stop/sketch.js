@@ -9,7 +9,7 @@ let hands = [];
 let isDetecting = false;
 
 function preload() {
-  // Load the handpose model.
+  // Load the handpose model
   handpose = ml5.handpose();
 }
 
@@ -46,12 +46,12 @@ function draw() {
   }
 }
 
-//toggle detection when mouse is pressed
+// Toggle detection when mouse is pressed
 function mousePressed() {
   toggleDetection();
 }
 
-// call this function to start and stop detection
+// Call this function to start and stop detection
 function toggleDetection() {
   if (isDetecting) {
     handpose.detectStop();
@@ -64,6 +64,6 @@ function toggleDetection() {
 
 // Callback function for when handpose outputs data
 function gotHands(results) {
-  // save the output to the hands variable
+  // Save the output to the hands variable
   hands = results;
 }

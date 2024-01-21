@@ -29,7 +29,12 @@ function draw() {
 
   if (faces.length > 0 && faces[0].lips) {
     fill(0, 255, 0);
-    rect(faces[0].lips.x, faces[0].lips.y, faces[0].lips.width, faces[0].lips.height);
+    rect(
+      faces[0].lips.x,
+      faces[0].lips.y,
+      faces[0].lips.width,
+      faces[0].lips.height
+    );
   }
 
   drawPartsKeypoints();
@@ -51,5 +56,4 @@ function drawPartsKeypoints() {
 function gotFaces(results) {
   // Save the output to the faces variable
   faces = results;
-  //console.log(faces);
 }
