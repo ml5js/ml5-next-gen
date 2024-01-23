@@ -38,5 +38,5 @@ function gotResult(results, error) {
   }
   // The results are in an array ordered by confidence.
   console.log(results);
-  resultsP.html(`Label: ${results[0].label  } ${nf(results[0].confidence, 0, 2)}`);
+  resultsP.html('Label: ' + results[0].label + '<br>Confidence: ' + nf(results[0].confidence, 0, 2));
 }
