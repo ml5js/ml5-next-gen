@@ -1,3 +1,8 @@
+// Copyright (c) 2023 ml5
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
 let sentiment;
 let statusEl; // to display model loading status
 let submitBtn;
@@ -9,14 +14,14 @@ function setup() {
   // initialize sentiment analysis model
   sentiment = ml5.sentiment("movieReviews", modelReady);
 
-  // setup the html environment
+  // setup the html dom elements
   statusEl = createP("Loading Model...");
   inputBox = createInput("Today is the happiest day and is full of rainbows!");
   inputBox.attribute("size", "75");
   submitBtn = createButton("submit");
   sentimentResult = createP("Sentiment score:");
 
-  // predicting the sentiment on mousePressed()
+  // predicting the sentiment when submit button is pressed
   submitBtn.mousePressed(getSentiment);
 }
 
@@ -31,8 +36,8 @@ function getSentiment() {
   sentimentResult.html("Sentiment score: " + prediction.score);
 }
 
+// a callback function that is called when model is ready
 function modelReady() {
-  // model is ready
   statusEl.html("Model loaded");
 }
 

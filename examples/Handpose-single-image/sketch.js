@@ -8,9 +8,9 @@ let video;
 let hands = [];
 
 function preload() {
-  //load the image to be detected
+  // Load the image to be detected
   img = loadImage("hand.jpg");
-  // Load the handpose model.
+  // Load the handpose model
   handpose = ml5.handpose();
 }
 

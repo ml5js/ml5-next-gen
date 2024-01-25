@@ -1,3 +1,8 @@
+// Copyright (c) 2023 ml5
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
 // Step 1: load data or create some data
 let data = [
   { r: 255, g: 0, b: 0, color: "red-ish" },
