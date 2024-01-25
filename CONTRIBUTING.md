@@ -116,8 +116,6 @@ npm publish --tag alpha --access public
    https://unpkg.com/ml5@[version]/dist/ml5.js
 ```
 
-At this point, the library can be built without error. I was only getting an error about exceeding recommended size limit. For the build, I am using the latest version of node, npm, and tfjs. I have not tested all the features of NeuralNetwork, but it appears to be working just fine.
-
 ## Utils
 
 This section documents the utility functions found in the `src/utils` folder.
