@@ -87,7 +87,6 @@ function handleOptions(optionsObject, moldObject) {
       // If the type is a boolean
       else if (type === "boolean") {
         options[key] = userValue;
-        break;
       }
       // If the type is a string
       else if (type === "string") {
@@ -97,7 +96,10 @@ function handleOptions(optionsObject, moldObject) {
         } else {
           options[key] = userValue;
         }
-        break;
+      }
+      // If the type is an object
+      else if (type === "object") {
+        options[key] = userValue;
       }
       // Throw an error if the type in moldObject is not recognized
       else {
