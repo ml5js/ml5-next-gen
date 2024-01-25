@@ -134,7 +134,6 @@ function handleOptions(userObject, moldObject) {
       }
     }
   }
-  console.log(filteredObject);
   return filteredObject;
 }
 
