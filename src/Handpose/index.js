@@ -79,15 +79,16 @@ class Handpose {
         default: "full",
       },
       solutionPath: {
-        type: "string",
+        type: (config) =>
+          config.runtime === "mediapipe" ? "string" : "undefined",
         default: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
       },
       detectorModelUrl: {
-        type: "string",
+        type: (config) => (config.runtime === "tfjs" ? "string" : "undefined"),
         default: undefined,
       },
       landmarkModelUrl: {
-        type: "string",
+        type: (config) => (config.runtime === "tfjs" ? "string" : "undefined"),
         default: undefined,
       },
     });
