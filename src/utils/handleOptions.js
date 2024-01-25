@@ -1,113 +1,141 @@
 /**
  * Evaluates the value of a moldObject property.
- * If the value is a function, it is called with the thisArg as its context.
+ * If the value is a function, it is called with the filtered options object as the its parameter.
  * Otherwise, the value is returned as is.
- * @param {object} thisArg
- * @param {any} value
- * @returns {any} - evaluated value
- * @private
+ * @param {object} filteredObject - the current filtered options object
+ * @param {any} value - the value to evaluate
+ * @returns {any} the evaluated value
  */
-function evaluate(thisArg, value) {
+function evaluate(filteredObject, value) {
   if (typeof value === "function") {
-    return value.call(thisArg);
+    return value(filteredObject);
   } else {
     return value;
   }
 }
 
 /**
- * This function takes in an object of options and an object of molds.
- * Filters the options based on the moldObject and returns the filtered options.
- * Logs out friendly warnings if the user options are not of the correct type or value.
+ * Checks if a value is within the enumArray.
+ * If isCaseInsensitive is true, the comparison is case insensitive.
  *
- * @param {object} optionsObject - options provided by the user
- * @param {object} moldObject - an object defining how the user option should be filtered
- * @returns {object} - filtered options
+ * @param {any} value - the value to check
+ * @param {Array} enumArray - the array of enum values
+ * @param {boolean} isCaseInsensitive - whether the comparison is case insensitive
+ * @returns {any | undefined} the enum value if the user value is within the enumArray, otherwise undefined
  */
-function handleOptions(optionsObject, moldObject) {
-  const options = {};
+function checkEnum(value, enumArray, isCaseInsensitive) {
+  if (isCaseInsensitive && typeof value === "string") {
+    for (const enumValue of enumArray) {
+      if (enumValue.toLowerCase() === userValue.toLowerCase()) {
+        return enumValue;
+      }
+    }
+  } else {
+    for (const enumValue of enumArray) {
+      if (enumValue === value) {
+        return enumValue;
+      }
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Checks if a value is within the range of min and max.
+ * @param {number} value - the value to check
+ * @param {number} min - the minimum value
+ * @param {number} max - the maximum value
+ * @returns {any | undefined} the value if it is within the range, otherwise undefined
+ */
+function checkNumber(value, min, max) {
+  if (value < min || value > max) {
+    return undefined;
+  } else {
+    return value;
+  }
+}
+
+/**
+ * This function takes a userObject and a moldObject as parameters.
+ * Filters the properties of userObject based on the rules defined in moldObject and returns a filteredObject.
+ * Logs out friendly warnings if the properties in userObject did not fulfill the rules.
+ *
+ * @param {object} userObject - options object provided by the user
+ * @param {object} moldObject - an object that defines how the user options object should be filtered
+ * @returns {object} - filtered options object
+ */
+function handleOptions(userObject, moldObject) {
+  const filteredObject = {};
 
   for (const key in moldObject) {
-    const userValue = optionsObject[key];
-    const type = evaluate(options, moldObject[key].type);
-    const defaultValue = evaluate(options, moldObject[key].default);
+    const userValue = userObject[key];
+    const rules = moldObject[key];
+    const type = evaluate(filteredObject, rules.type);
+    const defaultValue = evaluate(filteredObject, rules.default);
+
+    if (type === "undefined" || type === undefined) {
+      continue;
+    }
     // If the user did not provide a value for this option, use the default value.
     if (userValue === undefined) {
-      options[key] = defaultValue;
+      filteredObject[key] = defaultValue;
     }
     // If the user provided a value for this option, check if it is of the correct type.
     else if (typeof userValue !== type && type !== "enum") {
       console.warn(
         `The value of ${key} is not of type ${type}. Using default value ${defaultValue} instead.`
       );
-      options[key] = defaultValue;
+      filteredObject[key] = defaultValue;
     }
     // Check specific rules for each type.
     else {
-      // If the type is an enum
+      // If the type is an enum, apply the enum rules
       if (type === "enum") {
-        const enums = evaluate(options, moldObject[key].enums);
-        const caseInsensitive =
-          evaluate(options, moldObject[key].caseInsensitive) ?? true;
-        if (caseInsensitive && typeof userValue === "string") {
-          enums.forEach((enumValue) => {
-            if (enumValue.toLowerCase() === userValue.toLowerCase()) {
-              options[key] = enumValue;
-            }
-          });
-        } else {
-          enums.forEach((enumValue) => {
-            if (enumValue === userValue) {
-              options[key] = enumValue;
-            }
-          });
-        }
-        if (options[key] === undefined) {
+        const enums = evaluate(filteredObject, rules.enums);
+        const isCaseInsensitive = evaluate(
+          filteredObject,
+          rules.caseInsensitive
+        );
+        const checkedValue = checkEnum(userValue, enums, isCaseInsensitive);
+
+        if (checkedValue === undefined) {
           console.warn(
             `The value of ${key} is one of ${enums.join(
               ", "
             )}. Using default value ${defaultValue} instead.`
           );
-          options[key] = defaultValue;
+          filteredObject[key] = defaultValue;
+        } else {
+          filteredObject[key] = checkedValue;
         }
       }
-      // If the type is a number
+      // If the type is a number, apply the min and max rules
       else if (type === "number") {
-        const min = evaluate(options, moldObject[key].min) ?? -Infinity;
-        const max = evaluate(options, moldObject[key].max) ?? Infinity;
-        if (userValue < min || userValue > max) {
+        const min = evaluate(filteredObject, rules.min) ?? -Infinity;
+        const max = evaluate(filteredObject, rules.max) ?? Infinity;
+        const checkedValue = checkNumber(userValue, min, max);
+
+        if (checkedValue === undefined) {
           console.warn(
             `The value of ${key} is not within the range of ${min} to ${max}. Using default value ${defaultValue} instead.`
           );
-          options[key] = defaultValue;
+          filteredObject[key] = defaultValue;
         } else {
-          options[key] = userValue;
+          filteredObject[key] = checkedValue;
         }
       }
-      // If the type is a boolean
-      else if (type === "boolean") {
-        options[key] = userValue;
+      // If type is boolean, string, or object, use the user value as is
+      else if (type === "boolean" || type === "string" || type === "object") {
+        filteredObject[key] = userValue;
       }
-      // If the type is a string
-      else if (type === "string") {
-        const lowercase = evaluate(options, moldObject[key].lowercase) ?? false;
-        if (lowercase) {
-          options[key] = userValue.toLowerCase();
-        } else {
-          options[key] = userValue;
-        }
-      }
-      // If the type is an object
-      else if (type === "object") {
-        options[key] = userValue;
-      }
-      // Throw an error if the type in moldObject is not recognized
+      // Throw an error if the type in moldObject is not "enum", "number", "boolean", "string", or "object"
       else {
         throw new Error(`Unknown type "${type}" for ${key} in moldObject.`);
       }
     }
   }
-  return options;
+  console.log(filteredObject);
+  return filteredObject;
 }
 
 export default handleOptions;
