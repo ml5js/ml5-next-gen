@@ -15,7 +15,7 @@ import handleArguments from "../utils/handleArguments";
 import * as darknet from "./darknet";
 import * as doodlenet from "./doodlenet";
 import callCallback from "../utils/callcallback";
-import { mediaReady } from "../utils/imageUtilities";
+import { imgToTensor, mediaReady } from "../utils/imageUtilities";
 
 const DEFAULTS = {
   mobilenet: {
@@ -24,6 +24,7 @@ const DEFAULTS = {
     topk: 3,
   },
 };
+const IMAGE_SIZE = 224;
 const MODEL_OPTIONS = ["mobilenet", "darknet", "darknet-tiny", "doodlenet"];
 
 class ImageClassifier {
@@ -37,6 +38,12 @@ class ImageClassifier {
   constructor(modelNameOrUrl, options, callback) {
     this.model = null;
     this.mapStringToIndex = [];
+
+    // flags for classifyStart() and classifyStop()
+    this.isClassifying = false;// True when classification loop is running
+    this.signalStop = false; // Signal to stop the loop
+    this.prevCall = ""; // Track previous call to detectStart() or detectStop()
+
     if (typeof modelNameOrUrl === "string") {
       if (MODEL_OPTIONS.includes(modelNameOrUrl)) {
         this.modelName = modelNameOrUrl;
@@ -134,6 +141,10 @@ class ImageClassifier {
     await this.ready;
     await mediaReady(imgToPredict, true);
 
+    // For Doodlenet and Teachable Machine models a manual resizing of the image is still necessary
+    const imageResize = [IMAGE_SIZE, IMAGE_SIZE];
+    if (this.modelName == "doodlenet" || this.modelUrl) imgToPredict = imgToTensor(imgToPredict, imageResize);
+
     if (this.modelUrl) {
       await tf.nextFrame();
       const predictedClasses = tf.tidy(() => {
@@ -188,26 +199,48 @@ class ImageClassifier {
    * @param {function} cb - a callback function that handles the results of the function.
    * @return {function} a promise or the results of a given callback, cb.
    */
-     async classifyStart(inputNumOrCallback, numOrCallback, cb) {
-      const { image, number, callback } = handleArguments(inputNumOrCallback, numOrCallback, cb)
-        .require('image', "No input provided.");
-  
-      // Function to classify a single frame
-      const classifyFrame = async () => {
-        await mediaReady(image, true);
-        await this.classifyInternal(image, number);
-        // call the callback function
-        callCallback(this.classifyInternal(image, number), callback);
-  
-        // call recursively for continuous classification
+    async classifyStart(inputNumOrCallback, numOrCallback, cb) {
+    const { image, number, callback } = handleArguments(inputNumOrCallback, numOrCallback, cb)
+      .require('image', "No input provided.");
+
+    // Function to classify a single frame
+    const classifyFrame = async () => {
+      await mediaReady(image, true);
+      await this.classifyInternal(image, number);
+      // call the callback function
+      callCallback(this.classifyInternal(image, number), callback);
+
+      // call recursively for continuous classification
+      if (!this.signalStop){
         requestAnimationFrame(classifyFrame);
-      };
-  
-      // Start the classification
+      }else{
+        this.isClassifying = false;
+      }
+    };
+
+    // Start the classification
+    this.signalStop = false;
+    if (!this.isClassifying){
+      this.isClassifying = true;
       classifyFrame();
-  
-      return callCallback(this.classifyInternal(image, number), callback);
     }
+    if (this.prevCall === "start") {
+      console.warn(
+        "classifyStart() was called more than once without calling classifyStop(). Only the latest classifyStart() call will take effect."
+      );
+    }
+    this.prevCall = "start";
+  }
+
+  /** 
+  * Used to stop the continuous classification of a video
+  */
+  classifyStop(){
+    if (this.isClassifying) {
+      this.signalStop = true;
+    }
+    this.prevCall = "stop";
+  }
 }
 
 const imageClassifier = (modelName, optionsOrCallback, cb) => {

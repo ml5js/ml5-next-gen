@@ -6,7 +6,8 @@
 /* ===
 ml5 Example
 Webcam video classification using MobileNet and p5.js
-This example uses a callback function to display the results
+This example uses a callback function to update the canvas label with the latest results,
+it makes use of the p5 mousePressed() function to toggle between an active classification
 === */
 
 // A variable to initialize the Image Classifier
@@ -15,28 +16,42 @@ let classifier;
 // A variable to hold the video we want to classify
 let vid;
 
-// Element for displaying the results
-let resultsP;
+// Variable for displaying the results on the canvas
+let label = 'Model loading...';
 
 function preload() {
   classifier = ml5.imageClassifier('MobileNet');
 }
 
 function setup() {
-  noCanvas();
-  // Using webcam feed as video input
+  createCanvas(640, 480);
+  background(255);
+  textSize(32);
+  fill(255);
+  // Using webcam feed as video input, hiding html element to avoid duplicate with canvas
   vid = createCapture(VIDEO);
+  vid.hide();
   classifier.classifyStart(vid, gotResult);
-  resultsP = createP("Model loading...");
 }
 
-// A function to run when we get any errors and the results
-function gotResult(results, error) {
-  // Display error in the console
-  if (error) {
-    console.error(error);
+function draw() {
+  //Each video frame is painted on the canvas
+  image(vid, 0, 0);
+  //Printing class with the highest probability on the canvas
+  text(label, 20, 50);
+}
+
+//A mouse click to stop and restart the classification process
+function mousePressed(){
+  if (classifier.isClassifying){
+    classifier.classifyStop();
+  }else{
+    classifier.classifyStart(vid, gotResult);
   }
-  // The results are in an array ordered by confidence.
-  console.log(results);
-  resultsP.html('Label: ' + results[0].label + '<br>Confidence: ' + nf(results[0].confidence, 0, 2));
+}
+
+// A function to run when we get the results and any errors
+function gotResult(results) {
+  //update label variable which is displayed on the canvas
+  label = results[0].label;
 }
