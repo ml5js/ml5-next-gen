@@ -62,42 +62,52 @@ class Handpose {
   async loadModel() {
     const pipeline = handPoseDetection.SupportedModels.MediaPipeHands;
     //filter out model config options
-    const modelConfig = handleOptions(this.config, {
-      maxHands: {
-        type: "number",
-        min: 1,
-        default: 2,
+    const modelConfig = handleOptions(
+      this.config,
+      {
+        maxHands: {
+          type: "number",
+          min: 1,
+          default: 2,
+        },
+        runtime: {
+          type: "enum",
+          enums: ["mediapipe", "tfjs"],
+          default: "mediapipe",
+        },
+        modelType: {
+          type: "enum",
+          enums: ["lite", "full"],
+          default: "full",
+        },
+        solutionPath: {
+          type: (config) =>
+            config.runtime === "mediapipe" ? "string" : "undefined",
+          default: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
+        },
+        detectorModelUrl: {
+          type: (config) =>
+            config.runtime === "tfjs" ? "string" : "undefined",
+          default: undefined,
+        },
+        landmarkModelUrl: {
+          type: (config) =>
+            config.runtime === "tfjs" ? "string" : "undefined",
+          default: undefined,
+        },
       },
-      runtime: {
-        type: "enum",
-        enums: ["mediapipe", "tfjs"],
-        default: "mediapipe",
+      "handpose"
+    );
+    this.runtimeConfig = handleOptions(
+      this.config,
+      {
+        flipHorizontal: {
+          type: "boolean",
+          default: false,
+        },
       },
-      modelType: {
-        type: "enum",
-        enums: ["lite", "full"],
-        default: "full",
-      },
-      solutionPath: {
-        type: (config) =>
-          config.runtime === "mediapipe" ? "string" : "undefined",
-        default: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
-      },
-      detectorModelUrl: {
-        type: (config) => (config.runtime === "tfjs" ? "string" : "undefined"),
-        default: undefined,
-      },
-      landmarkModelUrl: {
-        type: (config) => (config.runtime === "tfjs" ? "string" : "undefined"),
-        default: undefined,
-      },
-    });
-    this.runtimeConfig = handleOptions(this.config, {
-      flipHorizontal: {
-        type: "boolean",
-        default: false,
-      },
-    });
+      "handpose"
+    );
 
     await tf.ready();
     this.model = await handPoseDetection.createDetector(pipeline, modelConfig);

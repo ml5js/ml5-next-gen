@@ -59,7 +59,7 @@ function checkNumber(value, min, max) {
  * @param {object} moldObject - an object that defines how the user options object should be filtered
  * @returns {object} - filtered options object
  */
-function handleOptions(userObject, moldObject) {
+function handleOptions(userObject, moldObject, modelName) {
   const filteredObject = {};
 
   for (const key in moldObject) {
