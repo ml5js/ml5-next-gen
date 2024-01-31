@@ -25,19 +25,14 @@ function evaluate(filteredObject, value) {
  */
 function checkEnum(value, enumArray, isCaseInsensitive) {
   if (isCaseInsensitive && typeof value === "string") {
-    for (const enumValue of enumArray) {
-      if (enumValue.toLowerCase() === userValue.toLowerCase()) {
-        return enumValue;
-      }
-    }
+    const matchingValue = enumArray.find(
+      (enumValue) => enumValue.toLowerCase() === value.toLowerCase()
+    );
+    return matchingValue;
   } else {
-    for (const enumValue of enumArray) {
-      if (enumValue === value) {
-        return enumValue;
-      }
-    }
+    const isValid = enumArray.includes(value);
+    return isValid ? value : undefined;
   }
-  return undefined;
 }
 
 /**
