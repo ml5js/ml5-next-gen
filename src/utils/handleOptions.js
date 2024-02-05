@@ -1,12 +1,14 @@
 const errorMessages = {
   type: (modelName, keyName, userType, requiredType, defaultValue) =>
-    `🟪ml5.js warns: The '${keyName}' option for ${modelName} has to be set to a ${requiredType}, but it is being set to a ${userType} instead.\n\nml5.js is using default value '${defaultValue}'.`,
+    `🟪ml5.js warns: The '${keyName}' option for ${modelName} has to be set to a ${requiredType}, but it is being set to a ${userType} instead.\n\nml5.js is using default value of '${defaultValue}'.`,
   enum: (modelName, keyName, userValue, enums, defaultValue) =>
     `🟪ml5.js warns: The '${keyName}' option for ${modelName} has to be set to ${renderArray(
       enums
-    )}, but it is being set to '${userValue}' instead.\n\nml5.js is using default value '${defaultValue}'.`,
+    )}, but it is being set to '${userValue}' instead.\n\nml5.js is using default value of '${defaultValue}'.`,
   numberRange: (modelName, keyName, userValue, min, max, defaultValue) =>
-    `🟪ml5.js warns: The '${keyName}' option for ${modelName} has to be set to a number between ${min} and ${max}, but it is being set to '${userValue}' instead.\n\nml5.js is using default value '${defaultValue}'.`,
+    `🟪ml5.js warns: The '${keyName}' option for ${modelName} has to be set to a number between ${min} and ${max}, but it is being set to '${userValue}' instead.\n\nml5.js is using default value of '${defaultValue}'.`,
+  numberInteger: (modelName, keyName, userValue, defaultValue) =>
+    `🟪ml5.js warns: The '${keyName}' option for ${modelName} has to be set to an integer, but it is being set to the float value '${userValue}' instead.\n\nml5.js is using the default value of ${defaultValue}.`,
 };
 
 /**
@@ -67,9 +69,9 @@ function checkEnum(value, enumArray, isCaseInsensitive) {
  * @param {number} value - the value to check
  * @param {number} min - the minimum value
  * @param {number} max - the maximum value
- * @returns {any | undefined} the value if it is within the range, otherwise undefined
+ * @returns {number | undefined} the value if it is within the range, otherwise undefined
  */
-function checkNumber(value, min, max) {
+function isInRange(value, min, max) {
   if (value < min || value > max) {
     return undefined;
   } else {
@@ -131,9 +133,15 @@ function handleOptions(userObject, moldObject, modelName) {
       else if (type === "number") {
         const min = evaluate(filteredObject, rules.min) ?? -Infinity;
         const max = evaluate(filteredObject, rules.max) ?? Infinity;
-        const checkedValue = checkNumber(userValue, min, max);
+        const integer = evaluate(filteredObject, rules.integer) ?? false;
+        const checkedValue = isInRange(userValue, min, max);
 
-        if (checkedValue === undefined) {
+        if (integer && !Number.isInteger(userValue)) {
+          console.warn(
+            errorMessages.numberInteger(modelName, key, userValue, defaultValue)
+          );
+          filteredObject[key] = defaultValue;
+        } else if (checkedValue === undefined) {
           console.warn(
             errorMessages.numberRange(
               modelName,

@@ -69,6 +69,7 @@ class Handpose {
           type: "number",
           min: 1,
           max: 2147483647,
+          integer: true,
           default: 2,
         },
         runtime: {
