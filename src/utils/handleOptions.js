@@ -1,3 +1,30 @@
+const errorMessages = {
+  type: (modelName, keyName, userType, requiredType, defaultValue) =>
+    `🟪ml5.js warns: The '${keyName}' option for ${modelName} has to be set to a ${requiredType}, but it is being set to a ${userType} instead.\n\nml5.js is using default value '${defaultValue}'.`,
+  enum: (modelName, keyName, userValue, enums, defaultValue) =>
+    `🟪ml5.js warns: The '${keyName}' option for ${modelName} has to be set to ${renderArray(
+      enums
+    )}, but it is being set to '${userValue}' instead.\n\nml5.js is using default value '${defaultValue}'.`,
+  numberRange: (modelName, keyName, userValue, min, max, defaultValue) =>
+    `🟪ml5.js warns: The '${keyName}' option for ${modelName} has to be set to a number between ${min} and ${max}, but it is being set to '${userValue}' instead.\n\nml5.js is using default value '${defaultValue}'.`,
+};
+
+/**
+ * Transforms an array into a human readable string, wrapping the elements with quotation, splitting them with a comma and the last element with "or".
+ * @param {array} array
+ * @returns {string} the string representation of the array
+ */
+function renderArray(array) {
+  if (array.length === 1) {
+    return `'${array[0]}'`;
+  } else if (array.length === 2) {
+    return `'${array[0]}' or '${array[1]}'`;
+  } else {
+    const last = array.pop();
+    return `'${array.join("', '")}', or '${last}'`;
+  }
+}
+
 /**
  * Evaluates the value of a moldObject property.
  * If the value is a function, it is called with the filtered options object as the its parameter.
@@ -78,7 +105,7 @@ function handleOptions(userObject, moldObject, modelName) {
     // If the user provided a value for this option, check if it is of the correct type.
     else if (typeof userValue !== type && type !== "enum") {
       console.warn(
-        `The value of ${key} is not of type ${type}. Using default value ${defaultValue} instead.`
+        errorMessages.type(modelName, key, typeof userValue, type, defaultValue)
       );
       filteredObject[key] = defaultValue;
     }
@@ -87,17 +114,13 @@ function handleOptions(userObject, moldObject, modelName) {
       // If the type is an enum, apply the enum rules
       if (type === "enum") {
         const enums = evaluate(filteredObject, rules.enums);
-        const isCaseInsensitive = evaluate(
-          filteredObject,
-          rules.caseInsensitive
-        );
+        const isCaseInsensitive =
+          evaluate(filteredObject, rules.caseInsensitive) ?? true;
         const checkedValue = checkEnum(userValue, enums, isCaseInsensitive);
 
         if (checkedValue === undefined) {
           console.warn(
-            `The value of ${key} is one of ${enums.join(
-              ", "
-            )}. Using default value ${defaultValue} instead.`
+            errorMessages.enum(modelName, key, userValue, enums, defaultValue)
           );
           filteredObject[key] = defaultValue;
         } else {
@@ -112,7 +135,14 @@ function handleOptions(userObject, moldObject, modelName) {
 
         if (checkedValue === undefined) {
           console.warn(
-            `The value of ${key} is not within the range of ${min} to ${max}. Using default value ${defaultValue} instead.`
+            errorMessages.numberRange(
+              modelName,
+              key,
+              userValue,
+              min,
+              max,
+              defaultValue
+            )
           );
           filteredObject[key] = defaultValue;
         } else {
@@ -124,6 +154,7 @@ function handleOptions(userObject, moldObject, modelName) {
         filteredObject[key] = userValue;
       }
       // Throw an error if the type in moldObject is not "enum", "number", "boolean", "string", or "object"
+      // This should never happen if the moldObject is correctly defined.
       else {
         throw new Error(`Unknown type "${type}" for ${key} in moldObject.`);
       }
