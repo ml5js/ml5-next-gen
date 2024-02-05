@@ -96,8 +96,9 @@ function handleOptions(userObject, moldObject, modelName) {
     const rules = moldObject[key];
     const type = evaluate(filteredObject, rules.type);
     const defaultValue = evaluate(filteredObject, rules.default);
+    const ignore = evaluate(filteredObject, rules.ignore);
 
-    if (type === "undefined" || type === undefined) {
+    if (ignore) {
       continue;
     }
     // If the user did not provide a value for this option, use the default value.
@@ -168,6 +169,7 @@ function handleOptions(userObject, moldObject, modelName) {
       }
     }
   }
+  console.log(filteredObject);
   return filteredObject;
 }
 
