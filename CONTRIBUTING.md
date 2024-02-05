@@ -170,11 +170,15 @@ This particular `moldObject` allows the user to have a `maxHands` option with a 
 The `moldObject` consists of key-value pairs. The key defines the name of an allowed option, and the value is an object that contains rules on how the option should be filtered. Here are the rules:
 
 - `type` (required): A string defining the correct type, can be `"number"`, `"enum"`, `"boolean"`, `"string"`, `"object"`, or `"undefined"`.
-- `min` (optional): A number defining the minimum value for `type: "number"`.
-- `max` (optional): A number defining the maximum value for `type: "number"`.
-- `enums` (required when `type: "enum"`): An array defining a list of valid values.
-- `caseInsensitive` (optional): A boolean that defaults to `true`. When true, checks the user value against the enum list case-insensitively.
 - `default` (required): The default value in case the user does not provide a value or provides an erroneous value for the option.
+- `ignore` (optional): A boolean defining whether the key should be ignored. Defaults to false. Useful when set to a dynamically evaluated value (see section below).
+- Specifically for `type: "number"`:
+  - `min` (optional): A number defining the minimum value.
+  - `max` (optional): A number defining the maximum value.
+  - `integer` (optional): A boolean defining whether the value should be an integer. Defaults to `false`.
+- Specifically for `type: "enum"`:
+  - `enums` (required): An array defining a list of valid values.
+  - `caseInsensitive` (optional): A boolean defining whether to checks the user value against the enum list case-insensitively. Defaults to `true`.
 
 #### Functions As Rules
 
@@ -197,4 +201,4 @@ const mold = {
 
 When the user sets the runtime to `mediapipe`, the default value of `maxHands` is `4`, and when the user sets the runtime to `tfjs`, the default `maxHands` is `2`.
 
-**Caveat:** the options gets filtered from top to bottom as defined in the `moldObject`, and the filteredObject only contains the options that has already been filtered. Thus, `runtime` must be placed above `maxHands` in the `moldObject` for the function to work properly.
+**Caveat:** the options gets processed from top to bottom in the order defined in the `moldObject`, and the `filteredObject` only contains the options that has already been processed. Thus, `runtime` must be placed above `maxHands` in the `moldObject` for the function to work properly.
