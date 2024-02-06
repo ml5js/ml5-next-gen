@@ -3,46 +3,36 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-/* ===
-ml5 Example
-BodyPix
-=== */
-
-let bodypix;
+let bodyPix;
 let video;
 let segmentation;
 
 let options = {
-  outputStride: 16, //adjust the output stride and see which one works best!
-  multiSegmentation: false,
-  segmentBodyParts: true,
-  flipHorizontal: true,
+  maskType: "background",
 };
 
+function preload() {
+  bodyPix = ml5.bodySegmentation("SelfieSegmentation", options);
+}
+
 function setup() {
-  createCanvas(480, 360);
+  createCanvas(640, 480);
   // Create the video
   video = createCapture(VIDEO);
   video.size(width, height);
   video.hide();
-  bodypix = ml5.bodyPix(video, options, modelReady);
-  bodypix.on("bodypix", gotResults);
-}
 
-// Event for body segmentation
-function gotResults(result) {
-  // Save the latest part mask from the model in global variable "segmentation"
-  segmentation = result;
-  //Draw the video
-  image(video, 0, 0, width, height);
-  image(segmentation.backgroundMask, 0, 0, width, height);
-  tint(255, 128); // opacity tuning
-}
-
-// Event when model is loaded
-function modelReady() {
-  console.log("Model ready!");
+  bodyPix.detectStart(video, gotResults);
 }
 
 function draw() {
+  background(0, 0, 255);
+  if (segmentation) {
+    video.mask(segmentation);
+    image(video, 0, 0);
+  }
+}
+// callback function for body segmentation
+function gotResults(result) {
+  segmentation = result.mask;
 }

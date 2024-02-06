@@ -8,7 +8,7 @@ let video;
 let hands = [];
 
 function preload() {
-  // Load the handpose model.
+  // Load the handpose model
   handpose = ml5.handpose();
 }
 

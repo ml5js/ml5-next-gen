@@ -11,7 +11,7 @@ let hands = [];
 let pinch = 0;
 
 function preload() {
-  // Load the handpose model.
+  // Load the handpose model
   handpose = ml5.handpose();
 }
 
@@ -21,7 +21,7 @@ function setup() {
   video = createCapture(VIDEO);
   video.size(width, height);
   video.hide();
-  // start detecting hands from the webcam video
+  // Start detecting hands from the webcam video
   handpose.detectStart(video, gotHands);
 }
 
@@ -51,7 +51,7 @@ function draw() {
 
 // Callback function for when handpose outputs data
 function gotHands(results) {
-  // save the output to the hands variable
+  // Save the output to the hands variable
   hands = results;
   console.log(hands);
 }

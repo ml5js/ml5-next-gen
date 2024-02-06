@@ -181,20 +181,70 @@ class Facemesh {
    * @private
    */
   addKeypoints(faces) {
-    const result = faces.map((face) => {
-      for (let i = 0; i < face.keypoints.length; i++) {
-        let keypoint = face.keypoints[i];
-        if (!keypoint.name) continue;
-        if (!face[keypoint.name]) face[keypoint.name] = [];
-        face[keypoint.name].push({
-          x: keypoint.x,
-          y: keypoint.y,
-          z: keypoint.z,
-        });
+    const contours = faceLandmarksDetection.util.getKeypointIndexByContour(
+      faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh
+    );
+
+    for (let face of faces) {
+      for (let contourLabel in contours) {
+        for (let keypointIndex of contours[contourLabel]) {
+          // check if face has this keypoint
+          if (keypointIndex >= face.keypoints.length) {
+            continue;
+          }
+          // if this doesn't exist yet, create an object to hold the contour
+          if (face[contourLabel] === undefined) {
+            face[contourLabel] = { keypoints: [] };
+          }
+          // add the keypoint
+          let keypoint = face.keypoints[keypointIndex];
+          face[contourLabel].keypoints.push({
+            x: keypoint.x,
+            y: keypoint.y,
+            z: keypoint.z,
+          });
+          // track the extent of contour coordinates
+          face[contourLabel].xMin =
+            face[contourLabel].xMin === undefined ||
+            keypoint.x < face[contourLabel].xMin
+              ? keypoint.x
+              : face[contourLabel].xMin;
+          face[contourLabel].xMax =
+            face[contourLabel].xMax === undefined ||
+            keypoint.x > face[contourLabel].xMax
+              ? keypoint.x
+              : face[contourLabel].xMax;
+          face[contourLabel].yMin =
+            face[contourLabel].yMin === undefined ||
+            keypoint.y < face[contourLabel].yMin
+              ? keypoint.y
+              : face[contourLabel].yMin;
+          face[contourLabel].yMax =
+            face[contourLabel].yMax === undefined ||
+            keypoint.y > face[contourLabel].yMax
+              ? keypoint.y
+              : face[contourLabel].yMax;
+        }
+        // finalize contour coordinates
+        if (face[contourLabel]) {
+          face[contourLabel].x = face[contourLabel].xMin;
+          face[contourLabel].y = face[contourLabel].yMin;
+          face[contourLabel].width =
+            face[contourLabel].xMax - face[contourLabel].xMin;
+          face[contourLabel].height =
+            face[contourLabel].yMax - face[contourLabel].yMin;
+          face[contourLabel].centerX =
+            face[contourLabel].x + face[contourLabel].width / 2;
+          face[contourLabel].centerY =
+            face[contourLabel].y + face[contourLabel].height / 2;
+          delete face[contourLabel].xMin;
+          delete face[contourLabel].xMax;
+          delete face[contourLabel].yMin;
+          delete face[contourLabel].yMax;
+        }
       }
-      return face;
-    });
-    return result;
+    }
+    return faces;
   }
 
   /**

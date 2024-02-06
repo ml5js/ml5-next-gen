@@ -9,32 +9,30 @@
  */
 
 import * as tf from "@tensorflow/tfjs";
-import * as bodySegmentation from "@tensorflow-models/body-segmentation";
-import { EventEmitter } from "events";
+import * as tfBodySegmentation from "@tensorflow-models/body-segmentation";
 import callCallback from "../utils/callcallback";
-import generatedImageResult from "../utils/generatedImageResult";
 import handleArguments from "../utils/handleArguments";
 import BODYPIX_PALETTE from "./BODYPIX_PALETTE";
 import { mediaReady } from "../utils/imageUtilities";
 
-class BodyPix extends EventEmitter {
+class BodySegmentation {
   /**
    * Create BodyPix.
    * @param {HTMLVideoElement} [video] - An HTMLVideoElement.
    * @param {object} [options] - An object with options.
    * @param {function} [callback] - A callback to be called when the model is ready.
    */
-  constructor(video, options, callback) {
-    super();
-
+  constructor(modelName, options, callback) {
     // for compatibility with p5's preload()
     if (this.p5PreLoadExists()) window._incrementPreload();
 
+    this.modelName = modelName;
     this.video = video;
     this.model = null;
-    this.modelReady = false;
     this.config = options;
-
+    this.runtimeConfig = {};
+    this.detectMedia = null;
+    this.detectCallback = null;
     this.ready = callCallback(this.loadModel(), callback);
   }
 
@@ -43,112 +41,233 @@ class BodyPix extends EventEmitter {
    * @return {this} the Bodypix model.
    */
   async loadModel() {
-    const pipeline = bodySegmentation.SupportedModels.BodyPix;
-    const modelConfig = {
-      architecture: this.config?.architecture ?? "ResNet50", // MobileNetV1 or ResNet 50
-      multiplier: this.config?.multiplier ?? 1, // 0.5, 0.75 or 1, only for MobileNetV1
-      outputStride: this.config?.outputStride ?? 16, // 8 or 16 for MobileNetV1, 16 or 32 for ResNet50
-      quantBytes: this.config?.quantBytes ?? 2, //1, 2 or 4, accuracy and model siz increase correspondingly
-    };
-    await tf.setBackend("webgl");
-    this.model = await bodySegmentation.createSegmenter(pipeline, modelConfig);
-    this.modelReady = true;
-    if (this.video) {
-      this.segment();
+    let pipeline;
+    let modelConfig;
+
+    // select the correct model based on mask type
+    if (!this.modelName) {
+      if (this.config.maskType === "parts") {
+        this.modelName = "BodyPix";
+      } else {
+        this.modelName = "SelfieSegmentation";
+      }
+    } else {
+      if (this.config.maskType === "parts") {
+        if (this.modelName !== "BodyPix") {
+          console.warn(
+            `Expect model name to be "BodyPix" when maskType is "parts", but got "${this.modelName}". Using "BodyPix" instead.`
+          );
+          this.modelName = "BodyPix";
+        }
+      } else {
+        if (
+          this.modelName !== "SelfieSegmentation" &&
+          this.modelName !== "BodyPix"
+        ) {
+          console.warn(
+            `Expect model name to be "SelfieSegmentation" or "BodyPix", but got "${this.modelName}". Using "SelfieSegmentation" instead.`
+          );
+          this.modelName = "SelfieSegmentation";
+        }
+      }
     }
+
+    if (this.modelName === "BodyPix") {
+      pipeline = tfBodySegmentation.SupportedModels.BodyPix;
+      modelConfig = {
+        architecture: this.config.architecture ?? "ResNet50", // MobileNetV1 or ResNet 50
+        multiplier: this.config.multiplier ?? 1, // 0.5, 0.75 or 1, only for MobileNetV1
+        outputStride: this.config.outputStride ?? 16, // 8 or 16 for MobileNetV1, 16 or 32 for ResNet50
+        quantBytes: this.config.quantBytes ?? 2, // 1, 2 or 4, accuracy and model siz increase correspondingly
+      };
+      this.runtimeConfig = {
+        maskType: this.config.maskType ?? "background", // "person", "background", or "parts"
+        multiSegmentation: this.config?.multiSegmentation ?? false,
+        segmentBodyParts: this.config?.segmentBodyParts ?? true, // if bodyparts are segmented
+        flipHorizontal: this.config?.flipHorizontal ?? false, // set to true for webcam
+      };
+      if (this.runtimeConfig.maskType === "parts") {
+        // whether we need multiple outputs when multiple people detected
+      }
+    } else {
+      pipeline = tfBodySegmentation.SupportedModels.MediaPipeSelfieSegmentation;
+      modelConfig = {
+        runtime: this.config.runtime ?? "mediapipe",
+        solutionPath:
+          this.config.solution ??
+          "https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation",
+        modelType: this.config.modelType ?? "general", // "general" or "landscape"
+      };
+      this.runtimeConfig = {
+        maskType: this.config.maskType ?? "background", // "person", "background", or "parts"
+        flipHorizontal: this.config?.flipHorizontal ?? false, // set to true for webcam
+      };
+      if (this.runtimeConfig.maskType === "parts") {
+        this.runtimeConfig.maskType = "person";
+        console.warn(
+          `Selfie Segmentation model does not segment individual body parts, using maskType "person" instead.`
+        );
+      }
+    }
+
+    await tf.ready();
+    this.model = await tfBodySegmentation.createSegmenter(
+      pipeline,
+      modelConfig
+    );
 
     // for compatibility with p5's preload()
     if (this.p5PreLoadExists) window._decrementPreload();
 
     return this;
   }
-
   /**
-   * @typedef {Object} SegmentationResult
-   * @property {{maskValueToLabel: Function, mask: Object}} segmentation
-   * @property {p5.Image | Uint8ClampedArray} personMask - will be a p5 Image if p5 is available,
-   * or imageData otherwise.
-   * @property {p5.Image | Uint8ClampedArray} backgroundMask - backgroundMask
-   * @property {p5.Image | Uint8ClampedArray} partMask - partMask which plots 24 parts of your body.
-   * @property {{personMask: ImageData, backgroundMask: ImageData, partMask?: ImageData}} raw
-   * @property {tf.Tensor | null} tensor -
-   * return the Tensor objects for the person and the background if option `returnTensors` is true.
-   * @property {Object} bodyParts - An object that maps body parts to id and RGB color.
+   * Calls segmentPeople in a loop.
+   * Can be started by detectStart() and terminated by detectStop().
+   * @private
    */
+  async detect(...inputs) {
+    const argumentObject = handleArguments(...inputs);
+    argumentObject.require(
+      "image",
+      "An html or p5.js image, video, or canvas element argument is required for detectStart()."
+    );
+    const { image, callback } = argumentObject;
 
-  /**
-   * Segments the image with partSegmentation, return result object
-   * @param {InputImage} [imgToSegment]
-   * @param {function} [cb] - config params for the segmentation
-   * @return {Promise<SegmentationResult>} a result object with image, raw, bodyParts
-   */
-  async segment(imgToSegment, cb) {
-    const { image, callback } = handleArguments(this.video, imgToSegment, cb);
-    if (!image) {
-      throw new Error(
-        "No input image provided. If you want to classify a video, pass the video element in the constructor."
-      );
-    }
     await mediaReady(image, false);
-    const options = {
-      multiSegmentation: this.config?.multiSegmentation ?? false, // whether we need multiple outputs when multiple people detected
-      segmentBodyParts: this.config?.segmentBodyParts ?? true, // if bodyparts are segmented
-      flipHorizontal: this.config?.flipHorizontal ?? false, // set to true for webcam
-    };
 
-    const segmentation = await this.model.segmentPeople(image, options);
-
-    const result = {
-      segmentation,
-      raw: {
-        personMask: null,
-        backgroundMask: null,
-        partMask: null,
-      },
-      personMask: null,
-      backgroundMask: null,
-      partMask: null,
-      tensor: null,
-      bodyParts: BODYPIX_PALETTE,
-    };
-
-    result.raw.personMask = await bodySegmentation.toBinaryMask(
-      segmentation,
-      { r: 0, g: 0, b: 0, a: 255 },
-      { r: 0, g: 0, b: 0, a: 0 }
+    const segmentation = await this.model.segmentPeople(
+      image,
+      this.runtimeConfig
     );
-    result.raw.backgroundMask = await bodySegmentation.toBinaryMask(
-      segmentation
+
+    const result = {};
+    switch (this.runtimeConfig.maskType) {
+      case "background":
+        result.maskImageData = await tfBodySegmentation.toBinaryMask(
+          segmentation,
+          { r: 0, g: 0, b: 0, a: 255 },
+          { r: 0, g: 0, b: 0, a: 0 }
+        );
+        break;
+      case "person":
+        result.maskImageData = await tfBodySegmentation.toBinaryMask(
+          segmentation
+        );
+        break;
+      case "parts":
+        result.maskImageData = await tfBodySegmentation.toColoredMask(
+          segmentation,
+          tfBodySegmentation.bodyPixMaskValueToRainbowColor,
+          { r: 255, g: 255, b: 255, a: 255 }
+        );
+        result.bodyParts = BODYPIX_PALETTE;
+    }
+    result.mask = this.generateP5Image(result.maskImageData);
+
+    if (callback) callback(result);
+    return result;
+  }
+  /**
+   * Repeatedly outputs hand predictions through a callback function.
+   * @param {*} [media] - An HMTL or p5.js image, video, or canvas element to run the prediction on.
+   * @param {gotHands} [callback] - A callback to handle the hand detection results.
+   */
+  detectStart(...inputs) {
+    // Parse out the input parameters
+    const argumentObject = handleArguments(...inputs);
+    argumentObject.require(
+      "image",
+      "An html or p5.js image, video, or canvas element argument is required for detectStart()."
     );
-    if (this.config.segmentBodyParts) {
-      result.raw.partMask = await bodySegmentation.toColoredMask(
-        segmentation,
-        bodySegmentation.bodyPixMaskValueToRainbowColor,
-        { r: 255, g: 255, b: 255, a: 255 }
+    argumentObject.require(
+      "callback",
+      "A callback function argument is required for detectStart()."
+    );
+    this.detectMedia = argumentObject.image;
+    this.detectCallback = argumentObject.callback;
+
+    this.signalStop = false;
+    if (!this.detecting) {
+      this.detecting = true;
+      this.detectLoop();
+    }
+    if (this.prevCall === "start") {
+      console.warn(
+        "detectStart() was called more than once without calling detectStop(). Only the latest detectStart() call will take effect."
       );
     }
-    if (this.config.returnTensors) {
-      result.tensor = await segmentation[0].mask.toTensor();
+    this.prevCall = "start";
+  }
+
+  /**
+   * Stops the detection loop before next detection loop runs.
+   */
+  detectStop() {
+    if (this.detecting) this.signalStop = true;
+    this.prevCall = "stop";
+  }
+
+  /**
+   * Calls segmentPeople in a loop.
+   * Can be started by detectStart() and terminated by detectStop().
+   * @private
+   */
+  async detectLoop() {
+    await mediaReady(this.detectMedia, false);
+    while (!this.signalStop) {
+      const segmentation = await this.model.segmentPeople(
+        this.detectMedia,
+        this.runtimeConfig
+      );
+
+      const result = {};
+      switch (this.runtimeConfig.maskType) {
+        case "background":
+          result.maskImageData = await tfBodySegmentation.toBinaryMask(
+            segmentation,
+            { r: 0, g: 0, b: 0, a: 255 },
+            { r: 0, g: 0, b: 0, a: 0 }
+          );
+          break;
+        case "person":
+          result.maskImageData = await tfBodySegmentation.toBinaryMask(
+            segmentation
+          );
+          break;
+        case "parts":
+          result.maskImageData = await tfBodySegmentation.toColoredMask(
+            segmentation,
+            tfBodySegmentation.bodyPixMaskValueToRainbowColor,
+            { r: 255, g: 255, b: 255, a: 255 }
+          );
+          result.bodyParts = BODYPIX_PALETTE;
+      }
+      result.mask = this.generateP5Image(result.maskImageData);
+
+      this.detectCallback(result);
+      await tf.nextFrame();
     }
-    const personMaskRes = await generatedImageResult(result.raw.personMask);
-    const bgMaskRes = await generatedImageResult(result.raw.backgroundMask);
-    const partMaskRes = await generatedImageResult(result.raw.partMask);
 
-    result.personMask = personMaskRes.image || result.raw.personMask;
-    result.backgroundMask = bgMaskRes.image || result.raw.backgroundMask;
-    result.partMask = partMaskRes.image || result.raw.partMask;
+    this.detecting = false;
+    this.signalStop = false;
+  }
 
-    this.emit("bodypix", result);
-
-    if (this.video) {
-      return tf.nextFrame().then(() => this.segment());
+  /**
+   * Generate a p5 image from the image data
+   * @param imageData - a ImageData object
+   * @param width - the width of the p5 image
+   * @param height - the height of the p5 image
+   * @return a p5.Image object
+   */
+  generateP5Image(imageData) {
+    if (window?.p5) {
+      const img = new p5.Image(imageData.width, imageData.height);
+      img.drawingContext.putImageData(imageData, 0, 0);
+      return img;
+    } else {
+      return imageData;
     }
-
-    if (typeof callback === "function") {
-      callback(result);
-    }
-
-    return result;
   }
 
   /**
@@ -168,13 +287,13 @@ class BodyPix extends EventEmitter {
 }
 
 /**
- * @param {(HTMLVideoElement | p5.Video | BodyPixOptions |  ML5Callback<BodyPix>)[]} [inputs]
- * @return {BodyPix | Promise<BodyPix>}
+ * Factory function that returns a Facemesh instance
+ * @returns {Object} A new bodySegmentation instance
  */
-const bodyPix = (...inputs) => {
-  const { video, options = {}, callback } = handleArguments(...inputs);
-  const instance = new BodyPix(video, options, callback);
+const bodySegmentation = (...inputs) => {
+  const { string, options = {}, callback } = handleArguments(...inputs);
+  const instance = new BodySegmentation(string, options, callback);
   return instance;
 };
 
-export default bodyPix;
+export default bodySegmentation;
