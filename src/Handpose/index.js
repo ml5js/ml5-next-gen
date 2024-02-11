@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 /*
- * Handpose: Palm detector and hand-skeleton finger tracking in the browser
+ * HandPose: Palm detector and hand-skeleton finger tracking in the browser
  * Ported and integrated from all the hard work by: https://github.com/tensorflow/tfjs-models/tree/master/hand-pose-detection
  */
 
@@ -14,9 +14,9 @@ import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import { mediaReady } from "../utils/imageUtilities";
 
-class Handpose {
+class HandPose {
   /**
-   * An object for configuring Handpose options.
+   * An object for configuring HandPose options.
    * @typedef {Object} configOptions
    * @property {number} maxHands - Optional. The maximum number of hands to detect. Default: 2.
    * @property {string} modelType - Optional. The type of model to use: "lite" or "full". Default: "full".
@@ -30,8 +30,8 @@ class Handpose {
    */
 
   /**
-   * Creates Handpose.
-   * @param {configOptions} options - An object containing Handpose configuration options.
+   * Creates HandPose.
+   * @param {configOptions} options - An object containing HandPose configuration options.
    * @param {function} callback - A callback to be called when the model is ready.
    * @private
    */
@@ -55,7 +55,7 @@ class Handpose {
 
   /**
    * Loads the model.
-   * @return {this} the Handpose model.
+   * @return {this} the HandPose model.
    * @private
    */
   async loadModel() {
@@ -85,7 +85,7 @@ class Handpose {
   }
 
   /**
-   * A callback function that handles the handpose detection results.
+   * A callback function that handles the handPose detection results.
    * @callback gotHands
    * @param {Array} results - The detection output.
    */
@@ -220,13 +220,13 @@ class Handpose {
 }
 
 /**
- * Factory function that returns a new Handpose instance.
- * @returns {Handpose} A new handpose instance.
+ * Factory function that returns a new HandPose instance.
+ * @returns {HandPose} A new handPose instance.
  */
-const handpose = (...inputs) => {
+const handPose = (...inputs) => {
   const { options = {}, callback } = handleArguments(...inputs);
-  const instance = new Handpose(options, callback);
+  const instance = new HandPose(options, callback);
   return instance;
 };
 
-export default handpose;
+export default handPose;

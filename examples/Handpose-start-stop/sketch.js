@@ -3,14 +3,14 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-let handpose;
+let handPose;
 let video;
 let hands = [];
 let isDetecting = false;
 
 function preload() {
-  // Load the handpose model
-  handpose = ml5.handpose();
+  // Load the handPose model
+  handPose = ml5.handPose();
 }
 
 function setup() {
@@ -54,15 +54,15 @@ function mousePressed() {
 // Call this function to start and stop detection
 function toggleDetection() {
   if (isDetecting) {
-    handpose.detectStop();
+    handPose.detectStop();
     isDetecting = false;
   } else {
-    handpose.detectStart(video, gotHands);
+    handPose.detectStart(video, gotHands);
     isDetecting = true;
   }
 }
 
-// Callback function for when handpose outputs data
+// Callback function for when handPose outputs data
 function gotHands(results) {
   // Save the output to the hands variable
   hands = results;

@@ -1,5 +1,5 @@
 import neuralNetwork from "./NeuralNetwork";
-import handpose from "./Handpose";
+import handPose from "./HandPose";
 import sentiment from "./Sentiment";
 import faceMesh from "./FaceMesh";
 import bodyPose from "./BodyPose";
@@ -16,7 +16,7 @@ export default Object.assign(
     tf,
     tfvis,
     neuralNetwork,
-    handpose,
+    handPose,
     sentiment,
     faceMesh,
     bodyPose,

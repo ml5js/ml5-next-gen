@@ -3,15 +3,15 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-let handpose;
+let handPose;
 let video;
 let hands = [];
 
 function preload() {
   // Load the image to be detected
   img = loadImage("hand.jpg");
-  // Load the handpose model
-  handpose = ml5.handpose();
+  // Load the handPose model
+  handPose = ml5.handPose();
 }
 
 function setup() {
@@ -19,7 +19,7 @@ function setup() {
   // Draw the image
   image(img, 0, 0);
   // Detect hands in an image
-  handpose.detect(img, gotHands);
+  handPose.detect(img, gotHands);
 }
 
 function draw() {
@@ -35,7 +35,7 @@ function draw() {
   }
 }
 
-// Callback function for when handpose outputs data
+// Callback function for when handPose outputs data
 function gotHands(results) {
   // save the output to the hands variable
   hands = results;
