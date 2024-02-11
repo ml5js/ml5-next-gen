@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 /*
-Bodypose
+BodyPose
 Ported from pose-detection at Tensorflow.js
 */
 
@@ -14,9 +14,9 @@ import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import { mediaReady } from "../utils/imageUtilities";
 
-class Bodypose {
+class BodyPose {
   /**
-   * An object for configuring Bodypose options.
+   * An object for configuring BodyPose options.
    * @typedef {Object} configOptions
    * @property {string} modelType - Optional. specify what model variant to load from.
    * @property {boolean} enableSmoothing - Optional. Whether to use temporal filter to smooth keypoints across frames. Default: true.
@@ -41,7 +41,7 @@ class Bodypose {
    */
 
   /**
-   * Creates Bodypose.
+   * Creates BodyPose.
    * @param {string} modelName - Specify a model to use, "MoveNet" or "BlazePose". Default: "MoveNet".
    * @param {configOptions} options - An object describing a model accuracy and performance.
    * @param {function} callback  - A function to run once the model has been loaded.
@@ -267,13 +267,13 @@ class Bodypose {
 }
 
 /**
- * Factory function that returns a Bodypose instance.
- * @returns {Bodypose} A Bodypose instance.
+ * Factory function that returns a BodyPose instance.
+ * @returns {BodyPose} A BodyPose instance.
  */
-const bodypose = (...inputs) => {
+const bodyPose = (...inputs) => {
   const { string, options = {}, callback } = handleArguments(...inputs);
-  const instance = new Bodypose(string, options, callback);
+  const instance = new BodyPose(string, options, callback);
   return instance;
 };
 
-export default bodypose;
+export default bodyPose;

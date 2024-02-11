@@ -4,12 +4,12 @@
 // https://opensource.org/licenses/MIT
 
 let video;
-let bodypose;
+let bodyPose;
 let poses = [];
 
 function preload() {
-  // Load the bodypose model
-  bodypose = ml5.bodypose("BlazePose");
+  // Load the bodyPose model
+  bodyPose = ml5.bodyPose("BlazePose");
 }
 
 function setup() {
@@ -21,7 +21,7 @@ function setup() {
   video.hide();
 
   // Start detecting poses in the webcam video
-  bodypose.detectStart(video, gotPoses);
+  bodyPose.detectStart(video, gotPoses);
 }
 
 function draw() {
@@ -40,7 +40,7 @@ function draw() {
   }
 }
 
-// Callback function for when bodypose outputs data
+// Callback function for when bodyPose outputs data
 function gotPoses(results) {
   // Save the output to the poses variable
   poses = results;
