@@ -3,14 +3,14 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-let facemesh;
+let faceMesh;
 let video;
 let faces = [];
 let options = { maxFaces: 1, refineLandmarks: false, flipHorizontal: false };
 
 function preload() {
-  // Load the facemesh model
-  facemesh = ml5.facemesh(options);
+  // Load the faceMesh model
+  faceMesh = ml5.faceMesh(options);
 }
 
 function setup() {
@@ -20,7 +20,7 @@ function setup() {
   video.size(width, height);
   video.hide();
   // Start detecting faces from the webcam video
-  facemesh.detectStart(video, gotFaces);
+  faceMesh.detectStart(video, gotFaces);
 }
 
 function draw() {
@@ -52,7 +52,7 @@ function drawPartsKeypoints() {
   }
 }
 
-// Callback function for when facemesh outputs data
+// Callback function for when faceMesh outputs data
 function gotFaces(results) {
   // Save the output to the faces variable
   faces = results;

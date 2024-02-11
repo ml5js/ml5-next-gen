@@ -1,7 +1,7 @@
 import neuralNetwork from "./NeuralNetwork";
 import handpose from "./Handpose";
 import sentiment from "./Sentiment";
-import facemesh from "./Facemesh";
+import faceMesh from "./FaceMesh";
 import bodyPose from "./BodyPose";
 import * as tf from "@tensorflow/tfjs";
 import * as tfvis from "@tensorflow/tfjs-vis";
@@ -18,7 +18,7 @@ export default Object.assign(
     neuralNetwork,
     handpose,
     sentiment,
-    facemesh,
+    faceMesh,
     bodyPose,
     setBackend,
     bodySegmentation,

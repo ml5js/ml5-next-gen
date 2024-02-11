@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 /*
- * Facemesh: Face landmarks tracking in the browser
+ * FaceMesh: Face landmarks tracking in the browser
  * Ported and integrated from all the hard work by: https://github.com/tensorflow/tfjs-models/tree/master/face-landmarks-detection
  */
 
@@ -14,9 +14,9 @@ import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import { mediaReady } from "../utils/imageUtilities";
 
-class Facemesh {
+class FaceMesh {
   /**
-   * An options object to configure Facemesh settings
+   * An options object to configure FaceMesh settings
    * @typedef {Object} configOptions
    * @property {number} maxFacess - The maximum number of faces to detect. Defaults to 2.
    * @property {boolean} refineLandmarks - Refine the ladmarks. Defaults to false.
@@ -28,7 +28,7 @@ class Facemesh {
    */
 
   /**
-   * Create Facemesh.
+   * Create FaceMesh.
    * @param {configOptions} options - An object with options.
    * @param {function} callback - A callback to be called when the model is ready.
    *
@@ -54,7 +54,7 @@ class Facemesh {
 
   /**
    * Load the model and set it to this.model
-   * @return {this} the Facemesh model.
+   * @return {this} the FaceMesh model.
    *
    * @private
    */
@@ -264,13 +264,13 @@ class Facemesh {
 }
 
 /**
- * Factory function that returns a Facemesh instance
- * @returns {Object} A new facemesh instance
+ * Factory function that returns a FaceMesh instance
+ * @returns {Object} A new faceMesh instance
  */
-const facemesh = (...inputs) => {
+const faceMesh = (...inputs) => {
   const { options = {}, callback } = handleArguments(...inputs);
-  const instance = new Facemesh(options, callback);
+  const instance = new FaceMesh(options, callback);
   return instance;
 };
 
-export default facemesh;
+export default faceMesh;
