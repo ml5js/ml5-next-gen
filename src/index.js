@@ -1,8 +1,8 @@
 import neuralNetwork from "./NeuralNetwork";
-import handpose from "./Handpose";
+import handPose from "./HandPose";
 import sentiment from "./Sentiment";
-import facemesh from "./Facemesh";
-import bodypose from "./Bodypose";
+import faceMesh from "./FaceMesh";
+import bodyPose from "./BodyPose";
 import * as tf from "@tensorflow/tfjs";
 import * as tfvis from "@tensorflow/tfjs-vis";
 import p5Utils from "./utils/p5Utils";
@@ -16,10 +16,10 @@ export default Object.assign(
     tf,
     tfvis,
     neuralNetwork,
-    handpose,
+    handPose,
     sentiment,
-    facemesh,
-    bodypose,
+    faceMesh,
+    bodyPose,
     setBackend,
     bodySegmentation,
   }
