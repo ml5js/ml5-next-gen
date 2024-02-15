@@ -31,12 +31,8 @@ function setup() {
 }
 
 // A function to run when we get any errors and the results
-function gotResult(results, error) {
-  // Display error in the console
-  if (error) {
-    console.error(error);
-  }
-  // The results are in an array ordered by confidence.
+function gotResult(results) {
+  // The results are in an array ordered by confidence, print in console
   console.log(results);
 
   // Display the results on the canvas
@@ -44,7 +40,7 @@ function gotResult(results, error) {
   stroke(0);
   textSize(18);
   label = 'Label: ' + results[0].label;
-  text(label, 10, 360);
   confidence = 'Confidence: ' + nf(results[0].confidence, 0, 2);
+  text(label, 10, 360);
   text(confidence, 10, 380);
 }
