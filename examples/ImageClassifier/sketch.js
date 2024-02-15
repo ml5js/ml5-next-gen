@@ -15,6 +15,10 @@ let classifier;
 // A variable to hold the image we want to classify
 let img;
 
+// Variables for displaying the results on the canvas
+let label = '';
+let confidence = '';
+
 function preload() {
   classifier = ml5.imageClassifier('MobileNet');
   img = loadImage('images/bird.jpg');
@@ -34,6 +38,13 @@ function gotResult(results, error) {
   }
   // The results are in an array ordered by confidence.
   console.log(results);
-  createDiv('Label: ' + results[0].label);
-  createDiv('Confidence: ' + nf(results[0].confidence, 0, 2));
+
+  // Display the results on the canvas
+  fill(255);
+  stroke(0);
+  textSize(18);
+  label = 'Label: ' + results[0].label;
+  text(label, 10, 360);
+  confidence = 'Confidence: ' + nf(results[0].confidence, 0, 2);
+  text(confidence, 10, 380);
 }

@@ -14,7 +14,7 @@ it makes use of the p5 mousePressed() function to toggle between an active class
 let classifier;
 
 // A variable to hold the video we want to classify
-let vid;
+let video;
 
 // Variable for displaying the results on the canvas
 let label = 'Model loading...';
@@ -26,28 +26,21 @@ function preload() {
 function setup() {
   createCanvas(640, 480);
   background(255);
-  textSize(32);
-  fill(255);
+  
   // Using webcam feed as video input, hiding html element to avoid duplicate with canvas
-  vid = createCapture(VIDEO);
-  vid.hide();
-  classifier.classifyStart(vid, gotResult);
+  video = createCapture(VIDEO);
+  video.hide();
+  classifier.classifyStart(video, gotResult);
 }
 
 function draw() {
   //Each video frame is painted on the canvas
-  image(vid, 0, 0);
-  //Printing class with the highest probability on the canvas
-  text(label, 20, 50);
-}
+  image(video, 0, 0);
 
-//A mouse click to stop and restart the classification process
-function mousePressed(){
-  if (classifier.isClassifying){
-    classifier.classifyStop();
-  }else{
-    classifier.classifyStart(vid, gotResult);
-  }
+  //Printing class with the highest probability on the canvas
+  fill(255);
+  textSize(32);
+  text(label, 20, 50);
 }
 
 // A function to run when we get the results and any errors
