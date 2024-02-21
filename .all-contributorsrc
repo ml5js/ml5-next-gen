@@ -8,7 +8,6 @@
   ],
   "imageSize": 100,
   "commit": false,
-  "commitConvention": "angular",
   "contributors": [
     {
       "login": "shiffman",
@@ -1353,6 +1352,5 @@
     }
   ],
   "contributorsPerLine": 7,
-  "linkToUsage": true,
   "skipCi": true
 }
