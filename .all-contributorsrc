@@ -1,0 +1,14 @@
+{
+  "projectName": "ml5-next-gen",
+  "projectOwner": "ml5",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": ["README.md"],
+  "imageSize": 100,
+  "commit": true,
+  "commitConvention": "angular",
+  "contributors": [],
+  "contributorsPerLine": 7,
+  "linkToUsage": true
+}
+

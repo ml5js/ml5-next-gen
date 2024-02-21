@@ -26,6 +26,7 @@
     "url": "https://github.com/ml5js/ml5-next-gen/issues"
   },
   "devDependencies": {
+    "all-contributors-cli": "^6.26.1",
     "html-webpack-plugin": "^5.5.3",
     "patch-package": "^8.0.0",
     "postinstall-postinstall": "^2.1.0",
