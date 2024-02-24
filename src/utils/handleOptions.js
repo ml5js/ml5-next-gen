@@ -11,6 +11,10 @@ const errorMessages = {
     `🟪ml5.js warns: The '${keyName}' option for ${modelName} has to be set to an integer, but it is being set to the float value '${userValue}' instead.\n\nml5.js is using the default value of '${defaultValue}'.`,
   numberMultipleOf: (modelName, keyName, userValue, multipleOf, defaultValue) =>
     `🟪ml5.js warns: The '${keyName}' option for ${modelName} has to be a multiple of ${multipleOf}, but it is being set to '${userValue}' instead.\n\nml5.js is using the default value of '${defaultValue}'.`,
+  modelName: (modelName, userValue, enums, defaultValue) =>
+    `🟪ml5.js warns: The modelName parameter for ${modelName} has to be set to ${renderArray(
+      enums
+    )}, but it is being set to '${userValue}' instead.\n\nml5.js is using default model '${defaultValue}'.`,
 };
 
 /**
@@ -88,6 +92,7 @@ function isInRange(value, min, max) {
  *
  * @param {object} userObject - options object provided by the user
  * @param {object} moldObject - an object that defines how the user options object should be filtered
+ * @param {string} modelName - the name of the ml5 model
  * @returns {object} - filtered options object
  */
 function handleOptions(userObject, moldObject, modelName) {
@@ -185,6 +190,38 @@ function handleOptions(userObject, moldObject, modelName) {
   }
   console.log(filteredObject);
   return filteredObject;
+}
+
+/**
+ * A function that takes a user value and checks if it is a valid underlying model name.
+ * Returns the model name the user provided if it is valid, otherwise returns the default model name.
+ *
+ * @param {string} userValue - the value provided by the user
+ * @param {string[]} possibleValues - the available model names
+ * @param {string} defaultValue  - the default model to use if the userValue is not valid
+ * @param {string} ml5ModelName - the name of the ml5 model
+ *
+ * @returns {string} - the model name to use
+ */
+export function handleModelName(
+  userValue,
+  possibleValues,
+  defaultValue,
+  ml5ModelName
+) {
+  const modelName = checkEnum(userValue, possibleValues, true);
+  if (modelName === undefined) {
+    console.warn(
+      errorMessages.modelName(
+        ml5ModelName,
+        userValue,
+        possibleValues,
+        defaultValue
+      )
+    );
+    return defaultValue;
+  }
+  return modelName;
 }
 
 export default handleOptions;
