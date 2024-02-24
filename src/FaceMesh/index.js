@@ -13,6 +13,7 @@ import * as faceLandmarksDetection from "@tensorflow-models/face-landmarks-detec
 import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import { mediaReady } from "../utils/imageUtilities";
+import handleOptions from "../utils/handleOptions";
 
 class FaceMesh {
   /**
@@ -61,15 +62,52 @@ class FaceMesh {
   async loadModel() {
     const pipeline = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
     // filter out model config options
-    const modelConfig = {
-      runtime: "mediapipe",
-      solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh",
-      maxFaces: this.config?.maxFaces ?? 1,
-      refineLandmarks: this.config?.refineLandmarks ?? false,
-    };
-    this.runtimeConfig = {
-      flipHorizontal: this.config?.flipHorizontal ?? false,
-    };
+    const modelConfig = handleOptions(
+      this.config,
+      {
+        runtime: {
+          type: "enum",
+          values: ["mediapipe", "tfjs"],
+          default: "mediapipe",
+        },
+        maxFaces: {
+          type: "number",
+          min: 1,
+          default: 1,
+        },
+        refineLandmarks: {
+          type: "boolean",
+          default: false,
+        },
+        solutionPath: {
+          type: "string",
+          default: "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh",
+          ignore: (config) => config.runtime !== "mediapipe",
+        },
+        detectorModelUrl: {
+          type: "string",
+          default: undefined,
+          ignore: (config) => config.runtime !== "tfjs",
+        },
+        landmarkModelUrl: {
+          type: "string",
+          default: undefined,
+          ignore: (config) => config.runtime !== "tfjs",
+        },
+      },
+      "faceMesh"
+    );
+
+    this.runtimeConfig = handleOptions(
+      this.config,
+      {
+        flipHorizontal: {
+          type: "boolean",
+          default: false,
+        },
+      },
+      "faceMesh"
+    );
 
     await tf.ready();
     this.model = await faceLandmarksDetection.createDetector(
