@@ -98,7 +98,7 @@ class HandPose {
           ignore: (config) => config.runtime !== "tfjs",
         },
       },
-      "handpose"
+      "handPose"
     );
     this.runtimeConfig = handleOptions(
       this.config,
@@ -108,7 +108,7 @@ class HandPose {
           default: false,
         },
       },
-      "handpose"
+      "handPose"
     );
 
     await tf.ready();
