@@ -93,20 +93,20 @@ TODO (link p5 web editor examples once uploaded)
 
 ---
 
-## ml5.bodypose
+## ml5.bodyPose
 
 ### Description
 
-Bodypose can be used for real-time human pose Estimation.
+BodyPose can be used for real-time human pose Estimation.
 
 ### Methods
 
-#### ml5.bodypose()
+#### ml5.bodyPose()
 
-This method is used to initialize the bodypose object.
+This method is used to initialize the bodyPose object.
 
 ```javascript
-const bodypose = ml5.bodypose(?modelName, ?options, ?callback);
+const bodyPose = ml5.bodyPose(?modelName, ?options, ?callback);
 ```
 
 **Parameters:**
@@ -144,17 +144,17 @@ const bodypose = ml5.bodypose(?modelName, ?options, ?callback);
 
 [More info on options for MediaPipe BlazePose](https://github.com/tensorflow/tfjs-models/tree/master/pose-detection/src/blazepose_mediapipe) and for TFJS BlazePose [here](https://github.com/tensorflow/tfjs-models/tree/master/pose-detection/src/blazepose_tfjs#create-a-detector).
 
-- **callback(bodypose, error)**: OPTIONAL. A function to run once the model has been loaded. Alternatively, call `ml5.bodypose()` within the p5 `preload` function.
+- **callback(bodyPose, error)**: OPTIONAL. A function to run once the model has been loaded. Alternatively, call `ml5.bodyPose()` within the p5 `preload` function.
 
 **Returns:**  
-The bodypose object.
+The bodyPose object.
 
-#### bodypose.detectStart()
+#### bodyPose.detectStart()
 
 This method repeatedly outputs pose estimations on an image media through a callback function.
 
 ```javascript
-bodypose.detectStart(media, callback);
+bodyPose.detectStart(media, callback);
 ```
 
 **Parameters:**
@@ -182,20 +182,20 @@ bodypose.detectStart(media, callback);
 
   ![Keypoint Diagram](https://camo.githubusercontent.com/b8a385301ca6b034d5f4807505e528b4512a0aa78507dec9ebafcc829b9556be/68747470733a2f2f73746f726167652e676f6f676c65617069732e636f6d2f6d6f76656e65742f636f636f2d6b6579706f696e74732d3530302e706e67)
 
-#### bodypose.detectStop()
+#### bodyPose.detectStop()
 
-This method can be called after a call to `bodypose.detectStart` to stop the repeating pose estimation.
+This method can be called after a call to `bodyPose.detectStart` to stop the repeating pose estimation.
 
 ```javascript
-bodypose.detectStop();
+bodyPose.detectStop();
 ```
 
-#### bodypose.detect()
+#### bodyPose.detect()
 
 This method asynchronously outputs a single pose estimation on an image media when called.
 
 ```javascript
-bodypose.detect(media, ?callback);
+bodyPose.detect(media, ?callback);
 ```
 
 **Parameters:**
@@ -212,20 +212,20 @@ TODO (link p5 web editor examples once uploaded)
 
 ---
 
-## ml5.facemesh
+## ml5.faceMesh
 
 ### Description
 
-Facemesh can be used for real-time face landmark Estimation.
+FaceMesh can be used for real-time face landmark Estimation.
 
 ### Methods
 
-#### ml5.facemesh()
+#### ml5.faceMesh()
 
-This method is used to initialize the facemesh object.
+This method is used to initialize the faceMesh object.
 
 ```javascript
-const facemesh = ml5.facemesh(?options, ?callback);
+const faceMesh = ml5.faceMesh(?options, ?callback);
 ```
 
 **Parameters:**
@@ -242,17 +242,17 @@ const facemesh = ml5.facemesh(?options, ?callback);
 
   More info on options [here](https://github.com/tensorflow/tfjs-models/tree/master/face-landmarks-detection/src/mediapipe#create-a-detector).
 
-- **callback(facemesh, error)**: OPTIONAL. A function to run once the model has been loaded. Alternatively, call `ml5.facemesh()` within the p5 `preload` function.
+- **callback(faceMesh, error)**: OPTIONAL. A function to run once the model has been loaded. Alternatively, call `ml5.faceMesh()` within the p5 `preload` function.
 
 **Returns:**  
-The facemesh object.
+The faceMesh object.
 
-#### facemesh.detectStart()
+#### faceMesh.detectStart()
 
 This method repeatedly outputs face estimations on an image media through a callback function.
 
 ```javascript
-facemesh.detectStart(media, callback);
+faceMesh.detectStart(media, callback);
 ```
 
 **Parameters:**
@@ -275,20 +275,20 @@ facemesh.detectStart(media, callback);
 
   [Here](https://github.com/tensorflow/tfjs-models/blob/master/face-landmarks-detection/mesh_map.jpg) is a diagram for the position of each keypoint (download and zoom in to see the index).
 
-#### facemesh.detectStop()
+#### faceMesh.detectStop()
 
-This method can be called after a call to `facemesh.detectStart` to stop the repeating face estimation.
+This method can be called after a call to `faceMesh.detectStart` to stop the repeating face estimation.
 
 ```javascript
-facemesh.detectStop();
+faceMesh.detectStop();
 ```
 
-#### facemesh.detect()
+#### faceMesh.detect()
 
 This method asynchronously outputs a single face estimation on an image media when called.
 
 ```javascript
-facemesh.detect(media, ?callback);
+faceMesh.detect(media, ?callback);
 ```
 
 **Parameters:**
@@ -305,20 +305,20 @@ TODO (link p5 web editor examples once uploaded)
 
 ---
 
-## ml5.handpose
+## ml5.handPose
 
 ### Description
 
-Handpose can be used for real-time hand Estimation.
+HandPose can be used for real-time hand Estimation.
 
 ### Methods
 
-#### ml5.handpose()
+#### ml5.handPose()
 
-This method is used to initialize the handpose object.
+This method is used to initialize the handPose object.
 
 ```javascript
-const handpose = ml5.handpose(?options, ?callback);
+const handPose = ml5.handPose(?options, ?callback);
 ```
 
 **Parameters:**
@@ -339,17 +339,17 @@ const handpose = ml5.handpose(?options, ?callback);
   More info on options [here](https://github.com/tensorflow/tfjs-models/tree/master/hand-pose-detection/src/mediapipe#create-a-detector) for "mediapipe" runtime.
   More info on options [here](https://github.com/tensorflow/tfjs-models/tree/master/hand-pose-detection/src/tfjs#create-a-detector) for "tfjs" runtime.
 
-- **callback(handpose, error)**: OPTIONAL. A function to run once the model has been loaded. Alternatively, call `ml5.handpose()` within the p5 `preload` function.
+- **callback(handPose, error)**: OPTIONAL. A function to run once the model has been loaded. Alternatively, call `ml5.handPose()` within the p5 `preload` function.
 
 **Returns:**  
-The handpose object.
+The handPose object.
 
-#### handpose.detectStart()
+#### handPose.detectStart()
 
 This method repeatedly outputs hand estimations on an image media through a callback function.
 
 ```javascript
-handpose.detectStart(media, callback);
+handPose.detectStart(media, callback);
 ```
 
 **Parameters:**
@@ -376,20 +376,20 @@ handpose.detectStart(media, callback);
 
   ![Keypoint Diagram](https://camo.githubusercontent.com/b0f077393b25552492ef5dd7cd9fd13f386e8bb480fa4ed94ce42ede812066a1/68747470733a2f2f6d65646961706970652e6465762f696d616765732f6d6f62696c652f68616e645f6c616e646d61726b732e706e67)
 
-#### handpose.detectStop()
+#### handPose.detectStop()
 
-This method can be called after a call to `handpose.detectStart` to stop the repeating hand estimation.
+This method can be called after a call to `handPose.detectStart` to stop the repeating hand estimation.
 
 ```javascript
-handpose.detectStop();
+handPose.detectStop();
 ```
 
-#### handpose.detect()
+#### handPose.detect()
 
 This method asynchronously outputs a single hand estimation on an image media when called.
 
 ```javascript
-handpose.detect(media, ?callback);
+handPose.detect(media, ?callback);
 ```
 
 **Parameters:**
