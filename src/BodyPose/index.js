@@ -13,6 +13,7 @@ import * as poseDetection from "@tensorflow-models/pose-detection";
 import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import { mediaReady } from "../utils/imageUtilities";
+import handleOptions from "../utils/handleOptions";
 
 class BodyPose {
   /**
@@ -77,38 +78,120 @@ class BodyPose {
     if (this.modelName === "BlazePose") {
       pipeline = poseDetection.SupportedModels.BlazePose;
       //Set the config to user defined or default values
-      modelConfig = {
-        runtime: this.config.runtime ?? "mediapipe",
-        enableSmoothing: this.config.enableSmoothing ?? true,
-        enableSegmentation: this.config.enableSegmentation ?? false,
-        smoothSegmentation: this.config.smoothSegmentation ?? true,
-        modelType: this.config.smoothSegmentation ?? "full",
-        solutionPath:
-          this.config.solutionPath ??
-          "https://cdn.jsdelivr.net/npm/@mediapipe/pose",
-        detectorModelUrl: this.config?.detectorModelUrl,
-        landmarkModelUrl: this.config?.landmarkModelUrl,
-      };
-
-      this.runtimeConfig.flipHorizontal = this.config.flipHorizontal ?? false;
+      modelConfig = handleOptions(
+        this.config,
+        {
+          runtime: {
+            type: "enum",
+            enums: ["mediapipe", "tfjs"],
+            default: "mediapipe",
+          },
+          enableSmoothing: {
+            type: "boolean",
+            default: true,
+          },
+          enableSegmentation: {
+            type: "boolean",
+            default: false,
+            ignore: (config) => config.runtime !== "mediapipe",
+          },
+          smoothSegmentation: {
+            type: "boolean",
+            default: true,
+            ignore: (config) => config.runtime !== "mediapipe",
+          },
+          modelType: {
+            type: "enum",
+            enums: ["lite", "full", "heavy"],
+            default: "full",
+          },
+          solutionPath: {
+            type: "string",
+            default: "https://cdn.jsdelivr.net/npm/@mediapipe/pose",
+            ignore: (config) => config.runtime !== "mediapipe",
+          },
+          detectorModelUrl: {
+            type: "string",
+            default: undefined,
+            ignore: (config) => config.runtime !== "tfjs",
+          },
+          landmarkModelUrl: {
+            type: "string",
+            default: undefined,
+            ignore: (config) => config.runtime !== "tfjs",
+          },
+        },
+        "bodyPose"
+      );
+      this.runtimeConfig = handleOptions(
+        this.config,
+        {
+          flipHorizontal: {
+            type: "boolean",
+            default: false,
+          },
+        },
+        "bodyPose"
+      );
     } else {
       if (this.modelName !== "MoveNet") {
         console.warn(
-          `Expect model name to be "MoveNet" or "BlazePose", but got "${this.modelName}". Using "MoveNet" instead.`
+          `🟪ml5.js warns: The modelName parameter for bodyPose has to be set to 'MoveNet' or 'BlazePose', but it is being set to '${this.modelName}' instead.\n\nml5.js is using the default value 'MoveNet' instead.`
         );
       }
       pipeline = poseDetection.SupportedModels.MoveNet;
       //Set the config to user defined or default values
-      modelConfig = {
-        enableSmoothing: this.config.enableSmoothing ?? true,
-        modelUrl: this.config.modelUrl,
-        minPoseScore: this.config.minPoseScore ?? 0.25,
-        multiPoseMaxDimension: this.config.multiPoseMaxDimension ?? 256,
-        enableTracking: this.config.enableTracking ?? true,
-        trackerType: this.config.trackerType ?? "boundingBox",
-        trackerConfig: this.config.trackerConfig,
-      };
-      // use multi-pose lightning model by default
+      modelConfig = handleOptions(
+        this.config,
+        {
+          modelType: {
+            type: "enum",
+            enums: [
+              "SINGLEPOSE_LIGHTNING",
+              "SINGLEPOSE_THUNDER",
+              "MULTIPOSE_LIGHTNING",
+            ],
+            default: "MULTIPOSE_LIGHTNING",
+          },
+          enableSmoothing: {
+            type: "boolean",
+            default: true,
+          },
+          minPoseScore: {
+            type: "number",
+            min: 0,
+            max: 1,
+            default: 0.25,
+          },
+          multiPoseMaxDimension: {
+            type: "number",
+            default: 256,
+            min: 32,
+            integer: true,
+            multipleOf: 32,
+          },
+          enableTracking: {
+            type: "boolean",
+            default: true,
+          },
+          trackerType: {
+            type: "enum",
+            enums: ["boundingBox", "keypoint"],
+            default: "boundingBox",
+          },
+          trackerConfig: {
+            type: "object",
+            default: undefined,
+          },
+          modelUrl: {
+            type: "string",
+            default: undefined,
+          },
+        },
+        "bodyPose"
+      );
+
+      // Map the modelType string to the movenet.modelType enum
       switch (this.config.modelType) {
         case "SINGLEPOSE_LIGHTNING":
           modelConfig.modelType =
