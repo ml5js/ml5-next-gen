@@ -14,6 +14,7 @@ import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import { mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
+import { handleModelName } from "../utils/handleOptions";
 
 class BodyPose {
   /**
@@ -48,7 +49,7 @@ class BodyPose {
    * @param {function} callback  - A function to run once the model has been loaded.
    * @private
    */
-  constructor(modelName = "MoveNet", options, callback) {
+  constructor(modelName, options, callback) {
     // for compatibility with p5's preload()
     if (this.p5PreLoadExists()) window._incrementPreload();
 
@@ -74,6 +75,13 @@ class BodyPose {
   async loadModel() {
     let pipeline;
     let modelConfig;
+
+    this.modelName = handleModelName(
+      this.modelName,
+      ["BlazePose", "MoveNet"],
+      "MoveNet",
+      "bodyPose"
+    );
 
     if (this.modelName === "BlazePose") {
       pipeline = poseDetection.SupportedModels.BlazePose;
@@ -134,11 +142,6 @@ class BodyPose {
         "bodyPose"
       );
     } else {
-      if (this.modelName !== "MoveNet") {
-        console.warn(
-          `🟪ml5.js warns: The modelName parameter for bodyPose has to be set to 'MoveNet' or 'BlazePose', but it is being set to '${this.modelName}' instead.\n\nml5.js is using the default value 'MoveNet' instead.`
-        );
-      }
       pipeline = poseDetection.SupportedModels.MoveNet;
       //Set the config to user defined or default values
       modelConfig = handleOptions(
