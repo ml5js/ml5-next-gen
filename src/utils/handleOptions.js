@@ -8,7 +8,9 @@ const errorMessages = {
   numberRange: (modelName, keyName, userValue, min, max, defaultValue) =>
     `🟪ml5.js warns: The '${keyName}' option for ${modelName} has to be set to a number between ${min} and ${max}, but it is being set to '${userValue}' instead.\n\nml5.js is using default value of '${defaultValue}'.`,
   numberInteger: (modelName, keyName, userValue, defaultValue) =>
-    `🟪ml5.js warns: The '${keyName}' option for ${modelName} has to be set to an integer, but it is being set to the float value '${userValue}' instead.\n\nml5.js is using the default value of ${defaultValue}.`,
+    `🟪ml5.js warns: The '${keyName}' option for ${modelName} has to be set to an integer, but it is being set to the float value '${userValue}' instead.\n\nml5.js is using the default value of '${defaultValue}'.`,
+  numberMultipleOf: (modelName, keyName, userValue, multipleOf, defaultValue) =>
+    `🟪ml5.js warns: The '${keyName}' option for ${modelName} has to be a multiple of ${multipleOf}, but it is being set to '${userValue}' instead.\n\nml5.js is using the default value of '${defaultValue}'.`,
 };
 
 /**
@@ -135,11 +137,23 @@ function handleOptions(userObject, moldObject, modelName) {
         const min = evaluate(filteredObject, rules.min) ?? -Infinity;
         const max = evaluate(filteredObject, rules.max) ?? Infinity;
         const integer = evaluate(filteredObject, rules.integer) ?? false;
+        const multipleOf = evaluate(filteredObject, rules.multipleOf);
         const checkedValue = isInRange(userValue, min, max);
 
         if (integer && !Number.isInteger(userValue)) {
           console.warn(
             errorMessages.numberInteger(modelName, key, userValue, defaultValue)
+          );
+          filteredObject[key] = defaultValue;
+        } else if (multipleOf !== undefined && userValue % multipleOf !== 0) {
+          console.warn(
+            errorMessages.numberMultipleOf(
+              modelName,
+              key,
+              userValue,
+              multipleOf,
+              defaultValue
+            )
           );
           filteredObject[key] = defaultValue;
         } else if (checkedValue === undefined) {

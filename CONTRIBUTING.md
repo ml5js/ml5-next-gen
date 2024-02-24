@@ -176,6 +176,7 @@ The `moldObject` consists of key-value pairs. The key defines the name of an all
   - `min` (optional): A number defining the minimum value.
   - `max` (optional): A number defining the maximum value.
   - `integer` (optional): A boolean defining whether the value should be an integer. Defaults to `false`.
+  - `multipleOf` (optional): A number. When defined, the user value must be a multiple of this number.
 - Specifically for `type: "enum"`:
   - `enums` (required): An array defining a list of valid values.
   - `caseInsensitive` (optional): A boolean defining whether to checks the user value against the enum list case-insensitively. Defaults to `true`.
