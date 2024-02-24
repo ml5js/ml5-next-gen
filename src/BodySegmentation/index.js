@@ -49,7 +49,8 @@ class BodySegmentation {
     this.modelName = handleModelName(
       this.modelName,
       ["BodyPix", "SelfieSegmentation"],
-      "SelfieSegmentation"
+      "SelfieSegmentation",
+      "bodySegmentation"
     );
 
     //select the correct model based on mask type
@@ -109,7 +110,7 @@ class BodySegmentation {
             default: undefined,
           },
         },
-        "BodySegmentation"
+        "bodySegmentation"
       );
       this.runtimeConfig = handleOptions(
         this.config,
@@ -132,7 +133,7 @@ class BodySegmentation {
             default: false,
           },
         },
-        "BodySegmentation"
+        "bodySegmentation"
       );
     } else {
       pipeline = tfBodySegmentation.SupportedModels.MediaPipeSelfieSegmentation;
@@ -160,7 +161,7 @@ class BodySegmentation {
             default: undefined,
           },
         },
-        "BodySegmentation"
+        "bodySegmentation"
       );
 
       this.runtimeConfig = handleOptions(
@@ -176,7 +177,7 @@ class BodySegmentation {
             default: false,
           },
         },
-        "BodySegmentation"
+        "bodySegmentation"
       );
     }
 
