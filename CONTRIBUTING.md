@@ -126,10 +126,6 @@ To add a new contributor, create a new branch from main. Then, enter the followi
 yarn all-contributors add
 ```
 
-Answer the prompts in the terminal. Then use the following command to regenerate the contributor's table in README.md.
-
-```
-all-contributors generate
-```
+Complete the prompts in the terminal.
 
 Make a pull request to merge the new branch into main. When the branch gets merged, the new contributor will show up in README.md!
