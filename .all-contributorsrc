@@ -950,6 +950,13 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/117459451?v=4",
       "profile": "https://github.com/acosmica",
       "contributions": ["blog", "communityManagement", "eventOrganizing"]
+    },
+    {
+      "login": "VivianChenyc5519",
+      "name": "Vivian Chen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/94060169?v=4",
+      "profile": "https://github.com/VivianChenyc5519",
+      "contributions": ["code"]
     }
   ],
   "contributorsPerLine": 7,
