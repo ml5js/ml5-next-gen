@@ -1,6 +1,7 @@
 # ml5-next-gen
+
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-132-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-133-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 Welcome to the next-generation repo for the ml5.js project! Due to the complexities inherent in updating all the dependencies in [the original repo](https://github.com/ml5js/ml5-library), we're exploring rebuilding from the ground up. This fresh repository allows us to migrate over classes and functions one at a time. This is very much a work in progress and is currently in its early, experimental stage. We appreciate your patience as we work towards refining this next evolution of the ml5.js project. Stay tuned!
@@ -217,6 +218,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://youtube.com/codergautam"><img src="https://avatars.githubusercontent.com/u/66850133?v=4?s=100" width="100px;" alt="Coder Gautam"/><br /><sub><b>Coder Gautam</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=codergautam" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/yoychen"><img src="https://avatars.githubusercontent.com/u/3905275?v=4?s=100" width="100px;" alt="Yong-Yuan Chen"/><br /><sub><b>Yong-Yuan Chen</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=yoychen" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/adrianfiedler"><img src="https://avatars.githubusercontent.com/u/7136570?v=4?s=100" width="100px;" alt="adrianfiedler"/><br /><sub><b>adrianfiedler</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=adrianfiedler" title="Documentation">📖</a> <a href="https://github.com/ml5js/ml5-next-gen/issues?q=author%3Aadrianfiedler" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/acosmica"><img src="https://avatars.githubusercontent.com/u/117459451?v=4?s=100" width="100px;" alt="Micaelle Lages Lucena"/><br /><sub><b>Micaelle Lages Lucena</b></sub></a><br /><a href="#blog-acosmica" title="Blogposts">📝</a> <a href="#communityManagement-acosmica" title="Community Management">👥</a> <a href="#eventOrganizing-acosmica" title="Event Organizing">📋</a></td>
     </tr>
   </tbody>
 </table>
