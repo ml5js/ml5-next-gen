@@ -76,7 +76,9 @@ export class Darknet {
     }
 
     // Warmup the model.
-    const result = tf.tidy(() => this.model.predict(tf.zeros([1, this.imgSize, this.imgSize, 3])));
+    const result = tf.tidy(() =>
+      this.model.predict(tf.zeros([1, this.imgSize, this.imgSize, 3]))
+    );
     await result.data();
     result.dispose();
   }
@@ -87,16 +89,22 @@ export class Darknet {
       const predictions = this.model.predict(imgData);
       return tf.softmax(predictions);
     });
-    const classes = await getTopKClassesFromTensor(logits, topk, IMAGENET_CLASSES_DARKNET);
+    const classes = await getTopKClassesFromTensor(
+      logits,
+      topk,
+      IMAGENET_CLASSES_DARKNET
+    );
     logits.dispose();
     return classes;
   }
 }
 
 export async function load(modelConfig) {
-  const { version } = modelConfig
+  const { version } = modelConfig;
   if (version !== "reference" && version !== "tiny") {
-    throw new Error("Please select a version: darknet-reference or darknet-tiny");
+    throw new Error(
+      "Please select a version: darknet-reference or darknet-tiny"
+    );
   }
 
   const darknet = new Darknet(version);
