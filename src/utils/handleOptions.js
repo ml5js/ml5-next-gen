@@ -203,13 +203,17 @@ function handleOptions(userObject, moldObject, modelName) {
  *
  * @returns {string} - the model name to use
  */
-export function handleModelName(
+function handleModelName(
   userValue,
   possibleValues,
   defaultValue,
   ml5ModelName
 ) {
   const modelName = checkEnum(userValue, possibleValues, true);
+  if (userValue === undefined) {
+    return defaultValue;
+  }
+
   if (modelName === undefined) {
     console.warn(
       errorMessages.modelName(
@@ -224,4 +228,5 @@ export function handleModelName(
   return modelName;
 }
 
+export { handleModelName };
 export default handleOptions;
