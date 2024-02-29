@@ -40,7 +40,7 @@ class ImageClassifier {
     this.mapStringToIndex = [];
 
     // flags for classifyStart() and classifyStop()
-    this.isClassifying = false;// True when classification loop is running
+    this.isClassifying = false; // True when classification loop is running
     this.signalStop = false; // Signal to stop the loop
     this.prevCall = ""; // Track previous call to detectStart() or detectStop()
 
@@ -73,7 +73,7 @@ class ImageClassifier {
         // its a url, we expect to find model.json
         this.modelUrl = modelNameOrUrl;
         // The teachablemachine urls end with a slash, so add model.json to complete the full path
-        if (this.modelUrl.endsWith('/')) this.modelUrl += "model.json";
+        if (this.modelUrl.endsWith("/")) this.modelUrl += "model.json";
       }
     }
     // Load the model
@@ -87,7 +87,11 @@ class ImageClassifier {
   async loadModel(modelUrl) {
     await tf.ready();
     if (modelUrl) this.model = await this.loadModelFrom(modelUrl);
-    else this.model = await this.modelToUse.load({ version: this.version, alpha: this.alpha });
+    else
+      this.model = await this.modelToUse.load({
+        version: this.version,
+        alpha: this.alpha,
+      });
 
     return this;
   }
@@ -109,12 +113,17 @@ class ImageClassifier {
         const prefix = split.slice(0, split.length - 1).join("/");
         const metadataUrl = `${prefix}/metadata.json`;
 
-        const metadataResponse = await axios.get(metadataUrl).catch((metadataError) => {
-          console.log("Tried to fetch metadata.json, but it seems to be missing.", metadataError);
-        });
+        const metadataResponse = await axios
+          .get(metadataUrl)
+          .catch((metadataError) => {
+            console.log(
+              "Tried to fetch metadata.json, but it seems to be missing.",
+              metadataError
+            );
+          });
         if (metadataResponse) {
           const metadata = metadataResponse.data;
-          
+
           if (metadata.labels) {
             this.mapStringToIndex = metadata.labels;
           }
@@ -143,7 +152,8 @@ class ImageClassifier {
 
     // For Doodlenet and Teachable Machine models a manual resizing of the image is still necessary
     const imageResize = [IMAGE_SIZE, IMAGE_SIZE];
-    if (this.modelName == "doodlenet" || this.modelUrl) imgToPredict = imgToTensor(imgToPredict, imageResize);
+    if (this.modelName == "doodlenet" || this.modelUrl)
+      imgToPredict = imgToTensor(imgToPredict, imageResize);
 
     if (this.modelUrl) {
       await tf.nextFrame();
@@ -169,7 +179,9 @@ class ImageClassifier {
 
     const results = this.model
       .classify(imgToPredict, numberOfClasses)
-      .then(classes => classes.map(c => ({ label: c.className, confidence: c.probability })));
+      .then((classes) =>
+        classes.map((c) => ({ label: c.className, confidence: c.probability }))
+      );
 
     return results;
   }
@@ -184,14 +196,18 @@ class ImageClassifier {
    * @return {function} a promise or the results of a given callback, cb.
    */
   async classify(inputNumOrCallback, numOrCallback, cb) {
-    const { image, number, callback } = handleArguments(inputNumOrCallback, numOrCallback, cb)
-      .require('image',
-        "No input image provided. If you want to classify a video, use classifyStart."
-      );
+    const { image, number, callback } = handleArguments(
+      inputNumOrCallback,
+      numOrCallback,
+      cb
+    ).require(
+      "image",
+      "No input image provided. If you want to classify a video, use classifyStart."
+    );
     return callCallback(this.classifyInternal(image, number), callback);
   }
 
-    /**
+  /**
    * Continuously classifies each frame of the given input
    * @param {HTMLVideoElement | object | function | number} inputNumOrCallback -
    *    takes any of the following params
@@ -199,9 +215,12 @@ class ImageClassifier {
    * @param {function} cb - a callback function that handles the results of the function.
    * @return {function} a promise or the results of a given callback, cb.
    */
-    async classifyStart(inputNumOrCallback, numOrCallback, cb) {
-    const { image, number, callback } = handleArguments(inputNumOrCallback, numOrCallback, cb)
-      .require('image', "No input provided.");
+  async classifyStart(inputNumOrCallback, numOrCallback, cb) {
+    const { image, number, callback } = handleArguments(
+      inputNumOrCallback,
+      numOrCallback,
+      cb
+    ).require("image", "No input provided.");
 
     // Function to classify a single frame
     const classifyFrame = async () => {
@@ -211,16 +230,16 @@ class ImageClassifier {
       callCallback(this.classifyInternal(image, number), callback);
 
       // call recursively for continuous classification
-      if (!this.signalStop){
+      if (!this.signalStop) {
         requestAnimationFrame(classifyFrame);
-      }else{
+      } else {
         this.isClassifying = false;
       }
     };
 
     // Start the classification
     this.signalStop = false;
-    if (!this.isClassifying){
+    if (!this.isClassifying) {
       this.isClassifying = true;
       classifyFrame();
     }
@@ -232,10 +251,10 @@ class ImageClassifier {
     this.prevCall = "start";
   }
 
-  /** 
-  * Used to stop the continuous classification of a video
-  */
-  classifyStop(){
+  /**
+   * Used to stop the continuous classification of a video
+   */
+  classifyStop() {
     if (this.isClassifying) {
       this.signalStop = true;
     }
@@ -244,8 +263,10 @@ class ImageClassifier {
 }
 
 const imageClassifier = (modelName, optionsOrCallback, cb) => {
-  const args = handleArguments(modelName, optionsOrCallback, cb)
-    .require('string', 'Please specify a model to use. E.g: "MobileNet"');
+  const args = handleArguments(modelName, optionsOrCallback, cb).require(
+    "string",
+    'Please specify a model to use. E.g: "MobileNet"'
+  );
 
   const { string, options = {}, callback } = args;
 
@@ -260,4 +281,3 @@ const imageClassifier = (modelName, optionsOrCallback, cb) => {
 };
 
 export default imageClassifier;
-

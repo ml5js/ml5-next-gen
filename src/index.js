@@ -16,21 +16,16 @@ const withPreload = {
   imageClassifier,
 };
 
-
-export default Object.assign(
-  { p5Utils },
-  preloadRegister(withPreload),
-  {
-    tf,
-    tfvis,
-    neuralNetwork,
-    handPose,
-    sentiment,
-    faceMesh,
-    bodyPose,
-    setBackend,
-    bodyPix,
-  }
-);
+export default Object.assign({ p5Utils }, preloadRegister(withPreload), {
+  tf,
+  tfvis,
+  neuralNetwork,
+  handPose,
+  sentiment,
+  faceMesh,
+  bodyPose,
+  setBackend,
+  bodyPix,
+});
 
 communityStatement();
