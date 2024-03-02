@@ -48,9 +48,6 @@ class BodyPose {
    * @private
    */
   constructor(modelName = "MoveNet", options, callback) {
-    // for compatibility with p5's preload()
-    if (this.p5PreLoadExists()) window._incrementPreload();
-
     this.modelName = modelName;
     this.model = null;
     this.config = options;
@@ -127,9 +124,6 @@ class BodyPose {
     // Load the detector model
     await tf.ready();
     this.model = await poseDetection.createDetector(pipeline, modelConfig);
-
-    // for compatibility with p5's preload()
-    if (this.p5PreLoadExists) window._decrementPreload();
 
     return this;
   }
@@ -249,20 +243,6 @@ class BodyPose {
       return hand;
     });
     return result;
-  }
-
-  /**
-   * Checks if p5.js' preload() function is present.
-   * @returns {boolean} true if preload() exists.
-   * @private
-   */
-  p5PreLoadExists() {
-    if (typeof window === "undefined") return false;
-    if (typeof window.p5 === "undefined") return false;
-    if (typeof window.p5.prototype === "undefined") return false;
-    if (typeof window.p5.prototype.registerPreloadMethod === "undefined")
-      return false;
-    return true;
   }
 }
 

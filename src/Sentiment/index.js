@@ -51,8 +51,8 @@ class Sentiment {
    */
   constructor(modelName, callback) {
     /**
-     * Boolean value that specifies if the model has loaded.
-     * @type {boolean}
+     * Promise that resolves when the model has loaded.
+     * @type {Promise<Sentiment>}
      * @public
      */
     this.ready = callCallback(this.loadModel(modelName), callback);

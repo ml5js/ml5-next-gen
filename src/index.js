@@ -13,24 +13,27 @@ import imageClassifier from "./ImageClassifier";
 import preloadRegister from "./utils/p5PreloadHelper";
 
 const withPreload = {
-  imageClassifier,
+    bodyPix,
+    bodyPose,
+    faceMesh,
+    handPose,
+    imageClassifier,
+    neuralNetwork,
+    sentiment,
 };
 
-
-export default Object.assign(
+const ml5 = Object.assign(
   { p5Utils },
   preloadRegister(withPreload),
   {
     tf,
     tfvis,
-    neuralNetwork,
-    handPose,
-    sentiment,
-    faceMesh,
-    bodyPose,
     setBackend,
-    bodyPix,
   }
 );
 
+p5Utils.shouldPreload(ml5, Object.keys(withPreload));
+
 communityStatement();
+
+export default ml5;

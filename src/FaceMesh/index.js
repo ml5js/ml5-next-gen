@@ -35,9 +35,6 @@ class FaceMesh {
    * @private
    */
   constructor(options, callback) {
-    // for compatibility with p5's preload()
-    if (this.p5PreLoadExists()) window._incrementPreload();
-
     this.model = null;
     this.config = options;
     this.runtimeConfig = {};
@@ -76,9 +73,6 @@ class FaceMesh {
       pipeline,
       modelConfig
     );
-
-    // for compatibility with p5's preload()
-    if (this.p5PreLoadExists) window._decrementPreload();
 
     return this;
   }
@@ -245,21 +239,6 @@ class FaceMesh {
       }
     }
     return faces;
-  }
-
-  /**
-   * Check if p5.js' preload() function is present
-   * @returns {boolean} true if preload() exists
-   *
-   * @private
-   */
-  p5PreLoadExists() {
-    if (typeof window === "undefined") return false;
-    if (typeof window.p5 === "undefined") return false;
-    if (typeof window.p5.prototype === "undefined") return false;
-    if (typeof window.p5.prototype.registerPreloadMethod === "undefined")
-      return false;
-    return true;
   }
 }
 
