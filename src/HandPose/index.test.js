@@ -3,6 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+import crossFetch from 'cross-fetch';
 import { asyncLoadImage } from "../utils/testingUtils";
 import handpose from "./index";
 
@@ -14,10 +15,17 @@ describe("Handpose", () => {
 
   beforeAll(async () => {
     jest.setTimeout(10000);
-    handposeInstance = await handpose();
+
+    // TODO: this should not be necessary! Should already be handled by setupTests.js.
+    if (!global.fetch) {
+      global.fetch = crossFetch;
+    }
+
+    handposeInstance = handpose();
+    await handposeInstance.ready;
   });
 
-  it("detects poses in image", async () => {
+  it("detects hands in image", async () => {
     testImage = await asyncLoadImage(HANDPOSE_IMG);
     const handPredictions = await handposeInstance.predict(testImage);
     expect(handPredictions).not.toHaveLength(0);

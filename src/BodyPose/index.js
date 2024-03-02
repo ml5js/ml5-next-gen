@@ -129,7 +129,7 @@ class BodyPose {
     this.model = await poseDetection.createDetector(pipeline, modelConfig);
 
     // for compatibility with p5's preload()
-    if (this.p5PreLoadExists) window._decrementPreload();
+    if (this.p5PreLoadExists()) window._decrementPreload();
 
     return this;
   }
