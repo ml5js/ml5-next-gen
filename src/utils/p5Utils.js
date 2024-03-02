@@ -3,13 +3,12 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-
 function isP5Constructor(source) {
   return Boolean(
     source &&
-    typeof source === "function" &&
-    source.prototype &&
-    source.prototype.registerMethod
+      typeof source === "function" &&
+      source.prototype &&
+      source.prototype.registerMethod
   );
 }
 
@@ -45,7 +44,6 @@ class P5Util {
     // Check for p5 on the window.
     this.findAndSetP5();
   }
-
 
   /**
    * @private

@@ -12,24 +12,21 @@ import communityStatement from "./utils/communityStatement";
 import imageClassifier from "./ImageClassifier";
 
 const withPreload = {
-    bodyPix,
-    bodyPose,
-    faceMesh,
-    handPose,
-    imageClassifier,
-    neuralNetwork,
-    sentiment,
+  bodyPix,
+  bodyPose,
+  faceMesh,
+  handPose,
+  imageClassifier,
+  neuralNetwork,
+  sentiment,
 };
 
-const ml5 = Object.assign(
-  { p5Utils },
-  withPreload,
-  {
-    tf,
-    tfvis,
-    setBackend,
-  }
-);
+const ml5 = Object.assign({ p5Utils }, withPreload, {
+  tf,
+  tfvis,
+  setBackend,
+  setP5: p5Utils.setP5.bind(p5Utils),
+});
 
 p5Utils.shouldPreload(ml5, Object.keys(withPreload));
 
