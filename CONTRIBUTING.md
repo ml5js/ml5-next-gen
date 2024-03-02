@@ -71,6 +71,7 @@ yarn run build
 
 This will create a production version of the library in `/dist` directory.
 
+
 ## Unit Tests
 
 To run the unit tests, run the following command
@@ -79,18 +80,47 @@ To run the unit tests, run the following command
 yarn test
 ```
 
-## Process
+## Making Releases
 
-_This section explains how this repository was creates and is for reference purposes only. The steps outlines in this section do not need to be followed by contributors._
+_This section is a temporary guide for contributors who wants to make a alpha release manually._
 
-I am building the library using Webpack, which was installed with:
+1. Create a new pull request on the main branch to update the SemVer number in `package.json`. For alpha releases, simply increment the trailing number in the SemVer. For example, `"version": "0.20.0-alpha.3"` should be changed to `"version": "0.20.0-alpha.4"`.
+
+2. Merge the pull request.
+
+3. Switch to the main branch and make sure the code is up to date by running the following command:
 
 ```
-npm install --save-dev webpack webpack cli
+git checkout main
+git pull
 ```
 
-I also created package.json using `npm init` and set up a basic config file for a library build named `webpack.config.js`. I configured package.json so I could run webpack with `npm run build`.
+4. Make sure all dependencies have been installed by running the following command:
 
-From the original ml5 library's `src` folder, I copied over all source files from the `NeuralNetwork` directory and necessary dependency files from `utils` directory. I also copied over `index.js` from the `src` folder and deleted everything unrelated to NeuralNetwork. I then installed `@tensorflow/tfjs@4.2.0`, `@tensorflow/tfjs-vis@1.5.1`, and `axios@1.3.4` with npm.
+```
+yarn
+```
 
-At this point, the library can be built without error. I was only getting an error about exceeding recommended size limit. For the build, I am using the latest version of node, npm, and tfjs. I have not tested all the features of NeuralNetwork, but it appears to be working just fine.
+5. Build the project with the following command and wait for the build to complete:
+
+```
+yarn run build
+```
+
+6. Run the following command and log in with an npm account that has write access to the ml5 package. You may be redirected to a browser window for authentication.
+
+```
+npm login
+```
+
+7. Publish the package with the following command. You may be redirected to a browser window for authentication.
+
+```
+npm publish --tag alpha --access public
+```
+
+8. The package should now be available at. (Replace [version] with the new SemVer set in step 1).
+
+```
+   https://unpkg.com/ml5@[version]/dist/ml5.js
+```
