@@ -10,7 +10,6 @@ import setBackend from "./utils/setBackend";
 import bodyPix from "./BodySegmentation";
 import communityStatement from "./utils/communityStatement";
 import imageClassifier from "./ImageClassifier";
-import preloadRegister from "./utils/p5PreloadHelper";
 
 const withPreload = {
     bodyPix,
@@ -24,7 +23,7 @@ const withPreload = {
 
 const ml5 = Object.assign(
   { p5Utils },
-  preloadRegister(withPreload),
+  withPreload,
   {
     tf,
     tfvis,
