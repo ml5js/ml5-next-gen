@@ -35,4 +35,4 @@ export async function getTopKClassesFromTensor(logits, topK, CLASSES) {
   return getTopKClassesFromArray(values, topK, CLASSES);
 }
 
-export default { getTopKClassesFromArray, getTopKClassesFromTensor }
+export default { getTopKClassesFromArray, getTopKClassesFromTensor };
