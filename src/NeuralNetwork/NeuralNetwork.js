@@ -251,7 +251,7 @@ class NeuralNetwork {
       const modelJsonResult = await axios.get(filesOrPath.model, {
         responseType: "text",
       });
-      const modelJson = JSON.stringify(modelJsonResult.data);
+      const modelJson = modelJsonResult.data;
       // TODO: browser File() API won't be available in node env
       const modelJsonFile = new File([modelJson], "model.json", {
         type: "application/json",

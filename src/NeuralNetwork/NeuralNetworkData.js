@@ -839,8 +839,7 @@ class NeuralNetworkData {
       let modelMetadata = await axios.get(filesOrPath.metadata, {
         responseType: "text",
       });
-      modelMetadata = JSON.stringify(modelMetadata.data);
-      modelMetadata = JSON.parse(modelMetadata);
+      modelMetadata = JSON.parse(modelMetadata.data);
 
       this.meta = modelMetadata;
     } else {
