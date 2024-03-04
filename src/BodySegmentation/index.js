@@ -10,6 +10,7 @@
 
 import * as tf from "@tensorflow/tfjs";
 import * as tfBodySegmentation from "@tensorflow-models/body-segmentation";
+import ImageDetector from "../ImageDetector";
 import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import BODYPIX_PALETTE from "./BODYPIX_PALETTE";
@@ -18,7 +19,7 @@ import { mediaReady } from "../utils/imageUtilities";
 class BodySegmentation {
   /**
    * Create BodyPix.
-   * @param {HTMLVideoElement} [video] - An HTMLVideoElement.
+   * @param {string} modelName
    * @param {object} [options] - An object with options.
    * @param {function} [callback] - A callback to be called when the model is ready.
    */
@@ -27,12 +28,10 @@ class BodySegmentation {
     if (this.p5PreLoadExists()) window._incrementPreload();
 
     this.modelName = modelName;
-    this.video = video;
     this.model = null;
     this.config = options;
     this.runtimeConfig = {};
-    this.detectMedia = null;
-    this.detectCallback = null;
+
     this.ready = callCallback(this.loadModel(), callback);
   }
 
@@ -117,22 +116,17 @@ class BodySegmentation {
     );
 
     // for compatibility with p5's preload()
-    if (this.p5PreLoadExists) window._decrementPreload();
+    if (this.p5PreLoadExists()) window._decrementPreload();
 
     return this;
   }
+
   /**
    * Calls segmentPeople in a loop.
    * Can be started by detectStart() and terminated by detectStop().
    * @private
    */
-  async detect(...inputs) {
-    const argumentObject = handleArguments(...inputs);
-    argumentObject.require(
-      "image",
-      "An html or p5.js image, video, or canvas element argument is required for detectStart()."
-    );
-    const { image, callback } = argumentObject;
+  async detect(image) {
 
     await mediaReady(image, false);
 
@@ -165,99 +159,12 @@ class BodySegmentation {
     }
     result.mask = this.generateP5Image(result.maskImageData);
 
-    if (callback) callback(result);
     return result;
-  }
-  /**
-   * Repeatedly outputs hand predictions through a callback function.
-   * @param {*} [media] - An HMTL or p5.js image, video, or canvas element to run the prediction on.
-   * @param {gotHands} [callback] - A callback to handle the hand detection results.
-   */
-  detectStart(...inputs) {
-    // Parse out the input parameters
-    const argumentObject = handleArguments(...inputs);
-    argumentObject.require(
-      "image",
-      "An html or p5.js image, video, or canvas element argument is required for detectStart()."
-    );
-    argumentObject.require(
-      "callback",
-      "A callback function argument is required for detectStart()."
-    );
-    this.detectMedia = argumentObject.image;
-    this.detectCallback = argumentObject.callback;
-
-    this.signalStop = false;
-    if (!this.detecting) {
-      this.detecting = true;
-      this.detectLoop();
-    }
-    if (this.prevCall === "start") {
-      console.warn(
-        "detectStart() was called more than once without calling detectStop(). Only the latest detectStart() call will take effect."
-      );
-    }
-    this.prevCall = "start";
-  }
-
-  /**
-   * Stops the detection loop before next detection loop runs.
-   */
-  detectStop() {
-    if (this.detecting) this.signalStop = true;
-    this.prevCall = "stop";
-  }
-
-  /**
-   * Calls segmentPeople in a loop.
-   * Can be started by detectStart() and terminated by detectStop().
-   * @private
-   */
-  async detectLoop() {
-    await mediaReady(this.detectMedia, false);
-    while (!this.signalStop) {
-      const segmentation = await this.model.segmentPeople(
-        this.detectMedia,
-        this.runtimeConfig
-      );
-
-      const result = {};
-      switch (this.runtimeConfig.maskType) {
-        case "background":
-          result.maskImageData = await tfBodySegmentation.toBinaryMask(
-            segmentation,
-            { r: 0, g: 0, b: 0, a: 255 },
-            { r: 0, g: 0, b: 0, a: 0 }
-          );
-          break;
-        case "person":
-          result.maskImageData = await tfBodySegmentation.toBinaryMask(
-            segmentation
-          );
-          break;
-        case "parts":
-          result.maskImageData = await tfBodySegmentation.toColoredMask(
-            segmentation,
-            tfBodySegmentation.bodyPixMaskValueToRainbowColor,
-            { r: 255, g: 255, b: 255, a: 255 }
-          );
-          result.bodyParts = BODYPIX_PALETTE;
-      }
-      result.mask = this.generateP5Image(result.maskImageData);
-
-      this.detectCallback(result);
-      await tf.nextFrame();
-    }
-
-    this.detecting = false;
-    this.signalStop = false;
   }
 
   /**
    * Generate a p5 image from the image data
-   * @param imageData - a ImageData object
-   * @param width - the width of the p5 image
-   * @param height - the height of the p5 image
+   * @param {ImageData} imageData - a ImageData object
    * @return a p5.Image object
    */
   generateP5Image(imageData) {
@@ -288,12 +195,12 @@ class BodySegmentation {
 
 /**
  * Factory function that returns a Facemesh instance
- * @returns {Object} A new bodySegmentation instance
+ * @returns {ImageDetector} A new bodySegmentation instance
  */
 const bodySegmentation = (...inputs) => {
   const { string, options = {}, callback } = handleArguments(...inputs);
   const instance = new BodySegmentation(string, options, callback);
-  return instance;
+  return new ImageDetector(instance);
 };
 
 export default bodySegmentation;

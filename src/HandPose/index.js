@@ -10,6 +10,7 @@
 
 import * as tf from "@tensorflow/tfjs";
 import * as handPoseDetection from "@tensorflow-models/hand-pose-detection";
+import ImageDetector from "../ImageDetector";
 import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import { mediaReady } from "../utils/imageUtilities";
@@ -42,13 +43,6 @@ class HandPose {
     this.model = null;
     this.config = options;
     this.runtimeConfig = {};
-    this.detectMedia = null;
-    this.detectCallback = null;
-
-    // flags for detectStart() and detectStop()
-    this.detecting = false; // True when detection loop is running
-    this.signalStop = false; // Signal to stop the loop
-    this.prevCall = ""; // Track previous call to detectStart() or detectStop()
 
     this.ready = callCallback(this.loadModel(), callback);
   }
@@ -79,104 +73,24 @@ class HandPose {
     this.model = await handPoseDetection.createDetector(pipeline, modelConfig);
 
     // for compatibility with p5's preload()
-    if (this.p5PreLoadExists) window._decrementPreload();
+    if (this.p5PreLoadExists()) window._decrementPreload();
 
     return this;
   }
 
   /**
-   * A callback function that handles the handPose detection results.
-   * @callback gotHands
-   * @param {Array} results - The detection output.
-   */
-
-  /**
    * Asynchronously outputs a single hand landmark detection result when called.
    * Supports both callback and promise.
-   * @param {*} [media] - An HMTL or p5.js image, video, or canvas element to run the detection on.
-   * @param {gotHands} [callback] - Optional. A callback to handle the hand detection result.
+   * @param {*} [media] - An HTML or p5.js image, video, or canvas element to run the detection on.
    * @returns {Promise<Array>} The detection result.
    */
-  async detect(...inputs) {
-    //Parse out the input parameters
-    const argumentObject = handleArguments(...inputs);
-    argumentObject.require(
-      "image",
-      "An html or p5.js image, video, or canvas element argument is required for detect()."
-    );
-    const { image, callback } = argumentObject;
-
-    await mediaReady(image, false);
+  async detect(media) {
+    await mediaReady(media, false);
     const predictions = await this.model.estimateHands(
-      image,
+      media,
       this.runtimeConfig
     );
-    let result = predictions;
-    result = this.addKeypoints(result);
-    if (typeof callback === "function") callback(result);
-    return result;
-  }
-
-  /**
-   * Repeatedly outputs hand predictions through a callback function.
-   * @param {*} [media] - An HMTL or p5.js image, video, or canvas element to run the prediction on.
-   * @param {gotHands} [callback] - A callback to handle the hand detection results.
-   */
-  detectStart(...inputs) {
-    // Parse out the input parameters
-    const argumentObject = handleArguments(...inputs);
-    argumentObject.require(
-      "image",
-      "An html or p5.js image, video, or canvas element argument is required for detectStart()."
-    );
-    argumentObject.require(
-      "callback",
-      "A callback function argument is required for detectStart()."
-    );
-    this.detectMedia = argumentObject.image;
-    this.detectCallback = argumentObject.callback;
-
-    this.signalStop = false;
-    if (!this.detecting) {
-      this.detecting = true;
-      this.detectLoop();
-    }
-    if (this.prevCall === "start") {
-      console.warn(
-        "detectStart() was called more than once without calling detectStop(). Only the latest detectStart() call will take effect."
-      );
-    }
-    this.prevCall = "start";
-  }
-
-  /**
-   * Stops the detection loop before next detection loop runs.
-   */
-  detectStop() {
-    if (this.detecting) this.signalStop = true;
-    this.prevCall = "stop";
-  }
-
-  /**
-   * Calls estimateHands in a loop.
-   * Can be started by detectStart() and terminated by detectStop().
-   * @private
-   */
-  async detectLoop() {
-    await mediaReady(this.detectMedia, false);
-    while (!this.signalStop) {
-      const predictions = await this.model.estimateHands(
-        this.detectMedia,
-        this.runtimeConfig
-      );
-      let result = predictions;
-      result = this.addKeypoints(result);
-      this.detectCallback(result);
-      // wait for the frame to update
-      await tf.nextFrame();
-    }
-    this.detecting = false;
-    this.signalStop = false;
+    return this.addKeypoints(predictions);
   }
 
   /**
@@ -221,12 +135,12 @@ class HandPose {
 
 /**
  * Factory function that returns a new HandPose instance.
- * @returns {HandPose} A new handPose instance.
+ * @returns {ImageDetector} A new handPose instance.
  */
 const handPose = (...inputs) => {
   const { options = {}, callback } = handleArguments(...inputs);
   const instance = new HandPose(options, callback);
-  return instance;
+  return new ImageDetector(instance);
 };
 
 export default handPose;
