@@ -836,12 +836,9 @@ class NeuralNetworkData {
     } else if (filesOrPath instanceof Object) {
       // filesOrPath = {model: URL, metadata: URL, weights: URL}
 
-      let modelMetadata = await axios.get(filesOrPath.metadata, {
-        responseType: "text",
-      });
-      modelMetadata = JSON.parse(modelMetadata.data);
+      let metadataResult = await axios.get(filesOrPath.metadata);
 
-      this.meta = modelMetadata;
+      this.meta = metadataResult.data;
     } else {
       const metaPath = `${filesOrPath.substring(
         0,
