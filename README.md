@@ -1,7 +1,7 @@
 # ml5-next-gen
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-137-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-138-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 Welcome to the next-generation repo for the ml5.js project! Due to the complexities inherent in updating all the dependencies in [the original repo](https://github.com/ml5js/ml5-library), we're exploring rebuilding from the ground up. This fresh repository allows us to migrate over classes and functions one at a time. This is very much a work in progress and is currently in its early, experimental stage. We appreciate your patience as we work towards refining this next evolution of the ml5.js project. Stay tuned!
@@ -225,6 +225,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ch3926"><img src="https://avatars.githubusercontent.com/u/76244682?v=4?s=100" width="100px;" alt="ch3926"/><br /><sub><b>ch3926</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=ch3926" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ziyuan-linn"><img src="https://avatars.githubusercontent.com/u/93690311?v=4?s=100" width="100px;" alt="Ziyuan Lin"/><br /><sub><b>Ziyuan Lin</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=ziyuan-linn" title="Code">💻</a> <a href="https://github.com/ml5js/ml5-next-gen/commits?author=ziyuan-linn" title="Documentation">📖</a> <a href="#example-ziyuan-linn" title="Examples">💡</a> <a href="#maintenance-ziyuan-linn" title="Maintenance">🚧</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/oziomarc"><img src="https://avatars.githubusercontent.com/u/51927015?v=4?s=100" width="100px;" alt="Ozioma Chukwukeme"/><br /><sub><b>Ozioma Chukwukeme</b></sub></a><br /><a href="#blog-oziomarc" title="Blogposts">📝</a> <a href="#communityManagement-oziomarc" title="Community Management">👥</a> <a href="#eventOrganizing-oziomarc" title="Event Organizing">📋</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/B2xx"><img src="https://avatars.githubusercontent.com/u/113410244?v=4?s=100" width="100px;" alt="Zhuolin Li"/><br /><sub><b>Zhuolin Li</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=B2xx" title="Code">💻</a> <a href="https://github.com/ml5js/ml5-next-gen/commits?author=B2xx" title="Documentation">📖</a> <a href="#ideas-B2xx" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/ml5js/ml5-next-gen/commits?author=B2xx" title="Tests">⚠️</a></td>
     </tr>
   </tbody>
 </table>

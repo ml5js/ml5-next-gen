@@ -978,6 +978,13 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/51927015?v=4",
       "profile": "https://github.com/oziomarc",
       "contributions": ["blog", "communityManagement", "eventOrganizing"]
+    },
+    {
+      "login": "B2xx",
+      "name": "Zhuolin Li",
+      "avatar_url": "https://avatars.githubusercontent.com/u/113410244?v=4",
+      "profile": "https://github.com/B2xx",
+      "contributions": ["code", "doc", "ideas", "test"]
     }
   ],
   "contributorsPerLine": 7,
