@@ -53,11 +53,10 @@ function evaluate(filteredObject, value) {
  * Checks if a value is within the enumArray.
  * If isCaseInsensitive is true, the comparison is case insensitive.
  *
- * @param {any} value - the value to check
- * @param {Array} enumArray - the array of enum values
+ * @param {string | number} value - the value to check
+ * @param {Array<string | number>} enumArray - the array of enum values
  * @param {boolean} isCaseInsensitive - whether the comparison is case insensitive
- * @returns {any | undefined} the enum value if the user value is within the enumArray, otherwise undefined
- */
+ * @returns {string | number | undefined} the enum value if the user value is within the enumArray, otherwise undefined
 function checkEnum(value, enumArray, isCaseInsensitive) {
   if (isCaseInsensitive && typeof value === "string") {
     const matchingValue = enumArray.find(
