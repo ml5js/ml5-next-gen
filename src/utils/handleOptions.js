@@ -57,6 +57,7 @@ function evaluate(filteredObject, value) {
  * @param {Array<string | number>} enumArray - the array of enum values
  * @param {boolean} isCaseInsensitive - whether the comparison is case insensitive
  * @returns {string | number | undefined} the enum value if the user value is within the enumArray, otherwise undefined
+ */
 function checkEnum(value, enumArray, isCaseInsensitive) {
   if (isCaseInsensitive && typeof value === "string") {
     const matchingValue = enumArray.find(
