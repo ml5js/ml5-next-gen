@@ -188,7 +188,6 @@ function handleOptions(userObject, moldObject, modelName) {
       }
     }
   }
-  console.log(filteredObject);
   return filteredObject;
 }
 
