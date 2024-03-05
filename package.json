@@ -7,7 +7,7 @@
     "prebuild": "rimraf dist",
     "build": "webpack --config webpack.config.js --mode production",
     "start": "webpack serve --config webpack.config.js --mode development",
-    "format": "prettier --write \"**/*.js\"",
+    "format": "prettier --write \"**/(*.js|*.html|*.md)\"",
     "postinstall": "patch-package"
   },
   "files": [
@@ -45,6 +45,7 @@
     "@tensorflow-models/body-segmentation": "^1.0.1",
     "@tensorflow-models/face-landmarks-detection": "1.0.5",
     "@tensorflow-models/hand-pose-detection": "^2.0.0",
+    "@tensorflow-models/mobilenet": "^2.1.0",
     "@tensorflow-models/pose-detection": "^2.1.0",
     "@tensorflow/tfjs": "^4.2.0",
     "@tensorflow/tfjs-vis": "^1.5.1",
