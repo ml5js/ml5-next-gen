@@ -964,6 +964,13 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/76244682?v=4",
       "profile": "https://github.com/ch3926",
       "contributions": ["code"]
+    },
+    {
+      "login": "ziyuan-linn",
+      "name": "Ziyuan Lin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/93690311?v=4",
+      "profile": "https://github.com/ziyuan-linn",
+      "contributions": ["code", "doc", "example", "maintenance"]
     }
   ],
   "contributorsPerLine": 7,
