@@ -209,11 +209,11 @@ function handleModelName(
   defaultValue,
   ml5ModelName
 ) {
-  const modelName = checkEnum(userValue, possibleValues, true);
   if (userValue === undefined) {
     return defaultValue;
   }
 
+  const modelName = checkEnum(userValue, possibleValues, true);
   if (modelName === undefined) {
     console.warn(
       errorMessages.modelName(
