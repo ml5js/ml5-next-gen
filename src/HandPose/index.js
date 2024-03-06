@@ -12,6 +12,7 @@ import * as tf from "@tensorflow/tfjs";
 import * as handPoseDetection from "@tensorflow-models/hand-pose-detection";
 import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
+import handleOptions from "../utils/handleOptions";
 import { mediaReady } from "../utils/imageUtilities";
 
 class HandPose {
@@ -61,19 +62,54 @@ class HandPose {
   async loadModel() {
     const pipeline = handPoseDetection.SupportedModels.MediaPipeHands;
     //filter out model config options
-    const modelConfig = {
-      maxHands: this.config?.maxHands ?? 2,
-      runtime: this.config?.runtime ?? "mediapipe",
-      modelType: this.config?.modelType ?? "full",
-      solutionPath:
-        this.config?.solutionPath ??
-        "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
-      detectorModelUrl: this.config?.detectorModelUrl,
-      landmarkModelUrl: this.config?.landmarkModelUrl,
-    };
-    this.runtimeConfig = {
-      flipHorizontal: this.config?.flipHorizontal ?? false,
-    };
+    const modelConfig = handleOptions(
+      this.config,
+      {
+        maxHands: {
+          type: "number",
+          min: 1,
+          max: 2147483647,
+          integer: true,
+          default: 2,
+        },
+        runtime: {
+          type: "enum",
+          enums: ["mediapipe", "tfjs"],
+          default: "mediapipe",
+        },
+        modelType: {
+          type: "enum",
+          enums: ["lite", "full"],
+          default: "full",
+        },
+        solutionPath: {
+          type: "string",
+          default: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
+          ignore: (config) => config.runtime !== "mediapipe",
+        },
+        detectorModelUrl: {
+          type: "string",
+          default: undefined,
+          ignore: (config) => config.runtime !== "tfjs",
+        },
+        landmarkModelUrl: {
+          type: "string",
+          default: undefined,
+          ignore: (config) => config.runtime !== "tfjs",
+        },
+      },
+      "handPose"
+    );
+    this.runtimeConfig = handleOptions(
+      this.config,
+      {
+        flipHorizontal: {
+          type: "boolean",
+          default: false,
+        },
+      },
+      "handPose"
+    );
 
     await tf.ready();
     this.model = await handPoseDetection.createDetector(pipeline, modelConfig);

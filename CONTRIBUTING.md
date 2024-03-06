@@ -129,3 +129,91 @@ yarn all-contributors add
 Complete the prompts in the terminal.
 
 Make a pull request to merge the new branch into main. When the branch gets merged, the new contributor will show up in README.md!
+
+## Utils
+
+This section documents the utility functions found in the `src/utils` folder.
+
+### [handleOptions](src\utils\handleOptions.js)
+
+`handleOptions` is a function that filters a user defined options object based on rules in a mold object, returning a filtered options object. The function logs friendly warnings in the console when one of the user defined options violates the rules.
+
+```js
+const filteredOptions = handleOptions(userObject, moldObject);
+```
+
+#### `userObject`
+
+The `userObject` is an object defined by the user to configure the options of a model. For example, the below object configures the `handpose` model to detect a maximum of 4 hands using the "full" variant:
+
+```js
+const optionsObject = {
+  maxHands: 4,
+  modelType: full,
+};
+```
+
+#### `moldObject`
+
+Inspired by [Mongoose Models](https://mongoosejs.com/docs/models.html), the `moldObject` defines how the `userObject` should be filtered. Here is an example `optionsObject`:
+
+```js
+const mold = {
+  maxHands: {
+    type: "number",
+    min: 1,
+    default: 2,
+  },
+  runtime: {
+    type: "enum",
+    enums: ["mediapipe", "tfjs"],
+    default: "mediapipe",
+  },
+  modelType: {
+    type: "enum",
+    enums: ["lite", "full"],
+    default: "full",
+  },
+};
+```
+
+This particular `moldObject` allows the user to have a `maxHands` option with a minimum value of 1, a `runtime` option with the value of either `mediapipe` or `tfjs`, and a `modelType` option with the value of either `lite` or `full`.
+
+#### Define a Rule in `moldObject`
+
+The `moldObject` consists of key-value pairs. The key defines the name of an allowed option, and the value is an object that contains rules on how the option should be filtered. Here are the rules:
+
+- `type` (required): A string defining the correct type, can be `"number"`, `"enum"`, `"boolean"`, `"string"`, `"object"`, or `"undefined"`.
+- `default` (required): The default value in case the user does not provide a value or provides an erroneous value for the option.
+- `ignore` (optional): A boolean defining whether the key should be ignored. Defaults to false. Useful when set to a dynamically evaluated value (see section below).
+- Specifically for `type: "number"`:
+  - `min` (optional): A number defining the minimum value.
+  - `max` (optional): A number defining the maximum value.
+  - `integer` (optional): A boolean defining whether the value should be an integer. Defaults to `false`.
+  - `multipleOf` (optional): A number. When defined, the user value must be a multiple of this number.
+- Specifically for `type: "enum"`:
+  - `enums` (required): An array defining a list of valid values.
+  - `caseInsensitive` (optional): A boolean defining whether to checks the user value against the enum list case-insensitively. Defaults to `true`.
+
+#### Functions As Rules
+
+A rule can be a constant value or a function that is dynamically evaluated. The function will be called with the current filtered object as its parameter. Below is an example usage:
+
+```js
+const mold = {
+  runtime: {
+    type: "enum",
+    enums: ["mediapipe", "tfjs"],
+    default: "mediapipe",
+  },
+  maxHands: {
+    type: "number",
+    min: 1,
+    default: (filteredObject) => filteredObject.runtime === "mediapipe" ? 4 : 2;
+  },
+};
+```
+
+When the user sets the runtime to `mediapipe`, the default value of `maxHands` is `4`, and when the user sets the runtime to `tfjs`, the default `maxHands` is `2`.
+
+**Caveat:** the options gets processed from top to bottom in the order defined in the `moldObject`, and the `filteredObject` only contains the options that has already been processed. Thus, `runtime` must be placed above `maxHands` in the `moldObject` for the function to work properly.
