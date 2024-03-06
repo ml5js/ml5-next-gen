@@ -16,16 +16,26 @@ import * as darknet from "./darknet";
 import * as doodlenet from "./doodlenet";
 import callCallback from "../utils/callcallback";
 import { imgToTensor, mediaReady } from "../utils/imageUtilities";
+import handleOptions from "../utils/handleOptions";
+import { handleModelName } from "../utils/handleOptions";
 
-const DEFAULTS = {
-  mobilenet: {
-    version: 2,
-    alpha: 1.0,
-    topk: 3,
-  },
-};
 const IMAGE_SIZE = 224;
 const MODEL_OPTIONS = ["mobilenet", "darknet", "darknet-tiny", "doodlenet"];
+
+/**
+ * Check if a string is a valid http url
+ * @param {string} string - The string to check
+ * @returns {boolean} - True if the string is a valid http url
+ */
+function isHttpUrl(string) {
+  let url;
+  try {
+    url = new URL(string);
+  } catch (e) {
+    return false;
+  }
+  return url.protocol === "http:" || url.protocol === "https:";
+}
 
 class ImageClassifier {
   /**
@@ -40,40 +50,69 @@ class ImageClassifier {
     this.mapStringToIndex = [];
 
     // flags for classifyStart() and classifyStop()
-    this.isClassifying = false;// True when classification loop is running
+    this.isClassifying = false; // True when classification loop is running
     this.signalStop = false; // Signal to stop the loop
     this.prevCall = ""; // Track previous call to detectStart() or detectStop()
 
-    if (typeof modelNameOrUrl === "string") {
-      if (MODEL_OPTIONS.includes(modelNameOrUrl)) {
-        this.modelName = modelNameOrUrl;
-        this.modelUrl = null;
-        switch (this.modelName) {
-          case "mobilenet":
-            this.modelToUse = mobilenet;
-            this.version = options.version || DEFAULTS.mobilenet.version;
-            this.alpha = options.alpha || DEFAULTS.mobilenet.alpha;
-            this.topk = options.topk || DEFAULTS.mobilenet.topk;
-            break;
-          case "darknet":
-            this.version = "reference"; // this a 28mb model
-            this.modelToUse = darknet;
-            break;
-          case "darknet-tiny":
-            this.version = "tiny"; // this a 4mb model
-            this.modelToUse = darknet;
-            break;
-          case "doodlenet":
-            this.modelToUse = doodlenet;
-            break;
-          default:
-            this.modelToUse = null;
-        }
-      } else {
-        // its a url, we expect to find model.json
-        this.modelUrl = modelNameOrUrl;
-        // The teachablemachine urls end with a slash, so add model.json to complete the full path
-        if (this.modelUrl.endsWith('/')) this.modelUrl += "model.json";
+    if (typeof modelNameOrUrl === "string" && isHttpUrl(modelNameOrUrl)) {
+      // its a url, we expect to find model.json
+      this.modelUrl = modelNameOrUrl;
+      // The teachablemachine urls end with a slash, so add model.json to complete the full path
+      if (this.modelUrl.endsWith("/")) this.modelUrl += "model.json";
+    } else {
+      // its a model name
+      this.modelUrl = null;
+      this.modelName = handleModelName(
+        modelNameOrUrl,
+        MODEL_OPTIONS,
+        "mobilenet",
+        "imageClassifier"
+      );
+
+      switch (this.modelName) {
+        case "mobilenet":
+          this.modelToUse = mobilenet;
+          const config = handleOptions(
+            options,
+            {
+              version: {
+                type: "enum",
+                enums: [1, 2],
+                default: 2,
+              },
+              alpha: {
+                type: "enum",
+                enums: (config) =>
+                  config.version === 1
+                    ? [0.25, 0.5, 0.75, 1.0]
+                    : [0.5, 0.75, 1.0],
+                default: 1.0,
+              },
+              topk: {
+                type: "number",
+                integer: true,
+                default: 3,
+              },
+            },
+            "imageClassifier"
+          );
+          this.version = config.version;
+          this.alpha = config.alpha;
+          this.topk = config.topk;
+          break;
+        case "darknet":
+          this.version = "reference"; // this a 28mb model
+          this.modelToUse = darknet;
+          break;
+        case "darknet-tiny":
+          this.version = "tiny"; // this a 4mb model
+          this.modelToUse = darknet;
+          break;
+        case "doodlenet":
+          this.modelToUse = doodlenet;
+          break;
+        default:
+          this.modelToUse = null;
       }
     }
     // Load the model
@@ -87,7 +126,11 @@ class ImageClassifier {
   async loadModel(modelUrl) {
     await tf.ready();
     if (modelUrl) this.model = await this.loadModelFrom(modelUrl);
-    else this.model = await this.modelToUse.load({ version: this.version, alpha: this.alpha });
+    else
+      this.model = await this.modelToUse.load({
+        version: this.version,
+        alpha: this.alpha,
+      });
 
     return this;
   }
@@ -109,12 +152,17 @@ class ImageClassifier {
         const prefix = split.slice(0, split.length - 1).join("/");
         const metadataUrl = `${prefix}/metadata.json`;
 
-        const metadataResponse = await axios.get(metadataUrl).catch((metadataError) => {
-          console.log("Tried to fetch metadata.json, but it seems to be missing.", metadataError);
-        });
+        const metadataResponse = await axios
+          .get(metadataUrl)
+          .catch((metadataError) => {
+            console.log(
+              "Tried to fetch metadata.json, but it seems to be missing.",
+              metadataError
+            );
+          });
         if (metadataResponse) {
           const metadata = metadataResponse.data;
-          
+
           if (metadata.labels) {
             this.mapStringToIndex = metadata.labels;
           }
@@ -143,7 +191,8 @@ class ImageClassifier {
 
     // For Doodlenet and Teachable Machine models a manual resizing of the image is still necessary
     const imageResize = [IMAGE_SIZE, IMAGE_SIZE];
-    if (this.modelName == "doodlenet" || this.modelUrl) imgToPredict = imgToTensor(imgToPredict, imageResize);
+    if (this.modelName == "doodlenet" || this.modelUrl)
+      imgToPredict = imgToTensor(imgToPredict, imageResize);
 
     if (this.modelUrl) {
       await tf.nextFrame();
@@ -190,14 +239,18 @@ class ImageClassifier {
    * @return {function} a promise or the results of a given callback, cb.
    */
   async classify(inputNumOrCallback, numOrCallback, cb) {
-    const { image, number, callback } = handleArguments(inputNumOrCallback, numOrCallback, cb)
-      .require('image',
-        "No input image provided. If you want to classify a video, use classifyStart."
-      );
+    const { image, number, callback } = handleArguments(
+      inputNumOrCallback,
+      numOrCallback,
+      cb
+    ).require(
+      "image",
+      "No input image provided. If you want to classify a video, use classifyStart."
+    );
     return callCallback(this.classifyInternal(image, number), callback);
   }
 
-    /**
+  /**
    * Continuously classifies each frame of the given input
    * @param {HTMLVideoElement | object | function | number} inputNumOrCallback -
    *    takes any of the following params
@@ -205,9 +258,12 @@ class ImageClassifier {
    * @param {function} cb - a callback function that handles the results of the function.
    * @return {function} a promise or the results of a given callback, cb.
    */
-    async classifyStart(inputNumOrCallback, numOrCallback, cb) {
-    const { image, number, callback } = handleArguments(inputNumOrCallback, numOrCallback, cb)
-      .require('image', "No input provided.");
+  async classifyStart(inputNumOrCallback, numOrCallback, cb) {
+    const { image, number, callback } = handleArguments(
+      inputNumOrCallback,
+      numOrCallback,
+      cb
+    ).require("image", "No input provided.");
 
     // Function to classify a single frame
     const classifyFrame = async () => {
@@ -217,16 +273,16 @@ class ImageClassifier {
       callCallback(this.classifyInternal(image, number), callback);
 
       // call recursively for continuous classification
-      if (!this.signalStop){
+      if (!this.signalStop) {
         requestAnimationFrame(classifyFrame);
-      }else{
+      } else {
         this.isClassifying = false;
       }
     };
 
     // Start the classification
     this.signalStop = false;
-    if (!this.isClassifying){
+    if (!this.isClassifying) {
       this.isClassifying = true;
       classifyFrame();
     }
@@ -238,10 +294,10 @@ class ImageClassifier {
     this.prevCall = "start";
   }
 
-  /** 
-  * Used to stop the continuous classification of a video
-  */
-  classifyStop(){
+  /**
+   * Used to stop the continuous classification of a video
+   */
+  classifyStop() {
     if (this.isClassifying) {
       this.signalStop = true;
     }
@@ -250,20 +306,12 @@ class ImageClassifier {
 }
 
 const imageClassifier = (modelName, optionsOrCallback, cb) => {
-  const args = handleArguments(modelName, optionsOrCallback, cb)
-    .require('string', 'Please specify a model to use. E.g: "MobileNet"');
+  const args = handleArguments(modelName, optionsOrCallback, cb);
 
   const { string, options = {}, callback } = args;
 
-  let model = string;
-  // TODO: I think we should delete this.
-  if (model.indexOf("http") === -1) {
-    model = model.toLowerCase();
-  }
-
-  const instance = new ImageClassifier(model, options, callback);
+  const instance = new ImageClassifier(string, options, callback);
   return instance;
 };
 
 export default imageClassifier;
-
