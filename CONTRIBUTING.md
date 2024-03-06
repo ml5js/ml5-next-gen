@@ -116,6 +116,20 @@ npm publish --tag alpha --access public
    https://unpkg.com/ml5@[version]/dist/ml5.js
 ```
 
+## All Contributors
+
+If you contributed to the project in any way, we would like to include you in our [contributors list in README.md](https://github.com/ml5js/ml5-next-gen?tab=readme-ov-file#contributors).
+
+To add a new contributor, create a new branch from main. Then, enter the following command in the terminal:
+
+```
+yarn all-contributors add
+```
+
+Complete the prompts in the terminal.
+
+Make a pull request to merge the new branch into main. When the branch gets merged, the new contributor will show up in README.md!
+
 ## Utils
 
 This section documents the utility functions found in the `src/utils` folder.
