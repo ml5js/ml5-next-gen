@@ -7,7 +7,7 @@
     "prebuild": "rimraf dist",
     "build": "webpack --config webpack.config.js --mode production",
     "start": "webpack serve --config webpack.config.js --mode development",
-    "format": "prettier --write \"**/(*.js|*.html|*.md)\"",
+    "format": "prettier --write \"**/*.js\"",
     "postinstall": "patch-package"
   },
   "files": [
@@ -50,5 +50,5 @@
     "@tensorflow/tfjs-vis": "^1.5.1",
     "axios": "^1.3.4",
     "webpack-merge": "^5.9.0"
-  }
+}
 }
