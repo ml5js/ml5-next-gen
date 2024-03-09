@@ -3,27 +3,33 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import * as tf from '@tensorflow/tfjs';
-import { getTopKClassesFromTensor } from '../utils/gettopkclasses';
-import DOODLENET_CLASSES from '../utils/DOODLENET_CLASSES';
+import * as tf from "@tensorflow/tfjs";
+import { getTopKClassesFromTensor } from "../utils/gettopkclasses";
+import DOODLENET_CLASSES from "../utils/DOODLENET_CLASSES";
 
 const DEFAULTS = {
-  DOODLENET_URL: 'https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models@master/models/doodlenet/model.json',
+  DOODLENET_URL:
+    "https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models@master/models/doodlenet/model.json",
   IMAGE_SIZE_DOODLENET: 28,
 };
 
 function preProcess(img, size) {
   let image;
   if (!(img instanceof tf.Tensor)) {
-    if (img instanceof HTMLImageElement 
-      || img instanceof HTMLVideoElement 
-      || img instanceof HTMLCanvasElement
-      || img instanceof ImageData) {
+    if (
+      img instanceof HTMLImageElement ||
+      img instanceof HTMLVideoElement ||
+      img instanceof HTMLCanvasElement ||
+      img instanceof ImageData
+    ) {
       image = tf.browser.fromPixels(img);
-    } else if (typeof img === 'object' && (img.elt instanceof HTMLImageElement 
-      || img.elt instanceof HTMLVideoElement 
-      || img.elt instanceof HTMLCanvasElement
-      || img.elt instanceof ImageData)) {
+    } else if (
+      typeof img === "object" &&
+      (img.elt instanceof HTMLImageElement ||
+        img.elt instanceof HTMLVideoElement ||
+        img.elt instanceof HTMLCanvasElement ||
+        img.elt instanceof ImageData)
+    ) {
       image = tf.browser.fromPixels(img.elt); // Handle p5.js image, video and canvas.
     }
   } else {
@@ -36,7 +42,7 @@ function preProcess(img, size) {
   }
 
   const [r, g, b] = tf.split(resized, 3, 3);
-  const gray = (r.add(g).add(b)).div(tf.scalar(3)).floor(); // Get average r,g,b color value and round to 0 or 1
+  const gray = r.add(g).add(b).div(tf.scalar(3)).floor(); // Get average r,g,b color value and round to 0 or 1
   const batched = gray.reshape([1, size, size, 1]);
   return batched;
 }
@@ -50,7 +56,9 @@ export class Doodlenet {
     this.model = await tf.loadLayersModel(DEFAULTS.DOODLENET_URL);
 
     // Warmup the model.
-    const result = tf.tidy(() => this.model.predict(tf.zeros([1, this.imgSize, this.imgSize, 1])));
+    const result = tf.tidy(() =>
+      this.model.predict(tf.zeros([1, this.imgSize, this.imgSize, 1]))
+    );
     await result.data();
     result.dispose();
   }
@@ -61,7 +69,11 @@ export class Doodlenet {
       const predictions = this.model.predict(imgData);
       return predictions;
     });
-    const classes = await getTopKClassesFromTensor(logits, topk, DOODLENET_CLASSES);
+    const classes = await getTopKClassesFromTensor(
+      logits,
+      topk,
+      DOODLENET_CLASSES
+    );
     logits.dispose();
     return classes;
   }

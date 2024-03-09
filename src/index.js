@@ -24,7 +24,7 @@ const withPreload = {
 const ml5 = Object.assign({ p5Utils }, withPreload, {
   tf,
   tfvis,
-  setBackend,
+    setBackend,
   setP5: p5Utils.setP5.bind(p5Utils),
 });
 

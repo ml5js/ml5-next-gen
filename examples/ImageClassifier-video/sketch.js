@@ -17,16 +17,16 @@ let classifier;
 let video;
 
 // Variable for displaying the results on the canvas
-let label = 'Model loading...';
+let label = "Model loading...";
 
 function preload() {
-  classifier = ml5.imageClassifier('MobileNet');
+  classifier = ml5.imageClassifier("MobileNet");
 }
 
 function setup() {
   createCanvas(640, 480);
   background(255);
-  
+
   // Using webcam feed as video input, hiding html element to avoid duplicate with canvas
   video = createCapture(VIDEO);
   video.hide();
