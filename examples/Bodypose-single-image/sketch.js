@@ -25,18 +25,14 @@ function setup() {
   image(img, 0, 0);
   // Do not need to draw on every frame
   noLoop();
-  // Draw again when changing checkboxes
-  // TODO: can use p5 function once this fix is published - https://github.com/processing/p5.js/pull/6838
-  // select("form").changed(redraw);
-  document.querySelector('form').addEventListener('change', redraw);
-}
-
-// When bodyPose is ready, do the detection
-function modelReady() {
   // Update the status
   select('#status').html('Model Loaded');
   // Detect poses in the image
   bodyPose.detect(img, onPose);
+  // Draw again when changing checkboxes
+  // TODO: can use p5 function once this fix is published - https://github.com/processing/p5.js/pull/6838
+  // select("form").changed(redraw);
+  document.querySelector('form').addEventListener('change', redraw);
 }
 
 // Function to run when the model detects poses.
