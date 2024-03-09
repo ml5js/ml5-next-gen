@@ -88,10 +88,10 @@ class P5Util {
     if (isP5Constructor(p5)) {
       this.p5Constructor = p5;
       this.p5Extensions = p5.prototype;
+      this.registerPreloads();
     } else {
       console.warn("Invalid p5 object provided to ml5.setP5().");
     }
-    this.registerPreloads();
   }
 
   /**
