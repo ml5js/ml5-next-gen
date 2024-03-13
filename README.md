@@ -1,44 +1,99 @@
 # ml5-next-gen
 
+**Read our [ml5.js Code of Conduct and software licence](https://github.com/ml5js/Code-of-Conduct) here!**
+
+# ![ml5](https://user-images.githubusercontent.com/10605821/41332516-2ee26714-6eac-11e8-83e4-a40b8761e764.png)
+
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
 [![All Contributors](https://img.shields.io/badge/all_contributors-138-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
+
+**_This project is currently in development._**
+
+## Friendly machine learning for the web!
+
+ml5.js aims to make machine learning approachable for a broad audience of artists, creative coders, and students. The library provides access to machine learning algorithms and models in the browser, building on top of [TensorFlow.js](https://js.tensorflow.org/).
+
+The library is supported by code examples, tutorials, and sample data sets with an emphasis on ethical computing. Bias in data, stereotypical harms, and responsible crowdsourcing are part of the documentation around data collection and usage.
+
+ml5.js is heavily inspired by [Processing](https://processing.org/) and [p5.js](https://p5js.org/).
+
+Please read our [Code of Conduct](https://github.com/ml5js/Code-of-Conduct), which establishes our commitment to make ml5.js a friendly and welcoming environment.
+
+## Usage
+
+Before getting started with ml5.js, review our [Code of Conduct](https://github.com/ml5js/Code-of-Conduct). There are several ways you can use the ml5.js library:
+
+<p id="latest-version">
+
+- You can use the latest version (0.12.2) by adding it to the head section of your HTML document:
+
+**v0.12.2**
+
+    <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js" type="text/javascript"></script>
+
+</p data-id="latest-version">
+
+- If you need to use an earlier version for any reason, you can change the version number. The [previous versions of ml5 can be found here](https://www.npmjs.com/package/ml5). You can use those previous versions by replacing `<version>` with the ml5 version of interest:
+
+```html
+<script
+  src="https://unpkg.com/ml5@<version>/dist/ml5.min.js"
+  type="text/javascript"
+></script>
+```
+
+For example:
+
+```html
+<script
+  src="https://unpkg.com/ml5@0.6.1/dist/ml5.min.js"
+  type="text/javascript"
+></script>
+```
+
+- You can also reference "latest", but we do not recommend this as your code may break as we update ml5.
+
+```html
+<script
+  src="https://unpkg.com/ml5@latest/dist/ml5.min.js"
+  type="text/javascript"
+></script>
+```
 
 Welcome to the next-generation repo for the ml5.js project! Due to the complexities inherent in updating all the dependencies in [the original repo](https://github.com/ml5js/ml5-library), we're exploring rebuilding from the ground up. This fresh repository allows us to migrate over classes and functions one at a time. This is very much a work in progress and is currently in its early, experimental stage. We appreciate your patience as we work towards refining this next evolution of the ml5.js project. Stay tuned!
 
-## Setup
+## Resources
 
-This build uses node version 18.15.0.
-We use [Yarn](https://yarnpkg.com/) instead of npm to help us better manage dependencies from TensorFlow.js. Yarn is a newer package manager that is very similar to NPM. [Here is a cheat sheet](https://www.digitalocean.com/community/tutorials/nodejs-npm-yarn-cheatsheet) for npm vs Yarn commands.
+- [Getting Started](https://learn.ml5js.org/)
+- [API Reference](https://learn.ml5js.org/#/reference/index)
+- [Examples](https://github.com/ml5js/ml5-library/tree/main/examples)
+- [Community](https://ml5js.org/community)
+- [FAQ](https://learn.ml5js.org/#/faq)
 
-[Install nvm](https://github.com/nvm-sh/nvm#installing-and-updating) and run the following commands：
+## Standalone Examples
 
-```
-nvm install 18.15
-nvm use 18
-npm install -g yarn
-```
+You can find a collection of standalone examples in this repository within the `examples/` directory. You can also test working hosted of the examples online on the [ml5.js examples index website](https://examples.ml5js.org/).
 
-To start the development server, run the following commands:
+These examples are meant to serve as an introduction to the library and machine learning concepts.
 
-```
-yarn
-yarn start
-```
+## Code of Conduct
 
-You should see something similar to this in the terminal:
+We believe in a friendly internet and community as much as we do in building friendly machine learning for the web. Please refer to our [Code of Conduct](https://github.com/ml5js/Code-of-Conduct/) for our rules for interacting with ml5 as a developer, contributor, or as a person using the library.
 
-```
-[webpack-dev-server] Project is running at:
-[webpack-dev-server] Loopback: http://localhost:8080/
-...
-...
-webpack 5.76.1 compiled successfully in 8360 ms
-```
+## Contributing
 
-A local server have been started and hosts a built version of the ml5 library at http://localhost:8080/dist/ml5.js. While the server is running, Webpack will automatically rebuild the library if you change and save any file in the `/src` folder.
+Want to be a **contributor 🏗 to the ml5.js library**? If yes and you're interested to submit new features, fix bugs, or help develop the ml5.js ecosystem, please go to our [CONTRIBUTING](CONTRIBUTING.md) documentation to get started.
 
-A webpage at http://localhost:8080/examples/ should automatically open with the directory listing of the example directory. Select one of the directories to test run `ml5.js` in some example code.
+See [CONTRIBUTING](CONTRIBUTING.md) 🛠
+
+## Acknowledgements
+
+ml5.js is supported by the time and dedication of open source developers from all over the world. Funding and support is generously provided by a [Google Education grant](https://edu.google.com/giving/?modal_active=none) at NYU's ITP/IMA program.
+
+Many thanks [BrowserStack](https://www.browserstack.com/) for providing testing support.
 
 ## Contributors ✨
 
