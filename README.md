@@ -6,11 +6,11 @@
 
 # ml5-next-gen
 
+### Friendly machine learning for the web!
+
 **Read our [ml5.js Code of Conduct and software licence](https://github.com/ml5js/Code-of-Conduct) here!**
 
 **_This project is currently in development._**
-
-## Friendly machine learning for the web!
 
 ml5.js aims to make machine learning approachable for a broad audience of artists, creative coders, and students. The library provides access to machine learning algorithms and models in the browser, building on top of [TensorFlow.js](https://js.tensorflow.org/).
 
