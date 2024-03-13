@@ -1,14 +1,14 @@
-# ml5-next-gen
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 
-**Read our [ml5.js Code of Conduct and software licence](https://github.com/ml5js/Code-of-Conduct) here!**
+[![All Contributors](https://img.shields.io/badge/all_contributors-138-orange.svg?style=flat-square)](#contributors-)<!-- ALL-CONTRIBUTORS-BADGE:END -->[![Version](https://img.shields.io/npm/v/ml5.svg?style=flat-square)](https://www.npmjs.com/package/ml5)[![Twitter Follow](https://img.shields.io/twitter/follow/espadrine.svg?style=social&label=Follow)](https://twitter.com/ml5js)
 
 # ![ml5](https://user-images.githubusercontent.com/10605821/41332516-2ee26714-6eac-11e8-83e4-a40b8761e764.png)
 
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+# ml5-next-gen
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-138-orange.svg?style=flat-square)](#contributors-)
+---
 
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
+**Read our [ml5.js Code of Conduct and software licence](https://github.com/ml5js/Code-of-Conduct) here!**
 
 **_This project is currently in development._**
 
