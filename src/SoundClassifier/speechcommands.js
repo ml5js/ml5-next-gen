@@ -26,12 +26,12 @@ export class SpeechCommands {
             if (result.scores) {
                 const classes = getTopKClassesFromArray(result.scores, topk, this.allLabels)
                     .map(c => ({ label: c.className, confidence: c.probability }));
-                return cb(null, classes);
+                return cb(classes);
             }
             return cb(`ERROR: Cannot find scores in result: ${result}`);
         }, this.options)
             .catch(err => {
-                return cb(`ERROR: ${err.message}`);
+                return cb(null, `ERROR: ${err.message}`);
             });
     }
 }

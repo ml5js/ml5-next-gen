@@ -1,4 +1,4 @@
-// Copyright (c) 2019-2023 ml5
+// Copyright (c) 2019 ml5
 //
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
@@ -17,31 +17,31 @@ const options = { probabilityThreshold: 0.7 };
 let label;
 let confidence;
 
-async function setup() {
-    classifier = await ml5.soundClassifier("SpeechCommands18w", options);
-    // Create 'label' and 'confidence' div to hold results
-
-    label = document.createElement("DIV");
-    label.textContent = "label ...";
-    confidence = document.createElement("DIV");
-    confidence.textContent = "Confidence ...";
-
-    document.body.appendChild(label);
-    document.body.appendChild(confidence);
-    // Classify the sound from microphone in real time
-    classifier.classify(gotResult);
+function preload() {
+  // Load SpeechCommands18w sound classifier model
+  classifier = ml5.soundClassifier('SpeechCommands18w', options);
+  console.log("led");
 }
-setup();
+
+function setup() {
+  // noCanvas();
+  // Create 'label' and 'confidence' div to hold results
+  label = createDiv('Label: ...');
+  confidence = createDiv('Confidence: ...');
+  // Classify the sound from microphone in real time
+  classifier.classify(gotResult);
+
+}
 
 // A function to run when we get any errors and the results
-function gotResult(error, results) {
-    // Display error in the console
-    if (error) {
-        console.error(error);
-    }
-    // The results are in an array ordered by confidence.
-    console.log(results);
-    // Show the first label and confidence
-    label.textContent = `Label: ${results[0].label}`;
-    confidence.textContent = `Confidence: ${results[0].confidence.toFixed(4)}`;
+function gotResult(results) {
+  // Display error in the console
+  // if (error) {
+  //   console.error(error);
+  // }
+  // The results are in an array ordered by confidence.
+  console.log(results);
+  // Show the first label and confidence
+  label.html(`Label: ${results[0].label}`);
+  confidence.html(`Confidence: ${nf(results[0].confidence, 0, 2)}`); // Round the confidence to 0.01
 }
