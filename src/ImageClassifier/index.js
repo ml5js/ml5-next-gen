@@ -216,11 +216,15 @@ class ImageClassifier {
       return results;
     }
 
-    const results = this.model
-      .classify(imgToPredict, numberOfClasses)
-      .then((classes) =>
-        classes.map((c) => ({ label: c.className, confidence: c.probability }))
-      );
+    const results = await this.model.classify(imgToPredict, numberOfClasses);
+
+    // MobileNet uses className/probability instead of label/confidence.
+    if (this.modelName === "mobilenet") {
+      return results.map(result => ({
+        label: result.className,
+        confidence: result.probability
+      }));
+    }
 
     return results;
   }
