@@ -56,11 +56,11 @@ class NeuralNetwork {
   /**
    * add layer to the model
    * if the model has 2 or more layers switch the isLayered flag
-   * @param {*} _layerOptions
+   * @param {tf.Layer} layer
+   * @void
    */
-  addLayer(_layerOptions) {
-    const LAYER_OPTIONS = _layerOptions || {};
-    this.model.add(LAYER_OPTIONS);
+  addLayer(layer) {
+    this.model.add(layer);
 
     // check if it has at least an input and output layer
     if (this.model.layers.length >= 2) {
