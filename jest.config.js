@@ -14,6 +14,7 @@ const config = {
   testEnvironmentOptions: {
     resources: "usable", // Load image resources
   },
+  resetMocks: true
 };
 
 module.exports = config;
