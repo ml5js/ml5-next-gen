@@ -82,7 +82,7 @@ class P5Util {
    *
    * ml5.setP5(p5);
    *
-   * @param {p5} p5
+   * @param {import('p5')} p5
    */
   setP5(p5) {
     if (isP5Constructor(p5)) {
@@ -130,7 +130,7 @@ class P5Util {
     const self = this;
 
     // Function to be called when a sketch is created, either in global or instance mode.
-    p5.prototype.myLibInit = function () {
+    p5.prototype.ml5Init = function () {
       // Bind to this specific p5 instance.
       const increment = this._incrementPreload.bind(this);
       const decrement = this._decrementPreload.bind(this);
@@ -150,7 +150,7 @@ class P5Util {
     };
 
     // Function to be called when a sketch is destroyed.
-    p5.prototype.myLibRemove = function () {
+    p5.prototype.ml5Remove = function () {
       // Resets each ml5 method back to its original version.
       preloadMethods.forEach((method) => {
         ml5[method] = original[method];
@@ -158,15 +158,15 @@ class P5Util {
       self.didSetupPreload = false;
     };
 
-    p5.prototype.registerMethod("init", p5.prototype.myLibInit);
-    p5.prototype.registerMethod("remove", p5.prototype.myLibRemove);
+    p5.prototype.registerMethod("init", p5.prototype.ml5Init);
+    p5.prototype.registerMethod("remove", p5.prototype.ml5Remove);
   }
 
   /**
    * @internal
    * Dynamic getter checks if p5 is loaded and will return undefined if p5 cannot be found,
    * or will return an object containing all of the global p5 properties.
-   * @returns {p5.p5InstanceExtensions | undefined}
+   * @returns {import('p5').p5InstanceExtensions | undefined}
    */
   get p5Instance() {
     if (!this.p5Extensions) {
@@ -205,7 +205,7 @@ class P5Util {
   /**
    * Load a p5.Image from a URL in an async way.
    * @param {string} url
-   * @return {Promise<p5.Image>}
+   * @return {Promise<import('p5').Image>}
    */
   loadAsync(url) {
     return new Promise((resolve, reject) => {
@@ -268,7 +268,7 @@ class P5Util {
    * Convert Blob to P5.Image
    * @param {Blob} blob
    * Note: may want to reject instead of returning null.
-   * @returns {Promise<p5.Image | null>}
+   * @returns {Promise<import('p5').Image | null>}
    */
   async blobToP5Image(blob) {
     if (this.checkP5() && typeof URL !== "undefined") {
