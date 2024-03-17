@@ -2,6 +2,7 @@ import * as tf from "@tensorflow/tfjs";
 import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import { imgToPixelArray, isInstanceOfSupportedElement, } from "../utils/imageUtilities";
+import getTask from './getTask';
 import NeuralNetwork from "./NeuralNetwork";
 import NeuralNetworkData from "./NeuralNetworkData";
 
@@ -20,20 +21,17 @@ const DEFAULTS = {
   hiddenUnits: 16,
   neuroEvolution: false,
 };
+
 class DiyNeuralNetwork {
   constructor(options, callback) {
 
-    // Is there a better way to handle a different
-    // default learning rate for image classification tasks?
-    if (options.task === "imageClassification") {
-      DEFAULTS.learningRate = 0.02;
-    }
+    this.task = getTask(options.task || 'regression');
 
-    this.options =
-      {
-        ...DEFAULTS,
-        ...options,
-      } || DEFAULTS;
+    this.options = {
+      ...DEFAULTS,
+      ...this.task.getDefaultOptions?.(),
+      ...options,
+    }
 
     this.neuralNetwork = new NeuralNetwork();
     this.neuralNetworkData = new NeuralNetworkData();
@@ -43,51 +41,19 @@ class DiyNeuralNetwork {
       training: [],
     };
 
-    // Methods
-    this.init = this.init.bind(this);
-    // adding data
+    // Public Methods
     this.addData = this.addData.bind(this);
-    this.loadDataFromUrl = this.loadDataFromUrl.bind(this);
-    // metadata prep
-    this.createMetaData = this.createMetaData.bind(this);
-    // data prep and handling
-    this.prepareForTraining = this.prepareForTraining.bind(this);
     this.normalizeData = this.normalizeData.bind(this);
-    this.normalizeInput = this.normalizeInput.bind(this);
-    this.searchAndFormat = this.searchAndFormat.bind(this);
-    this.formatInputItem = this.formatInputItem.bind(this);
-    this.convertTrainingDataToTensors =
-      this.convertTrainingDataToTensors.bind(this);
-    this.formatInputsForPrediction = this.formatInputsForPrediction.bind(this);
-    this.formatInputsForPredictionAll =
-      this.formatInputsForPredictionAll.bind(this);
-    this.isOneHotEncodedOrNormalized =
-      this.isOneHotEncodedOrNormalized.bind(this);
-    // model prep
     this.train = this.train.bind(this);
-    this.trainInternal = this.trainInternal.bind(this);
-    this.addLayer = this.addLayer.bind(this);
-    this.createNetworkLayers = this.createNetworkLayers.bind(this);
-    this.addDefaultLayers = this.addDefaultLayers.bind(this);
-    this.compile = this.compile.bind(this);
-    // prediction / classification
     this.predict = this.predict.bind(this);
     this.predictMultiple = this.predictMultiple.bind(this);
     this.classify = this.classify.bind(this);
     this.classifyMultiple = this.classifyMultiple.bind(this);
-    this.predictInternal = this.predictInternal.bind(this);
-    this.classifyInternal = this.classifyInternal.bind(this);
-    // save / load data
     this.saveData = this.saveData.bind(this);
     this.loadData = this.loadData.bind(this);
-    // save / load model
     this.save = this.save.bind(this);
     this.load = this.load.bind(this);
-
-    // release model
     this.dispose = this.dispose.bind(this);
-
-    // neuroevolution
     this.mutate = this.mutate.bind(this);
     this.crossover = this.crossover.bind(this);
 
@@ -111,10 +77,10 @@ class DiyNeuralNetwork {
     if (this.options.neuroEvolution === true) {
       this.createLayersNoTraining();
     }
-
     if (this.options.dataUrl) {
       await this.loadDataFromUrl();
-    } else if (this.options.modelUrl) {
+    }
+    if (this.options.modelUrl) {
       // will take a URL to model.json, an object, or files array
       await this.load(this.options.modelUrl);
     }
@@ -122,26 +88,21 @@ class DiyNeuralNetwork {
   }
 
   /**
-   * createLayersNoTraining
-   * @private
+   * Creates and adds layers for use with neuroEvolution.
+   * @private - called by init.
    * @void
    */
   createLayersNoTraining() {
     // Create sample data based on options
-    const { inputs, outputs, task } = this.options;
-    if (task === "classification") {
-      for (let i = 0; i < outputs.length; i += 1) {
-        const inputSample = new Array(inputs).fill(0);
-        this.addData(inputSample, [outputs[i]]);
-      }
-    } else {
-      const inputSample = new Array(inputs).fill(0);
-      const outputSample = new Array(outputs).fill(0);
-      this.addData(inputSample, outputSample);
-    }
+    const { inputs, outputs } = this.options;
+    const data = this.task.getSampleData(inputs, outputs);
+    data.forEach(({ xs, ys }) => {
+      this.addData(xs, ys);
+    });
 
     // TODO: what about inputShape?
     this.neuralNetworkData.createMetadata();
+    // TODO: what if the user specifies options.layers?
     this.addDefaultLayers();
   }
 
@@ -577,18 +538,13 @@ class DiyNeuralNetwork {
 
     // check to see if layers are passed into the constructor
     // then use those to create your architecture
+    // or use the default layers for the task
     if (!this.neuralNetwork.isLayered) {
-      // TODO: don't update this.options.layers - Linda
-      this.options.layers = this.createNetworkLayers(
-        this.options.layers
-      );
-    }
-
-    // if the model does not have any layers defined yet
-    // then use the default structure
-    if (!this.neuralNetwork.isLayered) {
-      // TODO: don't update this.options.layers - Linda
-      this.options.layers = this.addDefaultLayers();
+      if (this.options.layers && this.options.layers.length > 2) {
+        this.createNetworkLayers(this.options.layers);
+      } else {
+        this.addDefaultLayers();
+      }
     }
 
     if (!this.neuralNetwork.isCompiled) {
@@ -601,206 +557,55 @@ class DiyNeuralNetwork {
   }
 
   /**
-   * addLayer
-   * @param {tf.Layer} layer
+   * @private - called by createNetworkLayers and addDefaultLayers
+   * Replace all layers of the model
+   * @param {Array<LayerJson>} layers - array of JSON objects
    */
-  addLayer(layer) {
-    this.neuralNetwork.addLayer(layer);
+  setLayers(layers) {
+    layers.forEach(layer => {
+      this.neuralNetwork.addLayer(tf.layers[layer.type](layer));
+    });
   }
 
   /**
-   * add custom layers in options
-   * @private
-   * @param {Array} layerJsonArray
-   * @returns // TODO: make void
+   * Create and custom layers from the user's options.
+   * Modifies the first and last layers to add the input and output shape,
+   * if not already set, without mutating the original objects.
+   * @private - called during training
+   * @param {Array<LayerJson>} layerJsonArray
+   * @void
    */
   createNetworkLayers(layerJsonArray) {
-    const layers = [...layerJsonArray];
-
     const { inputUnits, outputUnits } = this.neuralNetworkData.meta;
-    const layersLength = layers.length;
-
-    if (!(layers.length >= 2)) {
-      return false;
-    }
-
-    // set the inputShape
-    layers[0].inputShape = layers[0].inputShape
-      ? layers[0].inputShape
-      : inputUnits;
-    // set the output units
-    const lastIndex = layersLength - 1;
-    const lastLayer = layers[lastIndex];
-    lastLayer.units = lastLayer.units ? lastLayer.units : outputUnits;
-
-    layers.forEach((layer) => {
-      this.addLayer(tf.layers[layer.type](layer));
-    });
-
-    return layers;
+    const first = layerJsonArray[0];
+    const last = layerJsonArray[layerJsonArray.length - 1];
+    const layers = [
+      first.inputShape ? first : { ...first, inputShape: inputUnits },
+      ...layerJsonArray.slice(1,-1),
+      last.units ? last : { ...last, units: outputUnits }
+    ];
+    this.setLayers(layers);
   }
 
-  // /**
-  //  * createDenseLayer
-  //  * @param {*} _options
-  //  */
-  // // eslint-disable-next-line class-methods-use-this
-  // createDenseLayer(_options) {
-  //   const options = Object.assign({}, {
-  //     units: this.options.hiddenUnits,
-  //     activation: 'relu',
-  //     ..._options
-  //   });
-  //   return tf.layers.dense(options);
-  // }
-
-  // /**
-  //  * createConv2dLayer
-  //  * @param {*} _options
-  //  */
-  // // eslint-disable-next-line class-methods-use-this
-  // createConv2dLayer(_options) {
-  //   const options = Object.assign({}, {
-  //     kernelSize: 5,
-  //     filters: 8,
-  //     strides: 1,
-  //     activation: 'relu',
-  //     kernelInitializer: 'varianceScaling',
-  //     ..._options
-  //   })
-
-  //   return tf.layers.conv2d(options);
-  // }
-
   /**
-   * addDefaultLayers
-   * @private
-   * @returns // TODO: make void
+   * @private -- called by train and createLayersNoTraining
+   * Create and add the standard layers for the current task.
+   * @void
    */
   addDefaultLayers() {
-    let layers;
-    const task = this.options.task;
-    switch (task.toLowerCase()) {
-      // if the task is classification
-      case "classification":
-        layers = [
-          {
-            type: "dense",
-            units: this.options.hiddenUnits,
-            activation: "relu",
-          },
-          {
-            type: "dense",
-            activation: "softmax",
-          },
-        ];
-
-        return this.createNetworkLayers(layers);
-      // if the task is regression
-      case "regression":
-        layers = [
-          {
-            type: "dense",
-            units: this.options.hiddenUnits,
-            activation: "relu",
-          },
-          {
-            type: "dense",
-            activation: "sigmoid",
-          },
-        ];
-        return this.createNetworkLayers(layers);
-      // if the task is imageClassification
-      case "imageclassification":
-        layers = [
-          {
-            type: "conv2d",
-            filters: 8,
-            kernelSize: 5,
-            strides: 1,
-            activation: "relu",
-            kernelInitializer: "varianceScaling",
-          },
-          {
-            type: "maxPooling2d",
-            poolSize: [2, 2],
-            strides: [2, 2],
-          },
-          {
-            type: "conv2d",
-            filters: 16,
-            kernelSize: 5,
-            strides: 1,
-            activation: "relu",
-            kernelInitializer: "varianceScaling",
-          },
-          {
-            type: "maxPooling2d",
-            poolSize: [2, 2],
-            strides: [2, 2],
-          },
-          {
-            type: "flatten",
-          },
-          {
-            type: "dense",
-            kernelInitializer: "varianceScaling",
-            activation: "softmax",
-          },
-        ];
-        return this.createNetworkLayers(layers);
-
-      default:
-        console.log("no imputUnits or outputUnits defined");
-        layers = [
-          {
-            type: "dense",
-            units: this.options.hiddenUnits,
-            activation: "relu",
-          },
-          {
-            type: "dense",
-            activation: "sigmoid",
-          },
-        ];
-        return this.createNetworkLayers(layers);
-    }
+    const { inputUnits, outputUnits } = this.neuralNetworkData.meta;
+    const { hiddenUnits } = this.options;
+    const layers = this.task.createLayers(inputUnits, hiddenUnits, outputUnits);
+    this.setLayers(layers);
   }
 
   /**
    * compile the model
-   * @private
+   * @private - called during training
    * @void
    */
   compile() {
-    const LEARNING_RATE = this.options.learningRate;
-
-    let options = {};
-
-    if (
-      this.options.task === "classification" ||
-      this.options.task === "imageClassification"
-    ) {
-      options = {
-        loss: "categoricalCrossentropy",
-        optimizer: tf.train.sgd,
-        metrics: ["accuracy"],
-      };
-    } else if (this.options.task === "regression") {
-      options = {
-        loss: "meanSquaredError",
-        optimizer: tf.train.adam,
-        metrics: ["accuracy"],
-      };
-    }
-
-    options.optimizer = options.optimizer
-      ? this.neuralNetwork.setOptimizerFunction(
-          LEARNING_RATE,
-          options.optimizer
-        )
-      : this.neuralNetwork.setOptimizerFunction(LEARNING_RATE, tf.train.sgd);
-
+    const options = this.task.getCompileOptions(this.options.learningRate);
     this.neuralNetwork.compile(options);
 
     // if debug mode is true, then show the model summary
