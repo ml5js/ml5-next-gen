@@ -1,60 +1,63 @@
-// Copyright (c) 2018 ml5
+// Copyright (c) 2018-2024 ml5
 //
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
 import { asyncLoadImage } from "../utils/testingUtils";
-import poseNet from "./index";
+import bodyPose from "./index";
+import crossFetch from "cross-fetch";
 
 const POSENET_IMG =
   "https://github.com/ml5js/ml5-adjacent/raw/master/02_ImageClassification_Video/starter.png";
 
-const POSENET_DEFAULTS = {
-  architecture: "MobileNetV1",
-  outputStride: 16,
-  flipHorizontal: false,
-  minConfidence: 0.5,
-  maxPoseDetections: 5,
-  scoreThreshold: 0.5,
-  nmsRadius: 20,
-  detectionType: "multiple",
-  inputResolution: 256,
-  multiplier: 0.75,
-  quantBytes: 2,
-};
-
-describe("PoseNet", () => {
-  let net;
+describe("bodypose", () => {
+  let myBodyPose;
+  let image;
 
   beforeAll(async () => {
-    jest.setTimeout(10000);
-    net = await poseNet();
+
+    // TODO: this should not be necessary! Should already be handled by setupTests.js.
+    if (!global.fetch) {
+      global.fetch = crossFetch;
+    }
+
+    myBodyPose = bodyPose();
+    await myBodyPose.ready;
+
+    image = await asyncLoadImage(POSENET_IMG);
   });
 
-  it("instantiates poseNet", () => {
-    expect(net.architecture).toBe(POSENET_DEFAULTS.architecture);
-    expect(net.outputStride).toBe(POSENET_DEFAULTS.outputStride);
-    expect(net.inputResolution).toBe(POSENET_DEFAULTS.inputResolution);
-    expect(net.multiplier).toBe(POSENET_DEFAULTS.multiplier);
-    expect(net.quantBytes).toBe(POSENET_DEFAULTS.quantBytes);
+  it("instantiates bodyPose", () => {
+    expect(myBodyPose).toBeDefined()
+    expect(myBodyPose.model).toBeDefined();
   });
 
   it("detects poses in image", async () => {
-    const image = await asyncLoadImage(POSENET_IMG);
 
-    // Result should be an array with a single object containing pose and skeleton.
-    const result = await net.singlePose(image);
+    // Result should be an array with a single object containing the detection.
+    const result = await myBodyPose.detect(image);
     expect(result).toHaveLength(1);
-    expect(result[0]).toHaveProperty("pose");
-    expect(result[0]).toHaveProperty("skeleton");
+    expect(result[0]).toHaveProperty("box");
+    expect(result[0]).toHaveProperty("score");
+    expect(result[0].keypoints.length).toBeGreaterThanOrEqual(5);
 
     // Verify a known outcome.
-    const nose = result[0].pose.keypoints.find(
-      (keypoint) => keypoint.part === "nose"
+    const nose = result[0].keypoints.find(
+      (keypoint) => keypoint.name === "nose"
     );
+    // Should be {"name": "nose", "score": 0.7217329144477844, "x": 454.1112813949585, "y": 256.606980448618}
     expect(nose).toBeTruthy();
-    expect(nose.position.x).toBeCloseTo(448.6, 0);
-    expect(nose.position.y).toBeCloseTo(255.9, 0);
-    expect(nose.score).toBeCloseTo(0.999);
+    expect(nose.x).toBeCloseTo(454.1, 0);
+    expect(nose.y).toBeCloseTo(256.6, 0);
+    expect(nose.score).toBeCloseTo(0.721, 2);
+  });
+
+  it("calls the user's callback",(done) => {
+    expect.assertions(1);
+    const callback = (result) => {
+      expect(result).toHaveLength(1); // don't need to repeat the rest
+      done();
+    }
+    myBodyPose.detect(image, callback);
   });
 });
