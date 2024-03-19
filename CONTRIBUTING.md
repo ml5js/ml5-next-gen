@@ -71,18 +71,149 @@ yarn run build
 
 This will create a production version of the library in `/dist` directory.
 
-## Process
+## Making Releases
 
-_This section explains how this repository was creates and is for reference purposes only. The steps outlines in this section do not need to be followed by contributors._
+_This section is a temporary guide for contributors who wants to make a alpha release manually._
 
-I am building the library using Webpack, which was installed with:
+1. Create a new pull request on the main branch to update the SemVer number in `package.json`. For alpha releases, simply increment the trailing number in the SemVer. For example, `"version": "0.20.0-alpha.3"` should be changed to `"version": "0.20.0-alpha.4"`.
+
+2. Merge the pull request.
+
+3. Switch to the main branch and make sure the code is up to date by running the following command:
 
 ```
-npm install --save-dev webpack webpack cli
+git checkout main
+git pull
 ```
 
-I also created package.json using `npm init` and set up a basic config file for a library build named `webpack.config.js`. I configured package.json so I could run webpack with `npm run build`.
+4. Make sure all dependencies have been installed by running the following command:
 
-From the original ml5 library's `src` folder, I copied over all source files from the `NeuralNetwork` directory and necessary dependency files from `utils` directory. I also copied over `index.js` from the `src` folder and deleted everything unrelated to NeuralNetwork. I then installed `@tensorflow/tfjs@4.2.0`, `@tensorflow/tfjs-vis@1.5.1`, and `axios@1.3.4` with npm.
+```
+yarn
+```
 
-At this point, the library can be built without error. I was only getting an error about exceeding recommended size limit. For the build, I am using the latest version of node, npm, and tfjs. I have not tested all the features of NeuralNetwork, but it appears to be working just fine.
+5. Build the project with the following command and wait for the build to complete:
+
+```
+yarn run build
+```
+
+6. Run the following command and log in with an npm account that has write access to the ml5 package. You may be redirected to a browser window for authentication.
+
+```
+npm login
+```
+
+7. Publish the package with the following command. You may be redirected to a browser window for authentication.
+
+```
+npm publish --tag alpha --access public
+```
+
+8. The package should now be available at. (Replace [version] with the new SemVer set in step 1).
+
+```
+   https://unpkg.com/ml5@[version]/dist/ml5.js
+```
+
+## All Contributors
+
+If you contributed to the project in any way, we would like to include you in our [contributors list in README.md](https://github.com/ml5js/ml5-next-gen?tab=readme-ov-file#contributors).
+
+To add a new contributor, create a new branch from main. Then, enter the following command in the terminal:
+
+```
+yarn all-contributors add
+```
+
+Complete the prompts in the terminal.
+
+Make a pull request to merge the new branch into main. When the branch gets merged, the new contributor will show up in README.md!
+
+## Utils
+
+This section documents the utility functions found in the `src/utils` folder.
+
+### [handleOptions](src\utils\handleOptions.js)
+
+`handleOptions` is a function that filters a user defined options object based on rules in a mold object, returning a filtered options object. The function logs friendly warnings in the console when one of the user defined options violates the rules.
+
+```js
+const filteredOptions = handleOptions(userObject, moldObject);
+```
+
+#### `userObject`
+
+The `userObject` is an object defined by the user to configure the options of a model. For example, the below object configures the `handpose` model to detect a maximum of 4 hands using the "full" variant:
+
+```js
+const optionsObject = {
+  maxHands: 4,
+  modelType: full,
+};
+```
+
+#### `moldObject`
+
+Inspired by [Mongoose Models](https://mongoosejs.com/docs/models.html), the `moldObject` defines how the `userObject` should be filtered. Here is an example `optionsObject`:
+
+```js
+const mold = {
+  maxHands: {
+    type: "number",
+    min: 1,
+    default: 2,
+  },
+  runtime: {
+    type: "enum",
+    enums: ["mediapipe", "tfjs"],
+    default: "mediapipe",
+  },
+  modelType: {
+    type: "enum",
+    enums: ["lite", "full"],
+    default: "full",
+  },
+};
+```
+
+This particular `moldObject` allows the user to have a `maxHands` option with a minimum value of 1, a `runtime` option with the value of either `mediapipe` or `tfjs`, and a `modelType` option with the value of either `lite` or `full`.
+
+#### Define a Rule in `moldObject`
+
+The `moldObject` consists of key-value pairs. The key defines the name of an allowed option, and the value is an object that contains rules on how the option should be filtered. Here are the rules:
+
+- `type` (required): A string defining the correct type, can be `"number"`, `"enum"`, `"boolean"`, `"string"`, `"object"`, or `"undefined"`.
+- `default` (required): The default value in case the user does not provide a value or provides an erroneous value for the option.
+- `ignore` (optional): A boolean defining whether the key should be ignored. Defaults to false. Useful when set to a dynamically evaluated value (see section below).
+- Specifically for `type: "number"`:
+  - `min` (optional): A number defining the minimum value.
+  - `max` (optional): A number defining the maximum value.
+  - `integer` (optional): A boolean defining whether the value should be an integer. Defaults to `false`.
+  - `multipleOf` (optional): A number. When defined, the user value must be a multiple of this number.
+- Specifically for `type: "enum"`:
+  - `enums` (required): An array defining a list of valid values.
+  - `caseInsensitive` (optional): A boolean defining whether to checks the user value against the enum list case-insensitively. Defaults to `true`.
+
+#### Functions As Rules
+
+A rule can be a constant value or a function that is dynamically evaluated. The function will be called with the current filtered object as its parameter. Below is an example usage:
+
+```js
+const mold = {
+  runtime: {
+    type: "enum",
+    enums: ["mediapipe", "tfjs"],
+    default: "mediapipe",
+  },
+  maxHands: {
+    type: "number",
+    min: 1,
+    default: (filteredObject) => filteredObject.runtime === "mediapipe" ? 4 : 2;
+  },
+};
+```
+
+When the user sets the runtime to `mediapipe`, the default value of `maxHands` is `4`, and when the user sets the runtime to `tfjs`, the default `maxHands` is `2`.
+
+**Caveat:** the options gets processed from top to bottom in the order defined in the `moldObject`, and the `filteredObject` only contains the options that has already been processed. Thus, `runtime` must be placed above `maxHands` in the `moldObject` for the function to work properly.

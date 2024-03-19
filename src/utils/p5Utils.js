@@ -32,12 +32,18 @@ class P5Util {
    * @returns {p5 | undefined}
    */
   get p5Instance() {
-    if (typeof this.m_p5Instance !== "undefined" &&
-      typeof this.m_p5Instance.loadImage === "function") return this.m_p5Instance;
+    if (
+      typeof this.m_p5Instance !== "undefined" &&
+      typeof this.m_p5Instance.loadImage === "function"
+    )
+      return this.m_p5Instance;
 
-    if (typeof this.m_p5Instance.p5 !== 'undefined' &&
-      typeof this.m_p5Instance.p5.Image !== 'undefined' &&
-      typeof this.m_p5Instance.p5.Image === 'function') return this.m_p5Instance.p5;
+    if (
+      typeof this.m_p5Instance.p5 !== "undefined" &&
+      typeof this.m_p5Instance.p5.Image !== "undefined" &&
+      typeof this.m_p5Instance.p5.Image === "function"
+    )
+      return this.m_p5Instance.p5;
     return undefined;
   }
 
@@ -62,11 +68,11 @@ class P5Util {
         if (blob) {
           resolve(blob);
         } else {
-          reject(new Error('Canvas could not be converted to Blob.'));
+          reject(new Error("Canvas could not be converted to Blob."));
         }
       });
     });
-  };
+  }
 
   /**
    * Load a p5.Image from a URL in an async way.
@@ -75,13 +81,17 @@ class P5Util {
    */
   loadAsync(url) {
     return new Promise((resolve, reject) => {
-      this.p5Instance.loadImage(url, (img) => {
-        resolve(img);
-      }, () => {
-        reject(new Error(`Could not load image from url ${url}`));
-      });
+      this.p5Instance.loadImage(
+        url,
+        (img) => {
+          resolve(img);
+        },
+        () => {
+          reject(new Error(`Could not load image from url ${url}`));
+        }
+      );
     });
-  };
+  }
 
   /**
    * convert raw bytes to blob object
@@ -91,21 +101,40 @@ class P5Util {
    * @returns {Promise<Blob>}
    */
   async rawToBlob(raws, width, height) {
-    const arr = Array.from(raws)
-    const canvas = document.createElement('canvas'); // Consider using offScreenCanvas when it is ready?
-    const ctx = canvas.getContext('2d');
+    const arr = Array.from(raws);
+    const canvas = document.createElement("canvas"); // Consider using offScreenCanvas when it is ready?
+    const ctx = canvas.getContext("2d");
 
     canvas.width = width;
     canvas.height = height;
 
     const imgData = ctx.createImageData(width, height);
-    const {data} = imgData;
+    const { data } = imgData;
 
     for (let i = 0; i < width * height * 4; i += 1) data[i] = arr[i];
     ctx.putImageData(imgData, 0, 0);
 
     return this.getBlob(canvas);
-  };
+  }
+
+  /**
+   * convert ImageData to blob object
+   * @param {ImageData} segmentationResult
+   * @param {number} width
+   * @param {number} height
+   * @returns {Promise<Blob>}
+   */
+  async ImageDataToBlob(segmentationResult, width, height) {
+    const canvas = document.createElement("canvas"); // Consider using offScreenCanvas when it is ready?
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = width;
+    canvas.height = height;
+
+    ctx.putImageData(segmentationResult, 0, 0);
+
+    return this.getBlob(canvas);
+  }
 
   /**
    * Convert Blob to P5.Image
@@ -118,8 +147,7 @@ class P5Util {
       return this.loadAsync(URL.createObjectURL(blob));
     }
     return null;
-  };
-
+  }
 }
 
 const p5Utils = new P5Util();

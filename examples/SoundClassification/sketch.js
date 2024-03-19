@@ -20,7 +20,6 @@ let confidence;
 function preload() {
   // Load SpeechCommands18w sound classifier model
   classifier = ml5.soundClassifier('SpeechCommands18w', options);
-  console.log("led");
 }
 
 function setup() {
