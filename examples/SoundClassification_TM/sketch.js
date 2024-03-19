@@ -11,39 +11,50 @@ This example uses a callback pattern to create the classifier
 
 // Initialize a sound classifier method with SpeechCommands18w model. A callback needs to be passed.
 let classifier;
-// Options for the SpeechCommands18w model, the default probabilityThreshold is 0
-const options = { probabilityThreshold: 0.7 };
-// Two variable to hold the label and confidence of the result
-let label;
-let confidence;
 
+// Variable for holding the results of the classification
+let predictedSound = "";
+
+// Link to custom Teachable Machine model
 const modelJson = 'https://teachablemachine.withgoogle.com/models/FvsFiSwHW/';
 
 function preload() {
-  // Load SpeechCommands18w sound classifier model
+  // Load Teachable Machine model
   classifier = ml5.soundClassifier(modelJson);
-  console.log("led");
 }
 
 function setup() {
-  // noCanvas();
-  // Create 'label' and 'confidence' div to hold results
-  label = createDiv('Label: ...');
-  confidence = createDiv('Confidence: ...');
+  createCanvas(650, 450);
+  textAlign(CENTER, CENTER);
+  textSize(32);
+
   // Classify the sound from microphone in real time
   classifier.classify(gotResult);
+}
 
+function draw() {
+  background(250);
+  
+  // Update canvas according to classification results 
+  if (predictedSound == "Background Noise" || predictedSound == ""){
+    fill(0);
+    textSize(64);
+    text("clap 👏 or whistle 🎵 ", width / 2, height / 2);
+  }else if (predictedSound == "Clap"){
+    background(231, 176, 255);
+    textSize(128);
+    text("👏", width / 2, height / 2);
+  }else if (predictedSound == "whistle"){
+    background(255, 242, 143);
+    textSize(128);
+    text("🎵", width / 2, height / 2);
+  }
 }
 
 // A function to run when we get any errors and the results
 function gotResult(results) {
-  // Display error in the console
-  // if (error) {
-  //   console.error(error);
-  // }
   // The results are in an array ordered by confidence.
   console.log(results);
-  // Show the first label and confidence
-  label.html(`Label: ${results[0].label}`);
-  confidence.html(`Confidence: ${nf(results[0].confidence, 0, 2)}`); // Round the confidence to 0.01
+  // Store the first label
+  predictedSound = results[0].label;
 }
