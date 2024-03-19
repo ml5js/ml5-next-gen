@@ -1,0 +1,28 @@
+<!--
+ Copyright (c) 2023 ml5
+ 
+ This software is released under the MIT License.
+ https://opensource.org/licenses/MIT
+-->
+
+<html>
+  <head>
+    <title>ml5 - Sentiment</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.js"></script>
+    <script src="../../dist/ml5.js"></script>
+  </head>
+
+  <body>
+    <h1>Sentiment Analysis Demo</h1>
+    <p>
+      This example uses model trained on movie reviews. This model scores the
+      sentiment of text with a value between 0 ("negative") and 1 ("positive").
+      The movie reviews were truncated to a maximum of 200 words and only the
+      20,000 most common words in the reviews are used.
+      <br />
+      Press 'Enter' on your keyboard or 'Submit' to see score!
+    </p>
+
+    <script src="sketch.js"></script>
+  </body>
+</html>
