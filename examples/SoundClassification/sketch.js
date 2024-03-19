@@ -5,8 +5,7 @@
 
 /* ===
 ml5 Example
-Sound classification using Google's Teachable Machine and p5.js
-Create your own custom model with Google's Teachable Machine! https://teachablemachine.withgoogle.com/
+Sound classification using SpeechCommands18w and p5.js
 This example uses a callback pattern to create the classifier
 === */
 
