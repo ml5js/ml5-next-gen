@@ -324,21 +324,21 @@ class BodyPose {
 
   /**
    * Return a new array of results with named keypoints added.
-   * @param {Array} hands - the original detection results.
+   * @param {Array} poses - the original detection results.
    * @return {Array} the detection results with named keypoints added.
    * @private
    */
-  addKeypoints(hands) {
-    const result = hands.map((hand) => {
-      hand.keypoints.forEach((keypoint) => {
-        hand[keypoint.name] = {
+  addKeypoints(poses) {
+    const result = poses.map((pose) => {
+      pose.keypoints.forEach((keypoint) => {
+        pose[keypoint.name] = {
           x: keypoint.x,
           y: keypoint.y,
           score: keypoint.score,
         };
-        if (keypoint.z) hand[keypoint.name].z = keypoint.z;
+        if (keypoint.z) pose[keypoint.name].z = keypoint.z;
       });
-      return hand;
+      return pose;
     });
     return result;
   }
