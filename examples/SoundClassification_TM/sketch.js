@@ -17,7 +17,7 @@ let classifier;
 let predictedSound = "";
 
 // Link to custom Teachable Machine model
-const modelJson = 'https://teachablemachine.withgoogle.com/models/FvsFiSwHW/';
+const modelJson = "https://teachablemachine.withgoogle.com/models/FvsFiSwHW/";
 
 function preload() {
   // Load Teachable Machine model
@@ -35,17 +35,17 @@ function setup() {
 
 function draw() {
   background(250);
-  
-  // Update canvas according to classification results 
-  if (predictedSound == "Background Noise" || predictedSound == ""){
+
+  // Update canvas according to classification results
+  if (predictedSound == "Background Noise" || predictedSound == "") {
     fill(0);
     textSize(64);
     text("clap 👏 or whistle 🎵 ", width / 2, height / 2);
-  }else if (predictedSound == "Clap"){
+  } else if (predictedSound == "Clap") {
     background(231, 176, 255);
     textSize(128);
     text("👏", width / 2, height / 2);
-  }else if (predictedSound == "whistle"){
+  } else if (predictedSound == "whistle") {
     background(255, 242, 143);
     textSize(128);
     text("🎵", width / 2, height / 2);
