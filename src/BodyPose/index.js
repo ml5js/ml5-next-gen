@@ -248,6 +248,7 @@ class BodyPose {
     );
     let result = predictions;
     result = this.addKeypoints(result);
+    this.resizeBoundingBoxes(result, image.width, image.height);
     if (typeof callback === "function") callback(result);
     return result;
   }
@@ -300,6 +301,11 @@ class BodyPose {
       );
       let result = predictions;
       result = this.addKeypoints(result);
+      this.resizeBoundingBoxes(
+        result,
+        this.detectMedia.width,
+        this.detectMedia.height
+      );
       this.detectCallback(result);
       // wait for the frame to update
       await tf.nextFrame();
@@ -335,6 +341,28 @@ class BodyPose {
       return hand;
     });
     return result;
+  }
+
+  /**
+   * Resize the bounding box values from between 0-1 to the original media size.
+   *
+   * @param {Array} poses - the original detection results.
+   * @param {*} imageWidth - the width of the media being detected.
+   * @param {*} imageHeight - the height of the media being detected.
+   * @private
+   */
+  resizeBoundingBoxes(poses, imageWidth, imageHeight) {
+    // Only MoveNet model has box property
+    if (poses[0] && poses[0].box) {
+      poses.forEach((pose) => {
+        pose.box.height = pose.box.height * imageHeight;
+        pose.box.width = pose.box.width * imageWidth;
+        pose.box.xMax = pose.box.xMax * imageWidth;
+        pose.box.xMin = pose.box.xMin * imageWidth;
+        pose.box.yMax = pose.box.yMax * imageHeight;
+        pose.box.yMin = pose.box.yMin * imageHeight;
+      });
+    }
   }
 
   /**
