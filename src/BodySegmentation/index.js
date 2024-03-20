@@ -25,9 +25,6 @@ class BodySegmentation {
    * @param {function} [callback] - A callback to be called when the model is ready.
    */
   constructor(modelName = "SelfieSegmentation", options, callback) {
-    // for compatibility with p5's preload()
-    if (this.p5PreLoadExists()) window._incrementPreload();
-
     this.modelName = modelName;
     this.video = video;
     this.model = null;
@@ -187,9 +184,6 @@ class BodySegmentation {
       modelConfig
     );
 
-    // for compatibility with p5's preload()
-    if (this.p5PreLoadExists) window._decrementPreload();
-
     return this;
   }
   /**
@@ -339,21 +333,6 @@ class BodySegmentation {
     } else {
       return imageData;
     }
-  }
-
-  /**
-   * Check if p5.js' preload() function is present
-   * @returns {boolean} true if preload() exists
-   *
-   * @private
-   */
-  p5PreLoadExists() {
-    if (typeof window === "undefined") return false;
-    if (typeof window.p5 === "undefined") return false;
-    if (typeof window.p5.prototype === "undefined") return false;
-    if (typeof window.p5.prototype.registerPreloadMethod === "undefined")
-      return false;
-    return true;
   }
 }
 
