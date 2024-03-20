@@ -124,7 +124,7 @@ class DiyNeuralNetwork {
       // will take a URL to model.json, an object, or files array
       this.ready = this.load(this.options.modelUrl, callback);
     } else {
-      this.ready = true;
+      this.ready = Promise.resolve(this);
     }
   }
 
