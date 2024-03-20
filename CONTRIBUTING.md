@@ -71,6 +71,15 @@ yarn run build
 
 This will create a production version of the library in `/dist` directory.
 
+
+## Unit Tests
+
+To run the unit tests, run the following command
+
+```
+yarn test
+```
+
 ## Making Releases
 
 _This section is a temporary guide for contributors who wants to make a alpha release manually._

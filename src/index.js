@@ -6,7 +6,7 @@ import bodyPose from "./BodyPose";
 import imageClassifier from "./ImageClassifier";
 import soundClassifier from "./SoundClassifier";
 import setBackend from "./utils/setBackend";
-import bodyPix from "./BodySegmentation";
+import bodySegmentation from "./BodySegmentation";
 import communityStatement from "./utils/communityStatement";
 import * as tf from "@tensorflow/tfjs";
 import * as tfvis from "@tensorflow/tfjs-vis";
@@ -28,7 +28,7 @@ export default Object.assign({ p5Utils }, preloadRegister(withPreload), {
   faceMesh,
   bodyPose,
   setBackend,
-  bodyPix,
+  bodySegmentation,
 });
 
 communityStatement();
