@@ -34,7 +34,7 @@ Before getting started with ml5.js, review our [Code of Conduct](https://github.
 
 </p data-id="latest-version">
 
-- If you need to use an earlier version for any reason, you can change the version number. The [previous versions of ml5 can be found here](https://www.npmjs.com/package/ml5). You can use those previous versions by replacing `<version>` with the ml5 version of interest:
+- If you need to use an earlier version for any reason, you can change the version number. The [previous versions of ml5 can be found here](https://www.npmjs.com/package/ml5?activeTab=versions). You can use those previous versions by replacing `<version>` with the ml5 version of interest:
 
 ```html
 <script
