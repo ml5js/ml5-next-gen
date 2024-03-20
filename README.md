@@ -52,7 +52,7 @@ For example:
 ></script>
 ```
 
-- You can also reference "latest", but we do not recommend this as your code may break as we update ml5.
+- You can also reference "latest", but we do not recommend this as your code may break as we update ml5.js.
 
 ```html
 <script
