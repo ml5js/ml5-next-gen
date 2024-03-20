@@ -69,6 +69,7 @@ function draw() {
 
 function mousePressed() {
   start = createVector(mouseX, mouseY);
+  end = createVector(mouseX, mouseY);
 }
 
 function mouseDragged() {
