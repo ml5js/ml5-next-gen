@@ -11,8 +11,6 @@ This example uses a callback pattern to create the classifier
 
 // Initialize a sound classifier method with SpeechCommands18w model. A callback needs to be passed.
 let classifier;
-// Options for the SpeechCommands18w model, the default probabilityThreshold is 0
-const options = { probabilityThreshold: 0.7 };
 
 // Array containing the 18 words of SpeechCommands18w
 let words = [
@@ -40,14 +38,14 @@ let words = [
 let predictedWord = "";
 
 function preload() {
+  // Options for the SpeechCommands18w model, the default probabilityThreshold is 0
+  let options = { probabilityThreshold: 0.7 };
   // Load SpeechCommands18w sound classifier model
   classifier = ml5.soundClassifier("SpeechCommands18w", options);
 }
 
 function setup() {
   createCanvas(650, 450);
-  textAlign(CENTER, CENTER);
-  textSize(32);
   // Classify the sound from microphone in real time
   classifier.classify(gotResult);
 }
@@ -60,6 +58,7 @@ function draw() {
   // Once the model outputs results start displaying the predicted word on the canvas
   if (predictedWord !== "") {
     fill(211, 107, 255);
+    textAlign(CENTER, CENTER);
     textSize(64);
     text(predictedWord, width / 2, 90);
   }
@@ -67,8 +66,8 @@ function draw() {
 
 //Function to display the 18 words on the canvas
 function displayWords() {
+  textAlign(CENTER, CENTER);
   textSize(32);
-
   fill(96);
   text("Speak one of the words into your microphone", width / 2, 40);
 
