@@ -26,40 +26,35 @@ Before getting started with ml5.js, review our [Code of Conduct](https://github.
 
 <p id="latest-version">
 
-- You can use the latest version (0.12.2) by adding it to the head section of your HTML document:
+- You can use the latest version (0.20.0-alpha.3) by adding it to the head section of your HTML document:
 
-**v0.12.2**
+  **v0.20.0-alpha.3**
 
-    <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js" type="text/javascript"></script>
+  ```html
+  <script src="https://unpkg.com/ml5@0.20.0-alpha.3/dist/ml5.js"></script>
+  ```
 
 </p data-id="latest-version">
 
-- If you need to use an earlier version for any reason, you can change the version number. The [previous versions of ml5 can be found here](https://www.npmjs.com/package/ml5?activeTab=versions). You can use those previous versions by replacing `<version>` with the ml5 version of interest:
+- If you need to use an earlier version for any reason, you can change the version number. The [previous versions of ml5.js can be found here](https://www.npmjs.com/package/ml5?activeTab=versions). You can use those previous versions by replacing `<version>` with the ml5 version of interest:
 
-```html
-<script
-  src="https://unpkg.com/ml5@<version>/dist/ml5.min.js"
-  type="text/javascript"
-></script>
-```
+  ```html
+  <script src="https://unpkg.com/ml5@<version>/dist/ml5.min.js"></script>
+  ```
 
-For example:
+  For example:
 
-```html
-<script
-  src="https://unpkg.com/ml5@0.6.1/dist/ml5.min.js"
-  type="text/javascript"
-></script>
-```
+  ```html
+  <script src="https://unpkg.com/ml5@0.6.1/dist/ml5.min.js"></script>
+  ```
+
+  **Note:** To access the source code of version `0.12.2` or earlier, please visit the [archived repository](https://github.com/ml5js/ml5-library).
 
 - You can also reference "latest", but we do not recommend this as your code may break as we update ml5.js.
 
-```html
-<script
-  src="https://unpkg.com/ml5@latest/dist/ml5.min.js"
-  type="text/javascript"
-></script>
-```
+  ```html
+  <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+  ```
 
 ## Resources
 
