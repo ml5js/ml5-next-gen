@@ -1,6 +1,5 @@
 import * as tf from "@tensorflow/tfjs";
 import axios from "axios";
-import handleArguments from "../utils/handleArguments";
 import { saveBlob } from "../utils/io";
 import nnUtils from "./NeuralNetworkUtils";
 
@@ -623,10 +622,10 @@ class NeuralNetworkData {
 
   /**
    * loadData from fileinput or path
-   * @param {*} filesOrPath
-   * @param {*} callback
+   * @param {string | FileList | Object} filesOrPath
+   * @return {Promise<void>}
    */
-  async loadData(filesOrPath = null, callback) {
+  async loadData(filesOrPath) {
     try {
       let loadedData;
 
@@ -662,10 +661,6 @@ class NeuralNetworkData {
           'data must be a json object containing an array called "data" '
         );
       }
-
-      if (callback) {
-        callback();
-      }
     } catch (error) {
       throw new Error(error);
     }
@@ -673,7 +668,8 @@ class NeuralNetworkData {
 
   /**
    * saveData
-   * @param {*} name
+   * @param {string} [name]
+   * @return {Promise<void>}
    */
   async saveData(name) {
     const today = new Date();
@@ -697,29 +693,23 @@ class NeuralNetworkData {
 
   /**
    * Saves metadata of the data
-   * @param {*} nameOrCb
-   * @param {*} cb
+   * @param {string} modelName
+   * @return {Promise<void>}
    */
-  async saveMeta(nameOrCb, cb) {
-    const { string, callback } = handleArguments(nameOrCb, cb);
-    const modelName = string || "model";
-
+  async saveMeta(modelName = "model") {
     await saveBlob(
       JSON.stringify(this.meta),
       `${modelName}_meta.json`,
       "text/plain"
     );
-    if (callback) {
-      callback();
-    }
   }
 
   /**
    * load a model and metadata
-   * @param {*} filesOrPath
-   * @param {*} callback
+   * @param {string | FileList | Object} filesOrPath
+   * @return {Promise<void>}
    */
-  async loadMeta(filesOrPath = null, callback) {
+  async loadMeta(filesOrPath) {
     if (filesOrPath instanceof FileList) {
       const files = await Promise.all(
         Array.from(filesOrPath).map(async (file) => {
@@ -774,11 +764,6 @@ class NeuralNetworkData {
 
     this.isMetadataReady = true;
     this.isWarmedUp = true;
-
-    if (callback) {
-      callback();
-    }
-    return this.meta;
   }
 
   /*
