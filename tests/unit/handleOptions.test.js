@@ -1,4 +1,4 @@
-import handleOptions from './handleOptions';
+import handleOptions from '../../src/utils/handleOptions';
 
 describe('handleOptions', () => {
   const warnSpy = jest.spyOn(console, 'warn');
