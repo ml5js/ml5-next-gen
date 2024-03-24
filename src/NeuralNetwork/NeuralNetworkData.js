@@ -1,6 +1,5 @@
 import * as tf from "@tensorflow/tfjs";
 import axios from "axios";
-import handleArguments from "../utils/handleArguments";
 import { saveBlob } from "../utils/io";
 import nnUtils from "./NeuralNetworkUtils";
 
@@ -21,43 +20,6 @@ class NeuralNetworkData {
     this.data = {
       raw: [], // array of {xs:{}, ys:{}}
     };
-
-    // methods
-    // summarize data
-    this.createMetadata = this.createMetadata.bind(this);
-    this.getDataStats = this.getDataStats.bind(this);
-    this.getInputMetaStats = this.getInputMetaStats.bind(this);
-    this.getDataUnits = this.getDataUnits.bind(this);
-    this.getInputMetaUnits = this.getInputMetaUnits.bind(this);
-    this.getDTypesFromData = this.getDTypesFromData.bind(this);
-    // add data
-    this.addData = this.addData.bind(this);
-    // data conversion
-    this.convertRawToTensors = this.convertRawToTensors.bind(this);
-    // data normalization / unnormalization
-    this.normalizeDataRaw = this.normalizeDataRaw.bind(this);
-    this.normalizeInputData = this.normalizeInputData.bind(this);
-    this.normalizeArray = this.normalizeArray.bind(this);
-    this.unnormalizeArray = this.unnormalizeArray.bind(this);
-    // one hot
-    this.applyOneHotEncodingsToDataRaw =
-      this.applyOneHotEncodingsToDataRaw.bind(this);
-    this.getDataOneHot = this.getDataOneHot.bind(this);
-    this.getInputMetaOneHot = this.getInputMetaOneHot.bind(this);
-    this.createOneHotEncodings = this.createOneHotEncodings.bind(this);
-    // Saving / loading data
-    this.loadDataFromUrl = this.loadDataFromUrl.bind(this);
-    this.loadJSON = this.loadJSON.bind(this);
-    this.loadCSV = this.loadCSV.bind(this);
-    this.loadBlob = this.loadBlob.bind(this);
-    this.loadData = this.loadData.bind(this);
-    this.saveData = this.saveData.bind(this);
-    this.saveMeta = this.saveMeta.bind(this);
-    this.loadMeta = this.loadMeta.bind(this);
-    // data loading helpers
-    this.findEntries = this.findEntries.bind(this);
-    this.formatRawData = this.formatRawData.bind(this);
-    this.csvToJSON = this.csvToJSON.bind(this);
   }
 
   /**
@@ -73,21 +35,20 @@ class NeuralNetworkData {
    *  2. getting the min and max from the data
    *  3. getting the oneHot encoded values
    *  4. getting the inputShape and outputUnits from the data
-   * @param {*} dataRaw
-   * @param {*} inputShape
+   * @param {Array<number>} [inputShape]
+   * @void
    */
-  createMetadata(dataRaw, inputShape = null) {
+  createMetadata(inputShape = null) {
     // get the data type for each property
-    this.getDTypesFromData(dataRaw);
+    this.getDTypesFromData();
     // get the stats - min, max
-    this.getDataStats(dataRaw);
+    this.getDataStats();
     // onehot encode
-    this.getDataOneHot(dataRaw);
+    this.getDataOneHot();
     // calculate the input units from the data
-    this.getDataUnits(dataRaw, inputShape);
+    this.getDataUnits(inputShape);
 
     this.isMetadataReady = true;
-    return { ...this.meta };
   }
 
   /*
@@ -98,34 +59,22 @@ class NeuralNetworkData {
 
   /**
    * get stats about the data
-   * @param {*} dataRaw
+   * @private
+   * @void
    */
-  getDataStats(dataRaw) {
-    const meta = Object.assign({}, this.meta);
-
-    const inputMeta = this.getInputMetaStats(dataRaw, meta.inputs, "xs");
-    const outputMeta = this.getInputMetaStats(dataRaw, meta.outputs, "ys");
-
-    meta.inputs = inputMeta;
-    meta.outputs = outputMeta;
-
-    this.meta = {
-      ...this.meta,
-      ...meta,
-    };
-
-    return meta;
+  getDataStats() {
+    this.meta.inputs = this.getInputMetaStats(this.meta.inputs, "xs");
+    this.meta.outputs = this.getInputMetaStats(this.meta.outputs, "ys");
   }
 
   /**
-   * getRawStats
    * get back the min and max of each label
-   * @param {*} dataRaw
-   * @param {*} inputOrOutputMeta
-   * @param {*} xsOrYs
+   * @private
+   * @param {Object} inputOrOutputMeta
+   * @param {"xs" | "ys"} xsOrYs
+   * @return {Object}
    */
-  // eslint-disable-next-line no-unused-vars, class-methods-use-this
-  getInputMetaStats(dataRaw, inputOrOutputMeta, xsOrYs) {
+  getInputMetaStats(inputOrOutputMeta, xsOrYs) {
     const inputMeta = Object.assign({}, inputOrOutputMeta);
 
     Object.keys(inputMeta).forEach((k) => {
@@ -133,11 +82,11 @@ class NeuralNetworkData {
         inputMeta[k].min = 0;
         inputMeta[k].max = 1;
       } else if (inputMeta[k].dtype === "number") {
-        const dataAsArray = dataRaw.map((item) => item[xsOrYs][k]);
+        const dataAsArray = this.data.raw.map((item) => item[xsOrYs][k]);
         inputMeta[k].min = nnUtils.getMin(dataAsArray);
         inputMeta[k].max = nnUtils.getMax(dataAsArray);
       } else if (inputMeta[k].dtype === "array") {
-        const dataAsArray = dataRaw.map((item) => item[xsOrYs][k]).flat();
+        const dataAsArray = this.data.raw.map((item) => item[xsOrYs][k]).flat();
         inputMeta[k].min = nnUtils.getMin(dataAsArray);
         inputMeta[k].max = nnUtils.getMax(dataAsArray);
       }
@@ -148,42 +97,29 @@ class NeuralNetworkData {
 
   /**
    * get the data units, inputshape and output units
-   * @param {*} dataRaw
+   * @private
+   * @param {Array<number>} arrayShape
+   * @void
    */
-  getDataUnits(dataRaw, _arrayShape = null) {
-    const arrayShape = _arrayShape !== null ? _arrayShape : undefined;
-    const meta = Object.assign({}, this.meta);
-
+  getDataUnits(arrayShape = null) {
     // if the data has a shape pass it in
-    let inputShape;
     if (arrayShape) {
-      inputShape = arrayShape;
+      this.meta.inputUnits = arrayShape;
     } else {
-      inputShape = [this.getInputMetaUnits(dataRaw, meta.inputs)].flat();
+      this.meta.inputUnits = [this.getInputMetaUnits(this.meta.inputs)].flat();
     }
 
-    const outputShape = this.getInputMetaUnits(dataRaw, meta.outputs);
-
-    meta.inputUnits = inputShape;
-    meta.outputUnits = outputShape;
-
-    this.meta = {
-      ...this.meta,
-      ...meta,
-    };
-
-    return meta;
+    this.meta.outputUnits = this.getInputMetaUnits(this.meta.outputs);
   }
 
   /**
-   * get input
-   * @param {*} _inputsMeta
-   * @param {*} _dataRaw
+   * @private
+   * @param {Object} inputsMeta
+   * @return {number | Array<number>}
    */
-  // eslint-disable-next-line class-methods-use-this, no-unused-vars
-  getInputMetaUnits(_dataRaw, _inputsMeta) {
+  // eslint-disable-next-line class-methods-use-this
+  getInputMetaUnits(inputsMeta) {
     let units = 0;
-    const inputsMeta = Object.assign({}, _inputsMeta);
 
     Object.entries(inputsMeta).forEach((arr) => {
       const { dtype } = arr[1];
@@ -208,15 +144,17 @@ class NeuralNetworkData {
    * getDTypesFromData
    * gets the data types of the data we're using
    * important for handling oneHot
+   * @private
+   * @void - updates this.meta
    */
-  getDTypesFromData(_dataRaw) {
+  getDTypesFromData() {
     const meta = {
       ...this.meta,
       inputs: {},
       outputs: {},
     };
 
-    const sample = _dataRaw[0];
+    const sample = this.data.raw[0];
     const xs = Object.keys(sample.xs);
     const ys = Object.keys(sample.ys);
 
@@ -236,8 +174,6 @@ class NeuralNetworkData {
     // otherwise throw an error
 
     this.meta = meta;
-
-    return meta;
   }
 
   /**
@@ -250,6 +186,7 @@ class NeuralNetworkData {
    * Add Data
    * @param {object} xInputObj, {key: value}, key must be the name of the property value must be a String, Number, or Array
    * @param {*} yInputObj, {key: value}, key must be the name of the property value must be a String, Number, or Array
+   * @void - updates this.data
    */
   addData(xInputObj, yInputObj) {
     this.data.raw.push({
@@ -267,8 +204,9 @@ class NeuralNetworkData {
   /**
    * convertRawToTensors
    * converts array of {xs, ys} to tensors
-   * @param {*} _dataRaw
-   * @param {*} meta
+   * @param {*} dataRaw
+   *
+   * @return {{ inputs: tf.Tensor, outputs: tf.Tensor }}
    */
   // eslint-disable-next-line class-methods-use-this, no-unused-vars
   convertRawToTensors(dataRaw) {
@@ -323,13 +261,11 @@ class NeuralNetworkData {
 
   /**
    * normalize the dataRaw input
-   * @param {*} dataRaw
+   * @return {Array<object>}
    */
-  normalizeDataRaw(dataRaw) {
-    const meta = Object.assign({}, this.meta);
-
-    const normXs = this.normalizeInputData(dataRaw, meta.inputs, "xs");
-    const normYs = this.normalizeInputData(dataRaw, meta.outputs, "ys");
+  normalizeDataRaw() {
+    const normXs = this.normalizeInputData(this.meta.inputs, "xs");
+    const normYs = this.normalizeInputData(this.meta.outputs, "ys");
 
     const normalizedData = nnUtils.zipArrays(normXs, normYs);
 
@@ -337,13 +273,12 @@ class NeuralNetworkData {
   }
 
   /**
-   * normalizeRaws
-   * @param {*} dataRaw
-   * @param {*} inputOrOutputMeta
-   * @param {*} xsOrYs
+   * @param {Object} inputOrOutputMeta
+   * @param {"xs" | "ys"} xsOrYs
+   * @return {Array<object>}
    */
-  // eslint-disable-next-line no-unused-vars, class-methods-use-this
-  normalizeInputData(dataRaw, inputOrOutputMeta, xsOrYs) {
+  normalizeInputData(inputOrOutputMeta, xsOrYs) {
+    const dataRaw = this.data.raw;
     // the data length
     const dataLength = dataRaw.length;
     // the copy of the inputs.meta[inputOrOutput]
@@ -471,13 +406,11 @@ class NeuralNetworkData {
    * applyOneHotEncodingsToDataRaw
    * does not set this.data.raws
    * but rather returns them
-   * @param {*} _dataRaw
-   * @param {*} _meta
    */
-  applyOneHotEncodingsToDataRaw(dataRaw) {
+  applyOneHotEncodingsToDataRaw() {
     const meta = Object.assign({}, this.meta);
 
-    const output = dataRaw.map((row) => {
+    const output = this.data.raw.map((row) => {
       const xs = {
         ...row.xs,
       };
@@ -510,32 +443,21 @@ class NeuralNetworkData {
    * getDataOneHot
    * creates onehot encodings for the input and outputs
    * and adds them to the meta info
-   * @param {*} dataRaw
+   * @private
+   * @void
    */
-  getDataOneHot(dataRaw) {
-    const meta = Object.assign({}, this.meta);
-
-    const inputMeta = this.getInputMetaOneHot(dataRaw, meta.inputs, "xs");
-    const outputMeta = this.getInputMetaOneHot(dataRaw, meta.outputs, "ys");
-
-    meta.inputs = inputMeta;
-    meta.outputs = outputMeta;
-
-    this.meta = {
-      ...this.meta,
-      ...meta,
-    };
-
-    return meta;
+  getDataOneHot() {
+    this.meta.inputs = this.getInputMetaOneHot(this.meta.inputs, "xs");
+    this.meta.outputs = this.getInputMetaOneHot(this.meta.outputs, "ys");
   }
 
   /**
    * getOneHotMeta
-   * @param {*} _inputsMeta
-   * @param {*} _dataRaw
-   * @param {*} xsOrYs
+   * @param {Object} _inputsMeta
+   * @param {"xs" | "ys"} xsOrYs
+   * @return {Object}
    */
-  getInputMetaOneHot(_dataRaw, _inputsMeta, xsOrYs) {
+  getInputMetaOneHot(_inputsMeta, xsOrYs) {
     const inputsMeta = Object.assign({}, _inputsMeta);
 
     Object.entries(inputsMeta).forEach((arr) => {
@@ -546,7 +468,7 @@ class NeuralNetworkData {
 
       if (dtype === "string") {
         const uniqueVals = [
-          ...new Set(_dataRaw.map((obj) => obj[xsOrYs][key])),
+          ...new Set(this.data.raw.map((obj) => obj[xsOrYs][key])),
         ];
         const oneHotMeta = this.createOneHotEncodings(uniqueVals);
         inputsMeta[key] = {
@@ -562,6 +484,9 @@ class NeuralNetworkData {
   /**
    * Returns a legend mapping the
    * data values to oneHot encoded values
+   * @private
+   * @param {Array<string>} _uniqueValuesArray
+   * @return {Object}
    */
   // eslint-disable-next-line class-methods-use-this, no-unused-vars
   createOneHotEncodings(_uniqueValuesArray) {
@@ -602,22 +527,20 @@ class NeuralNetworkData {
    * @param {*} dataUrl
    * @param {*} inputs
    * @param {*} outputs
+   * @void
    */
   async loadDataFromUrl(dataUrl, inputs, outputs) {
     try {
-      let result;
 
       if (dataUrl.endsWith(".csv")) {
-        result = await this.loadCSV(dataUrl, inputs, outputs);
+        await this.loadCSV(dataUrl, inputs, outputs);
       } else if (dataUrl.endsWith(".json")) {
-        result = await this.loadJSON(dataUrl, inputs, outputs);
+        await this.loadJSON(dataUrl, inputs, outputs);
       } else if (dataUrl.includes("blob")) {
-        result = await this.loadBlob(dataUrl, inputs, outputs);
+        await this.loadBlob(dataUrl, inputs, outputs);
       } else {
         throw new Error("Not a valid data format. Must be csv or json");
       }
-
-      return result;
     } catch (error) {
       console.error(error);
       throw new Error(error);
@@ -626,9 +549,10 @@ class NeuralNetworkData {
 
   /**
    * loadJSON
-   * @param {*} _dataUrlOrJson
-   * @param {*} _inputLabelsArray
-   * @param {*} _outputLabelsArray
+   * @param {*} dataUrlOrJson
+   * @param {*} inputLabels
+   * @param {*} outputLabels
+   * @void
    */
   async loadJSON(dataUrlOrJson, inputLabels, outputLabels) {
     try {
@@ -642,8 +566,7 @@ class NeuralNetworkData {
       }
 
       // format the data.raw array
-      const result = this.formatRawData(json, inputLabels, outputLabels);
-      return result;
+      this.formatRawData(json, inputLabels, outputLabels);
     } catch (err) {
       console.error("error loading json");
       throw new Error(err);
@@ -652,9 +575,10 @@ class NeuralNetworkData {
 
   /**
    * loadCSV
-   * @param {*} _dataUrl
-   * @param {*} _inputLabelsArray
-   * @param {*} _outputLabelsArray
+   * @param {*} dataUrl
+   * @param {*} inputLabels
+   * @param {*} outputLabels
+   * @void
    */
   async loadCSV(dataUrl, inputLabels, outputLabels) {
     try {
@@ -664,8 +588,7 @@ class NeuralNetworkData {
         entries: loadedData,
       };
       // format the data.raw array
-      const result = this.formatRawData(json, inputLabels, outputLabels);
-      return result;
+      this.formatRawData(json, inputLabels, outputLabels);
     } catch (err) {
       console.error("error loading csv", err);
       throw new Error(err);
@@ -674,25 +597,23 @@ class NeuralNetworkData {
 
   /**
    * loadBlob
-   * @param {*} _dataUrlOrJson
-   * @param {*} _inputLabelsArray
-   * @param {*} _outputLabelsArray
+   * @param {*} dataUrlOrJson
+   * @param {*} inputLabels
+   * @param {*} outputLabels
+   * @void
    */
   async loadBlob(dataUrlOrJson, inputLabels, outputLabels) {
     try {
       const { data } = await axios.get(dataUrlOrJson);
       const text = data; // await data.text();
 
-      let result;
       if (nnUtils.isJsonOrString(text)) {
         const json = JSON.parse(text);
-        result = await this.loadJSON(json, inputLabels, outputLabels);
+        await this.loadJSON(json, inputLabels, outputLabels);
       } else {
         const json = this.csvToJSON(text);
-        result = await this.loadJSON(json, inputLabels, outputLabels);
+        await this.loadJSON(json, inputLabels, outputLabels);
       }
-
-      return result;
     } catch (err) {
       console.log("mmm might be passing in a string or something!", err);
       throw new Error(err);
@@ -701,10 +622,10 @@ class NeuralNetworkData {
 
   /**
    * loadData from fileinput or path
-   * @param {*} filesOrPath
-   * @param {*} callback
+   * @param {string | FileList | Object} filesOrPath
+   * @return {Promise<void>}
    */
-  async loadData(filesOrPath = null, callback) {
+  async loadData(filesOrPath) {
     try {
       let loadedData;
 
@@ -740,10 +661,6 @@ class NeuralNetworkData {
           'data must be a json object containing an array called "data" '
         );
       }
-
-      if (callback) {
-        callback();
-      }
     } catch (error) {
       throw new Error(error);
     }
@@ -751,7 +668,8 @@ class NeuralNetworkData {
 
   /**
    * saveData
-   * @param {*} name
+   * @param {string} [name]
+   * @return {Promise<void>}
    */
   async saveData(name) {
     const today = new Date();
@@ -775,29 +693,23 @@ class NeuralNetworkData {
 
   /**
    * Saves metadata of the data
-   * @param {*} nameOrCb
-   * @param {*} cb
+   * @param {string} modelName
+   * @return {Promise<void>}
    */
-  async saveMeta(nameOrCb, cb) {
-    const { string, callback } = handleArguments(nameOrCb, cb);
-    const modelName = string || "model";
-
+  async saveMeta(modelName = "model") {
     await saveBlob(
       JSON.stringify(this.meta),
       `${modelName}_meta.json`,
       "text/plain"
     );
-    if (callback) {
-      callback();
-    }
   }
 
   /**
    * load a model and metadata
-   * @param {*} filesOrPath
-   * @param {*} callback
+   * @param {string | FileList | Object} filesOrPath
+   * @return {Promise<void>}
    */
-  async loadMeta(filesOrPath = null, callback) {
+  async loadMeta(filesOrPath) {
     if (filesOrPath instanceof FileList) {
       const files = await Promise.all(
         Array.from(filesOrPath).map(async (file) => {
@@ -852,11 +764,6 @@ class NeuralNetworkData {
 
     this.isMetadataReady = true;
     this.isWarmedUp = true;
-
-    if (callback) {
-      callback();
-    }
-    return this.meta;
   }
 
   /*
@@ -873,8 +780,9 @@ class NeuralNetworkData {
    * formatRawData
    * takes a json and set the this.data.raw
    * @param {*} json 
-   * @param {Array} inputLabels
-   * @param {Array} outputLabels
+   * @param {Array<string>} inputLabels
+   * @param {Array<string>} outputLabels
+   * @void
    */
   formatRawData(json, inputLabels, outputLabels) {
     // Recurse through the json object to find
@@ -914,8 +822,6 @@ class NeuralNetworkData {
 
     // set this.data.raw
     this.data.raw = result;
-
-    return result;
   }
 
   /**

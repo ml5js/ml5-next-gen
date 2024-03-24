@@ -14,21 +14,25 @@ import p5Utils from "./utils/p5Utils";
 import preloadRegister from "./utils/p5PreloadHelper";
 
 const withPreload = {
+  bodyPose,
+  bodySegmentation,
+  faceMesh,
+  handPose,
   imageClassifier,
+  neuralNetwork,
+  sentiment,
   soundClassifier,
 };
 
-
-export default Object.assign({ p5Utils }, preloadRegister(withPreload), {
+const ml5 = Object.assign({ p5Utils }, withPreload, {
   tf,
   tfvis,
-  neuralNetwork,
-  handPose,
-  sentiment,
-  faceMesh,
-  bodyPose,
   setBackend,
-  bodySegmentation,
+  setP5: p5Utils.setP5.bind(p5Utils),
 });
 
+p5Utils.shouldPreload(ml5, Object.keys(withPreload));
+
 communityStatement();
+
+export default ml5;
