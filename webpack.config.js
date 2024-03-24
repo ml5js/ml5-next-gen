@@ -1,12 +1,13 @@
 const { resolve } = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { merge } = require("webpack-merge");
+const TerserPlugin = require("terser-webpack-plugin");
 
 const commonConfig = {
   context: __dirname,
   entry: "./src/index.js",
   output: {
-    filename: "ml5.min.js",
+    filename: "ml5.js",
     path: resolve(__dirname, "dist"),
     library: {
       name: "ml5",
@@ -48,9 +49,24 @@ const developmentConfig = {
 
 const productionConfig = {
   mode: "production",
+  entry: {
+    ml5: "./src/index.js",
+    "ml5.min": "./src/index.js",
+  },
   devtool: "source-map",
   output: {
     publicPath: "/",
+    filename: "[name].js",
+  },
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        include: "ml5.min.js",
+        exclude: "ml5.js",
+        extractComments: false,
+      }),
+    ],
   },
 };
 
