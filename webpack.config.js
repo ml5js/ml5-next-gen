@@ -6,7 +6,7 @@ const commonConfig = {
   context: __dirname,
   entry: "./src/index.js",
   output: {
-    filename: "ml5.js",
+    filename: "ml5.min.js",
     path: resolve(__dirname, "dist"),
     library: {
       name: "ml5",
