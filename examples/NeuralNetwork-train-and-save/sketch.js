@@ -74,7 +74,7 @@ function setup() {
 }
 
 function draw() {
-  //Display the webcam video
+  // Display the webcam video
   image(video, 0, 0, width, height);
 
   // Draw the handPose keypoints
