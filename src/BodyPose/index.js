@@ -378,6 +378,22 @@ class BodyPose {
       return false;
     return true;
   }
+
+  /**
+   * Returns the skeleton connections pairs for the model.
+   * @returns {Number[][]} an array of pairs of indices containing the connected keypoints.
+   */
+  getSkeleton() {
+    if (this.modelName === "BlazePose") {
+      return poseDetection.util.getAdjacentPairs(
+        poseDetection.SupportedModels.BlazePose
+      );
+    } else {
+      return poseDetection.util.getAdjacentPairs(
+        poseDetection.SupportedModels.MoveNet
+      );
+    }
+  }
 }
 
 /**
