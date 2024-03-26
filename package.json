@@ -2,7 +2,7 @@
   "name": "ml5",
   "version": "0.20.0-alpha.3",
   "description": "A friendly machine learning library for the web.",
-  "main": "dist/ml5.js",
+  "main": "dist/ml5.min.js",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "webpack --config webpack.config.js --mode production",
@@ -42,6 +42,7 @@
     "postinstall-postinstall": "^2.1.0",
     "prettier": "2.8.8",
     "rimraf": "^5.0.5",
+    "terser-webpack-plugin": "^5.3.10",
     "webpack": "^5.76.1",
     "webpack-cli": "^5.0.1",
     "webpack-dev-server": "^4.15.1"
