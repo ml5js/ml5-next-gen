@@ -2,6 +2,12 @@
 
 This is a temporary API reference for the next generation ml5 library version `0.20.0-alpha.4`. The project is currently under development and not stable, and final API will likely be different from the current version. Please feel free to reach out to us if you have any questions.
 
+You can access the library by including the following script tag in your HTML file:
+
+```html
+<script src="https://unpkg.com/ml5@0.20.0-alpha.4/dist/ml5.min.js"></script>
+```
+
 ---
 
 ## ml5.bodySegmentation
