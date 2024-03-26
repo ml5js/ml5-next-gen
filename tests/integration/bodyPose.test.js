@@ -3,14 +3,15 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { asyncLoadImage } from "../utils/testingUtils";
-import bodyPose from "./index";
+import { asyncLoadImage } from "../testingUtils";
+import bodyPose from "../../src/Bodypose";
 import crossFetch from "cross-fetch";
 
 const POSENET_IMG =
   "https://github.com/ml5js/ml5-adjacent/raw/master/02_ImageClassification_Video/starter.png";
 
-describe("bodypose", () => {
+// TODO: run this in a browser
+describe.skip("bodypose", () => {
   let myBodyPose;
   let image;
 

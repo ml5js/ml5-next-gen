@@ -1,4 +1,4 @@
-import modelLoader, { isAbsoluteURL } from './modelLoader';
+import modelLoader, { isAbsoluteURL } from '../../src/utils/modelLoader';
 
 describe('isAbsoluteURL', () => {
   it('returns false if relative', () => {
