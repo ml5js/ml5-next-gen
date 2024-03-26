@@ -12,7 +12,7 @@ let generations = 0;
 
 function setup() {
   createCanvas(640, 240);
-  ml5.tf.setBackend("cpu");
+  ml5.setBackend("cpu");
   for (let i = 0; i < 50; i++) {
     creatures[i] = new Creature(random(width), random(height));
   }
