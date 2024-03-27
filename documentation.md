@@ -1,6 +1,12 @@
 # Alpha Release Reference
 
-This is a temporary API reference for the next generation ml5 library. The project is currently under development and not stable, and final API will likely be different from the current version. Please feel free to reach out to us if you have any questions.
+This is a temporary API reference for the next generation ml5 library version `0.20.0-alpha.4`. The project is currently under development and not stable, and final API will likely be different from the current version. Please feel free to reach out to us if you have any questions.
+
+You can access the library by including the following script tag in your HTML file:
+
+```html
+<script src="https://unpkg.com/ml5@0.20.0-alpha.4/dist/ml5.min.js"></script>
+```
 
 ---
 
@@ -24,18 +30,21 @@ const bodySegmentation = ml5.bodySegmentation(?modelName, ?options, ?callback);
 
 - **modelName**: OPTIONAL: A string specifying which model to use, "SelfieSegmentation" or "BodyPix".
 
-- **options**: OPTIONAL. An object to change the default configuration of the model. See the example options:
+- **options**: OPTIONAL. An object to change the default configuration of the model. See the example options object:
 
   ```javascript
   {
-    runtime: "mediaPipe", // "mediapipe" or "tfjs"
+    runtime: "mediapipe", // "mediapipe" or "tfjs"
     modelType: "general", // "general" or "landscape"
     maskType: :"background", //"background", "body", or "parts" (used to change the type of segmentation mask output)
   }
   ```
 
-  [More info on options for SelfieSegmentation with mediaPipe runtime](https://github.com/tensorflow/tfjs-models/tree/master/body-segmentation/src/selfie_segmentation_mediapipe#create-a-detector).
-  [More info on options for SelfieSegmentation with tfjs runtime](https://github.com/tensorflow/tfjs-models/tree/master/body-segmentation/src/selfie_segmentation_tfjs#create-a-detector).
+  [More info on options for SelfieSegmentation model with mediaPipe runtime](https://github.com/tensorflow/tfjs-models/tree/master/body-segmentation/src/selfie_segmentation_mediapipe#create-a-detector).
+
+  [More info on options for SelfieSegmentation model with tfjs runtime](https://github.com/tensorflow/tfjs-models/tree/master/body-segmentation/src/selfie_segmentation_tfjs#create-a-detector).
+
+  [More infor on options for BodyPix model.](https://github.com/tensorflow/tfjs-models/blob/master/body-segmentation/src/body_pix/README.md#create-a-detector)
 
 - **callback(bodySegmentation, error)**: OPTIONAL. A function to run once the model has been loaded. Alternatively, call `ml5.bodySegmentation()` within the p5 `preload` function.
 
@@ -127,7 +136,7 @@ const bodyPose = ml5.bodyPose(?modelName, ?options, ?callback);
   }
   ```
 
-  [More info on options for MoveNet](https://github.com/tensorflow/tfjs-models/tree/master/pose-detection/src/movenet#create-a-detector).
+  [More info on options for the MoveNet model](https://github.com/tensorflow/tfjs-models/tree/master/pose-detection/src/movenet#create-a-detector).
 
   The default and available options for BlazePose model are:
 
@@ -142,7 +151,9 @@ const bodyPose = ml5.bodyPose(?modelName, ?options, ?callback);
   }
   ```
 
-[More info on options for MediaPipe BlazePose](https://github.com/tensorflow/tfjs-models/tree/master/pose-detection/src/blazepose_mediapipe) and for TFJS BlazePose [here](https://github.com/tensorflow/tfjs-models/tree/master/pose-detection/src/blazepose_tfjs#create-a-detector).
+[More info on options for BlazePose model with mediapipe runtime](https://github.com/tensorflow/tfjs-models/tree/master/pose-detection/src/blazepose_mediapipe#create-a-detector).
+
+[More info on options for BlazePose model with tfjs runtime](https://github.com/tensorflow/tfjs-models/tree/master/pose-detection/src/blazepose_tfjs#create-a-detector).
 
 - **callback(bodyPose, error)**: OPTIONAL. A function to run once the model has been loaded. Alternatively, call `ml5.bodyPose()` within the p5 `preload` function.
 
@@ -180,7 +191,12 @@ bodyPose.detectStart(media, callback);
 
   See the diagram below for the position of each keypoint.
 
-  ![Keypoint Diagram](https://camo.githubusercontent.com/b8a385301ca6b034d5f4807505e528b4512a0aa78507dec9ebafcc829b9556be/68747470733a2f2f73746f726167652e676f6f676c65617069732e636f6d2f6d6f76656e65742f636f636f2d6b6579706f696e74732d3530302e706e67)
+  **For MoveNet model:**
+
+  ![Keypoint diagram for MoveNet model](https://camo.githubusercontent.com/c3641b718d7e613b2ce111a6a4575e88ca35a60cb325efdd9113c453b2a09301/68747470733a2f2f73746f726167652e676f6f676c65617069732e636f6d2f6d6f76656e65742f636f636f2d6b6579706f696e74732d3530302e706e67)
+
+  **For BlazePose model:**
+  ![Keypoint diagram for BlazePose model](https://camo.githubusercontent.com/17082997c33fc6d2544c4aea33d9898860cf902ed5a0b865527d1dd91bbc7efa/68747470733a2f2f73746f726167652e676f6f676c65617069732e636f6d2f6d65646961706970652f626c617a65706f73652d6b6579706f696e74732d757064617465642e706e67)
 
 #### bodyPose.detectStop()
 
@@ -240,7 +256,7 @@ const faceMesh = ml5.faceMesh(?options, ?callback);
   }
   ```
 
-  More info on options [here](https://github.com/tensorflow/tfjs-models/tree/master/face-landmarks-detection/src/mediapipe#create-a-detector).
+  [More info on options here](https://github.com/tensorflow/tfjs-models/tree/master/face-landmarks-detection/src/mediapipe#create-a-detector).
 
 - **callback(faceMesh, error)**: OPTIONAL. A function to run once the model has been loaded. Alternatively, call `ml5.faceMesh()` within the p5 `preload` function.
 
@@ -273,7 +289,7 @@ faceMesh.detectStart(media, callback);
   ]
   ```
 
-  [Here](https://github.com/tensorflow/tfjs-models/blob/master/face-landmarks-detection/mesh_map.jpg) is a diagram for the position of each keypoint (download and zoom in to see the index).
+  [Here is a diagram for the position of each keypoint](https://github.com/tensorflow/tfjs-models/blob/master/face-landmarks-detection/mesh_map.jpg) (download and zoom in to see the index numbers).
 
 #### faceMesh.detectStop()
 
@@ -336,8 +352,9 @@ const handPose = ml5.handPose(?options, ?callback);
   }
   ```
 
-  More info on options [here](https://github.com/tensorflow/tfjs-models/tree/master/hand-pose-detection/src/mediapipe#create-a-detector) for "mediapipe" runtime.
-  More info on options [here](https://github.com/tensorflow/tfjs-models/tree/master/hand-pose-detection/src/tfjs#create-a-detector) for "tfjs" runtime.
+  [More info on options for mediapipe runtime](https://github.com/tensorflow/tfjs-models/tree/master/hand-pose-detection/src/mediapipe#create-a-detector).
+
+  [More info on options for tfjs runtime](https://github.com/tensorflow/tfjs-models/tree/master/hand-pose-detection/src/tfjs#create-a-detector).
 
 - **callback(handPose, error)**: OPTIONAL. A function to run once the model has been loaded. Alternatively, call `ml5.handPose()` within the p5 `preload` function.
 
@@ -374,7 +391,7 @@ handPose.detectStart(media, callback);
 
   See the diagram below for the position of each keypoint.
 
-  ![Keypoint Diagram](https://camo.githubusercontent.com/b0f077393b25552492ef5dd7cd9fd13f386e8bb480fa4ed94ce42ede812066a1/68747470733a2f2f6d65646961706970652e6465762f696d616765732f6d6f62696c652f68616e645f6c616e646d61726b732e706e67)
+  ![Keypoint Diagram](https://camo.githubusercontent.com/385c0bf768a8afc7aaa4ad5413a70284db1b0d14317b234b7ae69a105032ac01/68747470733a2f2f6d65646961706970652e6465762f696d616765732f6d6f62696c652f68616e645f6c616e646d61726b732e706e67)
 
 #### handPose.detectStop()
 
@@ -396,6 +413,78 @@ handPose.detect(media, ?callback);
 
 - **media**: An HTML or p5.js image, video, or canvas element to run the estimation on.
 - **callback(output, error)**: OPTIONAL. A callback function to handle the output of the estimation, see output example above.
+
+**Returns:**  
+A promise that resolves to the estimation output.
+
+### Examples
+
+TODO (link p5 web editor examples once uploaded)
+
+---
+
+## ml5.imageClassifier
+
+### Description
+
+ImageClassifier can be used to label images.
+
+### Methods
+
+#### ml5.imageClassifier()
+
+This method is used to initialize the imageClassifer object.
+
+```javascript
+const handPose = ml5.handPose(?modelName, ?options, ?callback);
+```
+
+**Parameters:**
+
+- **modelName**: OPTIONAL. Name of the underlying model to use.
+
+- **options**: OPTIONAL. An object to change the default configuration of the model.
+
+- **callback(handPose, error)**: OPTIONAL. A function to run once the model has been loaded. Alternatively, call `ml5.imageClassifier()` within the p5 `preload` function.
+
+**Returns:**  
+The imageClassifier object.
+
+#### imageClassifier.classifyStart()
+
+This method repeatedly outputs classification labels on an image media through a callback function.
+
+```javascript
+imageClassifier.classifyStart(media, ?kNumber, callback);
+```
+
+**Parameters:**
+
+- **media**: An HTML or p5.js image, video, or canvas element to run the classification on.
+- **kNumber**: The number of labels returned by the image classification.
+- **callback(output, error)**: A callback function to handle the output of the classification.
+
+#### imageClassifier.classifyStop()
+
+This method can be called after a call to `imageClassifier.classifyStart` to stop the repeating classifications.
+
+```javascript
+imageClassifier.classifyStop();
+```
+
+#### imageClassifier.classify()
+
+This method asynchronously outputs a single image classification on an image media when called.
+
+```javascript
+imageClassifier.classify(media, ?kNumber, ?callback);
+```
+
+**Parameters:**
+
+- **media**: An HTML or p5.js image, video, or canvas element to run the classification on.
+- **kNumber**: The number of labels returned by the image classification.
+- **callback(output, error)**: OPTIONAL. A callback function to handle the output of the classification.
 
 **Returns:**  
 A promise that resolves to the estimation output.
