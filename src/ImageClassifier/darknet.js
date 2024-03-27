@@ -5,7 +5,7 @@
 
 import * as tf from "@tensorflow/tfjs";
 import getTopKClasses from "../utils/gettopkclasses";
-import IMAGENET_CLASSES_DARKNET from "../utils/IMAGENET_CLASSES_DARKNET";
+import DARKNET_CLASSES from "./DARKNET_CLASSES";
 
 const DEFAULTS = {
   DARKNET_URL:
@@ -89,7 +89,7 @@ export class Darknet {
       const predictions = this.model.predict(imgData);
       return tf.softmax(predictions);
     });
-    return getTopKClasses(logits, topk, IMAGENET_CLASSES_DARKNET);
+    return getTopKClasses(logits, topk, DARKNET_CLASSES);
   }
 }
 

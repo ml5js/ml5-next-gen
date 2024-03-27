@@ -5,7 +5,7 @@
 
 import * as tf from "@tensorflow/tfjs";
 import getTopKClasses from "../utils/gettopkclasses";
-import DOODLENET_CLASSES from "../utils/DOODLENET_CLASSES";
+import DOODLENET_CLASSES from "./DOODLENET_CLASSES";
 
 const DEFAULTS = {
   DOODLENET_URL:
