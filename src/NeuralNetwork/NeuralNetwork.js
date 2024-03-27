@@ -1,5 +1,4 @@
 import * as tf from "@tensorflow/tfjs";
-import axios from "axios";
 import { saveBlob } from "../utils/io";
 import { randomGaussian } from "../utils/random";
 
@@ -230,28 +229,13 @@ class NeuralNetwork {
         tf.io.browserFiles([model, weights])
       );
     } else if (filesOrPath instanceof Object) {
-      // load the modelJson
-      const modelJsonResult = await axios.get(filesOrPath.model, {
-        responseType: "text",
-      });
-      const modelJson = modelJsonResult.data;
-      // TODO: browser File() API won't be available in node env
-      const modelJsonFile = new File([modelJson], "model.json", {
-        type: "application/json",
-      });
-
-      // load the weights
-      const weightsBlobResult = await axios.get(filesOrPath.weights, {
-        responseType: "blob",
-      });
-      const weightsBlob = weightsBlobResult.data;
-      // TODO: browser File() API won't be available in node env
-      const weightsBlobFile = new File([weightsBlob], "model.weights.bin", {
-        type: "application/macbinary",
-      });
-
       this.model = await tf.loadLayersModel(
-        tf.io.browserFiles([modelJsonFile, weightsBlobFile])
+        tf.io.http(filesOrPath.model, {
+          // Override the weights path from the JSON weightsManifest
+          weightUrlConverter: (weightFileName) => {
+            return filesOrPath.weights || weightFileName;
+          }
+        })
       );
     } else {
       this.model = await tf.loadLayersModel(filesOrPath);
