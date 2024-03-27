@@ -4,12 +4,13 @@
 // https://opensource.org/licenses/MIT
 
 import crossFetch from 'cross-fetch';
-import { asyncLoadImage } from "../utils/testingUtils";
-import handpose from "./index";
+import { asyncLoadImage } from "../testingUtils";
+import handpose from "../../src/Handpose";
 
 const HANDPOSE_IMG = "https://i.imgur.com/EZXOjqh.jpg";
 
-describe("Handpose", () => {
+// TODO: run this in a browser
+describe.skip("Handpose", () => {
   let handposeInstance;
   let testImage;
 
