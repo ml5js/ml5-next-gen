@@ -1,7 +1,10 @@
-// Copyright (c) 2018-2023 ml5
-//
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
+/*
+ * 👋 Hello! This is an ml5.js example made and shared with ❤️.
+ * Learn more about the ml5.js project: https://ml5js.org/
+ * ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
+ *
+ * This example demonstrates pose tracking on live video through ml5.bodyPose.
+ */
 
 let video;
 let bodyPose;
