@@ -2,6 +2,7 @@ const { resolve } = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { merge } = require("webpack-merge");
 const TerserPlugin = require("terser-webpack-plugin");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer");
 
 const commonConfig = {
   context: __dirname,
@@ -70,12 +71,16 @@ const productionConfig = {
   },
 };
 
+const analyzeConfig = {
+  plugins: [new BundleAnalyzerPlugin.BundleAnalyzerPlugin()],
+};
+
 module.exports = function (env, args) {
   switch (args.mode) {
     case "development":
       return merge(commonConfig, developmentConfig);
     case "production":
-      return merge(commonConfig, productionConfig);
+      return merge(commonConfig, productionConfig, analyzeConfig);
     default:
       throw new Error("No matching configuration was found!");
   }
