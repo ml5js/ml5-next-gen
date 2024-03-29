@@ -216,8 +216,12 @@ class FaceMesh {
     const contours = faceLandmarksDetection.util.getKeypointIndexByContour(
       faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh
     );
-
+    // Remove the following line when the tfjs fix the lips issue
+    if (contours.lips[20] !== 291) contours.lips.splice(20, 0, 291);
     for (let face of faces) {
+      // Remove the following line when the tfjs fix the lips issue
+      // https://github.com/tensorflow/tfjs/issues/8221
+      face.keypoints[291].name = "lips";
       for (let contourLabel in contours) {
         for (let keypointIndex of contours[contourLabel]) {
           // check if face has this keypoint
