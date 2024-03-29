@@ -65,7 +65,7 @@ const productionConfig = {
       new TerserPlugin({
         include: "ml5.min.js",
         exclude: "ml5.js",
-        extractComments: false,
+        extractComments: true,
       }),
     ],
   },
