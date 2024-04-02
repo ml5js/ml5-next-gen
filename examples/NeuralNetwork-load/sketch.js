@@ -1,9 +1,10 @@
-// Copyright (c) 2024 ml5
-//
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
-
-// This example will load a pre-trained model that recognizes hand gestures for rock paper scissors.
+/*
+ * 👋 Hello! This is an ml5.js example made and shared with ❤️.
+ * Learn more about the ml5.js project: https://ml5js.org/
+ * ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
+ *
+ * This example demonstrates loading a pre-trained model with ml5.neuralNetwork.
+ */
 
 let classifier;
 let handPose;
