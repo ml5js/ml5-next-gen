@@ -436,12 +436,12 @@ ImageClassifier can be used to label images.
 This method is used to initialize the imageClassifer object.
 
 ```javascript
-const handPose = ml5.handPose(?modelName, ?options, ?callback);
+const imageClassifier = ml5.imageClassifier(?modelName, ?options, ?callback);
 ```
 
 **Parameters:**
 
-- **modelName**: OPTIONAL. Name of the underlying model to use.
+- **modelName**: OPTIONAL. Name of the underlying model to use. Current available models are `MobileNet`, `Darknet`, `Darknet-tiny` and `Doodlenet`. It is also possible to use a custom Teachable Machine model using its model.json url. Defaults to `Mobilenet`.
 
 - **options**: OPTIONAL. An object to change the default configuration of the model.
 
@@ -462,7 +462,17 @@ imageClassifier.classifyStart(media, ?kNumber, callback);
 
 - **media**: An HTML or p5.js image, video, or canvas element to run the classification on.
 - **kNumber**: The number of labels returned by the image classification.
-- **callback(output, error)**: A callback function to handle the output of the classification.
+- **callback(output, error)**: A callback function to handle the output of the classification. See below for an example output passed into the callback function:
+
+  ```javascript
+  [
+    {
+      label: '...',
+      confidence: ...
+    }
+    ...
+  ]
+
 
 #### imageClassifier.classifyStop()
 
