@@ -102,6 +102,7 @@ class HandPose {
       {
         flipHorizontal: {
           type: "boolean",
+          alias: "flipped",
           default: false,
         },
       },

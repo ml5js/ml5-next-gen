@@ -100,6 +100,7 @@ class FaceMesh {
       {
         flipHorizontal: {
           type: "boolean",
+          alias: "flipped",
           default: false,
         },
       },
