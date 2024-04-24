@@ -36,7 +36,7 @@ const bodySegmentation = ml5.bodySegmentation(?modelName, ?options, ?callback);
   {
     runtime: "mediapipe", // "mediapipe" or "tfjs"
     modelType: "general", // "general" or "landscape"
-    maskType: :"background", //"background", "body", or "parts" (used to change the type of segmentation mask output)
+    maskType: "background", //"background", "body", or "parts" (used to change the type of segmentation mask output)
   }
   ```
 
@@ -125,7 +125,7 @@ const bodyPose = ml5.bodyPose(?modelName, ?options, ?callback);
 
   ```javascript
   {
-    modelType: "MULTIPOSE_LIGHTNING" // "MULTIPOSE_LIGHTNING", "SINGLEPOSE_LIGHTNING", or "SINGLEPOSE_THUNDE"
+    modelType: "MULTIPOSE_LIGHTNING", // "MULTIPOSE_LIGHTNING", "SINGLEPOSE_LIGHTNING", or "SINGLEPOSE_THUNDER"
     enableSmoothing: true,
     minPoseScore: 0.25,
     multiPoseMaxDimension: 256,
@@ -142,7 +142,7 @@ const bodyPose = ml5.bodyPose(?modelName, ?options, ?callback);
 
   ```javascript
   {
-    runtime: "mediapipe" // "mediapipe" or "tfjs"
+    runtime: "mediapipe", // "mediapipe" or "tfjs"
     enableSmoothing: true,
     modelType: "full", // "lite", "full", or "heavy"
     detectorModelUrl: undefined, //default to use the tf.hub model
@@ -472,7 +472,7 @@ imageClassifier.classifyStart(media, ?kNumber, callback);
     }
     ...
   ]
-
+  ```
 
 #### imageClassifier.classifyStop()
 
