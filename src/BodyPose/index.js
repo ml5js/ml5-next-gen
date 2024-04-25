@@ -136,6 +136,7 @@ class BodyPose {
         {
           flipHorizontal: {
             type: "boolean",
+            alias: "flipped",
             default: false,
           },
         },
