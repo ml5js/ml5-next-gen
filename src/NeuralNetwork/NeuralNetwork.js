@@ -204,26 +204,10 @@ class NeuralNetwork {
    */
   async load(filesOrPath) {
     if (filesOrPath instanceof FileList) {
-      const files = await Promise.all(
-        Array.from(filesOrPath).map(async (file) => {
-          if (file.name.includes(".json") && !file.name.includes("_meta")) {
-            return { name: "model", file };
-          } else if (
-            file.name.includes(".json") &&
-            file.name.includes("_meta.json")
-          ) {
-            const modelMetadata = await file.text();
-            return { name: "metadata", file: modelMetadata };
-          } else if (file.name.includes(".bin")) {
-            return { name: "weights", file };
-          }
-          return { name: null, file: null };
-        })
-      );
-
-      const model = files.find((item) => item.name === "model").file;
-      const weights = files.find((item) => item.name === "weights").file;
-
+      const files = Array.from(filesOrPath);
+      // find the correct files
+      const model = files.find((file) => file.name.includes(".json") && !file.name.includes("_meta"));
+      const weights = files.find((file) => file.name.includes(".bin"));
       // load the model
       this.model = await tf.loadLayersModel(
         tf.io.browserFiles([model, weights])
