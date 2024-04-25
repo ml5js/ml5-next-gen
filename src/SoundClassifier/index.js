@@ -13,6 +13,9 @@ import * as speechCommands from "./speechcommands";
 import callCallback from "../utils/callcallback";
 
 const MODEL_OPTIONS = ["speechcommands18w"];
+// exporting the sound classifier instance so that the stop/start flags regarding classification state are accessible to speechcommands.js to use
+export let instance;
+
 class SoundClassifier {
   /**
    * Create an SoundClassifier.
@@ -24,6 +27,12 @@ class SoundClassifier {
   constructor(modelNameOrUrl, options, callback) {
     this.model = null;
     this.options = options;
+
+    // flags for classifyStart() and classifyStop()
+    this.isClassifying = false; // True when classification loop is running
+    this.signalStop = false; // Signal to stop the loop
+    this.prevCall = ""; // Track previous call to detectStart() or detectStop()
+
     if (typeof modelNameOrUrl === "string") {
       if (MODEL_OPTIONS.includes(modelNameOrUrl)) {
         this.modelName = modelNameOrUrl;
@@ -66,11 +75,34 @@ class SoundClassifier {
    * @param {function} cb - a callback function that handles the results of the function.
    * @return {function} a promise or the results of a given callback, cb.
    */
-  async classify(numOrCallback = null, cb) {
+  async classifyStart(numOrCallback = null, cb) {
     const args = handleArguments(numOrCallback, cb);
     const numberOfClasses = args.number || this.topk;
 
-    return this.classifyInternal(numberOfClasses, args.callback);
+    // Start the classification
+    this.signalStop = false;
+    if (!this.isClassifying) {
+      this.isClassifying = true;
+      return this.classifyInternal(numberOfClasses, args.callback);
+    }
+    if (this.prevCall === "start") {
+      console.warn(
+        "classifyStart() was called more than once without calling classifyStop(). Only the latest classifyStart() call will take effect."
+      );
+    }
+    this.prevCall = "start";
+
+    // return results
+  }
+
+  /**
+   * Used to stop the continuous classification of a video
+   */
+   classifyStop() {
+    if (this.isClassifying) {
+      this.signalStop = true;
+    }
+    this.prevCall = "stop";
   }
 }
 
@@ -85,15 +117,12 @@ const soundClassifier = (modelName, optionsOrCallback, cb) => {
   );
 
   let model = string;
-  console.log(model); // 'SpeechCommands18w'
-  // TODO: I think we should delete this. -Linda
-  // when deleted, error message: Unsupported URL scheme in metadata URL:...
+
   if (model.indexOf("http") === -1) {
     model = model.toLowerCase();
   }
-  console.log(model); // ''speechcommands18w'
 
-  const instance = new SoundClassifier(model, options, callback);
+  instance = new SoundClassifier(model, options, callback);
   return callback ? instance : instance.ready;
 };
 

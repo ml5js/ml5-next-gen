@@ -1,13 +1,10 @@
-// Copyright (c) 2019 ml5
-//
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
-
-/* ===
-ml5 Example
-Sound classification using SpeechCommands18w and p5.js
-This example uses a callback pattern to create the classifier
-=== */
+/*
+ * 👋 Hello! This is an ml5.js example made and shared with ❤️.
+ * Learn more about the ml5.js project: https://ml5js.org/
+ * ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
+ *
+ * This example demonstrates Sound classification using SpeechCommands18w
+ */
 
 // Initialize a sound classifier method with SpeechCommands18w model. A callback needs to be passed.
 let classifier;
@@ -47,7 +44,7 @@ function preload() {
 function setup() {
   createCanvas(650, 450);
   // Classify the sound from microphone in real time
-  classifier.classify(gotResult);
+  classifier.classifyStart(gotResult);
 }
 
 function draw() {

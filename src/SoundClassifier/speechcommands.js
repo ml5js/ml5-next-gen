@@ -6,6 +6,7 @@
 import * as tfjsSpeechCommands from "@tensorflow-models/speech-commands";
 import getTopKClasses from "../utils/gettopkclasses";
 import modelLoader from "../utils/modelLoader";
+import {instance} from "./index";
 
 export class SpeechCommands {
   constructor(options) {
@@ -34,7 +35,13 @@ export class SpeechCommands {
             result.scores,
             topk,
             this.allLabels
-          );
+          );          
+          // if classifyStop is called stop the continuous listening
+          if (instance.signalStop){
+            this.model.stopListening();
+            instance.isClassifying = false;
+            return
+          } 
           return cb(classes);
         }
         return cb(null, `ERROR: Cannot find scores in result: ${result}`);
