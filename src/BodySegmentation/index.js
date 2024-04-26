@@ -127,6 +127,7 @@ class BodySegmentation {
           },
           flipHorizontal: {
             type: "boolean",
+            alias: "flipped",
             default: false,
           },
         },
@@ -171,6 +172,7 @@ class BodySegmentation {
           },
           flipHorizontal: {
             type: "boolean",
+            alias: "flipped",
             default: false,
           },
         },

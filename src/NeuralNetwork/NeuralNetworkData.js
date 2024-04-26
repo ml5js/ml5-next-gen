@@ -1,6 +1,7 @@
 import * as tf from "@tensorflow/tfjs";
 import axios from "axios";
 import { saveBlob } from "../utils/io";
+import modelLoader from '../utils/modelLoader';
 import nnUtils from "./NeuralNetworkUtils";
 
 class NeuralNetworkData {
@@ -711,55 +712,26 @@ class NeuralNetworkData {
    */
   async loadMeta(filesOrPath) {
     if (filesOrPath instanceof FileList) {
-      const files = await Promise.all(
-        Array.from(filesOrPath).map(async (file) => {
-          if (file.name.includes(".json") && !file.name.includes("_meta")) {
-            return {
-              name: "model",
-              file,
-            };
-          } else if (
-            file.name.includes(".json") &&
-            file.name.includes("_meta.json")
-          ) {
-            const modelMetadata = await file.text();
-            return {
-              name: "metadata",
-              file: modelMetadata,
-            };
-          } else if (file.name.includes(".bin")) {
-            return {
-              name: "weights",
-              file,
-            };
-          }
-          return {
-            name: null,
-            file: null,
-          };
-        })
+      const file = Array.from(filesOrPath).find((file) =>
+        file.name.includes("_meta.json")
       );
-
-      const modelMetadata = JSON.parse(
-        files.find((item) => item.name === "metadata").file
-      );
-
-      this.meta = modelMetadata;
+      if (!file) {
+        console.warn('no model_meta.json file found in FileList');
+        return;
+      }
+      const text = await file.text();
+      this.meta = JSON.parse(text);
     } else if (filesOrPath instanceof Object) {
       // filesOrPath = {model: URL, metadata: URL, weights: URL}
-
-      let metadataResult = await axios.get(filesOrPath.metadata);
-
+      const metadataResult = await axios.get(filesOrPath.metadata);
       this.meta = metadataResult.data;
     } else {
-      const metaPath = `${filesOrPath.substring(
-        0,
-        filesOrPath.lastIndexOf("/")
-      )}/model_meta.json`;
-      let modelMetadata = await axios.get(metaPath);
-      modelMetadata = modelMetadata.data;
-
-      this.meta = modelMetadata;
+      const loader = modelLoader(filesOrPath);
+      // TODO: it is not always "model_meta.json", it is "{model_name}_meta.json"
+      const metaPath = loader.getPath("model_meta.json");
+      // TODO: figure out how to use loader.loadMetadataJson() which has wrapped error messages
+      const metadataResult = await axios.get(metaPath);
+      this.meta = metadataResult.data;
     }
 
     this.isMetadataReady = true;

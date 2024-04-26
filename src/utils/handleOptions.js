@@ -99,7 +99,6 @@ function handleOptions(userObject, moldObject, modelName) {
   const filteredObject = {};
 
   for (const key in moldObject) {
-    const userValue = userObject[key];
     const rules = moldObject[key];
     const type = evaluate(filteredObject, rules.type);
     const defaultValue = evaluate(filteredObject, rules.default);
@@ -108,14 +107,31 @@ function handleOptions(userObject, moldObject, modelName) {
     if (ignore) {
       continue;
     }
-    // If the user did not provide a value for this option, use the default value.
-    if (userValue === undefined) {
+
+    const aliasKey = moldObject[key].alias;
+    let aliasUsed = false;
+    let userValue;
+    if (userObject[key] !== undefined) {
+      userValue = userObject[key];
+    } else if (aliasKey !== undefined && userObject[aliasKey] !== undefined) {
+      userValue = userObject[aliasKey];
+      aliasUsed = true;
+    } else {
+      // If the user did not provide a value for this option, use the default value.
       filteredObject[key] = defaultValue;
+      continue;
     }
+
     // If the user provided a value for this option, check if it is of the correct type.
-    else if (typeof userValue !== type && type !== "enum") {
+    if (typeof userValue !== type && type !== "enum") {
       console.warn(
-        errorMessages.type(modelName, key, typeof userValue, type, defaultValue)
+        errorMessages.type(
+          modelName,
+          aliasUsed ? aliasKey : key,
+          typeof userValue,
+          type,
+          defaultValue
+        )
       );
       filteredObject[key] = defaultValue;
     }
@@ -130,7 +146,13 @@ function handleOptions(userObject, moldObject, modelName) {
 
         if (checkedValue === undefined) {
           console.warn(
-            errorMessages.enum(modelName, key, userValue, enums, defaultValue)
+            errorMessages.enum(
+              modelName,
+              aliasUsed ? aliasKey : key,
+              userValue,
+              enums,
+              defaultValue
+            )
           );
           filteredObject[key] = defaultValue;
         } else {
@@ -147,14 +169,19 @@ function handleOptions(userObject, moldObject, modelName) {
 
         if (integer && !Number.isInteger(userValue)) {
           console.warn(
-            errorMessages.numberInteger(modelName, key, userValue, defaultValue)
+            errorMessages.numberInteger(
+              modelName,
+              aliasUsed ? aliasKey : key,
+              userValue,
+              defaultValue
+            )
           );
           filteredObject[key] = defaultValue;
         } else if (multipleOf !== undefined && userValue % multipleOf !== 0) {
           console.warn(
             errorMessages.numberMultipleOf(
               modelName,
-              key,
+              aliasUsed ? aliasKey : key,
               userValue,
               multipleOf,
               defaultValue
@@ -165,7 +192,7 @@ function handleOptions(userObject, moldObject, modelName) {
           console.warn(
             errorMessages.numberRange(
               modelName,
-              key,
+              aliasUsed ? aliasKey : key,
               userValue,
               min,
               max,

@@ -1,5 +1,4 @@
 import * as tf from "@tensorflow/tfjs";
-import axios from "axios";
 import { saveBlob } from "../utils/io";
 import { randomGaussian } from "../utils/random";
 
@@ -205,53 +204,22 @@ class NeuralNetwork {
    */
   async load(filesOrPath) {
     if (filesOrPath instanceof FileList) {
-      const files = await Promise.all(
-        Array.from(filesOrPath).map(async (file) => {
-          if (file.name.includes(".json") && !file.name.includes("_meta")) {
-            return { name: "model", file };
-          } else if (
-            file.name.includes(".json") &&
-            file.name.includes("_meta.json")
-          ) {
-            const modelMetadata = await file.text();
-            return { name: "metadata", file: modelMetadata };
-          } else if (file.name.includes(".bin")) {
-            return { name: "weights", file };
-          }
-          return { name: null, file: null };
-        })
-      );
-
-      const model = files.find((item) => item.name === "model").file;
-      const weights = files.find((item) => item.name === "weights").file;
-
+      const files = Array.from(filesOrPath);
+      // find the correct files
+      const model = files.find((file) => file.name.includes(".json") && !file.name.includes("_meta"));
+      const weights = files.find((file) => file.name.includes(".bin"));
       // load the model
       this.model = await tf.loadLayersModel(
         tf.io.browserFiles([model, weights])
       );
     } else if (filesOrPath instanceof Object) {
-      // load the modelJson
-      const modelJsonResult = await axios.get(filesOrPath.model, {
-        responseType: "text",
-      });
-      const modelJson = modelJsonResult.data;
-      // TODO: browser File() API won't be available in node env
-      const modelJsonFile = new File([modelJson], "model.json", {
-        type: "application/json",
-      });
-
-      // load the weights
-      const weightsBlobResult = await axios.get(filesOrPath.weights, {
-        responseType: "blob",
-      });
-      const weightsBlob = weightsBlobResult.data;
-      // TODO: browser File() API won't be available in node env
-      const weightsBlobFile = new File([weightsBlob], "model.weights.bin", {
-        type: "application/macbinary",
-      });
-
       this.model = await tf.loadLayersModel(
-        tf.io.browserFiles([modelJsonFile, weightsBlobFile])
+        tf.io.http(filesOrPath.model, {
+          // Override the weights path from the JSON weightsManifest
+          weightUrlConverter: (weightFileName) => {
+            return filesOrPath.weights || weightFileName;
+          }
+        })
       );
     } else {
       this.model = await tf.loadLayersModel(filesOrPath);

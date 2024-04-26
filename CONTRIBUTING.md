@@ -71,7 +71,6 @@ yarn run build
 
 This will create a production version of the library in `/dist` directory.
 
-
 ## Unit Tests
 
 To run the unit tests, run the following command
@@ -195,6 +194,7 @@ The `moldObject` consists of key-value pairs. The key defines the name of an all
 - `type` (required): A string defining the correct type, can be `"number"`, `"enum"`, `"boolean"`, `"string"`, `"object"`, or `"undefined"`.
 - `default` (required): The default value in case the user does not provide a value or provides an erroneous value for the option.
 - `ignore` (optional): A boolean defining whether the key should be ignored. Defaults to false. Useful when set to a dynamically evaluated value (see section below).
+- `alias` (optional): A string defining an alternative name for this option.
 - Specifically for `type: "number"`:
   - `min` (optional): A number defining the minimum value.
   - `max` (optional): A number defining the maximum value.

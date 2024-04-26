@@ -136,6 +136,7 @@ class BodyPose {
         {
           flipHorizontal: {
             type: "boolean",
+            alias: "flipped",
             default: false,
           },
         },
@@ -377,6 +378,22 @@ class BodyPose {
     if (typeof window.p5.prototype.registerPreloadMethod === "undefined")
       return false;
     return true;
+  }
+
+  /**
+   * Returns the skeleton connections pairs for the model.
+   * @returns {Number[][]} an array of pairs of indices containing the connected keypoints.
+   */
+  getSkeleton() {
+    if (this.modelName === "BlazePose") {
+      return poseDetection.util.getAdjacentPairs(
+        poseDetection.SupportedModels.BlazePose
+      );
+    } else {
+      return poseDetection.util.getAdjacentPairs(
+        poseDetection.SupportedModels.MoveNet
+      );
+    }
   }
 }
 
