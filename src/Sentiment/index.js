@@ -97,7 +97,7 @@ class Sentiment {
   /**
    * Scores the sentiment of given text with a value between 0 ("negative") and 1 ("positive").
    * @param {String} text - string of text to predict.
-   * @returns {{score: Number}}
+   * @returns {{confidence: Number}}
    */
   predict(text) {
     // Convert to lower case and remove all punctuations.
@@ -120,12 +120,12 @@ class Sentiment {
     const paddedSequence = padSequences([sequence], this.maxLen);
     const input = tf.tensor2d(paddedSequence, [1, this.maxLen]);
     const predictOut = this.model.predict(input);
-    const score = predictOut.dataSync()[0];
+    const confidence = predictOut.dataSync()[0];
     predictOut.dispose();
     input.dispose();
 
     return {
-      score,
+      confidence,
     };
   }
 }
