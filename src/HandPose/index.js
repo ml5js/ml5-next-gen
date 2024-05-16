@@ -1,4 +1,4 @@
-// Copyright (c) 2020-2023 ml5
+// Copyright (c) 2020-2024 ml5
 //
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
@@ -14,6 +14,7 @@ import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import handleOptions from "../utils/handleOptions";
 import { mediaReady } from "../utils/imageUtilities";
+import objectRenameKey from "../utils/objectRenameKey";
 
 class HandPose {
   /**
@@ -142,8 +143,11 @@ class HandPose {
       image,
       this.runtimeConfig
     );
+    // Modify the prediction result to make it more user-friendly
     let result = predictions;
-    result = this.addKeypoints(result);
+    this.renameScoreToConfidence(result);
+    this.addKeypoints(result);
+
     if (typeof callback === "function") callback(result);
     return result;
   }
@@ -201,13 +205,26 @@ class HandPose {
         this.runtimeConfig
       );
       let result = predictions;
-      result = this.addKeypoints(result);
+      // Modify the prediction result to make it more user-friendly
+      this.renameScoreToConfidence(result);
+      this.addKeypoints(result);
+
       this.detectCallback(result);
       // wait for the frame to update
       await tf.nextFrame();
     }
     this.detecting = false;
     this.signalStop = false;
+  }
+
+  /**
+   * Renames the score key to confidence in the detection results.
+   * @param {Object[]} hands - The detection results.
+   */
+  renameScoreToConfidence(hands) {
+    hands.forEach((hand) => {
+      objectRenameKey(hand, "score", "confidence");
+    });
   }
 
   /**
