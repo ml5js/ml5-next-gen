@@ -124,6 +124,26 @@ npm publish --tag alpha --access public
    https://unpkg.com/ml5@[version]/dist/ml5.js
 ```
 
+## Update p5 Web Editor Sketches
+
+To update the p5 Web Editor sketches, first create a `.env` file with the following content:
+
+```
+  P5_USERNAME=<p5 web editor username here>
+  P5_PASSWORD=<p5 web editor password here>
+
+```
+
+Then, run the following command:
+
+```
+yarn run upload-examples
+```
+
+This script will delete all existing sketches on the web editor and upload all example sketches in the `examples/` directory.
+
+Currently, this script cannot upload non-text files. Those files will be listed in the console and will require manual uploading.
+
 ## All Contributors
 
 If you contributed to the project in any way, we would like to include you in our [contributors list in README.md](https://github.com/ml5js/ml5-next-gen?tab=readme-ov-file#contributors).
