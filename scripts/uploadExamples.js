@@ -16,7 +16,7 @@ let manualUploadFlag = false;
 /**
  * Get the session ID for the p5 web editor.
  *
- * @returns {String} The session ID.
+ * @returns {Object} The response status code and the session ID
  */
 async function getP5SessionID() {
   // The credentials for p5 web editor.
@@ -33,19 +33,12 @@ async function getP5SessionID() {
     body: JSON.stringify(credentials),
   });
 
-  // Check if the credentials are valid.
-  if (res.status == 401) {
-    throw new Error(
-      "Invalid credentials. Please maake sure the username and password are set correctly in the .env file."
-    );
-  } else if (res.status != 200) {
-    throw new Error(
-      "Failed to login to p5 web editor. p5 Server returned status code: " +
-        res.status
-    );
-  }
-  let sid = res.headers.get("set-cookie").split(";")[0].split("=")[1];
-  return sid;
+  let sid;
+  try {
+    sid = res.headers.get("set-cookie").split(";")[0].split("=")[1];
+  } catch (e) {}
+
+  return { status: res.status, sid };
 }
 
 /**
@@ -62,16 +55,7 @@ async function uploadSketch(sketch) {
     },
     body: JSON.stringify(sketch),
   });
-  if (res.status != 200) {
-    console.log("🔴Failed to upload sketch: " + sketch.name);
-  } else {
-    if (manualUploadFlag) {
-      console.log("🟡Manual upload of non-text file required: " + sketch.name);
-      manualUploadFlag = false;
-      console.log(manualUploadList);
-    }
-    console.log("🟢Successfully uploaded sketch: " + sketch.name);
-  }
+  return res.status;
 }
 
 /**
@@ -98,6 +82,10 @@ async function uploadFile(filePath) {
   //return data;
 }
 
+/**
+ * Get the existing files on the p5 web editor.
+ * @returns {Object} The response status code and the data
+ */
 getExistingFiles = async () => {
   const res = await fetch(
     P5_URL + `/editor/${process.env.P5_USERNAME}/projects`,
@@ -108,15 +96,16 @@ getExistingFiles = async () => {
       },
     }
   );
-  if (!(res.status == 200 || res.status == 304)) {
-    throw new Error(
-      "Failed to get existing files. p5 Server returned status code: " +
-        res.status
-    );
-  }
-  return await res.json();
+
+  const data = await res.json();
+  return { status: res.status, data };
 };
 
+/**
+ * Delete a file from the p5 web editor.
+ * @param {Object} file - The file object.
+ * @returns {number} The status code of the response.
+ */
 deleteFile = async (file) => {
   const res = await fetch(P5_URL + `/editor/projects/${file.id}`, {
     method: "DELETE",
@@ -124,11 +113,7 @@ deleteFile = async (file) => {
       Cookie: `sessionId=${sessionID}`,
     },
   });
-  if (res.status != 200) {
-    console.log("🔴Failed to delete file: " + file.name);
-  } else {
-    console.log("🟢Successfully deleted file: " + file.name);
-  }
+  return res.status;
 };
 
 /**
@@ -268,17 +253,66 @@ function createSketchObject(sketchDirPath) {
  * This script uploads each sketch in the examples to the server.
  */
 async function main() {
-  sessionID = await getP5SessionID();
-  const sketchPaths = getFilepaths("examples");
-  const oldFiles = await getExistingFiles();
-  for (const file of oldFiles) {
-    await deleteFile(file);
+  // Get the session ID.
+  console.log("Obtaining session ID...");
+  const sessionRes = await getP5SessionID();
+  if (sessionRes.status == 401) {
+    console.log("🔴 Please check your p5 credentials in the .env file.");
+    process.exit(1);
+  } else if (sessionRes.status != 200) {
+    console.log(
+      "🔴 Failed to get session ID. The server returned status code: " +
+        sessionRes.status
+    );
+    process.exit(1);
   }
+  console.log("🟢 Successfully obtained session ID.");
+  sessionID = sessionRes.sid;
+  console.log();
 
+  // Delete existing files.
+  console.log("Deleting existing files...");
+  const getFilesRes = await getExistingFiles();
+  if (getFilesRes.status != 200) {
+    console.log(
+      "🔴 Failed to get existing files. The server returned status code: " +
+        getFilesRes.status
+    );
+    process.exit(1);
+  }
+  const oldFiles = getFilesRes.data;
+  for (const file of oldFiles) {
+    const status = await deleteFile(file);
+    if (status != 200) {
+      console.log("🔴 Failed to delete sketch: " + file.name);
+      console.log("The server returned status code: " + res.status);
+    } else {
+      console.log("🟢 Successfully deleted sketch: " + file.name);
+    }
+  }
+  console.log();
+
+  // Upload each sketch.
+  console.log("Uploading sketches...");
+  const sketchPaths = getFilepaths("examples");
   for (const sketchPath of sketchPaths) {
     const sketchObject = createSketchObject(sketchPath);
-    await uploadSketch(sketchObject);
+    const status = await uploadSketch(sketchObject);
+    if (status != 200) {
+      console.log("🔴 Failed to upload sketch: " + sketchPath);
+      console.log("The server returned status code: " + res.status);
+    } else {
+      if (manualUploadFlag) {
+        console.log("🟡 Partially uploaded sketch: " + sketchPath);
+        for (const file of manualUploadList) {
+          console.log("    Please manually Upload: " + file);
+        }
+        manualUploadList.splice(0, manualUploadList.length);
+        manualUploadFlag = false;
+      } else {
+        console.log("🟢 Successfully uploaded sketch: " + sketchPath);
+      }
+    }
   }
 }
-
 main();
