@@ -1,6 +1,8 @@
 const fs = require("fs");
 const dotenv = require("dotenv");
 const objectID = require("bson-objectid");
+const readline = require("node:readline/promises");
+const { stdin: input, stdout: output } = require("node:process");
 const ml5Version = require("../package.json").version;
 
 dotenv.config();
@@ -253,6 +255,20 @@ function createSketchObject(sketchDirPath) {
  * This script uploads each sketch in the examples to the server.
  */
 async function main() {
+  // Confirm that the user wants to upload the examples.
+  const rl = readline.createInterface({ input, output });
+  const response = await rl.question(
+    "This script will delete all existing sketches on the p5 web editor and upload the local examples. Please enter 'confirm' to proceed: "
+  );
+  if (response != "confirm") {
+    rl.close();
+    console.log("The upload was cancelled.");
+    process.exit(0);
+  } else {
+    console.log("Proceeding with the deletion and upload...");
+    rl.close();
+  }
+
   // Get the session ID.
   console.log("Obtaining session ID...");
   const sessionRes = await getP5SessionID();
