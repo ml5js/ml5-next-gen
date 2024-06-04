@@ -15,6 +15,7 @@ import handleArguments from "../utils/handleArguments";
 import { mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
+import objectRenameKey from "../utils/objectRenameKey";
 
 class BodyPose {
   /**
@@ -248,8 +249,11 @@ class BodyPose {
       this.runtimeConfig
     );
     let result = predictions;
-    result = this.addKeypoints(result);
+    // modify the raw tfjs output to a more usable format
+    this.renameScoreToConfidence(result);
+    this.addKeypoints(result);
     this.resizeBoundingBoxes(result, image.width, image.height);
+
     if (typeof callback === "function") callback(result);
     return result;
   }
@@ -301,7 +305,8 @@ class BodyPose {
         this.runtimeConfig
       );
       let result = predictions;
-      result = this.addKeypoints(result);
+      this.renameScoreToConfidence(result);
+      this.addKeypoints(result);
       this.resizeBoundingBoxes(
         result,
         this.detectMedia.width,
@@ -324,24 +329,39 @@ class BodyPose {
   }
 
   /**
+   * Rename the score property to confidence for consistency.
+   * @param {Array.<Object>} poses - the original detection results.
+   */
+  renameScoreToConfidence(poses) {
+    poses.forEach((pose) => {
+      pose.keypoints.forEach((keypoint) => {
+        objectRenameKey(keypoint, "score", "confidence");
+      });
+      if (pose.keypoints3D) {
+        pose.keypoints3D.forEach((keypoint) => {
+          objectRenameKey(keypoint, "score", "confidence");
+        });
+      }
+    });
+  }
+
+  /**
    * Return a new array of results with named keypoints added.
    * @param {Array} poses - the original detection results.
    * @return {Array} the detection results with named keypoints added.
    * @private
    */
   addKeypoints(poses) {
-    const result = poses.map((pose) => {
+    poses.forEach((pose) => {
       pose.keypoints.forEach((keypoint) => {
         pose[keypoint.name] = {
           x: keypoint.x,
           y: keypoint.y,
-          score: keypoint.score,
+          confidence: keypoint.confidence,
         };
         if (keypoint.z) pose[keypoint.name].z = keypoint.z;
       });
-      return pose;
     });
-    return result;
   }
 
   /**

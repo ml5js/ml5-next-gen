@@ -56,5 +56,4 @@ function draw() {
 function gotHands(results) {
   // Save the output to the hands variable
   hands = results;
-  console.log(hands);
 }
