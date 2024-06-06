@@ -140,9 +140,11 @@ Then, run the following command:
 yarn run upload-examples
 ```
 
-This script will delete all existing sketches on the web editor and upload all example sketches in the `examples/` directory.
+The script will match the directory name of a local example sketch with the name of the sketch on the web editor. If a local directory name is the same as a sketch name on the web editor (case sensitive), the content of the sketch will be updated (with the sharing URL unchanged). If a local directory name is not found on the web editor, a new web editor sketch will be created. If a web editor sketch does not have a matching local directory name, the script will not automatically delete the web editor sketch. Any deletion have to be done manually on the web editor.
 
-Currently, this script cannot upload non-text files. Those files will be listed in the console and will require manual uploading.
+Updating an existing sketch will not affect the collections on the p5 web editor. Newly uploaded sketches will not be automatically added to any collections.
+
+Currently, this script cannot upload non-text files. Those files that have not been uploaded will be listed and will require manual uploading.
 
 ## All Contributors
 

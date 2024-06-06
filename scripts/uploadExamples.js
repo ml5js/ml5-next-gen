@@ -44,13 +44,32 @@ async function getP5SessionID() {
 }
 
 /**
- * upload a sketch on the p5 web editor.
+ * upload a new sketch on the p5 web editor.
  *
  * @param {Object} sketch - The sketch object.
  */
 async function uploadSketch(sketch) {
   const res = await fetch(P5_URL + "/editor/projects", {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Cookie: `sessionId=${sessionID}`,
+    },
+    body: JSON.stringify(sketch),
+  });
+  return res.status;
+}
+
+/**
+ * update a sketch on the p5 web editor.
+ * The updated sketch will have the same URL as the original sketch.
+ *
+ * @param {Object} sketch - The sketch object.
+ */
+async function updateSketch(oldSketch, sketch) {
+  sketch.id = oldSketch.id;
+  const res = await fetch(P5_URL + "/editor/projects/" + oldSketch.id, {
+    method: "PUT",
     headers: {
       "Content-Type": "application/json",
       Cookie: `sessionId=${sessionID}`,
@@ -88,7 +107,7 @@ async function uploadFile(filePath) {
  * Get the existing files on the p5 web editor.
  * @returns {Object} The response status code and the data
  */
-getExistingFiles = async () => {
+getExistingSketches = async () => {
   const res = await fetch(
     P5_URL + `/editor/${process.env.P5_USERNAME}/projects`,
     {
@@ -108,7 +127,7 @@ getExistingFiles = async () => {
  * @param {Object} file - The file object.
  * @returns {number} The status code of the response.
  */
-deleteFile = async (file) => {
+deleteSketch = async (file) => {
   const res = await fetch(P5_URL + `/editor/projects/${file.id}`, {
     method: "DELETE",
     headers: {
@@ -258,15 +277,15 @@ async function main() {
   // Confirm that the user wants to upload the examples.
   const rl = readline.createInterface({ input, output });
   const response = await rl.question(
-    "This script will delete all existing sketches on the p5 web editor and upload the local examples. Please enter 'confirm' to proceed: "
+    "Running this script will update example sketches on the p5 Web Editor, please check out the section 'Update p5 Web Editor Sketches' in CONTRIBUTING.md for more detail before proceeding!\n\nEnter 'I understand' to proceed:\n"
   );
-  if (response != "confirm") {
+  if (response.toLocaleLowerCase() != "i understand") {
     rl.close();
-    console.log("The upload was cancelled.");
+    console.log("The script was cancelled.");
     process.exit(0);
   } else {
-    console.log("Proceeding with the deletion and upload...");
     rl.close();
+    console.log();
   }
 
   // Get the session ID.
@@ -286,47 +305,63 @@ async function main() {
   sessionID = sessionRes.sid;
   console.log();
 
-  // Delete existing files.
-  console.log("Deleting existing files...");
-  const getFilesRes = await getExistingFiles();
-  if (getFilesRes.status != 200) {
+  // Get the sketches on the web editor server and on the local machine.
+  const getSketchesRes = await getExistingSketches();
+  if (getSketchesRes.status != 200) {
     console.log(
       "🔴 Failed to get existing files. The server returned status code: " +
         getFilesRes.status
     );
     process.exit(1);
   }
-  const oldFiles = getFilesRes.data;
-  for (const file of oldFiles) {
-    const status = await deleteFile(file);
-    if (status != 200) {
-      console.log("🔴 Failed to delete sketch: " + file.name);
-      console.log("The server returned status code: " + res.status);
-    } else {
-      console.log("🟢 Successfully deleted sketch: " + file.name);
-    }
-  }
-  console.log();
-
-  // Upload each sketch.
-  console.log("Uploading sketches...");
+  const oldSketches = getSketchesRes.data;
   const sketchPaths = getFilepaths("examples");
+
+  // Update existing sketches and upload new sketches
+  console.log("Uploading sketches...");
   for (const sketchPath of sketchPaths) {
-    const sketchObject = createSketchObject(sketchPath);
-    const status = await uploadSketch(sketchObject);
-    if (status != 200) {
-      console.log("🔴 Failed to upload sketch: " + sketchPath);
-      console.log("The server returned status code: " + res.status);
-    } else {
-      if (manualUploadFlag) {
-        console.log("🟡 Partially uploaded sketch: " + sketchPath);
-        for (const file of manualUploadList) {
-          console.log("    Please manually Upload: " + file);
-        }
-        manualUploadList.splice(0, manualUploadList.length);
-        manualUploadFlag = false;
+    const oldSketch = oldSketches.find(
+      (sketch) => sketch.name == sketchPath.split("/").pop()
+    );
+    // If the sketch name already exists on the web editor, update the sketch.
+    if (oldSketch) {
+      const status = await updateSketch(
+        oldSketch,
+        createSketchObject(sketchPath)
+      );
+      if (status != 200) {
+        console.log("🔴 Failed to update sketch: " + oldSketch.name);
+        console.log("The server returned status code: " + status);
       } else {
-        console.log("🟢 Successfully uploaded sketch: " + sketchPath);
+        if (manualUploadFlag) {
+          console.log("🟡 Partially updated sketch: " + oldSketch.name);
+          for (const file of manualUploadList) {
+            console.log("    - Please manually update: " + file);
+          }
+          manualUploadList.splice(0, manualUploadList.length);
+          manualUploadFlag = false;
+        } else {
+          console.log("🟢 Successfully updated sketch: " + oldSketch.name);
+        }
+      }
+    }
+    // If the sketch name does not exist on the web editor, upload the sketch.
+    else {
+      const status = await uploadSketch(createSketchObject(sketchPath));
+      if (status != 200) {
+        console.log("🔴 Failed to create new sketch: " + sketchPath);
+        console.log("    - The server returned status code: " + status);
+      } else {
+        if (manualUploadFlag) {
+          console.log("🟡 Partially created new sketch: " + sketchPath);
+          for (const file of manualUploadList) {
+            console.log("    - Please manually upload: " + file);
+          }
+          manualUploadList.splice(0, manualUploadList.length);
+          manualUploadFlag = false;
+        } else {
+          console.log("🟢 Successfully created new sketch: " + sketchPath);
+        }
       }
     }
   }
