@@ -23,5 +23,6 @@ function draw() {
   stroke(0);
   let day = bodyPose.weekday();
   textSize(48);
+  textAlign(CENTER);
   text(day, width/2, height/2);
 }
