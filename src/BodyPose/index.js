@@ -415,6 +415,29 @@ class BodyPose {
       );
     }
   }
+
+  weekday() {
+    let d = new Date();
+    let day = d.getDay(); // number between 0 and 6
+    //console.log('getDay returned', day);
+    let str;
+    if (day == 0) {
+      str = 'Today is Sunday';
+    } else if (day == 1) {
+      str = 'Today is Monday';
+    } else if (day == 2) {
+      str = 'Today is Tuesday';
+    } else if (day == 3) {
+      str = 'Today is Wednesday';
+    } else if (day == 4) {
+      str = 'Today is Thursday';
+    } else if (day == 5) {
+      str = 'Today is Friday';
+    } else if (day == 6) {
+      str = 'Today is Saturday';
+    }
+    return str;
+  }
 }
 
 /**
