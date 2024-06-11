@@ -1,7 +1,7 @@
 import * as tf from "@tensorflow/tfjs";
 import axios from "axios";
 import { saveBlob } from "../utils/io";
-import modelLoader from '../utils/modelLoader';
+import modelLoader from "../utils/modelLoader";
 import nnUtils from "./NeuralNetworkUtils";
 
 class NeuralNetworkData {
@@ -39,13 +39,13 @@ class NeuralNetworkData {
    * @param {Array<number>} [inputShape]
    * @void
    */
-  createMetadata(inputShape = null) {
+  async createMetadata(inputShape = null) {
     // get the data type for each property
     this.getDTypesFromData();
     // get the stats - min, max
     this.getDataStats();
     // onehot encode
-    this.getDataOneHot();
+    await this.getDataOneHot();
     // calculate the input units from the data
     this.getDataUnits(inputShape);
 
@@ -447,9 +447,9 @@ class NeuralNetworkData {
    * @private
    * @void
    */
-  getDataOneHot() {
-    this.meta.inputs = this.getInputMetaOneHot(this.meta.inputs, "xs");
-    this.meta.outputs = this.getInputMetaOneHot(this.meta.outputs, "ys");
+  async getDataOneHot() {
+    this.meta.inputs = await this.getInputMetaOneHot(this.meta.inputs, "xs");
+    this.meta.outputs = await this.getInputMetaOneHot(this.meta.outputs, "ys");
   }
 
   /**
@@ -458,26 +458,28 @@ class NeuralNetworkData {
    * @param {"xs" | "ys"} xsOrYs
    * @return {Object}
    */
-  getInputMetaOneHot(_inputsMeta, xsOrYs) {
+  async getInputMetaOneHot(_inputsMeta, xsOrYs) {
     const inputsMeta = Object.assign({}, _inputsMeta);
 
-    Object.entries(inputsMeta).forEach((arr) => {
-      // the key
-      const key = arr[0];
-      // the value
-      const { dtype } = arr[1];
+    await Promise.all(
+      Object.entries(inputsMeta).map(async (arr) => {
+        // the key
+        const key = arr[0];
+        // the value
+        const { dtype } = arr[1];
 
-      if (dtype === "string") {
-        const uniqueVals = [
-          ...new Set(this.data.raw.map((obj) => obj[xsOrYs][key])),
-        ];
-        const oneHotMeta = this.createOneHotEncodings(uniqueVals);
-        inputsMeta[key] = {
-          ...inputsMeta[key],
-          ...oneHotMeta,
-        };
-      }
-    });
+        if (dtype === "string") {
+          const uniqueVals = [
+            ...new Set(this.data.raw.map((obj) => obj[xsOrYs][key])),
+          ];
+          const oneHotMeta = await this.createOneHotEncodings(uniqueVals);
+          inputsMeta[key] = {
+            ...inputsMeta[key],
+            ...oneHotMeta,
+          };
+        }
+      })
+    );
 
     return inputsMeta;
   }
@@ -490,31 +492,27 @@ class NeuralNetworkData {
    * @return {Object}
    */
   // eslint-disable-next-line class-methods-use-this, no-unused-vars
-  createOneHotEncodings(_uniqueValuesArray) {
-    return tf.tidy(() => {
-      const output = {
-        uniqueValues: _uniqueValuesArray,
-        legend: {},
-      };
-
-      const uniqueVals = _uniqueValuesArray; // [...new Set(this.data.raw.map(obj => obj.xs[prop]))]
-      // get back values from 0 to the length of the uniqueVals array
-      const onehotValues = uniqueVals.map((item, idx) => idx);
+  async createOneHotEncodings(_uniqueValuesArray) {
+    const output = {
+      uniqueValues: _uniqueValuesArray,
+      legend: {},
+    };
+    let uniqueVals = _uniqueValuesArray; // [...new Set(this.data.raw.map(obj => obj.xs[prop]))]
+    // get back values from 0 to the length of the uniqueVals array
+    const onehotValues = uniqueVals.map((item, idx) => idx);
+    const oneHotEncodedValues = tf.tidy(() => {
       // oneHot encode the values in the 1d tensor
-      const oneHotEncodedValues = tf.oneHot(
-        tf.tensor1d(onehotValues, "int32"),
-        uniqueVals.length
-      );
-      // convert them from tensors back out to an array
-      const oneHotEncodedValuesArray = oneHotEncodedValues.arraySync();
-
-      // populate the legend with the key/values
-      uniqueVals.forEach((uVal, uIdx) => {
-        output.legend[uVal] = oneHotEncodedValuesArray[uIdx];
-      });
-
-      return output;
+      return tf.oneHot(tf.tensor1d(onehotValues, "int32"), uniqueVals.length);
     });
+    // convert them from tensors back out to an array
+    let oneHotEncodedValuesArray;
+    oneHotEncodedValuesArray = await oneHotEncodedValues.array();
+
+    // populate the legend with the key/values
+    uniqueVals.forEach((uVal, uIdx) => {
+      output.legend[uVal] = oneHotEncodedValuesArray[uIdx];
+    });
+    return output;
   }
 
   /**
@@ -532,7 +530,6 @@ class NeuralNetworkData {
    */
   async loadDataFromUrl(dataUrl, inputs, outputs) {
     try {
-
       if (dataUrl.endsWith(".csv")) {
         await this.loadCSV(dataUrl, inputs, outputs);
       } else if (dataUrl.endsWith(".json")) {
@@ -716,7 +713,7 @@ class NeuralNetworkData {
         file.name.includes("_meta.json")
       );
       if (!file) {
-        console.warn('no model_meta.json file found in FileList');
+        console.warn("no model_meta.json file found in FileList");
         return;
       }
       const text = await file.text();

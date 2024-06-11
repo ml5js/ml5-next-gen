@@ -119,6 +119,11 @@ class NeuralNetwork {
    * @param {*} _inputs
    */
   predictSync(_inputs) {
+    if (tf.getBackend() === "webgpu") {
+      throw new Error(
+        "🟪ml5.js error: predictSync is not supported with webgpu backend, please use predict instead."
+      );
+    }
     const output = tf.tidy(() => {
       return this.model.predict(_inputs);
     });
@@ -159,6 +164,11 @@ class NeuralNetwork {
    * @param {*} _inputs
    */
   classifySync(_inputs) {
+    if (tf.getBackend() === "webgpu") {
+      throw new Error(
+        "🟪ml5.js error: classifySync is not supported with webgpu backend, please use classify instead."
+      );
+    }
     return this.predictSync(_inputs);
   }
 
@@ -206,7 +216,9 @@ class NeuralNetwork {
     if (filesOrPath instanceof FileList) {
       const files = Array.from(filesOrPath);
       // find the correct files
-      const model = files.find((file) => file.name.includes(".json") && !file.name.includes("_meta"));
+      const model = files.find(
+        (file) => file.name.includes(".json") && !file.name.includes("_meta")
+      );
       const weights = files.find((file) => file.name.includes(".bin"));
       // load the model
       this.model = await tf.loadLayersModel(
@@ -218,7 +230,7 @@ class NeuralNetwork {
           // Override the weights path from the JSON weightsManifest
           weightUrlConverter: (weightFileName) => {
             return filesOrPath.weights || weightFileName;
-          }
+          },
         })
       );
     } else {

@@ -23,13 +23,7 @@ let label = "training";
 
 let start, end;
 
-function setup() {
-  createCanvas(640, 240);
-  // For this example to work across all browsers
-  // "webgl" or "cpu" needs to be set as the backend
-  ml5.setBackend("webgl");
-
-  // Step 2: set your neural network options
+function preload() {
   let options = {
     task: "classification",
     debug: true,
@@ -37,6 +31,15 @@ function setup() {
 
   // Step 3: initialize your neural network
   classifier = ml5.neuralNetwork(options);
+}
+
+function setup() {
+  createCanvas(640, 240);
+  // For this example to work across all browsers
+  // "webgl" or "cpu" needs to be set as the backend
+  // ml5.setBackend("webgl");
+
+  // Step 2: set your neural network options
 
   // Step 4: add data to the neural network
   for (let i = 0; i < data.length; i++) {
