@@ -31,7 +31,6 @@
     "@babel/core": "^7.23.2",
     "@babel/preset-env": "^7.23.2",
     "@tensorflow/tfjs-backend-webgpu": "^4.17.0",
-    "@tensorflow/tfjs-node": "^4.17.0",
     "all-contributors-cli": "^6.26.1",
     "babel-jest": "^29.7.0",
     "bson-objectid": "^2.0.4",
