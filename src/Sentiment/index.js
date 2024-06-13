@@ -132,13 +132,8 @@ class Sentiment {
     predictOut.dispose();
     input.dispose();
 
-    if (gotResult) {
-      gotResult({ confidence });
-    }
-    callback({ confidence });
-    return {
-      confidence,
-    };
+    if (callback) callback({ confidence });
+    return { confidence };
   }
 }
 
