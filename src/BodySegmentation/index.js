@@ -24,7 +24,7 @@ class BodySegmentation {
    * @param {object} [options] - An object with options.
    * @param {function} [callback] - A callback to be called when the model is ready.
    */
-  constructor(modelName = "SelfieSegmentation", options, callback) {
+  constructor(modelName, options, callback) {
     this.modelName = modelName;
     this.video = video;
     this.model = null;

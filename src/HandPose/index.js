@@ -13,6 +13,7 @@ import * as handPoseDetection from "@tensorflow-models/hand-pose-detection";
 import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import handleOptions from "../utils/handleOptions";
+import { handleModelName } from "../utils/handleOptions";
 import { mediaReady } from "../utils/imageUtilities";
 import objectRenameKey from "../utils/objectRenameKey";
 
@@ -37,7 +38,8 @@ class HandPose {
    * @param {function} callback - A callback to be called when the model is ready.
    * @private
    */
-  constructor(options, callback) {
+  constructor(modelName, options, callback) {
+    this.modelName = modelName;
     this.model = null;
     this.config = options;
     this.runtimeConfig = {};
@@ -58,6 +60,13 @@ class HandPose {
    * @private
    */
   async loadModel() {
+    this.modelName = handleModelName(
+      this.modelName,
+      ["MediaPipeHands"],
+      "MediaPipeHands",
+      "handPose"
+    );
+
     const pipeline = handPoseDetection.SupportedModels.MediaPipeHands;
     //filter out model config options
     const modelConfig = handleOptions(
@@ -258,8 +267,8 @@ class HandPose {
  * @returns {HandPose} A new handPose instance.
  */
 const handPose = (...inputs) => {
-  const { options = {}, callback } = handleArguments(...inputs);
-  const instance = new HandPose(options, callback);
+  const { string, options = {}, callback } = handleArguments(...inputs);
+  const instance = new HandPose(string, options, callback);
   return instance;
 };
 
