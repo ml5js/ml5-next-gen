@@ -3,6 +3,9 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 /* eslint-disable */
+
+// These classes are based on the 1000 classes from the ImageNet dataset
+// https://www.image-net.org/
 export default [
   "kit fox",
   "English setter",
