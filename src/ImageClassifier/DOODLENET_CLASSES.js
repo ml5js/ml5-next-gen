@@ -4,6 +4,9 @@
 // https://opensource.org/licenses/MIT
 
 /* eslint-disable */
+
+// These classes are based on the Quick, Draw dataset.
+// https://github.com/googlecreativelab/quickdraw-dataset
 export default [
   "flashlight",
   "belt",
