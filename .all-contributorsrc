@@ -985,6 +985,20 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/113410244?v=4",
       "profile": "https://github.com/B2xx",
       "contributions": ["code", "doc", "ideas", "test"]
+    },
+    {
+      "login": "apoorva-a98",
+      "name": "Apoorva Avadhana",
+      "avatar_url": "https://avatars.githubusercontent.com/u/22196080?v=4",
+      "profile": "https://github.com/apoorva-a98",
+      "contributions": ["a11y", "bug", "design", "ideas", "research"]
+    },
+    {
+      "login": "QuinnHe",
+      "name": "QuinnHe",
+      "avatar_url": "https://avatars.githubusercontent.com/u/31847981?v=4",
+      "profile": "https://github.com/QuinnHe",
+      "contributions": ["code", "content", "doc"]
     }
   ],
   "contributorsPerLine": 7,

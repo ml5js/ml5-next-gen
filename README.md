@@ -1,8 +1,6 @@
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-
-# ml5-next-gen
-
-[![All Contributors](https://img.shields.io/badge/all_contributors-138-orange.svg?style=flat-square)](#contributors-)<!-- ALL-CONTRIBUTORS-BADGE:END --> [![Version](https://img.shields.io/npm/v/ml5.svg?style=flat-square)](https://www.npmjs.com/package/ml5) [![Twitter Follow](https://img.shields.io/twitter/follow/espadrine.svg?style=social&label=Follow)](https://twitter.com/ml5js)
+[![All Contributors](https://img.shields.io/badge/all_contributors-140-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END --> [![Version](https://img.shields.io/npm/v/ml5.svg?style=flat-square)](https://www.npmjs.com/package/ml5) [![Twitter Follow](https://img.shields.io/twitter/follow/espadrine.svg?style=social&label=Follow)](https://twitter.com/ml5js)
 
 ![ml5](https://user-images.githubusercontent.com/10605821/41332516-2ee26714-6eac-11e8-83e4-a40b8761e764.png)
 
@@ -272,6 +270,8 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ziyuan-linn"><img src="https://avatars.githubusercontent.com/u/93690311?v=4?s=100" width="100px;" alt="Ziyuan Lin"/><br /><sub><b>Ziyuan Lin</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=ziyuan-linn" title="Code">💻</a> <a href="https://github.com/ml5js/ml5-next-gen/commits?author=ziyuan-linn" title="Documentation">📖</a> <a href="#example-ziyuan-linn" title="Examples">💡</a> <a href="#maintenance-ziyuan-linn" title="Maintenance">🚧</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/oziomarc"><img src="https://avatars.githubusercontent.com/u/51927015?v=4?s=100" width="100px;" alt="Ozioma Chukwukeme"/><br /><sub><b>Ozioma Chukwukeme</b></sub></a><br /><a href="#blog-oziomarc" title="Blogposts">📝</a> <a href="#communityManagement-oziomarc" title="Community Management">👥</a> <a href="#eventOrganizing-oziomarc" title="Event Organizing">📋</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/B2xx"><img src="https://avatars.githubusercontent.com/u/113410244?v=4?s=100" width="100px;" alt="Zhuolin Li"/><br /><sub><b>Zhuolin Li</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=B2xx" title="Code">💻</a> <a href="https://github.com/ml5js/ml5-next-gen/commits?author=B2xx" title="Documentation">📖</a> <a href="#ideas-B2xx" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/ml5js/ml5-next-gen/commits?author=B2xx" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/apoorva-a98"><img src="https://avatars.githubusercontent.com/u/22196080?v=4?s=100" width="100px;" alt="Apoorva Avadhana"/><br /><sub><b>Apoorva Avadhana</b></sub></a><br /><a href="#a11y-apoorva-a98" title="Accessibility">️️️️♿️</a> <a href="https://github.com/ml5js/ml5-next-gen/issues?q=author%3Aapoorva-a98" title="Bug reports">🐛</a> <a href="#design-apoorva-a98" title="Design">🎨</a> <a href="#ideas-apoorva-a98" title="Ideas, Planning, & Feedback">🤔</a> <a href="#research-apoorva-a98" title="Research">🔬</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/QuinnHe"><img src="https://avatars.githubusercontent.com/u/31847981?v=4?s=100" width="100px;" alt="QuinnHe"/><br /><sub><b>QuinnHe</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=QuinnHe" title="Code">💻</a> <a href="#content-QuinnHe" title="Content">🖋</a> <a href="https://github.com/ml5js/ml5-next-gen/commits?author=QuinnHe" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>
