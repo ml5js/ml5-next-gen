@@ -16,6 +16,11 @@ let isModelLoaded = false;
 function preload() {
   // Load the handPose model
   handPose = ml5.handPose();
+  // Set up the neural network
+  let classifierOptions = {
+    task: "classification",
+  };
+  classifier = ml5.neuralNetwork(classifierOptions);
 }
 
 function setup() {
@@ -25,16 +30,6 @@ function setup() {
   video = createCapture(VIDEO);
   video.size(width, height);
   video.hide();
-
-  // For this example to work across all browsers
-  // "webgl" or "cpu" needs to be set as the backend
-  ml5.setBackend("webgl");
-
-  // Set up the neural network
-  let classifierOptions = {
-    task: "classification",
-  };
-  classifier = ml5.neuralNetwork(classifierOptions);
 
   const modelDetails = {
     model: "model/model.json",
