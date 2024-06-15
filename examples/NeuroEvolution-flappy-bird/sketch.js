@@ -8,6 +8,7 @@
 
 let birds = [];
 let pipes = [];
+let nextBirds = [];
 
 function setup() {
   createCanvas(640, 240);
@@ -64,15 +65,20 @@ function allBirdsDead() {
 }
 
 function reproduction() {
-  let nextBirds = [];
   for (let i = 0; i < birds.length; i++) {
     let parentA = weightedSelection();
     let parentB = weightedSelection();
-    let child = parentA.crossover(parentB);
-    child.mutate(0.01);
-    nextBirds[i] = new Bird(child);
+    parentA.crossover(parentB, gotCrossOver);
   }
-  birds = nextBirds;
+}
+
+function gotCrossOver(child) {
+  child.mutate(0.01);
+  nextBirds.push(new Bird(child));
+  if (nextBirds.length == birds.length) {
+    birds = nextBirds;
+    nextBirds = [];
+  }
 }
 
 // Normalize all fitness values

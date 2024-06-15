@@ -151,16 +151,22 @@ class DiyNeuralNetwork {
   /**
    * copy
    */
-  copy() {
-    const nnCopy = new DiyNeuralNetwork(this.options);
-    return tf.tidy(() => {
-      const weights = this.neuralNetwork.model.getWeights();
-      const weightCopies = [];
-      for (let i = 0; i < weights.length; i += 1) {
-        weightCopies[i] = weights[i].clone();
-      }
-      nnCopy.neuralNetwork.model.setWeights(weightCopies);
-      return nnCopy;
+  copy(callback) {
+    return new Promise((resolve) => {
+      const nnCopy = new DiyNeuralNetwork(this.options, () => {
+        tf.tidy(() => {
+          const weights = this.neuralNetwork.model.getWeights();
+          const weightCopies = [];
+          for (let i = 0; i < weights.length; i += 1) {
+            weightCopies[i] = weights[i].clone();
+          }
+          nnCopy.neuralNetwork.model.setWeights(weightCopies);
+          if (callback) {
+            callback(nnCopy);
+          }
+          resolve(nnCopy);
+        });
+      });
     });
   }
 
@@ -1236,9 +1242,12 @@ class DiyNeuralNetwork {
    * @param {*} other
    */
 
-  crossover(other) {
-    const nnCopy = this.copy();
+  async crossover(other, callback) {
+    const nnCopy = await this.copy();
     nnCopy.neuralNetwork.crossover(other.neuralNetwork);
+    if (callback) {
+      callback(nnCopy);
+    }
     return nnCopy;
   }
 }
