@@ -33,15 +33,17 @@ function getSentiment() {
   let text = inputBox.value();
 
   // make the prediction
-  let prediction = sentiment.predict(text);
-
-  // display sentiment result on html page
-  sentimentResult.html("Sentiment confidence: " + prediction.confidence);
+  sentiment.predict(text, gotResult);
 }
 
 // a callback function that is called when model is ready
 function modelReady() {
   statusEl.html("Model loaded");
+}
+
+function gotResult(prediction) {
+  // display sentiment result on html page
+  sentimentResult.html("Sentiment confidence: " + prediction.confidence);
 }
 
 // predicting the sentiment when 'Enter' key is pressed
