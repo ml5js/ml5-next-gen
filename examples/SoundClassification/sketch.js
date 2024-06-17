@@ -61,16 +61,16 @@ function draw() {
   }
 }
 
-//Function to display the 18 words on the canvas
+// Function to display the 18 words on the canvas
 function displayWords() {
   textAlign(CENTER, CENTER);
   textSize(32);
   fill(96);
-  text("Speak one of the words into your microphone", width / 2, 40);
+  text("Say one of these words!", width / 2, 40);
 
   let x = 125;
   let y = 150;
-  //Words appear in 3 columns of 6 rows
+  // Words appear in 3 columns of 6 rows
   for (let i = 0; i < words.length; i++) {
     fill(158);
     text(words[i], x, y);
