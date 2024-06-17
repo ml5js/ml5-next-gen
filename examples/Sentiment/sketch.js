@@ -22,7 +22,7 @@ function setup() {
   inputBox = createInput("Today is the happiest day and is full of rainbows!");
   inputBox.attribute("size", "75");
   submitBtn = createButton("submit");
-  sentimentResult = createP("Sentiment score:");
+  sentimentResult = createP("Sentiment confidence:");
 
   // predicting the sentiment when submit button is pressed
   submitBtn.mousePressed(getSentiment);
@@ -33,15 +33,17 @@ function getSentiment() {
   let text = inputBox.value();
 
   // make the prediction
-  let prediction = sentiment.predict(text);
-
-  // display sentiment result on html page
-  sentimentResult.html("Sentiment score: " + prediction.score);
+  sentiment.predict(text, gotResult);
 }
 
 // a callback function that is called when model is ready
 function modelReady() {
   statusEl.html("Model loaded");
+}
+
+function gotResult(prediction) {
+  // display sentiment result on html page
+  sentimentResult.html("Sentiment confidence: " + prediction.confidence);
 }
 
 // predicting the sentiment when 'Enter' key is pressed
