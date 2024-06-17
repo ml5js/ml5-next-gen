@@ -55,7 +55,7 @@ class SoundClassifier {
   }
 
   async loadModel(options) {
-    tf.setBackend("webgpu");
+    await tf.ready();
     this.model = await this.modelToUse.load(options, this.modelUrl);
     return this;
   }
@@ -123,7 +123,7 @@ const soundClassifier = (modelName, optionsOrCallback, cb) => {
   }
 
   instance = new SoundClassifier(model, options, callback);
-  return callback ? instance : instance.ready;
+  return instance;
 };
 
 export default soundClassifier;
