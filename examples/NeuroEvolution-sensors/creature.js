@@ -37,10 +37,10 @@ class Creature {
     }
   }
 
-  reproduce() {
-    let brain = this.brain.copy();
+  async reproduce(callback) {
+    let brain = await this.brain.copy(this.gotCopy);
     brain.mutate(0.1);
-    return new Creature(this.position.x, this.position.y, brain);
+    callback(new Creature(this.position.x, this.position.y, brain));
   }
 
   eat() {

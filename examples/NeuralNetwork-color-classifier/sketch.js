@@ -19,24 +19,14 @@ let data = [
   { r: 0, g: 0, b: 253, color: "blue-ish" },
 ];
 
-let classifer;
+let classifier;
 let r = 255;
 let g = 0;
 let b = 0;
 let rSlider, gSlider, bSlider;
 let label = "training";
 
-function setup() {
-  createCanvas(640, 240);
-
-  // For this example to work across all browsers
-  // "webgl" or "cpu" needs to be set as the backend
-  ml5.setBackend("webgl");
-
-  rSlider = createSlider(0, 255, 255).position(10, 20);
-  gSlider = createSlider(0, 255, 0).position(10, 40);
-  bSlider = createSlider(0, 255, 0).position(10, 60);
-
+function preload() {
   // Step 2: set your neural network options
   let options = {
     task: "classification",
@@ -45,6 +35,14 @@ function setup() {
 
   // Step 3: initialize your neural network
   classifier = ml5.neuralNetwork(options);
+}
+
+function setup() {
+  createCanvas(640, 240);
+
+  rSlider = createSlider(0, 255, 255).position(10, 20);
+  gSlider = createSlider(0, 255, 0).position(10, 40);
+  bSlider = createSlider(0, 255, 0).position(10, 60);
 
   // Step 4: add data to the neural network
   for (let i = 0; i < data.length; i++) {

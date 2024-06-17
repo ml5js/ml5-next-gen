@@ -42,8 +42,7 @@ function draw() {
       if (bloops[i].health < 0) {
         bloops.splice(i, 1);
       } else if (random(1) < 0.001) {
-        let child = bloops[i].reproduce();
-        bloops.push(child);
+        bloops[i].reproduce(gotChild);
       }
     }
   }
@@ -53,4 +52,8 @@ function draw() {
   for (let bloop of bloops) {
     bloop.show();
   }
+}
+
+function gotChild(child) {
+  bloops.push(child);
 }

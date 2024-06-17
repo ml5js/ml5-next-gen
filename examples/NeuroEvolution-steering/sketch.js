@@ -7,6 +7,7 @@
  */
 
 let creatures = [];
+let nextCreatures = [];
 let timeSlider;
 let lifeSpan = 250; // How long should each generation live
 let lifeCounter = 0; // Timer for cycle of generation
@@ -67,15 +68,21 @@ function normalizeFitness() {
 }
 
 function reproduction() {
-  let nextCreatures = [];
   for (let i = 0; i < creatures.length; i++) {
     let parentA = weightedSelection();
     let parentB = weightedSelection();
-    let child = parentA.crossover(parentB);
-    child.mutate(0.1);
-    nextCreatures[i] = new Creature(random(width), random(height), child);
+    parentA.crossover(parentB, gotChild);
   }
-  creatures = nextCreatures;
+}
+
+function gotChild(child) {
+  child.mutate(0.1);
+  let childCreature = new Creature(random(width), random(height), child);
+  nextCreatures.push(childCreature);
+  if (nextCreatures.length === creatures.length) {
+    creatures = nextCreatures;
+    nextCreatures = [];
+  }
 }
 
 function weightedSelection() {

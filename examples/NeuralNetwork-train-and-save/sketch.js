@@ -27,6 +27,12 @@ let trainButton;
 function preload() {
   // Load the handPose model, we will use the keypoints form handPose to train the neural network
   handPose = ml5.handPose();
+  // Set up the neural network
+  let classifierOptions = {
+    task: "classification",
+    debug: true,
+  };
+  classifier = ml5.neuralNetwork(classifierOptions);
 }
 
 function setup() {
@@ -58,17 +64,6 @@ function setup() {
   scissorsButton.mousePressed(addScissorsData);
   trainButton = createButton("Train and Save Model");
   trainButton.mousePressed(train);
-
-  // For this example to work across all browsers
-  // "webgl" or "cpu" needs to be set as the backend
-  ml5.setBackend("webgl");
-
-  // Set up the neural network
-  let classifierOptions = {
-    task: "classification",
-    debug: true,
-  };
-  classifier = ml5.neuralNetwork(classifierOptions);
 
   // Start the handPose detection
   handPose.detectStart(video, gotHands);
