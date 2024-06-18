@@ -25,7 +25,7 @@ function setup() {
   createCanvas(640, 480);
 
   // Create the webcam video and hide it
-  video = createCapture(VIDEO);
+  video = createCapture(VIDEO, { flipped: true });
   video.size(width, height);
   video.hide();
 
