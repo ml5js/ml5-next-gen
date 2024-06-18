@@ -73,7 +73,7 @@ class HandPose {
         runtime: {
           type: "enum",
           enums: ["mediapipe", "tfjs"],
-          default: "mediapipe",
+          default: "tfjs",
         },
         modelType: {
           type: "enum",

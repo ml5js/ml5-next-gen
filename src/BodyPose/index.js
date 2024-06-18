@@ -93,7 +93,7 @@ class BodyPose {
           runtime: {
             type: "enum",
             enums: ["mediapipe", "tfjs"],
-            default: "mediapipe",
+            default: "tfjs",
           },
           enableSmoothing: {
             type: "boolean",
