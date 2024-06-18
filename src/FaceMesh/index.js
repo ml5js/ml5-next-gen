@@ -14,6 +14,7 @@ import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import { mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
+import { handleModelName } from "../utils/handleOptions";
 
 class FaceMesh {
   /**
@@ -35,7 +36,13 @@ class FaceMesh {
    *
    * @private
    */
-  constructor(options, callback) {
+  constructor(modelName, options, callback) {
+    this.modelName = handleModelName(
+      modelName,
+      ["FaceMesh"],
+      "FaceMesh",
+      "faceMesh"
+    );
     this.model = null;
     this.config = options;
     this.runtimeConfig = {};
@@ -290,8 +297,8 @@ class FaceMesh {
  * @returns {Object} A new faceMesh instance
  */
 const faceMesh = (...inputs) => {
-  const { options = {}, callback } = handleArguments(...inputs);
-  const instance = new FaceMesh(options, callback);
+  const { string, options = {}, callback } = handleArguments(...inputs);
+  const instance = new FaceMesh(string, options, callback);
   return instance;
 };
 

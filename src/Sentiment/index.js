@@ -2,7 +2,7 @@ import * as tf from "@tensorflow/tfjs";
 import callCallback from "../utils/callcallback";
 import modelLoader from "../utils/modelLoader";
 import handleArguments from "../utils/handleArguments";
-
+import { handleModelName } from "../utils/handleOptions";
 /**
  * Initializes the Sentiment demo.
  */
@@ -56,7 +56,13 @@ class Sentiment {
      * @type {Promise<Sentiment>}
      * @public
      */
-    this.ready = callCallback(this.loadModel(modelName), callback);
+    this.modelName = handleModelName(
+      modelName,
+      ["MovieReviews"],
+      "MovieReviews",
+      "sentiment"
+    );
+    this.ready = callCallback(this.loadModel(), callback);
   }
 
   /**
@@ -66,9 +72,9 @@ class Sentiment {
   async loadModel(modelName) {
     await tf.ready();
     const modelUrl =
-      modelName.toLowerCase() === "moviereviews"
+      this.modelName.toLowerCase() === "moviereviews"
         ? "https://storage.googleapis.com/tfjs-models/tfjs/sentiment_cnn_v1/"
-        : modelName;
+        : this.modelName;
 
     const loader = modelLoader(modelUrl, "model");
 
@@ -137,6 +143,10 @@ class Sentiment {
   }
 }
 
-const sentiment = (modelName, callback) => new Sentiment(modelName, callback);
+const sentiment = (...inputs) => {
+  const { string, callback } = handleArguments(...inputs);
+  const instance = new Sentiment(string, callback);
+  return instance;
+};
 
 export default sentiment;

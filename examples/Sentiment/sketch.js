@@ -7,18 +7,19 @@
  */
 
 let sentiment;
-let statusEl; // to display model loading status
 let submitBtn;
 let inputBox;
 let sentimentResult;
 
+function preload() {
+  sentiment = ml5.sentiment("MovieReviews");
+}
+
 function setup() {
   noCanvas();
   // initialize sentiment analysis model
-  sentiment = ml5.sentiment("movieReviews", modelReady);
 
   // setup the html dom elements
-  statusEl = createP("Loading Model...");
   inputBox = createInput("Today is the happiest day and is full of rainbows!");
   inputBox.attribute("size", "75");
   submitBtn = createButton("submit");
@@ -34,11 +35,6 @@ function getSentiment() {
 
   // make the prediction
   sentiment.predict(text, gotResult);
-}
-
-// a callback function that is called when model is ready
-function modelReady() {
-  statusEl.html("Model loaded");
 }
 
 function gotResult(prediction) {
