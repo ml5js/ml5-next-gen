@@ -3,13 +3,14 @@ import handPose from "./HandPose";
 import sentiment from "./Sentiment";
 import faceMesh from "./FaceMesh";
 import bodyPose from "./BodyPose";
-import * as tf from "@tensorflow/tfjs";
-import * as tfvis from "@tensorflow/tfjs-vis";
-import p5Utils from "./utils/p5Utils";
+import imageClassifier from "./ImageClassifier";
+import soundClassifier from "./SoundClassifier";
 import setBackend from "./utils/setBackend";
 import bodySegmentation from "./BodySegmentation";
 import communityStatement from "./utils/communityStatement";
-import imageClassifier from "./ImageClassifier";
+import * as tf from "@tensorflow/tfjs";
+import * as tfvis from "@tensorflow/tfjs-vis";
+import p5Utils from "./utils/p5Utils";
 
 const withPreload = {
   bodyPose,
@@ -19,6 +20,7 @@ const withPreload = {
   imageClassifier,
   neuralNetwork,
   sentiment,
+  soundClassifier,
 };
 
 const ml5 = Object.assign({ p5Utils }, withPreload, {

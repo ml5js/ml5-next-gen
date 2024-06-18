@@ -45,6 +45,12 @@ const developmentConfig = {
       title: "ml5",
     }),
   ],
+  resolve: {
+    fallback: {
+      fs: false,
+      util: false
+    },
+  }
 };
 
 const productionConfig = {

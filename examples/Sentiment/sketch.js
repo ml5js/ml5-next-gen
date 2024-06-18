@@ -34,8 +34,10 @@ function getSentiment() {
   let text = inputBox.value();
 
   // make the prediction
-  let prediction = sentiment.predict(text);
+  sentiment.predict(text, gotResult);
+}
 
+function gotResult(prediction) {
   // display sentiment result on html page
   sentimentResult.html("Sentiment confidence: " + prediction.confidence);
 }

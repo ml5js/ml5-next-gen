@@ -59,6 +59,7 @@
     "@tensorflow-models/hand-pose-detection": "^2.0.0",
     "@tensorflow-models/mobilenet": "^2.1.0",
     "@tensorflow-models/pose-detection": "^2.1.0",
+    "@tensorflow-models/speech-commands": "^0.5.4",
     "@tensorflow/tfjs": "^4.2.0",
     "@tensorflow/tfjs-vis": "^1.5.1",
     "axios": "^1.3.4",
