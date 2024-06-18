@@ -25,7 +25,12 @@ class BodySegmentation {
    * @param {function} [callback] - A callback to be called when the model is ready.
    */
   constructor(modelName, options, callback) {
-    this.modelName = modelName;
+    this.modelName = handleModelName(
+      modelName,
+      ["BodyPix", "SelfieSegmentation"],
+      "SelfieSegmentation",
+      "bodySegmentation"
+    );
     this.video = video;
     this.model = null;
     this.config = options;
@@ -42,13 +47,6 @@ class BodySegmentation {
   async loadModel() {
     let pipeline;
     let modelConfig;
-
-    this.modelName = handleModelName(
-      this.modelName,
-      ["BodyPix", "SelfieSegmentation"],
-      "SelfieSegmentation",
-      "bodySegmentation"
-    );
 
     //select the correct model based on mask type
     // if (!this.modelName) {

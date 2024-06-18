@@ -56,7 +56,12 @@ class Sentiment {
      * @type {Promise<Sentiment>}
      * @public
      */
-    this.modelName = modelName;
+    this.modelName = handleModelName(
+      modelName,
+      ["MovieReviews"],
+      "MovieReviews",
+      "sentiment"
+    );
     this.ready = callCallback(this.loadModel(), callback);
   }
 
@@ -65,12 +70,6 @@ class Sentiment {
    */
 
   async loadModel() {
-    this.modelName = handleModelName(
-      this.modelName,
-      ["MovieReviews"],
-      "MovieReviews",
-      "sentiment"
-    );
     const modelUrl =
       this.modelName.toLowerCase() === "moviereviews"
         ? "https://storage.googleapis.com/tfjs-models/tfjs/sentiment_cnn_v1/"

@@ -54,7 +54,12 @@ class BodyPose {
     // for compatibility with p5's preload()
     if (this.p5PreLoadExists()) window._incrementPreload();
 
-    this.modelName = modelName;
+    this.modelName = handleModelName(
+      modelName,
+      ["BlazePose", "MoveNet"],
+      "MoveNet",
+      "bodyPose"
+    );
     this.model = null;
     this.config = options;
     this.runtimeConfig = {};
@@ -76,13 +81,6 @@ class BodyPose {
   async loadModel() {
     let pipeline;
     let modelConfig;
-
-    this.modelName = handleModelName(
-      this.modelName,
-      ["BlazePose", "MoveNet"],
-      "MoveNet",
-      "bodyPose"
-    );
 
     if (this.modelName === "BlazePose") {
       pipeline = poseDetection.SupportedModels.BlazePose;

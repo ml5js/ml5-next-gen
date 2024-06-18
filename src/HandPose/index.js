@@ -39,7 +39,12 @@ class HandPose {
    * @private
    */
   constructor(modelName, options, callback) {
-    this.modelName = modelName;
+    this.modelName = this.modelName = handleModelName(
+      modelName,
+      ["MediaPipeHands"],
+      "MediaPipeHands",
+      "handPose"
+    );
     this.model = null;
     this.config = options;
     this.runtimeConfig = {};
@@ -60,13 +65,6 @@ class HandPose {
    * @private
    */
   async loadModel() {
-    this.modelName = handleModelName(
-      this.modelName,
-      ["MediaPipeHands"],
-      "MediaPipeHands",
-      "handPose"
-    );
-
     const pipeline = handPoseDetection.SupportedModels.MediaPipeHands;
     //filter out model config options
     const modelConfig = handleOptions(

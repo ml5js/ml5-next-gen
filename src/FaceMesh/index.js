@@ -37,7 +37,12 @@ class FaceMesh {
    * @private
    */
   constructor(modelName, options, callback) {
-    this.modelName = modelName;
+    this.modelName = handleModelName(
+      modelName,
+      ["FaceMesh"],
+      "FaceMesh",
+      "faceMesh"
+    );
     this.model = null;
     this.config = options;
     this.runtimeConfig = {};
@@ -59,13 +64,6 @@ class FaceMesh {
    * @private
    */
   async loadModel() {
-    this.modelName = handleModelName(
-      this.modelName,
-      ["FaceMesh"],
-      "FaceMesh",
-      "faceMesh"
-    );
-
     const pipeline = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
     // filter out model config options
     const modelConfig = handleOptions(
