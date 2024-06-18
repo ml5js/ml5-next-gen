@@ -34,10 +34,10 @@ function setup() {
 }
 
 function draw() {
-  //Each video frame is painted on the canvas
+  // Each video frame is painted on the canvas
   image(video, 0, 0);
 
-  //Printing class with the highest probability on the canvas
+  // Printing class with the highest probability on the canvas
   fill(0, 255, 0);
   textSize(32);
   text(label, 20, 50);
@@ -45,6 +45,6 @@ function draw() {
 
 // A function to run when we get the results
 function gotResult(results) {
-  //update label variable which is displayed on the canvas
+  // update label variable which is displayed on the canvas
   label = results[0].label;
 }
