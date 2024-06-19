@@ -321,7 +321,8 @@ async function main() {
   console.log("Uploading sketches...");
   for (const sketchPath of sketchPaths) {
     const oldSketch = oldSketches.find(
-      (sketch) => sketch.name == sketchPath.split("/").pop()
+      (sketch) =>
+        sketch.name.toLowerCase() === sketchPath.split("/").pop().toLowerCase()
     );
     // If the sketch name already exists on the web editor, update the sketch.
     if (oldSketch) {
