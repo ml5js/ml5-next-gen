@@ -12,6 +12,7 @@ import * as tf from "@tensorflow/tfjs";
 import * as tfBodySegmentation from "@tensorflow-models/body-segmentation";
 import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
+import BODYPIX_PALETTE from "./BODYPIX_PALETTE";
 import { mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
@@ -130,6 +131,12 @@ class BodySegmentation {
         },
         "bodySegmentation"
       );
+
+      // add body part constants to the instance variable
+      for (let key in BODYPIX_PALETTE) {
+        this[key] = BODYPIX_PALETTE[key].id;
+      }
+
     } else {
       pipeline = tfBodySegmentation.SupportedModels.MediaPipeSelfieSegmentation;
       modelConfig = handleOptions(
@@ -175,6 +182,11 @@ class BodySegmentation {
         },
         "bodySegmentation"
       );
+
+      // add constants to the instance variable
+      this.BACKGROUND = 0;
+      this.BODY = 255;
+
     }
 
     await tf.ready();
