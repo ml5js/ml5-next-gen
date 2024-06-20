@@ -3,7 +3,7 @@
  * Learn more about the ml5.js project: https://ml5js.org/
  * ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
  *
- * This example demonstrates separating people from the background with ml5.bodySegmentation.
+ * This example demonstrates segmenting a person by body parts with ml5.bodySegmentation.
  */
 
 let bodySegmentation;
@@ -11,11 +11,11 @@ let video;
 let segmentation;
 
 let options = {
-  maskType: "background",
+  maskType: "parts",
 };
 
 function preload() {
-  bodySegmentation = ml5.bodySegmentation("SelfieSegmentation", options);
+  bodySegmentation = ml5.bodySegmentation("BodyPix", options);
 }
 
 function setup() {
@@ -29,10 +29,19 @@ function setup() {
 }
 
 function draw() {
-  background(0, 0, 255);
+  background(255);
+  image(video, 0, 0);
   if (segmentation) {
-    video.mask(segmentation.mask);
-    image(video, 0, 0);
+    let gridSize = 10;
+    for (let x=0; x < video.width; x += gridSize) {
+      for (let y=0; y < video.height; y += gridSize) {
+        if (segmentation.data[y * video.width + x] == bodySegmentation.TORSO_FRONT) {
+          fill(255, 0, 0);
+          noStroke();
+          circle(x, y, gridSize);
+        }
+      }
+    }
   }
 }
 
