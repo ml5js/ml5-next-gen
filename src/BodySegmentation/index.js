@@ -12,7 +12,6 @@ import * as tf from "@tensorflow/tfjs";
 import * as tfBodySegmentation from "@tensorflow-models/body-segmentation";
 import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
-import BODYPIX_PALETTE from "./BODYPIX_PALETTE";
 import { mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
@@ -242,7 +241,6 @@ class BodySegmentation {
           tfBodySegmentation.bodyPixMaskValueToRainbowColor,
           { r: 255, g: 255, b: 255, a: 255 }
         );
-        result.bodyParts = BODYPIX_PALETTE;
     }
     result.mask = this.generateP5Image(result.maskImageData);
 
@@ -338,7 +336,6 @@ class BodySegmentation {
             tfBodySegmentation.bodyPixMaskValueToRainbowColor,
             { r: 255, g: 255, b: 255, a: 255 }
           );
-          result.bodyParts = BODYPIX_PALETTE;
       }
       result.mask = this.generateP5Image(result.maskImageData);
 
