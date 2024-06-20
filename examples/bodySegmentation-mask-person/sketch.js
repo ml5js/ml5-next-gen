@@ -6,7 +6,7 @@
  * This example demonstrates segmenting the background from a person with ml5.bodySegmentation.
  */
 
-let bodyPix;
+let bodySegmentation;
 let video;
 let segmentation;
 
@@ -15,7 +15,7 @@ let options = {
 };
 
 function preload() {
-  bodyPix = ml5.bodySegmentation("SelfieSegmentation", options);
+  bodySegmentation = ml5.bodySegmentation("SelfieSegmentation", options);
 }
 
 function setup() {
@@ -25,18 +25,19 @@ function setup() {
   video.size(width, height);
   video.hide();
 
-  bodyPix.detectStart(video, gotResults);
+  bodySegmentation.detectStart(video, gotResults);
 }
 
 function draw() {
   background(0, 255, 0);
 
   if (segmentation) {
-    video.mask(segmentation);
+    video.mask(segmentation.mask);
     image(video, 0, 0);
   }
 }
+
 // callback function for body segmentation
 function gotResults(result) {
-  segmentation = result.mask;
+  segmentation = result;
 }
