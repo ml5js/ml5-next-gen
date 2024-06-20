@@ -207,6 +207,22 @@ class BodySegmentation {
     );
 
     const result = {};
+
+    // add array of raw values to output
+    if (segmentation.length) {
+      result.imageData = await segmentation[0].mask.toImageData();
+      let data = new Array(result.imageData.width * result.imageData.height);
+      for (let i=0; i < data.length; i++) {
+        data[i] = result.imageData.data[i*4];
+      }
+      result.data = data;
+    } else {
+      result.data = [];
+      result.imageData = null;
+    }
+    // Note: our output doesn't handle BodyPix' multi-segmentation mode
+    // (which defaults to false) - this only looks at the first segmentation
+
     switch (this.runtimeConfig.maskType) {
       case "background":
         result.maskImageData = await tfBodySegmentation.toBinaryMask(
@@ -287,6 +303,22 @@ class BodySegmentation {
       );
 
       const result = {};
+
+      // add array of raw values to output
+      if (segmentation.length) {
+        result.imageData = await segmentation[0].mask.toImageData();
+        let data = new Array(result.imageData.width * result.imageData.height);
+        for (let i=0; i < data.length; i++) {
+          data[i] = result.imageData.data[i*4];
+        }
+        result.data = data;
+      } else {
+        result.data = [];
+        result.imageData = null;
+      }
+      // Note: our output doesn't handle BodyPix' multi-segmentation mode
+      // (which defaults to false) - this only looks at the first segmentation
+
       switch (this.runtimeConfig.maskType) {
         case "background":
           result.maskImageData = await tfBodySegmentation.toBinaryMask(
