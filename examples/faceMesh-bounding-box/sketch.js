@@ -26,10 +26,10 @@ function setup() {
 }
 
 function draw() {
-  // draw the webcam video
+  // Draw the webcam video
   image(video, 0, 0, width, height);
 
-  // draw the faces' bounding boxes
+  // Draw the faces' bounding boxes
   for (let i = 0; i < faces.length; i++) {
     let face = faces[i];
     let x = face.box.xMin;
@@ -44,7 +44,7 @@ function draw() {
     rect(x, y, w, h);
     text(i, x, y - 10);
 
-    // draw the center of the face
+    // Draw the center of the face
     noStroke();
     fill(255, 0, 0);
     circle(centerX, centerY, 10);
