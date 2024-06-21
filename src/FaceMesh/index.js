@@ -72,7 +72,7 @@ class FaceMesh {
         runtime: {
           type: "enum",
           enums: ["mediapipe", "tfjs"],
-          default: "mediapipe",
+          default: "tfjs",
         },
         maxFaces: {
           type: "number",

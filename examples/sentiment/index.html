@@ -1,0 +1,29 @@
+<!--
+  👋 Hello! This is an ml5.js example made and shared with ❤️.
+  Learn more about the ml5.js project: https://ml5js.org/
+  ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
+
+  This example demonstrates sentiment analysis with ml5.sentiment.
+-->
+
+<html>
+  <head>
+    <title>ml5.js Sentiment Analysis Example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+    <script src="../../dist/ml5.js"></script>
+  </head>
+
+  <body>
+    <h1>Sentiment Analysis Demo</h1>
+    <p>
+      This example uses model trained on movie reviews. This model scores the
+      sentiment of text with a value between 0 ("negative") and 1 ("positive").
+      The movie reviews were truncated to a maximum of 200 words and only the
+      20,000 most common words in the reviews are used.
+      <br />
+      Press 'Enter' on your keyboard or 'Submit' to see score!
+    </p>
+
+    <script src="sketch.js"></script>
+  </body>
+</html>

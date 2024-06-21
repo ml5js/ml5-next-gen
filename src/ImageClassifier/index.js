@@ -196,12 +196,13 @@ class ImageClassifier {
 
     if (this.modelUrl) {
       await tf.nextFrame();
-      const predictedClasses = tf.tidy(() => {
-        const predictions = this.model.predict(imgToPredict);
-        return Array.from(predictions.as1D().dataSync());
-      });
 
-      const results = await predictedClasses
+      const predictions = this.model.predict(imgToPredict);
+      const predictionData = await predictions.as1D().data();
+      predictions.dispose();
+      const predictedClasses = Array.from(predictionData);
+
+      const results = predictedClasses
         .map((confidence, index) => {
           const label =
             this.mapStringToIndex.length > 0 && this.mapStringToIndex[index]
@@ -220,9 +221,9 @@ class ImageClassifier {
 
     // MobileNet uses className/probability instead of label/confidence.
     if (this.modelName === "mobilenet") {
-      return results.map(result => ({
+      return results.map((result) => ({
         label: result.className,
-        confidence: result.probability
+        confidence: result.probability,
       }));
     }
 
