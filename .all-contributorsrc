@@ -1061,6 +1061,13 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/5695301?v=4",
       "profile": "http://www.michaelweinberg.org/",
       "contributions": ["blog", "communityManagement", "license"]
+    },
+    {
+      "login": "gohai",
+      "name": "Gottfried Haider",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4945451?v=4",
+      "profile": "http://twitter.com/mrgohai",
+      "contributions": ["code", "example", "maintenance", "review"]
     }
   ],
   "contributorsPerLine": 7,
