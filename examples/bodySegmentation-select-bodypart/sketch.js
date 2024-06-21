@@ -22,7 +22,7 @@ function setup() {
   createCanvas(640, 480);
   // Create the video
   video = createCapture(VIDEO);
-  video.size(width, height);
+  video.size(640, 480);
   video.hide();
 
   bodySegmentation.detectStart(video, gotResults);
@@ -33,9 +33,11 @@ function draw() {
   image(video, 0, 0);
   if (segmentation) {
     let gridSize = 10;
-    for (let x=0; x < video.width; x += gridSize) {
-      for (let y=0; y < video.height; y += gridSize) {
-        if (segmentation.data[y * video.width + x] == bodySegmentation.TORSO_FRONT) {
+    for (let x = 0; x < video.width; x += gridSize) {
+      for (let y = 0; y < video.height; y += gridSize) {
+        if (
+          segmentation.data[y * video.width + x] == bodySegmentation.TORSO_FRONT
+        ) {
           fill(255, 0, 0);
           noStroke();
           circle(x, y, gridSize);

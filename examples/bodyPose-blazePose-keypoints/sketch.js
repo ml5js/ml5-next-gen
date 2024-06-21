@@ -20,7 +20,7 @@ function setup() {
 
   // Create the video and hide it
   video = createCapture(VIDEO);
-  video.size(width, height);
+  video.size(640, 480);
   video.hide();
 
   // Start detecting poses in the webcam video
