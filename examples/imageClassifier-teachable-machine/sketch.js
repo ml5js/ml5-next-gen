@@ -26,7 +26,7 @@ function setup() {
 
   // Create the webcam video and hide it
   video = createCapture(VIDEO, { flipped: true });
-  video.size(width, height);
+  video.size(640, 480);
   video.hide();
 
   // Start detecting objects in the video

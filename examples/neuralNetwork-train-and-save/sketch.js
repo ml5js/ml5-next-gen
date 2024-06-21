@@ -34,7 +34,7 @@ function setup() {
 
   // Create the webcam video and hide it
   video = createCapture(VIDEO);
-  video.size(width, height);
+  video.size(640, 480);
   video.hide();
 
   // Setup the UI buttons for training

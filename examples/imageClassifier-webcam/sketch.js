@@ -25,6 +25,7 @@ function setup() {
 
   // Using webcam feed as video input, hiding html element to avoid duplicate with canvas
   video = createCapture(VIDEO);
+  video.size(640, 480);
   video.hide();
   classifier.classifyStart(video, gotResult);
 }
