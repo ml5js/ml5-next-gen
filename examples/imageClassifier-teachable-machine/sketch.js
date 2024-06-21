@@ -26,7 +26,7 @@ function setup() {
 
   // Create the webcam video and hide it
   video = createCapture(VIDEO, { flipped: true });
-  video.size(width, height);
+  video.size(640, 480);
   video.hide();
 
   // Start detecting objects in the video
@@ -45,6 +45,6 @@ function draw() {
 
 // A function to run when we get the results
 function gotResult(results) {
-  // update label variable which is displayed on the canvas
+  // Update label variable which is displayed on the canvas
   label = results[0].label;
 }

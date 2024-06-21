@@ -21,12 +21,12 @@ function setup() {
 
   // Create the video and hide it
   video = createCapture(VIDEO);
-  video.size(width, height);
+  video.size(640, 480);
   video.hide();
 
   // Start detecting poses in the webcam video
   bodyPose.detectStart(video, gotPoses);
-  //get the skeleton connection information
+  // Get the skeleton connection information
   connections = bodyPose.getSkeleton();
 }
 
@@ -34,7 +34,7 @@ function draw() {
   // Draw the webcam video
   image(video, 0, 0, width, height);
 
-  //draw the skeleton connections
+  // Draw the skeleton connections
   for (let i = 0; i < poses.length; i++) {
     let pose = poses[i];
     for (let j = 0; j < connections.length; j++) {

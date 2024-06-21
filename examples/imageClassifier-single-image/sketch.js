@@ -27,9 +27,9 @@ function setup() {
   image(img, 0, 0, width, height);
 }
 
-// A function to run when we get any errors and the results
+// Callback function for when classification has finished
 function gotResult(results) {
-  // The results are in an array ordered by confidence, print in console
+  // The results are in an array ordered by confidence
   console.log(results);
 
   // Display the results on the canvas

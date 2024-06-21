@@ -10,7 +10,8 @@
     "format": "prettier --write \"**/*.js\"",
     "postinstall": "patch-package",
     "test": "jest --config tests/jest.config.js",
-    "upload-examples": "node scripts/uploadExamples.js"
+    "upload-examples": "node scripts/uploadExamples.js",
+    "update-p5-version": "node scripts/updateP5Version.js"
   },
   "files": [
     "dist"
