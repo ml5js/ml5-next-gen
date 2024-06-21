@@ -12,37 +12,37 @@ let inputBox;
 let sentimentResult;
 
 function preload() {
+  // Initialize the sentiment analysis model
   sentiment = ml5.sentiment("MovieReviews");
 }
 
 function setup() {
   noCanvas();
-  // initialize sentiment analysis model
 
-  // setup the html dom elements
+  // Setup the DOM elements
   inputBox = createInput("Today is the happiest day and is full of rainbows!");
   inputBox.attribute("size", "75");
   submitBtn = createButton("submit");
   sentimentResult = createP("Sentiment confidence:");
 
-  // predicting the sentiment when submit button is pressed
+  // Start predicting when the submit button is pressed
   submitBtn.mousePressed(getSentiment);
 }
 
 function getSentiment() {
-  // get the values from the input
+  // Use the value of the input box
   let text = inputBox.value();
 
-  // make the prediction
+  // Start making the prediction
   sentiment.predict(text, gotResult);
 }
 
 function gotResult(prediction) {
-  // display sentiment result on html page
+  // Display sentiment result via the DOM
   sentimentResult.html("Sentiment confidence: " + prediction.confidence);
 }
 
-// predicting the sentiment when 'Enter' key is pressed
+// Start predicting when the Enter key is pressed
 function keyPressed() {
   if (keyCode == ENTER) {
     getSentiment();

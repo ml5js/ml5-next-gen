@@ -45,6 +45,6 @@ function draw() {
 
 // A function to run when we get the results
 function gotResult(results) {
-  // update label variable which is displayed on the canvas
+  // Update label variable which is displayed on the canvas
   label = results[0].label;
 }
