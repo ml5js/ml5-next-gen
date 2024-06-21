@@ -19,7 +19,7 @@ function setup() {
   createCanvas(640, 480);
   // Create the webcam video and hide it
   video = createCapture(VIDEO);
-  video.size(width, height);
+  video.size(640, 480);
   video.hide();
   // start detecting hands from the webcam video
   handPose.detectStart(video, gotHands);

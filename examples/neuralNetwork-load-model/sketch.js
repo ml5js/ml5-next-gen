@@ -23,7 +23,7 @@ function setup() {
 
   // Create the webcam video and hide it
   video = createCapture(VIDEO);
-  video.size(width, height);
+  video.size(640, 480);
   video.hide();
 
   // For this example to work across all browsers
