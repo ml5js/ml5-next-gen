@@ -58,7 +58,7 @@ Before getting started with ml5.js, review our [Code of Conduct](https://github.
 - [API Reference](https://docs.ml5js.org/#/reference/overview)
 - [Examples](https://github.com/ml5js/ml5-next-gen/tree/main/examples)
 - [Community](https://ml5js.org/community)
-- [FAQ]([https://learn.ml5js.org/#/faq](https://docs.ml5js.org/#/welcome/faq)
+- [FAQ](https://docs.ml5js.org/#/welcome/faq)
 
 ## Code of Conduct
 
