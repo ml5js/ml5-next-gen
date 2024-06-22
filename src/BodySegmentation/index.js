@@ -185,7 +185,7 @@ class BodySegmentation {
 
       // add constants to the instance variable
       this.BACKGROUND = 0;
-      this.BODY = 255;
+      this.PERSON = 255;
 
     }
 
