@@ -131,6 +131,12 @@ class BodySegmentation {
         },
         "bodySegmentation"
       );
+
+      // add body part constants to the instance variable
+      for (let key in BODYPIX_PALETTE) {
+        this[key] = BODYPIX_PALETTE[key].id;
+      }
+
     } else {
       pipeline = tfBodySegmentation.SupportedModels.MediaPipeSelfieSegmentation;
       modelConfig = handleOptions(
@@ -176,6 +182,11 @@ class BodySegmentation {
         },
         "bodySegmentation"
       );
+
+      // add constants to the instance variable
+      this.BACKGROUND = 0;
+      this.PERSON = 255;
+
     }
 
     await tf.ready();
@@ -207,6 +218,22 @@ class BodySegmentation {
     );
 
     const result = {};
+
+    // add array of raw values to output
+    if (segmentation.length) {
+      result.imageData = await segmentation[0].mask.toImageData();
+      let data = new Array(result.imageData.width * result.imageData.height);
+      for (let i=0; i < data.length; i++) {
+        data[i] = result.imageData.data[i*4];
+      }
+      result.data = data;
+    } else {
+      result.data = [];
+      result.imageData = null;
+    }
+    // Note: our output doesn't handle BodyPix' multi-segmentation mode
+    // (which defaults to false) - this only looks at the first segmentation
+
     switch (this.runtimeConfig.maskType) {
       case "background":
         result.maskImageData = await tfBodySegmentation.toBinaryMask(
@@ -226,7 +253,6 @@ class BodySegmentation {
           tfBodySegmentation.bodyPixMaskValueToRainbowColor,
           { r: 255, g: 255, b: 255, a: 255 }
         );
-        result.bodyParts = BODYPIX_PALETTE;
     }
     result.mask = this.generateP5Image(result.maskImageData);
 
@@ -287,6 +313,22 @@ class BodySegmentation {
       );
 
       const result = {};
+
+      // add array of raw values to output
+      if (segmentation.length) {
+        result.imageData = await segmentation[0].mask.toImageData();
+        let data = new Array(result.imageData.width * result.imageData.height);
+        for (let i=0; i < data.length; i++) {
+          data[i] = result.imageData.data[i*4];
+        }
+        result.data = data;
+      } else {
+        result.data = [];
+        result.imageData = null;
+      }
+      // Note: our output doesn't handle BodyPix' multi-segmentation mode
+      // (which defaults to false) - this only looks at the first segmentation
+
       switch (this.runtimeConfig.maskType) {
         case "background":
           result.maskImageData = await tfBodySegmentation.toBinaryMask(
@@ -306,7 +348,6 @@ class BodySegmentation {
             tfBodySegmentation.bodyPixMaskValueToRainbowColor,
             { r: 255, g: 255, b: 255, a: 255 }
           );
-          result.bodyParts = BODYPIX_PALETTE;
       }
       result.mask = this.generateP5Image(result.maskImageData);
 

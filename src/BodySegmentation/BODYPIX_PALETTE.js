@@ -1,97 +1,97 @@
 export default {
-  leftFace: {
+  LEFT_FACE: {
     id: 0,
     color: [110, 64, 170],
   },
-  rightFace: {
+  RIGHT_FACE: {
     id: 1,
     color: [143, 61, 178],
   },
-  leftUpperArmFront: {
+  LEFT_UPPER_ARM_FRONT: {
     id: 2,
     color: [178, 60, 178],
   },
-  leftUpperArmBack: {
+  LEFT_UPPER_ARM_BACK: {
     id: 3,
     color: [210, 62, 167],
   },
-  rightUpperArmFront: {
+  RIGHT_UPPER_ARM_FRONT: {
     id: 4,
     color: [238, 67, 149],
   },
-  rightUpperArmBack: {
+  RIGHT_UPPER_ARM_BACK: {
     id: 5,
     color: [255, 78, 125],
   },
-  leftLowerArmFront: {
+  LEFT_LOWER_ARM_FRONT: {
     id: 6,
     color: [255, 94, 99],
   },
-  leftLowerArmBack: {
+  LEFT_LOWER_ARM_BACK: {
     id: 7,
     color: [255, 115, 75],
   },
-  rightLowerArmFront: {
+  RIGHT_LOWER_ARM_FRONT: {
     id: 8,
     color: [255, 140, 56],
   },
-  rightLowerArmBack: {
+  RIGHT_LOWER_ARM_BACK: {
     id: 9,
     color: [239, 167, 47],
   },
-  leftHand: {
+  LEFT_HAND: {
     id: 10,
     color: [217, 194, 49],
   },
-  rightHand: {
+  RIGHT_HAND: {
     id: 11,
     color: [194, 219, 64],
   },
-  torsoFront: {
+  TORSO_FRONT: {
     id: 12,
     color: [175, 240, 91],
   },
-  torsoBack: {
+  TORSO_BACK: {
     id: 13,
     color: [135, 245, 87],
   },
-  leftUpperLegFront: {
+  LEFT_UPPER_LEG_FRONT: {
     id: 14,
     color: [96, 247, 96],
   },
-  leftUpperLegBack: {
+  LEFT_UPPER_LEG_BACK: {
     id: 15,
     color: [64, 243, 115],
   },
-  rightUpperLegFront: {
+  RIGHT_UPPER_LEG_FRONT: {
     id: 16,
     color: [40, 234, 141],
   },
-  rightUpperLegBack: {
+  RIGHT_UPPER_LEG_BACK: {
     id: 17,
     color: [28, 219, 169],
   },
-  leftLowerLegFront: {
+  LEFT_LOWER_LEG_FRONT: {
     id: 18,
     color: [26, 199, 194],
   },
-  leftLowerLegBack: {
+  LEFT_LOWER_LEG_BACK: {
     id: 19,
     color: [33, 176, 213],
   },
-  rightLowerLegFront: {
+  RIGHT_LOWER_LEG_FRONT: {
     id: 20,
     color: [47, 150, 224],
   },
-  rightLowerLegBack: {
+  RIGHT_LOWER_LEG_BACK: {
     id: 21,
     color: [65, 125, 224],
   },
-  leftFoot: {
+  LEFT_FOOT: {
     id: 22,
     color: [84, 101, 214],
   },
-  rightFoot: {
+  RIGHT_FOOT: {
     id: 23,
     color: [99, 81, 195],
   },
