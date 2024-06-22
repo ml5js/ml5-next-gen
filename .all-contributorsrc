@@ -10,6 +10,11 @@
     "communityManagement": {
       "symbol": "👥",
       "description": "Community Management"
+    },
+    "license": {
+      "symbol": "📃",
+      "description": "Software License",
+      "link": "https://github.com/ml5js/Code-of-Conduct/blob/main/LICENSE.md"
     }
   },
   "contributors": [
@@ -970,7 +975,7 @@
       "name": "Ziyuan Lin",
       "avatar_url": "https://avatars.githubusercontent.com/u/93690311?v=4",
       "profile": "https://github.com/ziyuan-linn",
-      "contributions": ["code", "doc", "example", "maintenance"]
+      "contributions": ["code", "doc", "example", "maintenance", "ideas"]
     },
     {
       "login": "oziomarc",
@@ -1014,6 +1019,55 @@
         "mentoring",
         "tutorial"
       ]
+    },
+    {
+      "login": "alanvww",
+      "name": "Alan Ren",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10086000?v=4",
+      "profile": "https://alan.ooo/",
+      "contributions": ["bug", "code", "content", "design", "doc", "ideas"]
+    },
+    {
+      "login": "jackbdu",
+      "name": "Jack B. Du",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8614803?v=4",
+      "profile": "https://jackbdu.com/about",
+      "contributions": ["bug", "example", "tutorial"]
+    },
+    {
+      "login": "OrpheasK",
+      "name": "OrpheasK",
+      "avatar_url": "https://avatars.githubusercontent.com/u/45125993?v=4",
+      "profile": "https://github.com/OrpheasK",
+      "contributions": ["code", "example", "maintenance"]
+    },
+    {
+      "login": "myrahsa",
+      "name": "Myrah Sarwar",
+      "avatar_url": "https://avatars.githubusercontent.com/u/78187389?v=4",
+      "profile": "https://github.com/myrahsa",
+      "contributions": ["a11y", "content", "doc"]
+    },
+    {
+      "login": "SherabCodes",
+      "name": "Sherab",
+      "avatar_url": "https://avatars.githubusercontent.com/u/149223426?v=4",
+      "profile": "https://github.com/SherabCodes",
+      "contributions": ["code", "maintenance"]
+    },
+    {
+      "login": "mwweinberg",
+      "name": "Michael Weinberg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5695301?v=4",
+      "profile": "http://www.michaelweinberg.org/",
+      "contributions": ["blog", "communityManagement", "license"]
+    },
+    {
+      "login": "gohai",
+      "name": "Gottfried Haider",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4945451?v=4",
+      "profile": "http://twitter.com/mrgohai",
+      "contributions": ["code", "example", "maintenance", "review"]
     }
   ],
   "contributorsPerLine": 7,
