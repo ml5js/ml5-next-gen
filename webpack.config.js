@@ -74,6 +74,12 @@ const productionConfig = {
       }),
     ],
   },
+  resolve: {
+    fallback: {
+      fs: false,
+      util: false
+    },
+  }
 };
 
 module.exports = function (env, args) {
