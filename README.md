@@ -22,12 +22,12 @@ Before getting started with ml5.js, review our [Code of Conduct](https://github.
 
 <p id="latest-version">
 
-- You can use the latest version (0.20.0-alpha.3) by adding it to the head section of your HTML document:
+- You can use the latest version (1.0.1) by adding it to the head section of your HTML document:
 
-  **v0.20.0-alpha.3**
+  **v1.0.1**
 
   ```html
-  <script src="https://unpkg.com/ml5@0.20.0-alpha.3/dist/ml5.js"></script>
+  <script src="https://unpkg.com/ml5@1.0.1/dist/ml5.js"></script>
   ```
 
 </p data-id="latest-version">
@@ -54,17 +54,11 @@ Before getting started with ml5.js, review our [Code of Conduct](https://github.
 
 ## Resources
 
-- [Getting Started](https://learn.ml5js.org/)
-- [API Reference](https://learn.ml5js.org/#/reference/index)
-- [Examples](https://github.com/ml5js/ml5-library/tree/main/examples)
+- [Getting Started](https://docs.ml5js.org/)
+- [API Reference](https://docs.ml5js.org/#/reference/overview)
+- [Examples](https://github.com/ml5js/ml5-next-gen/tree/main/examples)
 - [Community](https://ml5js.org/community)
-- [FAQ](https://learn.ml5js.org/#/faq)
-
-## Standalone Examples
-
-You can find a collection of standalone examples in this repository within the `examples/` directory. You can also test working hosted of the examples online on the [ml5.js examples index website](https://examples.ml5js.org/).
-
-These examples are meant to serve as an introduction to the library and machine learning concepts.
+- [FAQ](https://docs.ml5js.org/#/welcome/faq)
 
 ## Code of Conduct
 
