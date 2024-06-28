@@ -282,6 +282,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="http://twitter.com/mrgohai"><img src="https://avatars.githubusercontent.com/u/4945451?v=4?s=100" width="100px;" alt="Gottfried Haider"/><br /><sub><b>Gottfried Haider</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=gohai" title="Code">💻</a> <a href="#example-gohai" title="Examples">💡</a> <a href="#maintenance-gohai" title="Maintenance">🚧</a> <a href="https://github.com/ml5js/ml5-next-gen/pulls?q=is%3Apr+reviewed-by%3Agohai" title="Reviewed Pull Requests">👀</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/douaaz"><img src="https://avatars.githubusercontent.com/u/94295853?v=4?s=100" width="100px;" alt="douaaz"/><br /><sub><b>douaaz</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=douaaz" title="Code">💻</a> <a href="#maintenance-douaaz" title="Maintenance">🚧</a> <a href="#research-douaaz" title="Research">🔬</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/XiaozaoWang"><img src="https://avatars.githubusercontent.com/u/115412906?v=4?s=100" width="100px;" alt="Xiaozao Wang"/><br /><sub><b>Xiaozao Wang</b></sub></a><br /><a href="#content-XiaozaoWang" title="Content">🖋</a> <a href="#design-XiaozaoWang" title="Design">🎨</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Ricci-Liu"><img src="https://avatars.githubusercontent.com/u/131328073?v=4?s=100" width="100px;" alt="Ricci-Liu"/><br /><sub><b>Ricci-Liu</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=Ricci-Liu" title="Code">💻</a> <a href="#research-Ricci-Liu" title="Research">🔬</a></td>
     </tr>
   </tbody>
 </table>
