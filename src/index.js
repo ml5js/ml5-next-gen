@@ -7,6 +7,7 @@ import imageClassifier from "./ImageClassifier";
 import soundClassifier from "./SoundClassifier";
 import setBackend from "./utils/setBackend";
 import bodySegmentation from "./BodySegmentation";
+import timeSeries from "./LSTM";
 import communityStatement from "./utils/communityStatement";
 import * as tf from "@tensorflow/tfjs";
 import * as tfvis from "@tensorflow/tfjs-vis";
@@ -22,6 +23,7 @@ const withPreload = {
   neuralNetwork,
   sentiment,
   soundClassifier,
+  
 };
 
 const ml5 = Object.assign({ p5Utils }, withPreload, {
@@ -30,6 +32,7 @@ const ml5 = Object.assign({ p5Utils }, withPreload, {
   setBackend,
   version: packageInfo.version,
   setP5: p5Utils.setP5.bind(p5Utils),
+  timeSeries
 });
 
 p5Utils.shouldPreload(ml5, Object.keys(withPreload));
