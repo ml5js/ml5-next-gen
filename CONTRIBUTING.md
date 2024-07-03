@@ -1,4 +1,56 @@
-## Setup
+# How to Contribute
+
+_last updated: 3, July 2024_
+
+Welcome to the ml5 project! Developing ml5 is not just about developing machine learning software, it is about making machine learning approachable for a broad audience of artists, creative coders, and students. The library provides access to machine learning algorithms and models in the browser, building on top of TensorFlow.js with no other external dependencies. The library is supported by code examples, tutorials, and sample datasets with an emphasis on ethical computing. Bias in data, stereotypical harms, and responsible crowdsourcing are part of the documentation around data collection and usage. We're building friendly machine learning for the web - we're glad you're here!
+
+## Table of Content
+
+- [The ml5.js Ecosystem](#the-ml5js-ecosystem)
+- [Contributing Workflow](#contributing-workflow)
+- [Setup Development Environment](#setup-development-environment)
+- [Code Formatting](#code-formatting)
+- [Building the Library](#building-the-library)
+- [Making Releases](#making-releases)
+- [Unit Tests](#unit-tests)
+- [Update p5 Web Editor Sketches](#update-p5-web-editor-sketches)
+- [All Contributors](#all-contributors)
+- [API Implementation Guideline](#api-implementation-guideline)
+- [Utils](#utils)
+
+## The ml5.js Ecosystem
+
+ml5.js is comprised a number of sister repositories which you can find at the ml5 github organization - [github.com/ml5js](https://github.com/ml5js). As a contributor of ml5 you should be aware of the other parallel repositories of the ml5 project.
+
+Here is a list of the repositories you most likely will be working with:
+
+- **[ml5-next-gen (this repository)](https://github.com/ml5js/ml5-next-gen)**: The main repository for the ml5.js library. The source code in the library is buldled into the `ml5.js` library files and gets published on [npm](https://www.npmjs.com/package/ml5).
+- **[ml5-website-v03-docsify](https://github.com/ml5js/ml5-website-v02-docsify)**: The repository for the [ml5.js documentatipn webpage](https://docs.ml5js.org), which is built using [Docsify](https://docsify.js.org/). It contains documentation and and reference materials for for the ml5.js library models.
+- **[ml5-website-v02-gatsby](https://github.com/ml5js/ml5-website-v02-gatsby)**: The repository for the [main ml5.js website](https://ml5js.org), which is built using [Gatsby](https://www.gatsbyjs.com/). It contains information about the ml5.js project, community, and resources.
+
+## Contributing Workflow
+
+**Preamble**: If you're interested in contributing to the ml5 project, just know you can always open an issue to ask questions or flag things that may seem confusing, unclear or intimidating. Our goal is to make ml5 as open and supportive as possible for those who want to be involved. Ok, now that's out of the way, here's how a general workflow for what contributions might look like to ml5.
+
+1. Read the CONTRIBUTING.md docs. ❤️
+2. Take a peek at the [issues](https://github.com/ml5js/ml5-next-gen/issues) and identify something you'd like to address **or** file an issue about a bug you discovered. The issue could be addressing a bug, adding a new feature, updating an existing feature, or anything else. 🚩
+3. Make a comment on the existing issue **or** indicate on your new issue that you're curious to do your best to solve it. 🔬
+4. Make a `forked` copy of the ml5-library and create it branch with a meaningful name such as `fix-detection-results`. 🍴
+5. Jam on some coding sessions, commit your changes with meaningful commit messages, and push your changes to your branch. 💻
+6. When ready, [make a pull request to the `main` branch of ml5-next-gen](https://github.com/ml5js/ml5-next-gen/compare). 📄
+7. The ml5 dev team will review your changes and quite likely correspond with you on your changes. When all looks good, your changes will be merged in and released with the next public update to the library. 🎉
+8. Hi-fives 👏 and hugs 🤗
+
+## Setup Development Environment
+
+We use node.js as our development environment for bundling code, running tests, and more. If you've never used node.js before, please [download and install Node.js here](https://nodejs.org/en/download/prebuilt-installer). Please select version 20 (`v20.x.x (LTS)`) of Node.js for your operating system and architecture of your computer.
+
+If you already have a different version of Node.js, it might still be compatible with the library. However, we recommend installing [nvm](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating), a Node.js version manager and using Node.js version 20. Once you have nvm installed, you can run the following commands:
+
+```
+nvm install 20
+nvm use 20
+```
 
 This build uses node version 18.15.0.
 We use [Yarn](https://yarnpkg.com/) instead of npm to help us better manage dependencies from TensorFlow.js. Yarn is a newer package manager that is very similar to NPM. [Here is a cheat sheet](https://www.digitalocean.com/community/tutorials/nodejs-npm-yarn-cheatsheet) for npm vs Yarn commands.
