@@ -52,18 +52,15 @@ nvm install 20
 nvm use 20
 ```
 
-This build uses node version 18.15.0.
 We use [Yarn](https://yarnpkg.com/) instead of npm to help us better manage dependencies from TensorFlow.js. Yarn is a newer package manager that is very similar to NPM. [Here is a cheat sheet](https://www.digitalocean.com/community/tutorials/nodejs-npm-yarn-cheatsheet) for npm vs Yarn commands.
 
-[Install nvm](https://github.com/nvm-sh/nvm#installing-and-updating) and run the following commands：
+Install yarn with the following command:
 
 ```
-nvm install 18.15
-nvm use 18
 npm install -g yarn
 ```
 
-To start the development server, run the following commands:
+Then, run the following command to install the dependencies and start the development server:
 
 ```
 yarn
@@ -80,23 +77,23 @@ You should see something similar to this in the terminal:
 webpack 5.76.1 compiled successfully in 8360 ms
 ```
 
-A local server have been started and hosts a built version of the ml5 library at http://localhost:8080/dist/ml5.js. While the server is running, Webpack will automatically rebuild the library if you change and save any file in the `/src` folder.
+A local server have been started, hosting a built version of the ml5 library at http://localhost:8080/dist/ml5.js. While the server is running, Webpack will automatically rebuild the library if you change and save any file in the `/src` folder.
 
-A webpage at http://localhost:8080/examples/ should automatically open with the directory listing of the example directory. Select one of the directories to test run `ml5.js` in some example code.
+A webpage at http://localhost:8080/examples/ should automatically open with the directory listing of the example sketches. Select one of the sketches to test run `ml5.js` with some example code.
 
 ## Code Formatting
 
-To keep the coding style consistent, we will be using the Prettier formatter.
+To keep the coding style consistent, ml5.js uses the [Prettier code formatter](https://prettier.io/). Follow the instructions below to set up Prettier in your development environment.
 
-### Visual Studio Code
+### For Visual Studio Code
 
 If you are using Visual Studio Code, you can install the Prettier extension by going to the **Extensions** tab and search for "Prettier". Click on **Prettier - Code formatter** and click **Install**.
 
 Go to **File > Preferences > Settings**, search for "default formatter" and make sure **Prettier - Code formatter** is selected for **Editor: Default Formatter**.
 
-To automatically format a document when saving it, search for "format on save" in the settings and make sure **Editor: Format On Save** is checked. Otherwise, you can use the VS Code keyboard shortcut to format an opened document, which is <kbd>shift</kbd> + <kbd>alt</kbd> + <kbd>f</kbd> for Windows or <kbd>shift</kbd> + <kbd>option</kbd> + <kbd>f</kbd> for Mac by default.
+To automatically format a document when saving it, search for "format on save" in the settings and make sure **Editor: Format On Save** is checked. Otherwise, you can use the VS Code keyboard shortcut to format an opened document, which is <kbd>shift</kbd> + <kbd>alt</kbd> + <kbd>f</kbd> on Windows or <kbd>shift</kbd> + <kbd>option</kbd> + <kbd>f</kbd> on Mac by default.
 
-### Command Line
+### For Command Line
 
 You can also format a document via the command line. To format all JavaScript documents in the repo, use:
 
@@ -110,11 +107,11 @@ To format a specific document, use
 npx prettier --write path/to/file
 ```
 
-For more options with the command line, refer to the [Prettier Documentation](https://prettier.io/docs/en/cli.html)
+For more options with the command line, please refer to the [Prettier Documentation](https://prettier.io/docs/en/cli.html)
 
 ## Building the Library
 
-To build the ml5 library for production, run the following commands
+To build the ml5 library for production and publishing, run the following commands:
 
 ```
 yarn
@@ -123,19 +120,9 @@ yarn run build
 
 This will create a production version of the library in `/dist` directory.
 
-## Unit Tests
-
-To run the unit tests, run the following command
-
-```
-yarn test
-```
-
 ## Making Releases
 
-_This section is a temporary guide for contributors who wants to make a alpha release manually._
-
-1. Create a new pull request on the main branch to update the SemVer number in `package.json`. For alpha releases, simply increment the trailing number in the SemVer. For example, `"version": "0.20.0-alpha.3"` should be changed to `"version": "0.20.0-alpha.4"`.
+1. Create a new pull request on the main branch to update the SemVer number in `package.json`. Increment the version number based on [semantic versioning rules](https://semver.org/).
 
 2. Merge the pull request.
 
@@ -167,13 +154,23 @@ npm login
 7. Publish the package with the following command. You may be redirected to a browser window for authentication.
 
 ```
-npm publish --tag alpha --access public
+npm publish --access public
 ```
 
-8. The package should now be available at. (Replace [version] with the new SemVer set in step 1).
+8. The package should now be available at. (Replace `<version>` with the new SemVer set in step 1).
 
 ```
-   https://unpkg.com/ml5@[version]/dist/ml5.js
+   https://unpkg.com/ml5@<version>/dist/ml5.js
+```
+
+9. Update the example code on the ml5 web editor. Follow the instructions in the [Update p5 Web Editor Sketches](#update-p5-web-editor-sketches) section.
+
+## Unit Tests
+
+To run the unit tests, run the following command
+
+```
+yarn test
 ```
 
 ## Update p5 Web Editor Sketches
