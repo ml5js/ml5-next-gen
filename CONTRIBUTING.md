@@ -71,10 +71,98 @@ yarn run build
 
 This will create a production version of the library in `/dist` directory.
 
+## Unit Tests
+
+To run the unit tests, run the following command
+
+```
+yarn test
+```
+
+## Making Releases
+
+_This section is a temporary guide for contributors who wants to make a alpha release manually._
+
+1. Create a new pull request on the main branch to update the SemVer number in `package.json`. For alpha releases, simply increment the trailing number in the SemVer. For example, `"version": "0.20.0-alpha.3"` should be changed to `"version": "0.20.0-alpha.4"`.
+
+2. Merge the pull request.
+
+3. Switch to the main branch and make sure the code is up to date by running the following command:
+
+```
+git checkout main
+git pull
+```
+
+4. Make sure all dependencies have been installed by running the following command:
+
+```
+yarn
+```
+
+5. Build the project with the following command and wait for the build to complete:
+
+```
+yarn run build
+```
+
+6. Run the following command and log in with an npm account that has write access to the ml5 package. You may be redirected to a browser window for authentication.
+
+```
+npm login
+```
+
+7. Publish the package with the following command. You may be redirected to a browser window for authentication.
+
+```
+npm publish --tag alpha --access public
+```
+
+8. The package should now be available at. (Replace [version] with the new SemVer set in step 1).
+
+```
+   https://unpkg.com/ml5@[version]/dist/ml5.js
+```
+
+## Update p5 Web Editor Sketches
+
+To update the p5 Web Editor sketches, first create a `.env` file with the following content:
+
+```
+  P5_USERNAME=<p5 web editor username here>
+  P5_PASSWORD=<p5 web editor password here>
+
+```
+
+Then, run the following command:
+
+```
+yarn run upload-examples
+```
+
+The script will match the directory name of a local example sketch with the name of the sketch on the web editor. If a local directory name is the same as a sketch name on the web editor (case sensitive), the content of the sketch will be updated (with the sharing URL unchanged). If a local directory name is not found on the web editor, a new web editor sketch will be created. If a web editor sketch does not have a matching local directory name, the script will not automatically delete the web editor sketch. Any deletion have to be done manually on the web editor.
+
+Updating an existing sketch will not affect the collections on the p5 web editor. Newly uploaded sketches will not be automatically added to any collections.
+
+Currently, this script cannot upload non-text files. Those files that have not been uploaded will be listed and will require manual uploading.
+
+## All Contributors
+
+If you contributed to the project in any way, we would like to include you in our [contributors list in README.md](https://github.com/ml5js/ml5-next-gen?tab=readme-ov-file#contributors).
+
+To add a new contributor, create a new branch from main. Then, enter the following command in the terminal:
+
+```
+yarn all-contributors add
+```
+
+Complete the prompts in the terminal.
+
+Make a pull request to merge the new branch into main. When the branch gets merged, the new contributor will show up in README.md!
+
 ## API Implementation Guideline
 
 This guideline provides a high-level concept of what the ml5 library's API should look like, serving as a reference to keep the ml5 interface consistent and friendly.
-
 
 (Temporary note: This section does not fully reflect the current interface of the library, but rather proposes an ideal interface for future ml5.)
 
@@ -133,47 +221,91 @@ let neuralNetwork = ml5.neuralNetwork();
 - **options**: An object, specifies configuration setting for the ml5 model.
 - **modelReady**: A callback function that is called when the underlying model is ready. An instance of the ml5 is passed into the its first parameter no error occurs. Otherwise, an error object is pass into the second parameter.
 
-## Making Releases
+## Utils
 
-_This section is a temporary guide for contributors who wants to make a alpha release manually._
+This section documents the utility functions found in the `src/utils` folder.
 
-1. Create a new pull request on the main branch to update the SemVer number in `package.json`. For alpha releases, simply increment the trailing number in the SemVer. For example, `"version": "0.20.0-alpha.3"` should be changed to `"version": "0.20.0-alpha.4"`.
+### [handleOptions](src\utils\handleOptions.js)
 
-2. Merge the pull request.
+`handleOptions` is a function that filters a user defined options object based on rules in a mold object, returning a filtered options object. The function logs friendly warnings in the console when one of the user defined options violates the rules.
 
-3. Switch to the main branch and make sure the code is up to date by running the following command:
-
-```
-git checkout main
-git pull
+```js
+const filteredOptions = handleOptions(userObject, moldObject);
 ```
 
-4. Make sure all dependencies have been installed by running the following command:
+#### `userObject`
 
-```
-yarn
-```
+The `userObject` is an object defined by the user to configure the options of a model. For example, the below object configures the `handpose` model to detect a maximum of 4 hands using the "full" variant:
 
-5. Build the project with the following command and wait for the build to complete:
-
-```
-yarn run build
-```
-
-6. Run the following command and log in with an npm account that has write access to the ml5 package. You may be redirected to a browser window for authentication.
-
-```
-npm login
+```js
+const optionsObject = {
+  maxHands: 4,
+  modelType: full,
+};
 ```
 
-7. Publish the package with the following command. You may be redirected to a browser window for authentication.
+#### `moldObject`
 
-```
-npm publish --tag alpha --access public
+Inspired by [Mongoose Models](https://mongoosejs.com/docs/models.html), the `moldObject` defines how the `userObject` should be filtered. Here is an example `optionsObject`:
+
+```js
+const mold = {
+  maxHands: {
+    type: "number",
+    min: 1,
+    default: 2,
+  },
+  runtime: {
+    type: "enum",
+    enums: ["mediapipe", "tfjs"],
+    default: "mediapipe",
+  },
+  modelType: {
+    type: "enum",
+    enums: ["lite", "full"],
+    default: "full",
+  },
+};
 ```
 
-8. The package should now be available at. (Replace [version] with the new SemVer set in step 1).
+This particular `moldObject` allows the user to have a `maxHands` option with a minimum value of 1, a `runtime` option with the value of either `mediapipe` or `tfjs`, and a `modelType` option with the value of either `lite` or `full`.
 
+#### Define a Rule in `moldObject`
+
+The `moldObject` consists of key-value pairs. The key defines the name of an allowed option, and the value is an object that contains rules on how the option should be filtered. Here are the rules:
+
+- `type` (required): A string defining the correct type, can be `"number"`, `"enum"`, `"boolean"`, `"string"`, `"object"`, or `"undefined"`.
+- `default` (required): The default value in case the user does not provide a value or provides an erroneous value for the option.
+- `ignore` (optional): A boolean defining whether the key should be ignored. Defaults to false. Useful when set to a dynamically evaluated value (see section below).
+- `alias` (optional): A string defining an alternative name for this option.
+- Specifically for `type: "number"`:
+  - `min` (optional): A number defining the minimum value.
+  - `max` (optional): A number defining the maximum value.
+  - `integer` (optional): A boolean defining whether the value should be an integer. Defaults to `false`.
+  - `multipleOf` (optional): A number. When defined, the user value must be a multiple of this number.
+- Specifically for `type: "enum"`:
+  - `enums` (required): An array defining a list of valid values.
+  - `caseInsensitive` (optional): A boolean defining whether to checks the user value against the enum list case-insensitively. Defaults to `true`.
+
+#### Functions As Rules
+
+A rule can be a constant value or a function that is dynamically evaluated. The function will be called with the current filtered object as its parameter. Below is an example usage:
+
+```js
+const mold = {
+  runtime: {
+    type: "enum",
+    enums: ["mediapipe", "tfjs"],
+    default: "mediapipe",
+  },
+  maxHands: {
+    type: "number",
+    min: 1,
+    default: (filteredObject) => filteredObject.runtime === "mediapipe" ? 4 : 2;
+  },
+};
 ```
-   https://unpkg.com/ml5@[version]/dist/ml5.js
-```
+
+When the user sets the runtime to `mediapipe`, the default value of `maxHands` is `4`, and when the user sets the runtime to `tfjs`, the default `maxHands` is `2`.
+
+**Caveat:** the options gets processed from top to bottom in the order defined in the `moldObject`, and the `filteredObject` only contains the options that has already been processed. Thus, `runtime` must be placed above `maxHands` in the `moldObject` for the function to work properly.

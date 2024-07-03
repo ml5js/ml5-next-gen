@@ -18,9 +18,16 @@ export function isAbsoluteURL(str) {
  * @param {string} absoluteOrRelativeUrl
  * @returns {string}
  */
-export function getModelPath(absoluteOrRelativeUrl) {
+export function getAbsolutePath(absoluteOrRelativeUrl) {
   if (!isAbsoluteURL(absoluteOrRelativeUrl) && typeof window !== "undefined") {
-    return window.location.pathname + absoluteOrRelativeUrl;
+    // If it starts with "/" then it is relative to the domain/subdomain.
+    if (absoluteOrRelativeUrl.startsWith('/')) {
+      return window.location.origin + absoluteOrRelativeUrl;
+    }
+    // Otherwise it is relative to the current page.
+    let base = window.location.href;
+    if (!base.endsWith('/')) base += '/';
+    return base + absoluteOrRelativeUrl;
   }
   return absoluteOrRelativeUrl;
 }
@@ -45,7 +52,7 @@ class ModelLoader {
    * @param {boolean} prepend
    */
   constructor(path, expected = "model", prepend = true) {
-    const url = prepend ? getModelPath(path) : path;
+    const url = prepend ? getAbsolutePath(path) : path;
     const known = {};
     // If a specific URL is provided, make sure that we don't overwrite it with generic '/model.json'
     // But warn the user and try to correct if it seems like they passed the wrong file type.

@@ -10,8 +10,8 @@
  * Generic type T describes the type of the result.
  * @template T
  * @callback ML5Callback<T>
- * @param {unknown} error - any error thrown during the execution of the function.
- * @param {T} [result] - the expected result, if successful.
+ * @param {T | undefined} result - the expected result, if successful.
+ * @param {unknown} [error] - any error thrown during the execution of the function.
  * @return {void} - callbacks can have side effects, but should not return a value.
  */
 

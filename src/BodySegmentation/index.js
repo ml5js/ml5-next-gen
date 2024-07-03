@@ -14,6 +14,8 @@ import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import BODYPIX_PALETTE from "./BODYPIX_PALETTE";
 import { mediaReady } from "../utils/imageUtilities";
+import handleOptions from "../utils/handleOptions";
+import { handleModelName } from "../utils/handleOptions";
 
 class BodySegmentation {
   /**
@@ -23,10 +25,12 @@ class BodySegmentation {
    * @param {function} [callback] - A callback to be called when the model is ready.
    */
   constructor(modelName, options, callback) {
-    // for compatibility with p5's preload()
-    if (this.p5PreLoadExists()) window._incrementPreload();
-
-    this.modelName = modelName;
+    this.modelName = handleModelName(
+      modelName,
+      ["BodyPix", "SelfieSegmentation"],
+      "SelfieSegmentation",
+      "bodySegmentation"
+    );
     this.video = video;
     this.model = null;
     this.config = options;
@@ -44,70 +48,145 @@ class BodySegmentation {
     let pipeline;
     let modelConfig;
 
-    // select the correct model based on mask type
-    if (!this.modelName) {
-      if (this.config.maskType === "parts") {
-        this.modelName = "BodyPix";
-      } else {
-        this.modelName = "SelfieSegmentation";
-      }
-    } else {
-      if (this.config.maskType === "parts") {
-        if (this.modelName !== "BodyPix") {
-          console.warn(
-            `Expect model name to be "BodyPix" when maskType is "parts", but got "${this.modelName}". Using "BodyPix" instead.`
-          );
-          this.modelName = "BodyPix";
-        }
-      } else {
-        if (
-          this.modelName !== "SelfieSegmentation" &&
-          this.modelName !== "BodyPix"
-        ) {
-          console.warn(
-            `Expect model name to be "SelfieSegmentation" or "BodyPix", but got "${this.modelName}". Using "SelfieSegmentation" instead.`
-          );
-          this.modelName = "SelfieSegmentation";
-        }
-      }
-    }
+    //select the correct model based on mask type
+    // if (!this.modelName) {
+    //   this.modelName =
+    //     this.config.maskType === "parts" ? "BodyPix" : "SelfieSegmentation";
+    // } else {
+    //   if (this.config.maskType === "parts") {
+    //     if (this.modelName !== "BodyPix") {
+    //       console.warn(
+    //         `Expect model name to be "BodyPix" when maskType is "parts", but got "${this.modelName}". Using "BodyPix" instead.`
+    //       );
+    //       this.modelName = "BodyPix";
+    //     }
+    //   } else {
+    //     if (
+    //       this.modelName !== "SelfieSegmentation" &&
+    //       this.modelName !== "BodyPix"
+    //     ) {
+    //       console.warn(
+    //         `Expect model name to be "SelfieSegmentation" or "BodyPix", but got "${this.modelName}". Using "SelfieSegmentation" instead.`
+    //       );
+    //       this.modelName = "SelfieSegmentation";
+    //     }
+    //   }
+    // }
 
     if (this.modelName === "BodyPix") {
       pipeline = tfBodySegmentation.SupportedModels.BodyPix;
-      modelConfig = {
-        architecture: this.config.architecture ?? "ResNet50", // MobileNetV1 or ResNet 50
-        multiplier: this.config.multiplier ?? 1, // 0.5, 0.75 or 1, only for MobileNetV1
-        outputStride: this.config.outputStride ?? 16, // 8 or 16 for MobileNetV1, 16 or 32 for ResNet50
-        quantBytes: this.config.quantBytes ?? 2, // 1, 2 or 4, accuracy and model siz increase correspondingly
-      };
-      this.runtimeConfig = {
-        maskType: this.config.maskType ?? "background", // "person", "background", or "parts"
-        multiSegmentation: this.config?.multiSegmentation ?? false,
-        segmentBodyParts: this.config?.segmentBodyParts ?? true, // if bodyparts are segmented
-        flipHorizontal: this.config?.flipHorizontal ?? false, // set to true for webcam
-      };
-      if (this.runtimeConfig.maskType === "parts") {
-        // whether we need multiple outputs when multiple people detected
+      modelConfig = handleOptions(
+        this.config,
+        {
+          architecture: {
+            type: "enum",
+            enums: ["MobileNetV1", "ResNet50"],
+            default: "ResNet50",
+          },
+          multiplier: {
+            type: "enum",
+            enums: [0.5, 0.75, 1],
+            default: 1,
+            ignore: (config) => config.architecture !== "MobileNetV1",
+          },
+          outputStride: {
+            type: "enum",
+            enums: (config) =>
+              config.architecture === "MobileNetV1" ? [8, 16] : [16, 32],
+            default: 16,
+          },
+          quantBytes: {
+            type: "enum",
+            enums: [1, 2, 4],
+            default: 2,
+          },
+          modelURL: {
+            type: "string",
+            default: undefined,
+          },
+        },
+        "bodySegmentation"
+      );
+      this.runtimeConfig = handleOptions(
+        this.config,
+        {
+          maskType: {
+            type: "enum",
+            enums: ["person", "background", "parts"],
+            default: "background",
+          },
+          multiSegmentation: {
+            type: "boolean",
+            default: false,
+          },
+          segmentBodyParts: {
+            type: "boolean",
+            default: true,
+          },
+          flipHorizontal: {
+            type: "boolean",
+            alias: "flipped",
+            default: false,
+          },
+        },
+        "bodySegmentation"
+      );
+
+      // add body part constants to the instance variable
+      for (let key in BODYPIX_PALETTE) {
+        this[key] = BODYPIX_PALETTE[key].id;
       }
+
     } else {
       pipeline = tfBodySegmentation.SupportedModels.MediaPipeSelfieSegmentation;
-      modelConfig = {
-        runtime: this.config.runtime ?? "mediapipe",
-        solutionPath:
-          this.config.solution ??
-          "https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation",
-        modelType: this.config.modelType ?? "general", // "general" or "landscape"
-      };
-      this.runtimeConfig = {
-        maskType: this.config.maskType ?? "background", // "person", "background", or "parts"
-        flipHorizontal: this.config?.flipHorizontal ?? false, // set to true for webcam
-      };
-      if (this.runtimeConfig.maskType === "parts") {
-        this.runtimeConfig.maskType = "person";
-        console.warn(
-          `Selfie Segmentation model does not segment individual body parts, using maskType "person" instead.`
-        );
-      }
+      modelConfig = handleOptions(
+        this.config,
+        {
+          runtime: {
+            type: "enum",
+            enums: ["mediapipe, tfjs"],
+            default: "tfjs",
+          },
+          modelType: {
+            type: "enum",
+            enums: ["general", "landscape"],
+            default: "general",
+          },
+          solutionPath: {
+            type: "string",
+            default:
+              "https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation",
+            ignore: (config) => config.runtime !== "mediapipe",
+          },
+          modelURL: {
+            type: "string",
+            default: undefined,
+          },
+        },
+        "bodySegmentation"
+      );
+
+      this.runtimeConfig = handleOptions(
+        this.config,
+        {
+          maskType: {
+            type: "enum",
+            enums: ["person", "background"],
+            default: "background",
+          },
+          flipHorizontal: {
+            type: "boolean",
+            alias: "flipped",
+            default: false,
+          },
+        },
+        "bodySegmentation"
+      );
+
+      // add constants to the instance variable
+      this.BACKGROUND = 0;
+      this.PERSON = 255;
+
     }
 
     await tf.ready();
@@ -115,9 +194,6 @@ class BodySegmentation {
       pipeline,
       modelConfig
     );
-
-    // for compatibility with p5's preload()
-    if (this.p5PreLoadExists) window._decrementPreload();
 
     return this;
   }
@@ -142,6 +218,22 @@ class BodySegmentation {
     );
 
     const result = {};
+
+    // add array of raw values to output
+    if (segmentation.length) {
+      result.imageData = await segmentation[0].mask.toImageData();
+      let data = new Array(result.imageData.width * result.imageData.height);
+      for (let i=0; i < data.length; i++) {
+        data[i] = result.imageData.data[i*4];
+      }
+      result.data = data;
+    } else {
+      result.data = [];
+      result.imageData = null;
+    }
+    // Note: our output doesn't handle BodyPix' multi-segmentation mode
+    // (which defaults to false) - this only looks at the first segmentation
+
     switch (this.runtimeConfig.maskType) {
       case "background":
         result.maskImageData = await tfBodySegmentation.toBinaryMask(
@@ -161,7 +253,6 @@ class BodySegmentation {
           tfBodySegmentation.bodyPixMaskValueToRainbowColor,
           { r: 255, g: 255, b: 255, a: 255 }
         );
-        result.bodyParts = BODYPIX_PALETTE;
     }
     result.mask = this.generateP5Image(result.maskImageData);
 
@@ -222,6 +313,22 @@ class BodySegmentation {
       );
 
       const result = {};
+
+      // add array of raw values to output
+      if (segmentation.length) {
+        result.imageData = await segmentation[0].mask.toImageData();
+        let data = new Array(result.imageData.width * result.imageData.height);
+        for (let i=0; i < data.length; i++) {
+          data[i] = result.imageData.data[i*4];
+        }
+        result.data = data;
+      } else {
+        result.data = [];
+        result.imageData = null;
+      }
+      // Note: our output doesn't handle BodyPix' multi-segmentation mode
+      // (which defaults to false) - this only looks at the first segmentation
+
       switch (this.runtimeConfig.maskType) {
         case "background":
           result.maskImageData = await tfBodySegmentation.toBinaryMask(
@@ -241,7 +348,6 @@ class BodySegmentation {
             tfBodySegmentation.bodyPixMaskValueToRainbowColor,
             { r: 255, g: 255, b: 255, a: 255 }
           );
-          result.bodyParts = BODYPIX_PALETTE;
       }
       result.mask = this.generateP5Image(result.maskImageData);
 
@@ -268,21 +374,6 @@ class BodySegmentation {
     } else {
       return imageData;
     }
-  }
-
-  /**
-   * Check if p5.js' preload() function is present
-   * @returns {boolean} true if preload() exists
-   *
-   * @private
-   */
-  p5PreLoadExists() {
-    if (typeof window === "undefined") return false;
-    if (typeof window.p5 === "undefined") return false;
-    if (typeof window.p5.prototype === "undefined") return false;
-    if (typeof window.p5.prototype.registerPreloadMethod === "undefined")
-      return false;
-    return true;
   }
 }
 

@@ -1,7 +1,8 @@
 import * as tf from "@tensorflow/tfjs";
 import callCallback from "../utils/callcallback";
 import modelLoader from "../utils/modelLoader";
-
+import handleArguments from "../utils/handleArguments";
+import { handleModelName } from "../utils/handleOptions";
 /**
  * Initializes the Sentiment demo.
  */
@@ -51,11 +52,17 @@ class Sentiment {
    */
   constructor(modelName, callback) {
     /**
-     * Boolean value that specifies if the model has loaded.
-     * @type {boolean}
+     * Promise that resolves when the model has loaded.
+     * @type {Promise<Sentiment>}
      * @public
      */
-    this.ready = callCallback(this.loadModel(modelName), callback);
+    this.modelName = handleModelName(
+      modelName,
+      ["MovieReviews"],
+      "MovieReviews",
+      "sentiment"
+    );
+    this.ready = callCallback(this.loadModel(), callback);
   }
 
   /**
@@ -63,14 +70,13 @@ class Sentiment {
    */
 
   async loadModel(modelName) {
+    await tf.ready();
     const modelUrl =
-      modelName.toLowerCase() === "moviereviews"
+      this.modelName.toLowerCase() === "moviereviews"
         ? "https://storage.googleapis.com/tfjs-models/tfjs/sentiment_cnn_v1/"
-        : modelName;
+        : this.modelName;
 
     const loader = modelLoader(modelUrl, "model");
-
-    await tf.setBackend("webgl");
 
     // load in parallel
     const [model, sentimentMetadata] = await Promise.all([
@@ -96,12 +102,19 @@ class Sentiment {
 
   /**
    * Scores the sentiment of given text with a value between 0 ("negative") and 1 ("positive").
-   * @param {String} text - string of text to predict.
-   * @returns {{score: Number}}
+   * @param {string} text - string of text to predict.
+   * @param {function} callback - Optional. A callback function that is called once the prediction is done.
+   * @returns {{confidence: number}}
    */
-  predict(text) {
+  async predict(...inputs) {
+    const argumentObject = handleArguments(...inputs);
+    const { string, callback } = argumentObject;
+    argumentObject.require(
+      "string",
+      "A string argument is required for sentiment.predict function."
+    );
     // Convert to lower case and remove all punctuations.
-    const inputText = text
+    const inputText = string
       .trim()
       .toLowerCase()
       .replace(/[.,?!]/g, "")
@@ -120,16 +133,20 @@ class Sentiment {
     const paddedSequence = padSequences([sequence], this.maxLen);
     const input = tf.tensor2d(paddedSequence, [1, this.maxLen]);
     const predictOut = this.model.predict(input);
-    const score = predictOut.dataSync()[0];
+    const predictData = await predictOut.data();
+    const confidence = predictData[0];
     predictOut.dispose();
     input.dispose();
 
-    return {
-      score,
-    };
+    if (callback) callback({ confidence });
+    return { confidence };
   }
 }
 
-const sentiment = (modelName, callback) => new Sentiment(modelName, callback);
+const sentiment = (...inputs) => {
+  const { string, callback } = handleArguments(...inputs);
+  const instance = new Sentiment(string, callback);
+  return instance;
+};
 
 export default sentiment;

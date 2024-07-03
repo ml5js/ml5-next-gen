@@ -1,12 +1,12 @@
-import * as tf from '@tensorflow/tfjs';
-import p5Utils from './p5Utils';
+import * as tf from "@tensorflow/tfjs";
+import p5Utils from "./p5Utils";
 
 /**
-* @typedef {Object} GeneratedImageResult
-* @property {ImageData} segmentationResult - raw segmentation results
-* @property {Blob} blob - image blob
-* @property {p5.Image | null} image - p5 Image, if p5 is available.
-*/
+ * @typedef {Object} GeneratedImageResult
+ * @property {ImageData} segmentationResult - raw segmentation results
+ * @property {Blob} blob - image blob
+ * @property {p5.Image | null} image - p5 Image, if p5 is available.
+ */
 
 /**
  * Utility function for returning an image in multiple formats.
@@ -16,7 +16,7 @@ import p5Utils from './p5Utils';
  *
  * Accepts options as an object with property `returnTensors` so that models can pass this.config.
  *
- * @param {ImageData} 
+ * @param {ImageData}
  * @return {Promise<GeneratedImageResult>}
  */
 export default async function generatedImageResult(segmentationResult) {
