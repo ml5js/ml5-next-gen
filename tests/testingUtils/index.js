@@ -1,3 +1,8 @@
+// Copyright (c) 2018-2024 ml5
+//
+// This software is open source and the ml5.js license.
+// https://github.com/ml5js/ml5-next-gen/blob/88f7a3b260c59de84a7e4dab181cd3f69ba19bb1/LICENSE.md
+
 export const asyncLoadImage = async (src) => {
   const img = new Image();
   if (src.startsWith("http")) {
@@ -25,4 +30,3 @@ export const randomImageData = (width = 200, height = 100) => {
   // Initialize a new ImageData object
   return { width, height, data: array };
 };
-

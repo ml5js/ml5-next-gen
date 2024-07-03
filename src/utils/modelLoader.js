@@ -1,3 +1,8 @@
+// Copyright (c) 2018-2024 ml5
+//
+// This software is open source and the ml5.js license.
+// https://github.com/ml5js/ml5-next-gen/blob/88f7a3b260c59de84a7e4dab181cd3f69ba19bb1/LICENSE.md
+
 import * as tf from "@tensorflow/tfjs";
 import axios from "axios";
 
@@ -21,12 +26,12 @@ export function isAbsoluteURL(str) {
 export function getAbsolutePath(absoluteOrRelativeUrl) {
   if (!isAbsoluteURL(absoluteOrRelativeUrl) && typeof window !== "undefined") {
     // If it starts with "/" then it is relative to the domain/subdomain.
-    if (absoluteOrRelativeUrl.startsWith('/')) {
+    if (absoluteOrRelativeUrl.startsWith("/")) {
       return window.location.origin + absoluteOrRelativeUrl;
     }
     // Otherwise it is relative to the current page.
     let base = window.location.href;
-    if (!base.endsWith('/')) base += '/';
+    if (!base.endsWith("/")) base += "/";
     return base + absoluteOrRelativeUrl;
   }
   return absoluteOrRelativeUrl;

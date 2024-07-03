@@ -1,7 +1,7 @@
-// Copyright (c) 2019-2023 ml5
+// Copyright (c) 2019-2024 ml5
 //
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
+// This software is open source and the ml5.js license:
+// https://github.com/ml5js/ml5-next-gen/blob/88f7a3b260c59de84a7e4dab181cd3f69ba19bb1/LICENSE.md
 
 /*
  * BodyPix: Real-time Person Segmentation in the Browser
@@ -136,7 +136,6 @@ class BodySegmentation {
       for (let key in BODYPIX_PALETTE) {
         this[key] = BODYPIX_PALETTE[key].id;
       }
-
     } else {
       pipeline = tfBodySegmentation.SupportedModels.MediaPipeSelfieSegmentation;
       modelConfig = handleOptions(
@@ -186,7 +185,6 @@ class BodySegmentation {
       // add constants to the instance variable
       this.BACKGROUND = 0;
       this.PERSON = 255;
-
     }
 
     await tf.ready();
@@ -223,8 +221,8 @@ class BodySegmentation {
     if (segmentation.length) {
       result.imageData = await segmentation[0].mask.toImageData();
       let data = new Array(result.imageData.width * result.imageData.height);
-      for (let i=0; i < data.length; i++) {
-        data[i] = result.imageData.data[i*4];
+      for (let i = 0; i < data.length; i++) {
+        data[i] = result.imageData.data[i * 4];
       }
       result.data = data;
     } else {
@@ -318,8 +316,8 @@ class BodySegmentation {
       if (segmentation.length) {
         result.imageData = await segmentation[0].mask.toImageData();
         let data = new Array(result.imageData.width * result.imageData.height);
-        for (let i=0; i < data.length; i++) {
-          data[i] = result.imageData.data[i*4];
+        for (let i = 0; i < data.length; i++) {
+          data[i] = result.imageData.data[i * 4];
         }
         result.data = data;
       } else {

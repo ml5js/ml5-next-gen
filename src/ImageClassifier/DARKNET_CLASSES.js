@@ -1,11 +1,11 @@
-// Copyright (c) 2018 ml5
+// Copyright (c) 2018-2024 ml5
 //
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
-/* eslint-disable */
+// This software is open source and the ml5.js license.
+// https://github.com/ml5js/ml5-next-gen/blob/88f7a3b260c59de84a7e4dab181cd3f69ba19bb1/LICENSE.md
 
 // These classes are based on the 1000 classes from the ImageNet dataset
 // https://www.image-net.org/
+
 export default [
   "kit fox",
   "English setter",

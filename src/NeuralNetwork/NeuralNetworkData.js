@@ -1,7 +1,12 @@
+// Copyright (c) 2018-2024 ml5
+//
+// This software is open source and the ml5.js license.
+// https://github.com/ml5js/ml5-next-gen/blob/88f7a3b260c59de84a7e4dab181cd3f69ba19bb1/LICENSE.md
+
 import * as tf from "@tensorflow/tfjs";
 import axios from "axios";
 import { saveBlob } from "../utils/io";
-import modelLoader from '../utils/modelLoader';
+import modelLoader from "../utils/modelLoader";
 import nnUtils from "./NeuralNetworkUtils";
 
 class NeuralNetworkData {
@@ -532,7 +537,6 @@ class NeuralNetworkData {
    */
   async loadDataFromUrl(dataUrl, inputs, outputs) {
     try {
-
       if (dataUrl.endsWith(".csv")) {
         await this.loadCSV(dataUrl, inputs, outputs);
       } else if (dataUrl.endsWith(".json")) {
@@ -716,7 +720,7 @@ class NeuralNetworkData {
         file.name.includes("_meta.json")
       );
       if (!file) {
-        console.warn('no model_meta.json file found in FileList');
+        console.warn("no model_meta.json file found in FileList");
         return;
       }
       const text = await file.text();

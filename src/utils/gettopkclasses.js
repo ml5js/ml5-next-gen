@@ -1,7 +1,8 @@
-// Copyright (c) 2018 - 2024 ml5
+// Copyright (c) 2018-2024 ml5
 //
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
+// This software is open source and the ml5.js license.
+// https://github.com/ml5js/ml5-next-gen/blob/88f7a3b260c59de84a7e4dab181cd3f69ba19bb1/LICENSE.md
+
 import * as tf from "@tensorflow/tfjs";
 
 /**
@@ -12,14 +13,19 @@ import * as tf from "@tensorflow/tfjs";
  * @param {boolean} [keepTensor] - The logits will be automatically disposed unless this is `true`.
  * @return {Promise<Array<{ label: string, confidence: number}>>} - An array of objects with properties `label` and `confidence`.
  */
-export default async function getTopKClasses(logits, topK, classes, keepTensor = false ) {
+export default async function getTopKClasses(
+  logits,
+  topK,
+  classes,
+  keepTensor = false
+) {
   const top = tf.topk(logits, topK, true);
   const values = await top.values.data();
   const indices = await top.indices.data();
   const result = Array.from(indices).map((index, i) => ({
     confidence: values[i],
-    label: classes ? classes[index] : index.toString(10)
-  }))
+    label: classes ? classes[index] : index.toString(10),
+  }));
   top.values.dispose();
   top.indices.dispose();
   if (!keepTensor && logits instanceof tf.Tensor) {

@@ -1,7 +1,7 @@
 // Copyright (c) 2018-2024 ml5
 //
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
+// This software is open source and the ml5.js license.
+// https://github.com/ml5js/ml5-next-gen/blob/88f7a3b260c59de84a7e4dab181cd3f69ba19bb1/LICENSE.md
 
 import { asyncLoadImage } from "../testingUtils";
 import bodyPose from "../../src/Bodypose";
@@ -16,7 +16,6 @@ describe.skip("bodypose", () => {
   let image;
 
   beforeAll(async () => {
-
     // TODO: this should not be necessary! Should already be handled by setupTests.js.
     if (!global.fetch) {
       global.fetch = crossFetch;
@@ -29,12 +28,11 @@ describe.skip("bodypose", () => {
   });
 
   it("instantiates bodyPose", () => {
-    expect(myBodyPose).toBeDefined()
+    expect(myBodyPose).toBeDefined();
     expect(myBodyPose.model).toBeDefined();
   });
 
   it("detects poses in image", async () => {
-
     // Result should be an array with a single object containing the detection.
     const result = await myBodyPose.detect(image);
     expect(result).toHaveLength(1);
@@ -53,12 +51,12 @@ describe.skip("bodypose", () => {
     expect(nose.score).toBeCloseTo(0.721, 2);
   });
 
-  it("calls the user's callback",(done) => {
+  it("calls the user's callback", (done) => {
     expect.assertions(1);
     const callback = (result) => {
       expect(result).toHaveLength(1); // don't need to repeat the rest
       done();
-    }
+    };
     myBodyPose.detect(image, callback);
   });
 });

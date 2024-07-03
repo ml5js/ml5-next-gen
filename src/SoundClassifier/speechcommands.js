@@ -1,12 +1,12 @@
-// Copyright (c) 2018 ml5
+// Copyright (c) 2018-2024 ml5
 //
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
+// This software is open source and the ml5.js license.
+// https://github.com/ml5js/ml5-next-gen/blob/88f7a3b260c59de84a7e4dab181cd3f69ba19bb1/LICENSE.md
 
 import * as tfjsSpeechCommands from "@tensorflow-models/speech-commands";
 import getTopKClasses from "../utils/gettopkclasses";
 import modelLoader from "../utils/modelLoader";
-import {instance} from "./index";
+import { instance } from "./index";
 
 export class SpeechCommands {
   constructor(options) {
@@ -35,13 +35,13 @@ export class SpeechCommands {
             result.scores,
             topk,
             this.allLabels
-          );          
+          );
           // if classifyStop is called stop the continuous listening
-          if (instance.signalStop){
+          if (instance.signalStop) {
             this.model.stopListening();
             instance.isClassifying = false;
-            return
-          } 
+            return;
+          }
           return cb(classes);
         }
         return cb(null, `ERROR: Cannot find scores in result: ${result}`);

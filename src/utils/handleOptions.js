@@ -1,3 +1,8 @@
+// Copyright (c) 2018-2024 ml5
+//
+// This software is open source and the ml5.js license.
+// https://github.com/ml5js/ml5-next-gen/blob/88f7a3b260c59de84a7e4dab181cd3f69ba19bb1/LICENSE.md
+
 const errorMessages = {
   type: (modelName, keyName, userType, requiredType, defaultValue) =>
     `🟪ml5.js warns: The '${keyName}' option for ${modelName} has to be set to a ${requiredType}, but it is being set to a ${userType} instead.\n\nml5.js is using default value of '${defaultValue}'.`,

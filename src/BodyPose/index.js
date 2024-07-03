@@ -1,12 +1,13 @@
-// Copyright (c) 2018-2023 ml5
+// Copyright (c) 2018-2024 ml5
 //
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
+// This software is open source and the ml5.js license:
+// https://github.com/ml5js/ml5-next-gen/blob/88f7a3b260c59de84a7e4dab181cd3f69ba19bb1/LICENSE.md
 
 /*
-BodyPose
-Ported from pose-detection at Tensorflow.js
-*/
+ * The ml5.js BodyPose is a pretrained full-body pose estimation model that
+ * can estimate poses and track key body parts in real-time. It uses
+ * TensorFlow's MoveNet and BlazePose models under the hood.
+ */
 
 import * as tf from "@tensorflow/tfjs";
 import * as poseDetection from "@tensorflow-models/pose-detection";

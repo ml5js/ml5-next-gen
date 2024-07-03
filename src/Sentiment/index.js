@@ -1,8 +1,14 @@
+// Copyright (c) 2018-2024 ml5
+//
+// This software is open source and the ml5.js license.
+// https://github.com/ml5js/ml5-next-gen/blob/88f7a3b260c59de84a7e4dab181cd3f69ba19bb1/LICENSE.md
+
 import * as tf from "@tensorflow/tfjs";
 import callCallback from "../utils/callcallback";
 import modelLoader from "../utils/modelLoader";
 import handleArguments from "../utils/handleArguments";
 import { handleModelName } from "../utils/handleOptions";
+
 /**
  * Initializes the Sentiment demo.
  */

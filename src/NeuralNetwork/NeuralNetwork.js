@@ -1,3 +1,8 @@
+// Copyright (c) 2018-2024 ml5
+//
+// This software is open source and the ml5.js license.
+// https://github.com/ml5js/ml5-next-gen/blob/88f7a3b260c59de84a7e4dab181cd3f69ba19bb1/LICENSE.md
+
 import * as tf from "@tensorflow/tfjs";
 import { saveBlob } from "../utils/io";
 import { randomGaussian } from "../utils/random";
@@ -206,7 +211,9 @@ class NeuralNetwork {
     if (filesOrPath instanceof FileList) {
       const files = Array.from(filesOrPath);
       // find the correct files
-      const model = files.find((file) => file.name.includes(".json") && !file.name.includes("_meta"));
+      const model = files.find(
+        (file) => file.name.includes(".json") && !file.name.includes("_meta")
+      );
       const weights = files.find((file) => file.name.includes(".bin"));
       // load the model
       this.model = await tf.loadLayersModel(
@@ -218,7 +225,7 @@ class NeuralNetwork {
           // Override the weights path from the JSON weightsManifest
           weightUrlConverter: (weightFileName) => {
             return filesOrPath.weights || weightFileName;
-          }
+          },
         })
       );
     } else {

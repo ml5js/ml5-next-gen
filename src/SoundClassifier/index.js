@@ -1,7 +1,7 @@
-// Copyright (c) 2019-2023 ml5
+// Copyright (c) 2019-2024 ml5
 //
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
+// This software is open source and the ml5.js license.
+// https://github.com/ml5js/ml5-next-gen/blob/88f7a3b260c59de84a7e4dab181cd3f69ba19bb1/LICENSE.md
 
 /*
 Sound Classifier using pre-trained networks
@@ -98,7 +98,7 @@ class SoundClassifier {
   /**
    * Used to stop the continuous classification of a video
    */
-   classifyStop() {
+  classifyStop() {
     if (this.isClassifying) {
       this.signalStop = true;
     }
