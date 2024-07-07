@@ -240,7 +240,7 @@ let neuralNetwork = ml5.neuralNetwork();
 
 5. When possible, all parameters should be optional and have default values in lieu of user definition.
 
-6. ml5 should throw a friendly warning when the user passes in an invalid parameter, and proceed with the default value when possible. For example:
+6. ml5.js should throw a friendly warning when the user passes in an invalid parameter, and proceed with the default value when possible. For example:
    ```javascript
    let bodyPose = ml5.bodyPose({ modelType: "foo" });
    // Console:
