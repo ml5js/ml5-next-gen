@@ -111,7 +111,7 @@ For more options with the command line, please refer to the [Prettier Documentat
 
 ## Building the Library
 
-To build the ml5 library for production and publishing, run the following commands:
+To build the ml5.js library for production and publishing, run the following commands:
 
 ```
 yarn
