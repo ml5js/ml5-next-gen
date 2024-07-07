@@ -211,7 +211,7 @@ Make a pull request to merge the new branch into main. When the branch gets merg
 
 ## API Implementation Guideline
 
-This guideline provides a high-level concept of what the ml5 library's API should look like, serving as a reference to keep the ml5 interface consistent and friendly.
+This guideline provides a high-level concept of what the ml5.js library's API should look like, serving as a reference to keep the ml5.js interface consistent and friendly.
 
 (Temporary note: This section does not fully reflect the current interface of the library, but rather proposes an ideal interface for future ml5.)
 
