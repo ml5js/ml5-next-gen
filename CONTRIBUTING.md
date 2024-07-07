@@ -219,7 +219,7 @@ This guideline provides a high-level concept of what the ml5.js library's API sh
 
 ### General Guidelines
 
-1. All ml5 functions called by the user should be defined in camel case.
+1. All ml5.hs functions called by the user are defined with "camelCase".
 
 2. The user accesses an instance of the ml5 model by calling the factory function `ml5.<modelName>`. For example:
 
