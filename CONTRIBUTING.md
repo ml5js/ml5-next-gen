@@ -77,7 +77,7 @@ You should see something similar to this in the terminal:
 webpack 5.76.1 compiled successfully in 8360 ms
 ```
 
-A local server have been started, hosting a built version of the ml5 library at http://localhost:8080/dist/ml5.js. While the server is running, Webpack will automatically rebuild the library if you change and save any file in the `/src` folder.
+A local server will start, hosting a built version of the ml5.js library at http://localhost:8080/dist/ml5.js. While the server is running, Webpack will automatically rebuild the library if you change and save any file in the `/src` folder.
 
 A webpage at http://localhost:8080/examples/ should automatically open with the directory listing of the example sketches. Select one of the sketches to test run `ml5.js` with some example code.
 
