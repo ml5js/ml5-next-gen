@@ -38,7 +38,7 @@ Here is a list of the repositories you most likely will be working with:
 4. Make a `forked` copy of the ml5-library and create it branch with a meaningful name such as `fix-detection-results`. 🍴
 5. Jam on some coding sessions, commit your changes with descriptive commit messages, and push your changes to your branch. 💻
 6. When ready, [make a pull request to the `main` branch of ml5-next-gen](https://github.com/ml5js/ml5-next-gen/compare). 📄
-7. The ml5 dev team will review your changes and quite likely correspond with you on your changes. When all looks good, your changes will be merged in and released with the next public update to the library. 🎉
+7. The ml5.js dev team will review your changes and reply with feedback or questions. When all looks good, your changes will be merged in and released with the next public update to the library. 🎉
 8. Hi-fives 👏 and hugs 🤗
 
 ## Setup Development Environment
