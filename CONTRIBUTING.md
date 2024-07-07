@@ -228,7 +228,7 @@ let bodyPose = ml5.bodyPose("BlazePose");
 let neuralNetwork = ml5.neuralNetwork();
 ```
 
-4. When a string parameter is passed into any ml5 function as a configuration setting, it should be matched case insensitively For example, the following calls produce the same result:
+4. When a string parameter is passed into any ml5.js function as a configuration setting, it is matched case _insensitively_ . For example, the following calls produce the same result:
 
    ```javascript
    let bodyPose = ml5.bodyPose("BlazePose", { modelType: "Full" });
