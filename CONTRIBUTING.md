@@ -20,7 +20,7 @@ Welcome to the ml5.js project! Developing ml5.js is not just about developing ma
 
 ## The ml5.js Ecosystem
 
-ml5.js is comprised a number of sister repositories which you can find at the ml5 github organization - [github.com/ml5js](https://github.com/ml5js). As a contributor of ml5 you should be aware of the other parallel repositories of the ml5 project.
+ml5.js is comprised a number of related repositories which you can find at the ml5.js github organization - [github.com/ml5js](https://github.com/ml5js). As a contributor of ml5.js you should be aware of the other parallel repositories of the ml5 project.
 
 Here is a list of the repositories you most likely will be working with:
 
