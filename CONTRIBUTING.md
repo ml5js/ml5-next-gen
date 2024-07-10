@@ -260,7 +260,7 @@ let neuralNetwork = ml5.neuralNetwork();
 
 9. ml5's should call the callback functions with the pattern `callback(result, error)`.
 
-10. The factory functions `ml5.<modelName>` should support p5's preload feature as well as the callback interface. Thus, the factory functions should synchronously/immediately return an instance of the ml5 model and load the underlying model asynchronously before calling the callback/releasing p5's preload hook.
+10. The factory functions `ml5.<modelName>` should support p5.js's `preload()` as well as the callback interface. When called in `preload()`, the factory functions should synchronously return an instance of the ml5.js model. Otherwise, the model is loaded asynchronously before calling the callback.
 
 ### Image/Video-Based Detection Models
 
