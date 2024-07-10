@@ -169,11 +169,13 @@ npm publish --access public
 
 ## Unit Tests
 
-To run the unit tests, run the following command
+To run the unit tests, run the following command:
 
 ```
 yarn test
 ```
+
+Currently, ml5 have a very limited number of unit tests. Tests is an area we are investigating, and we hope to improve it in the near future. We encourage anyone with experience or knowledge about unit tests to open an issue for discussion and contribution.
 
 ## Update p5 Web Editor Sketches
 
