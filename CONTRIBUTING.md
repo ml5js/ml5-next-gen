@@ -1,6 +1,6 @@
 # How to Contribute
 
-_last updated: 3, July 2024_
+_last updated: 10, July 2024_
 
 Welcome to the ml5.js project! Developing ml5.js is not just about developing machine learning software, it is about making machine learning approachable for a broad audience of artists, creative coders, and students. The library provides access to machine learning algorithms and models in the browser, building on top of TensorFlow.js with no other external dependencies. The library is supported by code examples, tutorials, and sample datasets with an emphasis on ethical computing. Bias in data, stereotypical harms, and responsible crowdsourcing are part of the documentation around data collection and usage. We're building friendly machine learning for the web - we're glad you're here!
 
@@ -20,39 +20,41 @@ Welcome to the ml5.js project! Developing ml5.js is not just about developing ma
 
 ## The ml5.js Ecosystem
 
-ml5.js is comprised a number of related repositories which you can find at the ml5.js github organization - [github.com/ml5js](https://github.com/ml5js). As a contributor of ml5.js you should be aware of the other parallel repositories of the ml5 project.
+ml5.js is comprised a number of related repositories which you can find at the ml5.js github organization - [github.com/ml5js](https://github.com/ml5js). As a contributor of ml5.js you should be aware of the other parallel repositories of the ml5.js project.
 
 Here is a list of the repositories you most likely will be working with:
 
-- **[ml5-next-gen (this repository)](https://github.com/ml5js/ml5-next-gen)**: The main repository for the ml5.js library. The source code in the library is buldled into the `ml5.js` library files and gets published on [npm](https://www.npmjs.com/package/ml5).
-- **[ml5-website-v03-docsify](https://github.com/ml5js/ml5-website-v02-docsify)**: The repository for the [ml5.js documentatipn webpage](https://docs.ml5js.org), which is built using [Docsify](https://docsify.js.org/). It contains documentation and and reference materials for for the ml5.js library models.
+- **[ml5-next-gen (this repository)](https://github.com/ml5js/ml5-next-gen)**: The main repository for the ml5.js library. The source code in this repository is bundled into the `ml5.js` library files and gets published on [npm](https://www.npmjs.com/package/ml5).
+- **[ml5-website-v03-docsify](https://github.com/ml5js/ml5-website-v02-docsify)**: The repository for the [ml5.js documentation webpage](https://docs.ml5js.org), which is built using [Docsify](https://docsify.js.org/). It contains documentation and and reference materials for the ml5.js library users.
 - **[ml5-website-v02-gatsby](https://github.com/ml5js/ml5-website-v02-gatsby)**: The repository for the [main ml5.js website](https://ml5js.org), which is built using [Gatsby](https://www.gatsbyjs.com/). It contains information about the ml5.js project, community, and resources.
 
-## Contributing Workflow
+## Contribution Workflow
 
-**Preamble**: If you're interested in contributing to the ml5 project, just know you can always open an issue to ask questions or flag things that may seem confusing, unclear or intimidating. Our goal is to make ml5 as open and supportive as possible for those who want to be involved. Ok, now that's out of the way, here's how a general workflow for what contributions might look like to ml5.
+**Preamble**: If you're interested in contributing to the ml5.js project, just know you can always open an issue to ask questions or flag things that may seem confusing, unclear or intimidating. Our goal is to make ml5.js as open and supportive as possible for those who want to be involved. Ok, now that's out of the way, here's how a general workflow for what contributions to ml5.js might look like.
 
-1. Read the CONTRIBUTING.md docs. ❤️
-2. Take a peek at the [issues](https://github.com/ml5js/ml5-next-gen/issues) and identify something you'd like to address **or** file an issue about a bug you discovered. The issue could be addressing a bug, adding a new feature, updating an existing feature, or anything else. 🚩
+1. Read the CONTRIBUTING.md document. ❤️
+2. Take a peek at the [issues](https://github.com/ml5js/ml5-next-gen/issues) page and identify something you'd like to address **or** file a new issue. The issue could be about fixing a bug, adding a new feature, updating an existing feature, or anything else. 🚩
 3. Make a comment on the existing issue **or** indicate on your new issue that you're curious to do your best to solve it. 🔬
-4. Make a `forked` copy of the ml5-library and create it branch with a meaningful name such as `fix-detection-results`. 🍴
+4. Make a forked copy of the ml5-next-gen repository and create a branch with a meaningful name such as `fix-detection-results`. 🍴
 5. Jam on some coding sessions, commit your changes with descriptive commit messages, and push your changes to your branch. 💻
 6. When ready, [make a pull request to the `main` branch of ml5-next-gen](https://github.com/ml5js/ml5-next-gen/compare). 📄
 7. The ml5.js dev team will review your changes and reply with feedback or questions. When all looks good, your changes will be merged in and released with the next public update to the library. 🎉
 8. Hi-fives 👏 and hugs 🤗
 
+**Note**: If you are new to making contributions on GitHub, a great resource to check out is [first-contributions](https://github.com/firstcontributions/first-contributions), a repository that walks you through the process of making your first contribution. If you have any questions about the contribution workflow of ml5.js, please don't hesitate to reach out to the ml5.js team.
+
 ## Setup Development Environment
 
-We use node.js as our development environment for bundling code, running tests, and more. If you've never used node.js before, please [download and install Node.js here](https://nodejs.org/en/download/prebuilt-installer). Please select version 20 (`v20.x.x (LTS)`) of Node.js for your operating system and architecture of your computer.
+We use node.js as our development environment for bundling code, running tests, and more. If you've never used node.js before, please [download and install Node.js here](https://nodejs.org/en/download/prebuilt-installer). Please select the lts/iron (`v20.x.x (LTS)`) of Node.js for your operating system and architecture of your computer.
 
-If you already have a different version of Node.js, it might still be compatible with the library. However, we recommend installing [nvm](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating), a Node.js version manager and using Node.js version 20. Once you have nvm installed, you can run the following commands:
+If you already have a different version of Node.js installed, we recommend installing [nvm](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating), a Node.js version manager that allows you to switch between different versions of Node.js. and using Node.js version 20. Once you have nvm installed, you can run the following commands:
 
 ```
-nvm install 20
-nvm use 20
+nvm install lts/iron
+nvm use lts/iron
 ```
 
-We use [Yarn](https://yarnpkg.com/) instead of npm to help us better manage dependencies from TensorFlow.js. Yarn is a newer package manager that is very similar to NPM. [Here is a cheat sheet](https://www.digitalocean.com/community/tutorials/nodejs-npm-yarn-cheatsheet) for npm vs Yarn commands.
+We use [Yarn](https://yarnpkg.com/) instead of npm to help us better manage dependencies from TensorFlow.js. Yarn is a newer package manager that is very similar to NPM. [Here is a cheat sheet for NPM vs Yarn commands](https://www.digitalocean.com/community/tutorials/nodejs-npm-yarn-cheatsheet).
 
 Install yarn with the following command:
 
@@ -107,7 +109,7 @@ To format a specific document, use
 npx prettier --write path/to/file
 ```
 
-For more options with the command line, please refer to the [Prettier Documentation](https://prettier.io/docs/en/cli.html)
+For more options with the command line, please refer to the [Prettier Documentation](https://prettier.io/docs/en/cli.html).
 
 ## Building the Library
 
@@ -145,7 +147,7 @@ yarn
 yarn run build
 ```
 
-6. Run the following command and log in with an npm account that has write access to the ml5 package. You may be redirected to a browser window for authentication.
+6. Run the following command and log in with an npm account that has write access to the `ml5` package. You may be redirected to a browser window for authentication.
 
 ```
 npm login
@@ -163,7 +165,7 @@ npm publish --access public
    https://unpkg.com/ml5@<version>/dist/ml5.js
 ```
 
-9. Update the example code on the ml5 web editor. Follow the instructions in the [Update p5 Web Editor Sketches](#update-p5-web-editor-sketches) section.
+9. Update the example code on the p5 web editor. Follow the instructions in the [Update p5 Web Editor Sketches](#update-p5-web-editor-sketches) section.
 
 ## Unit Tests
 
@@ -213,15 +215,15 @@ Make a pull request to merge the new branch into main. When the branch gets merg
 
 This guideline provides a high-level concept of what the ml5.js library's API should look like, serving as a reference to keep the ml5.js interface consistent and friendly.
 
-(Temporary note: This section does not fully reflect the current interface of the library, but rather proposes an ideal interface for future ml5.)
+(Temporary note: This section does not fully reflect the current interface of the library, but rather proposes an ideal interface for future ml5.js.)
 
 (Temporary note 2: This section is work in progress.)
 
 ### General Guidelines
 
-1. All ml5.hs functions called by the user are defined with "camelCase".
+1. All ml5.js functions called by the user are defined with "camelCase".
 
-2.  All ml5.js models are instantiated with a factory function with the style `ml5.<modelName>`. For example:
+2. All ml5.js models are instantiated with a factory function with the style `ml5.<modelName>`. For example:
 
 ```javascript
 let bodyPose = ml5.bodyPose("BlazePose");
@@ -246,7 +248,7 @@ let neuralNetwork = ml5.neuralNetwork();
    // Console:
    // Warning: bodyPose does not have modelType "foo", using modelType "full" instead.
    ```
-7. An ml5 function should be able to accept parameters in any order. For example, the following calls produce the same result:
+7. An ml5.js function should be able to accept parameters in any order. For example, the following calls produce the same result:
 
    ```javascript
    let bodyPose = ml5.bodyPose("blazepose", { modelType: "full" });
@@ -256,9 +258,9 @@ let neuralNetwork = ml5.neuralNetwork();
    let bodyPose = ml5.bodyPose({ modelType: "full" }, "blazepose");
    ```
 
-8. Asynchronous ml5 functions should support the callback interface, and support the promise/async await interface as well when possible.
+8. Asynchronous ml5.js functions should support the callback interface, and support the promise/async await interface as well when possible.
 
-9. ml5's should call the callback functions with the pattern `callback(result, error)`.
+9. ml5.js should call the callback functions with the pattern `callback(result, error)`.
 
 10. The factory functions `ml5.<modelName>` should support p5.js's `preload()` as well as the callback interface. When called in `preload()`, the factory functions should synchronously return an instance of the ml5.js model. Otherwise, the model is loaded asynchronously before calling the callback.
 
@@ -267,8 +269,8 @@ let neuralNetwork = ml5.neuralNetwork();
 1. For image-based detection models, `ml5.<modelName>` should accept 3 optional parameters, `modelName`, `options`, and `modelReady`.
 
 - **modelName**: A string, case insensitively specify the underlying model to use.
-- **options**: An object, specifies configuration setting for the ml5 model.
-- **modelReady**: A callback function that is called when the underlying model is ready. An instance of the ml5 is passed into the its first parameter no error occurs. Otherwise, an error object is pass into the second parameter.
+- **options**: An object, specifies configuration setting for the ml5.js model.
+- **modelReady**: A callback function that is called when the underlying model is ready. An instance of ml5.js model is passed into the its first parameter no error occurs. Otherwise, an error object is pass into the second parameter.
 
 ## Utils
 
