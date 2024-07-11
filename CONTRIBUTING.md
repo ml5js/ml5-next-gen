@@ -184,7 +184,6 @@ To update the p5 Web Editor sketches, first create a `.env` file with the follow
 ```
   P5_USERNAME=<p5 web editor username here>
   P5_PASSWORD=<p5 web editor password here>
-
 ```
 
 Then, run the following command:
@@ -193,11 +192,11 @@ Then, run the following command:
 yarn run upload-examples
 ```
 
-The script will match the directory name of a local example sketch with the name of the sketch on the web editor. If a local directory name is the same as a sketch name on the web editor (case sensitive), the content of the sketch will be updated (with the sharing URL unchanged). If a local directory name is not found on the web editor, a new web editor sketch will be created. If a web editor sketch does not have a matching local directory name, the script will not automatically delete the web editor sketch. Any deletion have to be done manually on the web editor.
+The script will match the directory name of a local example sketch with the name of the sketch on the web editor. If a local directory name is the same as a sketch name on the web editor (case sensitive), the content of the sketch will be updated (with the sharing URL unchanged). If a local directory name is not found on the web editor, a new web editor sketch will be created. If a web editor sketch does not have a matching local directory name, the script will NOT automatically delete the web editor sketch. Any deletion should be done manually on the web editor.
 
 Updating an existing sketch will not affect the collections on the p5 web editor. Newly uploaded sketches will not be automatically added to any collections.
 
-Currently, this script cannot upload non-text files. Those files that have not been uploaded will be listed and will require manual uploading.
+Currently, this script cannot upload non-text files such as images or binaries. Those files that have not been uploaded will be listed and will require manual uploading.
 
 ## All Contributors
 
@@ -209,30 +208,29 @@ To add a new contributor, create a new branch from main. Then, enter the followi
 yarn all-contributors add
 ```
 
-Complete the prompts in the terminal.
+Complete the instructions in the terminal. This will automatically update `README.md` and `.all-contributorsrc` files with the new contributor.
 
-Make a pull request to merge the new branch into main. When the branch gets merged, the new contributor will show up in README.md!
+Make a pull request to merge the new branch into main. Once the branch gets merged, the new contributor will be listed!
 
 ## API Implementation Guideline
 
 This guideline provides a high-level concept of what the ml5.js library's API should look like, serving as a reference to keep the ml5.js interface consistent and friendly.
 
-(Temporary note: This section does not fully reflect the current interface of the library, but rather proposes an ideal interface for future ml5.js.)
-
-(Temporary note 2: This section is work in progress.)
-
 ### General Guidelines
 
-1. All ml5.js functions called by the user are defined with "camelCase".
+1. ml5.js is a standalone library; however, ml5.js prioritizes compatibility with [p5.js library](https://p5js.org/).
+2. All ml5.js functions called by the user are defined with "camelCase".
 
-2. All ml5.js models are instantiated with a factory function with the style `ml5.<modelName>`. For example:
+3. All ml5.js model objects are instantiated with a factory function with the style `ml5.<modelName>`. For example:
 
-```javascript
-let bodyPose = ml5.bodyPose("BlazePose");
-let neuralNetwork = ml5.neuralNetwork();
-```
+   ```javascript
+   let bodyPose = ml5.bodyPose("BlazePose");
+   let neuralNetwork = ml5.neuralNetwork();
+   ```
 
-4. When a string parameter is passed into any ml5.js function as a configuration setting, it is matched case _insensitively_ . For example, the following calls produce the same result:
+4. The factory functions `ml5.<modelName>` should support p5.js's `preload()` as well as the callback interface. The factory functions should synchronously return an unready instance of the ml5.js model object. When the model becomes ready, the factory functions should call the callback function with the (now ready) instance of the object and also signal p5.js if `preload()` function is present.
+
+5. When a string parameter or option is passed into any ml5.js function as a configuration setting, it is matched case _insensitively_. For example, the following calls produce the same result:
 
    ```javascript
    let bodyPose = ml5.bodyPose("BlazePose", { modelType: "Full" });
@@ -242,15 +240,17 @@ let neuralNetwork = ml5.neuralNetwork();
    let bodyPose = ml5.bodyPose("blazepose", { modelType: "full" });
    ```
 
-5. When possible, all parameters should be optional and have default values in lieu of user definition.
+6. When possible, parameters and options should be optional and have default values in lieu of user definition.
 
-6. ml5.js should throw a friendly warning when the user passes in an invalid parameter, and proceed with the default value when possible. For example:
+7. ml5.js should throw a friendly warning when the user passes in an invalid parameter or option, and proceed with the default value when possible. For example:
    ```javascript
    let bodyPose = ml5.bodyPose({ modelType: "foo" });
    // Console:
-   // Warning: bodyPose does not have modelType "foo", using modelType "full" instead.
+   // 🟪ml5.js warns: The 'modelType' option for bodyPose has to be set to 'lite', 'full', or 'heavy', but it is being set to 'foo' instead.
+   //
+   // ml5.js is using default value of 'full'.
    ```
-7. An ml5.js function should be able to accept parameters in any order. For example, the following calls produce the same result:
+8. An ml5.js function should be able to accept parameters in any order when possible. For example, the following calls produce the same result:
 
    ```javascript
    let bodyPose = ml5.bodyPose("blazepose", { modelType: "full" });
@@ -260,11 +260,10 @@ let neuralNetwork = ml5.neuralNetwork();
    let bodyPose = ml5.bodyPose({ modelType: "full" }, "blazepose");
    ```
 
-8. Asynchronous ml5.js functions should support the callback interface, and support the promise/async await interface as well when possible.
+9. Asynchronous ml5.js functions should use the callback interface.
+   **Note**: Currently, some ml5.js functions also provides the promise/async await interface. However, ml5.js does not officially support the promise/async await interface. We are considering fully supporting the promise/async await interface in the future and will follow [p5.js](https://p5js.org/)'s lead.
 
-9. ml5.js should call the callback functions with the pattern `callback(result, error)`.
-
-10. The factory functions `ml5.<modelName>` should support p5.js's `preload()` as well as the callback interface. When called in `preload()`, the factory functions should synchronously return an instance of the ml5.js model. Otherwise, the model is loaded asynchronously before calling the callback.
+10. ml5.js should call the callback functions with the pattern `callback(result, error)`.
 
 ### Image/Video-Based Detection Models
 
