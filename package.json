@@ -71,5 +71,6 @@
       "@babel/preset-env"
     ]
   },
-  "prettier": {}
+  "prettier": {},
+  "packageManager": "yarn@4.3.1"
 }
