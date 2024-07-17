@@ -1,158 +1,118 @@
-
 import * as tf from "@tensorflow/tfjs";
-import * as tfvis from "@tensorflow/tfjs-vis";
+import callCallback from "../utils/callcallback";
+import handleArguments from "../utils/handleArguments";
+import { imgToPixelArray, isInstanceOfSupportedElement, } from "../utils/imageUtilities";
+import NeuralNetwork from "./timeSeries";
+import NeuralNetworkData from "./timeSeriesData";
+
 import nnUtils from "../NeuralNetwork/NeuralNetworkUtils";
+import NeuralNetworkVis from "../NeuralNetwork/NeuralNetworkVis";
 
-// import '@tensorflow/tfjs-node';
-// import callCallback from "../utils/callcallback";
+import tsUtils from "./timeSeriesUtils";
 
-class LSTMify{
+const DEFAULTS = {
+  inputs: [],
+  outputs: [],
+  dataUrl: null,
+  modelUrl: null,
+  layers: [],
+  task: null,
+  debug: false,
+  learningRate: 0.2,
+  hiddenUnits: 16,
+  neuroEvolution: false,
+};
+
+
+/*
+as far as the p5 sketch is concerned, it will directly call only a few functions in the class,
+these are the following:
+
+model.addData
+model.saveData, model etc
+model.train
+model.classify/predict etc
+
+
+
+*/
+
+class timeSeries {
+
+  //reviewed
+  constructor(options, callback) {
+    this.options =
+      {
+        ...DEFAULTS,
+        ...options,
+      } || DEFAULTS;
+
+    this.neuralNetwork = new NeuralNetwork();
+    this.neuralNetworkData = new NeuralNetworkData();
+    this.neuralNetworkVis = new NeuralNetworkVis();
+
+    this.data = {
+      training: [],
+    };
+  }
+
+  // mainly for loading data - should be async
+  async init() {
+    return 0;
+  }
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  //                                 ADD DATA                                //
+  /////////////////////////////////////////////////////////////////////////////
+
+  /* adding data: can only accept the following formats:
+     - for xInputs:
+      1. Sequence of objects (array of objects) 
+        [{x: , y: },{x: , y: },{x: , y: },{x: , y: }]
+      2. Sequence of arrays (array of array, order matters)
+        [[],[],[],[]]
+      3. Sequence of values (inputlabels should be provided by user)
+        [[,,,,,]] e.g. shape = {inputLabels: ['x','y']} will become [{x: , y: },{x: , y: },{x: , y: },{x: , y: }]
+  
+    - for yInputs:
+      1. similar to neural network, so use same logic
+  */ 
+
+  addData(xInputs, yInputs, options = null){
+    // 1. verify format between the three possible types of xinputs
+    const xs = tsUtils.verifyAndFormatInputs(xInputs,options,this.options);
+
+    // 2. format the yInput - same logic as NN class
+    const ys = tsUtils.verifyAndFormatOutputs(yInputs,options,this.options);
     
-  constructor (options, callback){
-    // sample architecture just to try
-    this.model = tf.sequential();
-
+    this.neuralNetworkData.addData(xs,ys);
   }
 
-  createArchitecture() {
-
-    // Create the model
-    this.model = tf.sequential();
-
-    // Add the LSTM layers with the initializer
-    this.model.add(tf.layers.lstm({
-      units: 50,
-      inputShape: [20, 2],
-      activation: 'relu',
-      returnSequences: true,
-      kernelInitializer: tf.initializers.glorotNormal(),
-      recurrentInitializer: tf.initializers.glorotNormal(),
-      biasInitializer: tf.initializers.glorotNormal(),
-
-    }));
 
 
-    this.model.add(tf.layers.lstm({
-      units: 50,
-      kernelInitializer: tf.initializers.glorotNormal(),
-      recurrentInitializer: tf.initializers.glorotNormal(),
-      biasInitializer: tf.initializers.glorotNormal(),
-    }));
 
-    this.model.add(tf.layers.dense({
-      units: 2,
-      activation: 'softmax',
-    }));
-  }
 
-  compileModel(){
-    const optimizer = tf.train.adam(0.002)
-    // const optimizer = tf.train.adadelta(0.05)
 
-    this.model.compile({
-      optimizer: optimizer,
-      loss: 'binaryCrossentropy',
-      metrics: ['accuracy']
-    });
-  }
-  
-  summarizeModel(){
-    this.model.summary()
-  }
-
-  toTensors(x,y){
-    const x_tensor = tf.tensor(x);
-    const y_tensor = tf.tensor(y);
-
-    return [x_tensor,y_tensor]
-  }
-
-  async fitModel(xs,ys){
-    this.loggers = []
-    this.history = await this.model.fit(xs, ys,{ 
-      epochs: 50,
-      batchSize: 16,
-      callbacks: {
-        onEpochEnd: (epoch, logs) => {
-        this.loggers.push(logs)
-        console.log(`Epoch ${epoch + 1}: loss = ${logs.loss}, accuracy = ${logs.acc}`);
-      }
-      // callbacks: {
-      //   onEpochEnd: async (epoch, logs) => {
-      //     // Display the loss and accuracy at the end of each epoch
-      //     this.loggers.push(logs)
-      
-      //     // Plot loss and accuracy
-      //     tfvis.show.history(
-      //       { name: 'Training Performance' },
-      //       this.loggers,
-      //       ['loss', 'accuracy']  // or ['loss', 'acc'] based on your metrics
-      //     );
-      //   },
-      // }
-    }})
-  }
-
-  modelSummary() {
-    console.log(this.history);
-    tfvis.show.history({ name: 'Training Performance' }, this.loggers, ['loss', 'accuracy']);
-  }
-
-  // async predict(data){
-  //   const predictions =  this.model.predict(data)
-  //   const predict = await predictions.array();
-  //   console.log(typeof predict)
-  //   predict.array().then(array => {
-  //     console.log(array);
-  //     // return array
-  //   })
-  //   // console.log("this is the one")
-  //   // return array_ver
-
-  // }
-
-  predict(_inputs) {
-    const output = tf.tidy(() => {
-      return this.model.predict(_inputs);
-    });
-    const result = output.arraySync();
-
-    output.dispose();
-    _inputs.dispose();
-
-    console.log(result, 'here')
-
-    const final = nnUtils.getMax(result[result.length-1])
-
-    console.log(result[result.length-1].indexOf(final),'lalal', result, final)
-    const word = [result[result.length-1].indexOf(final)]
-
-    return word;
-  }
-
-  
 }
 
-const timeSeries = (inputsOrOptions, outputsOrCallback, callback) => {
-    // let options;
-    // let cb;
-  
-    // if (inputsOrOptions instanceof Object) {
-    //   options = inputsOrOptions;
-    //   cb = outputsOrCallback;
-    // } else {
-    //   options = {
-    //     inputs: inputsOrOptions,
-    //     outputs: outputsOrCallback,
-    //   };
-    //   cb = callback;
-    // }
-  
-    // const instance = new LSTMify(options, cb);
-    // return instance;
+const TimeSeries = (inputsOrOptions, outputsOrCallback, callback) => {
+  let options;
+  let cb;
 
-    const instance = new LSTMify();
-    return instance;
-  };
-  
-  export default timeSeries;
+  if (inputsOrOptions instanceof Object) {
+    options = inputsOrOptions;
+    cb = outputsOrCallback;
+  } else {
+    options = {
+      inputs: inputsOrOptions,
+      outputs: outputsOrCallback,
+    };
+    cb = callback;
+  }
+
+  const instance = new timeSeries(options, cb);
+  return instance;
+};
+
+export default TimeSeries;
