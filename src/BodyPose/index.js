@@ -208,6 +208,17 @@ class BodyPose {
           modelConfig.modelType =
             poseDetection.movenet.modelType.MULTIPOSE_LIGHTNING;
       }
+      this.runtimeConfig = handleOptions(
+        this.config,
+        {
+          flipHorizontal: {
+            type: "boolean",
+            alias: "flipped",
+            default: false,
+          },
+        },
+        "bodyPose"
+      );
     }
 
     // Load the detector model
@@ -249,6 +260,9 @@ class BodyPose {
     let result = predictions;
     // modify the raw tfjs output to a more usable format
     this.renameScoreToConfidence(result);
+    if (this.runtimeConfig.flipHorizontal) {
+      this.mirrorKeypoints(this.detectMedia, result);
+    }
     this.addKeypoints(result);
     this.resizeBoundingBoxes(result, image.width, image.height);
 
@@ -304,6 +318,9 @@ class BodyPose {
       );
       let result = predictions;
       this.renameScoreToConfidence(result);
+      if (this.runtimeConfig.flipHorizontal) {
+        this.mirrorKeypoints(this.detectMedia, result);
+      }
       this.addKeypoints(result);
       this.resizeBoundingBoxes(
         result,
@@ -340,6 +357,19 @@ class BodyPose {
           objectRenameKey(keypoint, "score", "confidence");
         });
       }
+
+  /**
+   * Mirror the keypoints around x-axis.
+   * @param {HTMLVideoElement | HTMLImageElement | HTMLCanvasElement} detectMedia
+   * @param {Object} poses - the original detection results.
+   * @private
+   */
+  mirrorKeypoints(detectMedia, poses) {
+    const mediaWidth = detectMedia.width;
+    poses.forEach((pose) => {
+      pose.keypoints.forEach((keypoint) => {
+        keypoint.x = mediaWidth - keypoint.x;
+      });
     });
   }
 
