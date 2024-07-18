@@ -16,6 +16,7 @@ import { mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
 import objectRenameKey from "../utils/objectRenameKey";
+import { isVideo } from "../utils/handleArguments";
 
 class BodyPose {
   /**
@@ -253,15 +254,12 @@ class BodyPose {
     const { image, callback } = argumentObject;
 
     await mediaReady(image, false);
-    const predictions = await this.model.estimatePoses(
-      image,
-      this.runtimeConfig
-    );
+    const predictions = await this.model.estimatePoses(image);
     let result = predictions;
     // modify the raw tfjs output to a more usable format
     this.renameScoreToConfidence(result);
     if (this.runtimeConfig.flipHorizontal) {
-      this.mirrorKeypoints(this.detectMedia, result);
+      this.mirrorKeypoints(result, image.width);
     }
     this.addKeypoints(result);
     this.resizeBoundingBoxes(result, image.width, image.height);
@@ -312,14 +310,11 @@ class BodyPose {
   async detectLoop() {
     await mediaReady(this.detectMedia, false);
     while (!this.signalStop) {
-      const predictions = await this.model.estimatePoses(
-        this.detectMedia,
-        this.runtimeConfig
-      );
+      const predictions = await this.model.estimatePoses(this.detectMedia);
       let result = predictions;
       this.renameScoreToConfidence(result);
       if (this.runtimeConfig.flipHorizontal) {
-        this.mirrorKeypoints(this.detectMedia, result);
+        this.mirrorKeypoints(result, this.detectMedia.width);
       }
       this.addKeypoints(result);
       this.resizeBoundingBoxes(
@@ -367,8 +362,7 @@ class BodyPose {
    * @param {Object} poses - the original detection results.
    * @private
    */
-  mirrorKeypoints(detectMedia, poses) {
-    const mediaWidth = detectMedia.width;
+  mirrorKeypoints(poses, mediaWidth) {
     poses.forEach((pose) => {
       pose.keypoints.forEach((keypoint) => {
         keypoint.x = mediaWidth - keypoint.x;
