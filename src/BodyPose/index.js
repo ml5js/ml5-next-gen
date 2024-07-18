@@ -258,6 +258,15 @@ class BodyPose {
     let result = predictions;
     // modify the raw tfjs output to a more usable format
     this.renameScoreToConfidence(result);
+    if (this.modelName === "MoveNet" && isVideo(image)) {
+      this.resizeKeypoints(
+        result,
+        image.videoWidth,
+        image.videoHeight,
+        image.width,
+        image.height
+      );
+    }
     if (this.runtimeConfig.flipHorizontal) {
       this.mirrorKeypoints(result, image.width);
     }
@@ -313,6 +322,15 @@ class BodyPose {
       const predictions = await this.model.estimatePoses(this.detectMedia);
       let result = predictions;
       this.renameScoreToConfidence(result);
+      if (this.modelName === "MoveNet" && isVideo(this.detectMedia)) {
+        this.resizeKeypoints(
+          result,
+          this.detectMedia.videoWidth,
+          this.detectMedia.videoHeight,
+          this.detectMedia.width,
+          this.detectMedia.height
+        );
+      }
       if (this.runtimeConfig.flipHorizontal) {
         this.mirrorKeypoints(result, this.detectMedia.width);
       }
@@ -366,6 +384,24 @@ class BodyPose {
     poses.forEach((pose) => {
       pose.keypoints.forEach((keypoint) => {
         keypoint.x = mediaWidth - keypoint.x;
+      });
+    });
+  }
+
+  /**
+   * Resize the keypoints output of moveNet model to match the display size.
+   *
+   * @param {Object} poses - the original detection results.
+   * @param {HTMLVideoElement} mediaWidth - the actual width of the video.
+   * @param {HTMLVideoElement} mediaHeight- the actual height of the video.
+   * @param {HTMLVideoElement} displayWidth - the display width of the video.
+   * @param {HTMLVideoElement} displayHeight - the display height of the video.
+   */
+  resizeKeypoints(poses, mediaWidth, mediaHeight, displayWidth, displayHeight) {
+    poses.forEach((pose) => {
+      pose.keypoints.forEach((keypoint) => {
+        keypoint.x = (keypoint.x / mediaWidth) * displayWidth;
+        keypoint.y = (keypoint.y / mediaHeight) * displayHeight;
       });
     });
   }
