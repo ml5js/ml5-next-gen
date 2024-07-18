@@ -357,6 +357,9 @@ class BodyPose {
           objectRenameKey(keypoint, "score", "confidence");
         });
       }
+      if (pose.score) objectRenameKey(pose, "score", "confidence");
+    });
+  }
 
   /**
    * Mirror the keypoints around x-axis.
