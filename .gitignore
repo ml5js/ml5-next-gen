@@ -13,6 +13,7 @@ training/lstm/data/t
 /static
 dist
 /dist_examples
+.yarn
 
 website/translated_docs
 website/build/

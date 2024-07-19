@@ -6,17 +6,28 @@ Welcome to the ml5.js project! Developing ml5.js is not just about developing ma
 
 ## Table of Content
 
-- [The ml5.js Ecosystem](#the-ml5js-ecosystem)
-- [Contributing Workflow](#contributing-workflow)
-- [Setup Development Environment](#setup-development-environment)
-- [Code Formatting](#code-formatting)
-- [Building the Library](#building-the-library)
-- [Making Releases](#making-releases)
-- [Unit Tests](#unit-tests)
-- [Update p5 Web Editor Sketches](#update-p5-web-editor-sketches)
-- [All Contributors](#all-contributors)
-- [API Implementation Guideline](#api-implementation-guideline)
-- [Utils](#utils)
+- [How to Contribute](#how-to-contribute)
+  - [Table of Content](#table-of-content)
+  - [The ml5.js Ecosystem](#the-ml5js-ecosystem)
+  - [Contribution Workflow](#contribution-workflow)
+  - [Setup Development Environment](#setup-development-environment)
+  - [Code Formatting](#code-formatting)
+    - [For Visual Studio Code](#for-visual-studio-code)
+    - [For Command Line](#for-command-line)
+  - [Building the Library](#building-the-library)
+  - [Making Releases](#making-releases)
+  - [Unit Tests](#unit-tests)
+  - [Update p5 Web Editor Sketches](#update-p5-web-editor-sketches)
+  - [All Contributors](#all-contributors)
+  - [API Implementation Guideline](#api-implementation-guideline)
+    - [General Guidelines](#general-guidelines)
+    - [Image/Video-Based Detection Models](#imagevideo-based-detection-models)
+  - [Utils](#utils)
+    - [handleOptions](#handleoptions)
+      - [`userObject`](#userobject)
+      - [`moldObject`](#moldobject)
+      - [Define a Rule in `moldObject`](#define-a-rule-in-moldobject)
+      - [Functions As Rules](#functions-as-rules)
 
 ## The ml5.js Ecosystem
 
@@ -47,22 +58,31 @@ Here is a list of the repositories you most likely will be working with:
 
 We use node.js as our development environment for bundling code, running tests, and more. If you've never used node.js before, please [download and install Node.js here](https://nodejs.org/en/download/prebuilt-installer). Please select the lts/iron (`v20.x.x (LTS)`) of Node.js for your operating system and architecture of your computer.
 
-If you already have a different version of Node.js installed, we recommend installing [nvm](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating), a Node.js version manager that allows you to switch between different versions of Node.js. and using Node.js version 20. Once you have nvm installed, you can run the following commands:
+If you already have a different version of Node.js installed, we recommend installing a Node.js version manager: [nvm](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating) for macOS and Linux operating systems, and [nvm-windows](https://github.com/coreybutler/nvm-windows) Windows operating system. A Node.js version manager that allows you to quickly switch between different versions of Node.js.
+
+**macOS and Linux:** To switch to the compatible Node.js version, run the following commands after installing nvm:
 
 ```
-nvm install lts/iron
-nvm use lts/iron
+nvm install
+nvm use
+```
+
+**Windows:** To switch to the compatible Node.js version, run the following commands after installing nvm-windows:
+
+```
+nvm install 20
+nvm use 20
 ```
 
 We use [Yarn](https://yarnpkg.com/) instead of npm to help us better manage dependencies from TensorFlow.js. Yarn is a newer package manager that is very similar to NPM. [Here is a cheat sheet for NPM vs Yarn commands](https://www.digitalocean.com/community/tutorials/nodejs-npm-yarn-cheatsheet).
 
-Install yarn with the following command:
+Enable Corepack with the following command:
 
 ```
-npm install -g yarn
+corepack enable
 ```
 
-Then, run the following command to install the dependencies and start the development server:
+Then, run the following commands to install the dependencies and start the development server. Corepack may ask to download Yarn, select yes when prompted:
 
 ```
 yarn
@@ -76,7 +96,7 @@ You should see something similar to this in the terminal:
 [webpack-dev-server] Loopback: http://localhost:8080/
 ...
 ...
-webpack 5.76.1 compiled successfully in 8360 ms
+webpack 5.x.x compiled successfully in 8360 ms
 ```
 
 A local server will start, hosting a built version of the ml5.js library at http://localhost:8080/dist/ml5.js. While the server is running, Webpack will automatically rebuild the library if you change and save any file in the `/src` folder.
