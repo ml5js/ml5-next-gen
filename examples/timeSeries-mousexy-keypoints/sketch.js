@@ -144,9 +144,9 @@ function UI(){
   }
 
   function trainModel(){
-    model.createArchitecture();
-    model.compileModel();
-    model.summarizeModel();
+    // model.createArchitecture();
+    // model.compileModel();
+    // model.summarizeModel();
     background(220);
     state = 'training';
     text("Training...", 50,50);

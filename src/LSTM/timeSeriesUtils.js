@@ -259,6 +259,23 @@ class TimeSeriesUtils {
       }
     }
   }
+
+
+
+  // normalize utilities
+  reshapeTo3DArray(data, shape) {
+    let result = [];
+    let index = 0;
+    for (let i = 0; i < shape[0]; i++) {
+        let subArray = [];
+        for (let j = 0; j < shape[1]; j++) {
+            subArray.push(data[index]);
+            index++;
+        }
+        result.push(subArray);
+    }
+    return result;
+  }
 }
   
 const timeSeriesUtils = () => {
