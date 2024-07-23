@@ -269,6 +269,7 @@ class BodyPose {
     }
     if (this.runtimeConfig.flipHorizontal) {
       this.mirrorKeypoints(result, image.width);
+      this.mirrorBoundingBox(result);
     }
     this.addKeypoints(result);
     this.resizeBoundingBoxes(result, image.width, image.height);
@@ -333,6 +334,7 @@ class BodyPose {
       }
       if (this.runtimeConfig.flipHorizontal) {
         this.mirrorKeypoints(result, this.detectMedia.width);
+        this.mirrorBoundingBox(result);
       }
       this.addKeypoints(result);
       this.resizeBoundingBoxes(
@@ -385,6 +387,20 @@ class BodyPose {
       pose.keypoints.forEach((keypoint) => {
         keypoint.x = mediaWidth - keypoint.x;
       });
+    });
+  }
+
+  /**
+   * Mirror the bounding box around x-axis.
+   * @param {Object} poses - the original detection results.
+   * @private
+   */
+  mirrorBoundingBox(poses) {
+    poses.forEach((pose) => {
+      if (!pose.box) return;
+      const tempXMin = pose.box.xMin;
+      pose.box.xMin = 1 - pose.box.xMax;
+      pose.box.xMax = 1 - tempXMin;
     });
   }
 
