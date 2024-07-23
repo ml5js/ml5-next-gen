@@ -28,37 +28,160 @@ import { handleModelName } from "../utils/handleOptions";
 import objectRenameKey from "../utils/objectRenameKey";
 import { isVideo } from "../utils/handleArguments";
 
+/**
+ * User provided options object for BodyPose with MoveNet model,
+ * the default model used by ml5.
+ * @typedef {Object} MoveNetOptions
+ * @property {string|undefined} modelType             - The type of MoveNet model to use.
+ * @property {boolean|undefined} enableSmoothing      - Whether to use temporal filter to smooth
+ *                                                      keypoints across frames.
+ * @property {number|undefined} minPoseScore          - The minimum confidence score for a pose to
+ *                                                      be detected.
+ * @property {number|undefined} multiPoseMaxDimension - The target maximum dimension to use as the
+ *                                                      input to the multi-pose model.
+ * @property {boolean|undefined} enableTracking       - Whether to track each person across the
+ *                                                      frames with a unique ID.
+ * @property {string|undefined} trackerType           - The type of tracker to use.
+ * @property {Object|undefined} trackerConfig         - Advanced tracker configurations.
+ * @property {string|undefined} modelUrl              - The file path or URL to the MoveNet model.
+ */
+
+/**
+ * User provided options object for BodyPose with BlazePose model.
+ * @typedef {Object} BlazePoseOptions
+ * @property {string|undefined} runtime               - The runtime to use.
+ * @property {boolean|undefined} enableSmoothing      - Whether to use temporal filter to smooth
+ *                                                      keypoints across frames.
+ * @property {boolean} enableSegmentation             - Whether to generate the segmentation mask.
+ *                                                      Only for 'mediapipe' runtime.
+ * @property {boolean} smoothSegmentation             - Whether to filter segmentation masks across
+ *                                                      different frames to reduce jitter.
+ *                                                      Only for 'mediapipe' runtime.
+ * @property {string|undefined} solutionPath          - The URL to the MediaPipe BlazePose solution.
+ *                                                      Only for 'mediapipe' runtime.
+ * @property {string|undefined} modelType             - The type of BlazePose model to use.
+ * @property {string|undefined} detectorModelUrl      - The file path or URL to the BlazePose
+ *                                                      detector model. Only for 'tfjs' runtime.
+ * @property {string|undefined} landmarkModelUrl      - The file path or URL to the BlazePose
+ *                                                      landmark model. Only for 'tfjs' runtime.
+ */
+
+/**
+ * Configuration schema for MoveNet model, used by `handleOptions` to
+ * validate the user's options object.
+ */
+const MoveNetConfigSchema = {
+  modelType: {
+    type: "enum",
+    enums: [
+      "SINGLEPOSE_LIGHTNING",
+      "SINGLEPOSE_THUNDER",
+      "MULTIPOSE_LIGHTNING",
+    ],
+    default: "MULTIPOSE_LIGHTNING",
+  },
+  enableSmoothing: {
+    type: "boolean",
+    default: true,
+  },
+  minPoseScore: {
+    type: "number",
+    min: 0,
+    max: 1,
+    default: 0.25,
+  },
+  multiPoseMaxDimension: {
+    type: "number",
+    default: 256,
+    min: 32,
+    integer: true,
+    multipleOf: 32,
+  },
+  enableTracking: {
+    type: "boolean",
+    default: true,
+  },
+  trackerType: {
+    type: "enum",
+    enums: ["boundingBox", "keypoint"],
+    default: "boundingBox",
+  },
+  trackerConfig: {
+    type: "object",
+    default: undefined,
+  },
+  modelUrl: {
+    type: "string",
+    default: undefined,
+  },
+};
+
+/**
+ * Configuration schema for BlazePose model, used by `handleOptions` to
+ * validate the user's options object.
+ */
+const blazePoseConfigSchema = {
+  runtime: {
+    type: "enum",
+    enums: ["mediapipe", "tfjs"],
+    default: "tfjs",
+  },
+  enableSmoothing: {
+    type: "boolean",
+    default: true,
+  },
+  enableSegmentation: {
+    type: "boolean",
+    default: false,
+    ignore: (config) => config.runtime !== "mediapipe",
+  },
+  smoothSegmentation: {
+    type: "boolean",
+    default: true,
+    ignore: (config) => config.runtime !== "mediapipe",
+  },
+  modelType: {
+    type: "enum",
+    enums: ["lite", "full", "heavy"],
+    default: "full",
+  },
+  solutionPath: {
+    type: "string",
+    default: "https://cdn.jsdelivr.net/npm/@mediapipe/pose",
+    ignore: (config) => config.runtime !== "mediapipe",
+  },
+  detectorModelUrl: {
+    type: "string",
+    default: undefined,
+    ignore: (config) => config.runtime !== "tfjs",
+  },
+  landmarkModelUrl: {
+    type: "string",
+    default: undefined,
+    ignore: (config) => config.runtime !== "tfjs",
+  },
+};
+
+/**
+ * Configuration schema for runtime options, used by `handleOptions` to
+ * validate the user's options object.
+ */
+const RuntimeConfigSchema = {
+  flipHorizontal: {
+    type: "boolean",
+    alias: "flipped",
+    default: false,
+  },
+};
+
+/** Class representing a BodyPose object. */
 class BodyPose {
   /**
-   * An object for configuring BodyPose options.
-   * @typedef {Object} configOptions
-   * @property {string} modelType - Optional. specify what model variant to load from.
-   * @property {boolean} enableSmoothing - Optional. Whether to use temporal filter to smooth keypoints across frames. Default: true.
-   *
-   * Only for when using MoveNet model
-   * @property {number} minPoseScore - Optional. The minimum confidence score for a pose to be detected. Default: 0.25.
-   * @property {number} multiPoseMaxDimension - Optional. The target maximum dimension to use as the input to the multi-pose model. Must be a mutiple of 32. Default: 256.
-   * @property {boolean} enableTracking - Optional. Track each person across the frame with a unique ID. Default: true.
-   * @property {string} trackerType - Optional. Specify what type of tracker to use. Default: "boundingBox".
-   * @property {Object} trackerConfig - Optional. Specify tracker configurations. Use tf.js settings by default.
-   *
-   * Only for when using BlazePose model
-   * @property {string} runtime - Optional. Either "tfjs" or "mediapipe". Default: "mediapipe"
-   * @property {boolean} enableSegmentation - Optional. A boolean indicating whether to generate the segmentation mask.
-   * @property {boolean} smoothSegmentation - Optional. whether to filters segmentation masks across different input images to reduce jitter.
-   *
-   * For using custom or offline models
-   * @property {string} modelUrl - Optional. The file path or URL to the MoveNet model.
-   * @property {string} solutionPath - Optional. The file path or URL to the mediaPipe BlazePose model.
-   * @property {string} detectorModelUrl - Optional. The file path or URL to the tfjs BlazePose detector model.
-   * @property {string}landmarkModelUrl - Optional. The file path or URL to the tfjs BlazePose landmark model.
-   */
-
-  /**
-   * Creates BodyPose.
-   * @param {string} modelName - Specify a model to use, "MoveNet" or "BlazePose". Default: "MoveNet".
-   * @param {configOptions} options - An object describing a model accuracy and performance.
-   * @param {function} callback  - A function to run once the model has been loaded.
+   * Creates an instance of BodyPose model.
+   * The constructor should be called with the `ml5.bodyPose` method and not directly.
+   * @param {string} modelName - The underlying model to use, "MoveNet" or "BlazePose". Default: "MoveNet".
+   * @param {configOptions} options - An options object for the model.
+   * @param {function} callback  - A callback function that is called once the model has been loaded.
    * @private
    */
   constructor(modelName, options, callback) {
@@ -98,112 +221,18 @@ class BodyPose {
       //Set the config to user defined or default values
       modelConfig = handleOptions(
         this.config,
-        {
-          runtime: {
-            type: "enum",
-            enums: ["mediapipe", "tfjs"],
-            default: "tfjs",
-          },
-          enableSmoothing: {
-            type: "boolean",
-            default: true,
-          },
-          enableSegmentation: {
-            type: "boolean",
-            default: false,
-            ignore: (config) => config.runtime !== "mediapipe",
-          },
-          smoothSegmentation: {
-            type: "boolean",
-            default: true,
-            ignore: (config) => config.runtime !== "mediapipe",
-          },
-          modelType: {
-            type: "enum",
-            enums: ["lite", "full", "heavy"],
-            default: "full",
-          },
-          solutionPath: {
-            type: "string",
-            default: "https://cdn.jsdelivr.net/npm/@mediapipe/pose",
-            ignore: (config) => config.runtime !== "mediapipe",
-          },
-          detectorModelUrl: {
-            type: "string",
-            default: undefined,
-            ignore: (config) => config.runtime !== "tfjs",
-          },
-          landmarkModelUrl: {
-            type: "string",
-            default: undefined,
-            ignore: (config) => config.runtime !== "tfjs",
-          },
-        },
+        blazePoseConfigSchema,
         "bodyPose"
       );
       this.runtimeConfig = handleOptions(
         this.config,
-        {
-          flipHorizontal: {
-            type: "boolean",
-            alias: "flipped",
-            default: false,
-          },
-        },
+        RuntimeConfigSchema,
         "bodyPose"
       );
     } else {
       pipeline = poseDetection.SupportedModels.MoveNet;
       //Set the config to user defined or default values
-      modelConfig = handleOptions(
-        this.config,
-        {
-          modelType: {
-            type: "enum",
-            enums: [
-              "SINGLEPOSE_LIGHTNING",
-              "SINGLEPOSE_THUNDER",
-              "MULTIPOSE_LIGHTNING",
-            ],
-            default: "MULTIPOSE_LIGHTNING",
-          },
-          enableSmoothing: {
-            type: "boolean",
-            default: true,
-          },
-          minPoseScore: {
-            type: "number",
-            min: 0,
-            max: 1,
-            default: 0.25,
-          },
-          multiPoseMaxDimension: {
-            type: "number",
-            default: 256,
-            min: 32,
-            integer: true,
-            multipleOf: 32,
-          },
-          enableTracking: {
-            type: "boolean",
-            default: true,
-          },
-          trackerType: {
-            type: "enum",
-            enums: ["boundingBox", "keypoint"],
-            default: "boundingBox",
-          },
-          trackerConfig: {
-            type: "object",
-            default: undefined,
-          },
-          modelUrl: {
-            type: "string",
-            default: undefined,
-          },
-        },
-        "bodyPose"
-      );
+      modelConfig = handleOptions(this.config, MoveNetConfigSchema, "bodyPose");
 
       // Map the modelType string to the movenet.modelType enum
       switch (this.config.modelType) {
@@ -219,15 +248,10 @@ class BodyPose {
           modelConfig.modelType =
             poseDetection.movenet.modelType.MULTIPOSE_LIGHTNING;
       }
+
       this.runtimeConfig = handleOptions(
         this.config,
-        {
-          flipHorizontal: {
-            type: "boolean",
-            alias: "flipped",
-            default: false,
-          },
-        },
+        RuntimeConfigSchema,
         "bodyPose"
       );
     }
