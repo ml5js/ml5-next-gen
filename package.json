@@ -56,6 +56,7 @@
     "@mediapipe/pose": "^0.5.1675469404",
     "@mediapipe/selfie_segmentation": "~0.1.0",
     "@tensorflow-models/body-segmentation": "^1.0.1",
+    "@tensorflow-models/coco-ssd": "^2.2.3",
     "@tensorflow-models/face-landmarks-detection": "1.0.5",
     "@tensorflow-models/hand-pose-detection": "^2.0.0",
     "@tensorflow-models/mobilenet": "^2.1.0",
