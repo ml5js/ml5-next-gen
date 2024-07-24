@@ -31,7 +31,7 @@ import { isVideo } from "../utils/handleArguments";
 /**
  * User provided options object for BodyPose with MoveNet model,
  * the default model used by ml5.
- * @typedef {Object} MoveNetOptions
+ * @typedef {object} MoveNetOptions
  * @property {string|undefined} modelType             - The type of MoveNet model to use.
  * @property {boolean|undefined} enableSmoothing      - Whether to use temporal filter to smooth
  *                                                      keypoints across frames.
@@ -42,19 +42,19 @@ import { isVideo } from "../utils/handleArguments";
  * @property {boolean|undefined} enableTracking       - Whether to track each person across the
  *                                                      frames with a unique ID.
  * @property {string|undefined} trackerType           - The type of tracker to use.
- * @property {Object|undefined} trackerConfig         - Advanced tracker configurations.
+ * @property {object|undefined} trackerConfig         - Advanced tracker configurations.
  * @property {string|undefined} modelUrl              - The file path or URL to the MoveNet model.
  */
 
 /**
  * User provided options object for BodyPose with BlazePose model.
- * @typedef {Object} BlazePoseOptions
+ * @typedef {object} BlazePoseOptions
  * @property {string|undefined} runtime               - The runtime to use.
  * @property {boolean|undefined} enableSmoothing      - Whether to use temporal filter to smooth
  *                                                      keypoints across frames.
- * @property {boolean} enableSegmentation             - Whether to generate the segmentation mask.
+ * @property {boolean|undefined} enableSegmentation   - Whether to generate the segmentation mask.
  *                                                      Only for 'mediapipe' runtime.
- * @property {boolean} smoothSegmentation             - Whether to filter segmentation masks across
+ * @property {boolean|undefined} smoothSegmentation   - Whether to filter segmentation masks across
  *                                                      different frames to reduce jitter.
  *                                                      Only for 'mediapipe' runtime.
  * @property {string|undefined} solutionPath          - The URL to the MediaPipe BlazePose solution.
@@ -174,48 +174,56 @@ const RuntimeConfigSchema = {
   },
 };
 
-/** Class representing a BodyPose object. */
 class BodyPose {
   /**
    * Creates an instance of BodyPose model.
    * The constructor should be called with the `ml5.bodyPose` method and not directly.
-   * @param {string} modelName - The underlying model to use, "MoveNet" or "BlazePose". Default: "MoveNet".
-   * @param {configOptions} options - An options object for the model.
+   * @param {string} modelName - The underlying model to use, `MoveNet` or `BlazePose`.
+   * @param {MoveNetOptions|BlazePoseOptions} options - An options object for the model.
    * @param {function} callback  - A callback function that is called once the model has been loaded.
    * @private
    */
   constructor(modelName, options, callback) {
+    /** The underlying model used. */
     this.modelName = handleModelName(
       modelName,
       ["BlazePose", "MoveNet"],
       "MoveNet",
       "bodyPose"
     );
+    /** The underlying TensorFlow.js detector instance.*/
     this.model = null;
-    this.config = options;
+    /** The user provided options object. */
+    this.userOptions = options;
+    /** The config passed to underlying detector instance during initialization. */
+    this.config = {};
+    /** The config passed to underlying detector instance during inference. */
     this.runtimeConfig = {};
+    /** The media source being continuously detected. Only used in continuous mode. */
     this.detectMedia = null;
+    /** The callback function for detection results. Only used in continuous mode. */
     this.detectCallback = null;
-
-    // flags for detectStart() and detectStop()
-    this.detecting = false; // true when detection loop is running
-    this.signalStop = false; // Signal to stop the loop
-    this.prevCall = ""; // Track previous call to detectStart() or detectStop()
+    /** A flag for continuous mode, set to true when detection loop is running.*/
+    this.detecting = false;
+    /** A flag to signal stop to the detection loop.*/
+    this.signalStop = false;
+    /** A flag to track the previous call to`detectStart` and `detectStop`. */
+    this.prevCall = "";
 
     this.ready = callCallback(this.loadModel(), callback);
   }
 
   /**
-   * Loads the model.
-   * @return {this} the detector model.
+   * Loads the BodyPose instance.
+   * @return {BodyPose} the BodyPose instance.
+   * @private
    */
   async loadModel() {
     let pipeline;
     let modelConfig;
-
+    // Select the correct model pipeline and config schema based on the model name
     if (this.modelName === "BlazePose") {
       pipeline = poseDetection.SupportedModels.BlazePose;
-      //Set the config to user defined or default values
       modelConfig = handleOptions(
         this.config,
         blazePoseConfigSchema,
@@ -228,10 +236,8 @@ class BodyPose {
       );
     } else {
       pipeline = poseDetection.SupportedModels.MoveNet;
-      //Set the config to user defined or default values
       modelConfig = handleOptions(this.config, MoveNetConfigSchema, "bodyPose");
-
-      // Map the modelType string to the movenet.modelType enum
+      // Map the modelType string to the `movenet.modelType` enum
       switch (this.config.modelType) {
         case "SINGLEPOSE_LIGHTNING":
           modelConfig.modelType =
@@ -245,7 +251,6 @@ class BodyPose {
           modelConfig.modelType =
             poseDetection.movenet.modelType.MULTIPOSE_LIGHTNING;
       }
-
       this.runtimeConfig = handleOptions(
         this.config,
         RuntimeConfigSchema,
@@ -253,26 +258,21 @@ class BodyPose {
       );
     }
 
-    // Load the detector model
+    // Load the TensorFlow.js detector instance
     await tf.ready();
     this.model = await poseDetection.createDetector(pipeline, modelConfig);
     return this;
   }
 
   /**
-   * A callback function that handles the pose detection results.
-   * @callback gotPoses
-   * @param {Array} results - An array of objects containing poses.
-   */
-
-  /**
    * Asynchronously outputs a single pose prediction result when called.
-   * @param {*} media - An HMTL or p5.js image, video, or canvas element to run the prediction on.
-   * @param {gotPoses} callback - A callback function to handle the predictions.
+   * @param {any} media - An HMTL or p5.js image, video, or canvas element to run the prediction on.
+   * @param {function} callback - A callback function to handle the predictions.
    * @returns {Promise<Array>} an array of poses.
+   * @public
    */
   async detect(...inputs) {
-    //Parse out the input parameters
+    // Parse the input parameters
     const argumentObject = handleArguments(...inputs);
     argumentObject.require(
       "image",
@@ -283,7 +283,8 @@ class BodyPose {
     await mediaReady(image, false);
     const predictions = await this.model.estimatePoses(image);
     let result = predictions;
-    // modify the raw tfjs output to a more usable format
+
+    // Modify the raw tfjs output to a more usable format
     this.renameScoreToConfidence(result);
     if (this.modelName === "MoveNet" && isVideo(image)) {
       this.resizeKeypoints(
@@ -296,7 +297,7 @@ class BodyPose {
     }
     if (this.runtimeConfig.flipHorizontal) {
       this.mirrorKeypoints(result, image.width);
-      this.mirrorBoundingBox(result);
+      this.mirrorBoundingBoxes(result);
     }
     this.addKeypoints(result);
     this.resizeBoundingBoxes(result, image.width, image.height);
@@ -308,12 +309,12 @@ class BodyPose {
   /**
    * Repeatedly outputs pose predictions through a callback function.
    * Calls the internal detectLoop() function.
-   * @param {*} media - An HMTL or p5.js image, video, or canvas element to run the prediction on.
+   * @param {any} media - An HMTL or p5.js image, video, or canvas element to run the prediction on.
    * @param {gotPoses} callback - A callback function to handle the predictions.
-   * @returns {Promise<Array>} an array of predictions.
+   * @public
    */
   detectStart(...inputs) {
-    // Parse out the input parameters
+    // Parse the input parameters
     const argumentObject = handleArguments(...inputs);
     argumentObject.require(
       "image",
@@ -340,8 +341,8 @@ class BodyPose {
   }
 
   /**
-   * Internal function that calls estimatePoses in a loop
-   * Can be started by detectStart() and terminated by detectStop()
+   * Internal function that calls underlying `estimatePoses` repeatedly.
+   * Can be started by `detectStart` and terminated by `detectStop`.
    * @private
    */
   async detectLoop() {
@@ -349,6 +350,8 @@ class BodyPose {
     while (!this.signalStop) {
       const predictions = await this.model.estimatePoses(this.detectMedia);
       let result = predictions;
+
+      // Modify the raw tfjs output to a more usable format
       this.renameScoreToConfidence(result);
       if (this.modelName === "MoveNet" && isVideo(this.detectMedia)) {
         this.resizeKeypoints(
@@ -361,7 +364,7 @@ class BodyPose {
       }
       if (this.runtimeConfig.flipHorizontal) {
         this.mirrorKeypoints(result, this.detectMedia.width);
-        this.mirrorBoundingBox(result);
+        this.mirrorBoundingBoxes(result);
       }
       this.addKeypoints(result);
       this.resizeBoundingBoxes(
@@ -369,6 +372,7 @@ class BodyPose {
         this.detectMedia.width,
         this.detectMedia.height
       );
+      // Call the user provided callback function with the detection results
       this.detectCallback(result);
       // wait for the frame to update
       await tf.nextFrame();
@@ -378,7 +382,8 @@ class BodyPose {
   }
 
   /**
-   * Stops the detection loop before next detection loop runs.
+   * Stops the detection loop before next detection runs.
+   * @public
    */
   detectStop() {
     if (this.detecting) this.signalStop = true;
@@ -386,8 +391,9 @@ class BodyPose {
   }
 
   /**
-   * Rename the score property to confidence for consistency.
-   * @param {Array.<Object>} poses - the original detection results.
+   * Rename the `score` property in the detection results to `confidence` for consistency.
+   * @param {object[]} poses - the original detection results.
+   * @private
    */
   renameScoreToConfidence(poses) {
     poses.forEach((pose) => {
@@ -404,9 +410,9 @@ class BodyPose {
   }
 
   /**
-   * Mirror the keypoints around x-axis.
-   * @param {HTMLVideoElement | HTMLImageElement | HTMLCanvasElement} detectMedia
-   * @param {Object} poses - the original detection results.
+   * Mirror the keypoints in the detection results around the x-axis.
+   * @param {object} poses - the original detection results.
+   * @param {number} mediaWidth - the media element being detected.
    * @private
    */
   mirrorKeypoints(poses, mediaWidth) {
@@ -418,11 +424,12 @@ class BodyPose {
   }
 
   /**
-   * Mirror the bounding box around x-axis.
+   * Mirror the bounding box in the detection results around the x-axis.
+   * This method should be call before `resizeBoundingBoxes` method.
    * @param {Object} poses - the original detection results.
    * @private
    */
-  mirrorBoundingBox(poses) {
+  mirrorBoundingBoxes(poses) {
     poses.forEach((pose) => {
       if (!pose.box) return;
       const tempXMin = pose.box.xMin;
@@ -432,27 +439,32 @@ class BodyPose {
   }
 
   /**
-   * Resize the keypoints output of moveNet model to match the display size.
-   *
-   * @param {Object} poses - the original detection results.
-   * @param {HTMLVideoElement} mediaWidth - the actual width of the video.
-   * @param {HTMLVideoElement} mediaHeight- the actual height of the video.
-   * @param {HTMLVideoElement} displayWidth - the display width of the video.
-   * @param {HTMLVideoElement} displayHeight - the display height of the video.
+   * Resize the keypoints of MoveNet model to match the video size.
+   * This method should only be used when the input media is a video element and the model is MoveNet.
+   * @param {object} poses - the original detection results.
+   * @param {number} intrinsicWidth - the actual width of the video.
+   * @param {number} intrinsicHeight - the actual height of the video.
+   * @param {number} displayWidth - the display width of the video.
+   * @param {number} displayHeight - the display height of the video.
    */
-  resizeKeypoints(poses, mediaWidth, mediaHeight, displayWidth, displayHeight) {
+  resizeKeypoints(
+    poses,
+    intrinsicWidth,
+    intrinsicHeight,
+    displayWidth,
+    displayHeight
+  ) {
     poses.forEach((pose) => {
       pose.keypoints.forEach((keypoint) => {
-        keypoint.x = (keypoint.x / mediaWidth) * displayWidth;
-        keypoint.y = (keypoint.y / mediaHeight) * displayHeight;
+        keypoint.x = (keypoint.x / intrinsicWidth) * displayWidth;
+        keypoint.y = (keypoint.y / intrinsicHeight) * displayHeight;
       });
     });
   }
 
   /**
-   * Return a new array of results with named keypoints added.
+   * Add named keypoints to the detection results for easier access.
    * @param {Array} poses - the original detection results.
-   * @return {Array} the detection results with named keypoints added.
    * @private
    */
   addKeypoints(poses) {
@@ -469,11 +481,11 @@ class BodyPose {
   }
 
   /**
-   * Resize the bounding box values from between 0-1 to the original media size.
-   *
+   * Resize the bounding box values of the detection results from between 0-1
+   * to the original media size.
    * @param {Array} poses - the original detection results.
-   * @param {*} imageWidth - the width of the media being detected.
-   * @param {*} imageHeight - the height of the media being detected.
+   * @param {number} imageWidth - the width of the media being detected.
+   * @param {number} imageHeight - the height of the media being detected.
    * @private
    */
   resizeBoundingBoxes(poses, imageWidth, imageHeight) {
@@ -492,7 +504,8 @@ class BodyPose {
 
   /**
    * Returns the skeleton connections pairs for the model.
-   * @returns {Number[][]} an array of pairs of indices containing the connected keypoints.
+   * @returns {number[][]} an array of pairs of indices containing the connected keypoints.
+   * @public
    */
   getSkeleton() {
     if (this.modelName === "BlazePose") {
@@ -509,6 +522,9 @@ class BodyPose {
 
 /**
  * Factory function that returns a BodyPose instance.
+ * @param {string} modelName - The underlying model to use, `MoveNet` or `BlazePose`.
+ * @param {MoveNetOptions|BlazePoseOptions} options - An options object for the model.
+ * @param {function} callback  - A callback function that is called once the model has been loaded.
  * @returns {BodyPose} A BodyPose instance.
  */
 const bodyPose = (...inputs) => {
