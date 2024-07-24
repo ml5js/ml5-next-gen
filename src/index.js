@@ -12,6 +12,7 @@ import * as tf from "@tensorflow/tfjs";
 import * as tfvis from "@tensorflow/tfjs-vis";
 import p5Utils from "./utils/p5Utils";
 import packageInfo from "../package.json";
+import objectDetector from "./ObjectDetector";
 
 const withPreload = {
   bodyPose,
@@ -22,6 +23,7 @@ const withPreload = {
   neuralNetwork,
   sentiment,
   soundClassifier,
+  objectDetector,
 };
 
 const ml5 = Object.assign({ p5Utils }, withPreload, {
