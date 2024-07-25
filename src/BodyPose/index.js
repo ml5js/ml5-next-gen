@@ -14,7 +14,7 @@
  *
  * TensorFlow Pose Detection repo:
  * https://github.com/tensorflow/tfjs-models/tree/master/pose-detection
- * ml5.js Website documentation:
+ * ml5.js BodyPose reference documentation:
  * https://docs.ml5js.org/#/reference/bodypose
  */
 
@@ -29,45 +29,45 @@ import objectRenameKey from "../utils/objectRenameKey";
 import { isVideo } from "../utils/handleArguments";
 
 /**
- * User provided options object for BodyPose with MoveNet model,
- * the default model used by ml5.
+ * User provided options object for BodyPose with MoveNet model.
  * @typedef {object} MoveNetOptions
- * @property {string|undefined} modelType             - The type of MoveNet model to use.
- * @property {boolean|undefined} enableSmoothing      - Whether to use temporal filter to smooth
- *                                                      keypoints across frames.
- * @property {number|undefined} minPoseScore          - The minimum confidence score for a pose to
- *                                                      be detected.
- * @property {number|undefined} multiPoseMaxDimension - The target maximum dimension to use as the
- *                                                      input to the multi-pose model.
- * @property {boolean|undefined} enableTracking       - Whether to track each person across the
- *                                                      frames with a unique ID.
- * @property {string|undefined} trackerType           - The type of tracker to use.
- * @property {object|undefined} trackerConfig         - Advanced tracker configurations.
- * @property {string|undefined} modelUrl              - The file path or URL to the MoveNet model.
+ * @property {string} [modelType]             - The type of MoveNet model to use.
+ * @property {boolean} [enableSmoothing]      - Whether to use temporal filter to smooth the
+ *                                              keypoints across frames.
+ * @property {number} [minPoseScore]          - The minimum confidence score for a pose to be
+ *                                              detected.
+ * @property {number} [multiPoseMaxDimension] - The target maximum dimension to use as the
+ *                                              input to the multi-pose model. Only for
+ *                                              `MULTIPOSE_LIGHTNING` model.
+ * @property {boolean} [enableTracking]       - Whether to track each person across the frames
+ *                                              with a unique ID.
+ * @property {string} [trackerType]           - The type of tracker to use.
+ * @property {object} [trackerConfig]         - Advanced tracker configurations.
+ * @property {string} [modelUrl]              - The file path or URL to the MoveNet model.
  */
 
 /**
  * User provided options object for BodyPose with BlazePose model.
  * @typedef {object} BlazePoseOptions
- * @property {string|undefined} runtime               - The runtime to use.
- * @property {boolean|undefined} enableSmoothing      - Whether to use temporal filter to smooth
- *                                                      keypoints across frames.
- * @property {boolean|undefined} enableSegmentation   - Whether to generate the segmentation mask.
- *                                                      Only for 'mediapipe' runtime.
- * @property {boolean|undefined} smoothSegmentation   - Whether to filter segmentation masks across
- *                                                      different frames to reduce jitter.
- *                                                      Only for 'mediapipe' runtime.
- * @property {string|undefined} solutionPath          - The URL to the MediaPipe BlazePose solution.
- *                                                      Only for 'mediapipe' runtime.
- * @property {string|undefined} modelType             - The type of BlazePose model to use.
- * @property {string|undefined} detectorModelUrl      - The file path or URL to the BlazePose
- *                                                      detector model. Only for 'tfjs' runtime.
- * @property {string|undefined} landmarkModelUrl      - The file path or URL to the BlazePose
- *                                                      landmark model. Only for 'tfjs' runtime.
+ * @property {string} [runtime]               - The runtime to use.
+ * @property {boolean} [enableSmoothing]      - Whether to use temporal filter to smooth
+ *                                              keypoints across frames.
+ * @property {boolean} [enableSegmentation]   - Whether to generate the segmentation mask.
+ *                                              Only for `mediapipe` runtime.
+ * @property {boolean} [smoothSegmentation]   - Whether to filter segmentation masks across
+ *                                              different frames to reduce jitter. Only for
+ *                                              `mediapipe` runtime.
+ * @property {string} [solutionPath]          - The URL to the MediaPipe BlazePose solution.
+ *                                              Only for `mediapipe` runtime.
+ * @property {string} [modelType]             - The type of BlazePose model to use.
+ * @property {string} [detectorModelUrl]      - The file path or URL to the BlazePose detector
+ *                                              model. Only for `tfjs` runtime.
+ * @property {string} [landmarkModelUrl]      - The file path or URL to the BlazePose landmark
+ *                                              model. Only for `tfjs` runtime.
  */
 
 /**
- * Configuration schema for MoveNet model, used by `handleOptions` to
+ * Schema for MoveNet model configuration, used by `handleOptions` to
  * validate the user's options object.
  */
 const MoveNetConfigSchema = {
@@ -117,7 +117,7 @@ const MoveNetConfigSchema = {
 };
 
 /**
- * Configuration schema for BlazePose model, used by `handleOptions` to
+ * Schema for BlazePose model configuration, used by `handleOptions` to
  * validate the user's options object.
  */
 const blazePoseConfigSchema = {
@@ -163,7 +163,7 @@ const blazePoseConfigSchema = {
 };
 
 /**
- * Configuration schema for runtime options, used by `handleOptions` to
+ * Schema for runtime configuration, used by `handleOptions` to
  * validate the user's options object.
  */
 const RuntimeConfigSchema = {
@@ -195,8 +195,6 @@ class BodyPose {
     this.model = null;
     /** The user provided options object. */
     this.userOptions = options;
-    /** The config passed to underlying detector instance during initialization. */
-    this.config = {};
     /** The config passed to underlying detector instance during inference. */
     this.runtimeConfig = {};
     /** The media source being continuously detected. Only used in continuous mode. */
@@ -209,7 +207,7 @@ class BodyPose {
     this.signalStop = false;
     /** A flag to track the previous call to`detectStart` and `detectStop`. */
     this.prevCall = "";
-
+    /** A promise that resolves when the model is ready. */
     this.ready = callCallback(this.loadModel(), callback);
   }
 
@@ -225,20 +223,19 @@ class BodyPose {
     if (this.modelName === "BlazePose") {
       pipeline = poseDetection.SupportedModels.BlazePose;
       modelConfig = handleOptions(
-        this.config,
+        this.userOptions,
         blazePoseConfigSchema,
-        "bodyPose"
-      );
-      this.runtimeConfig = handleOptions(
-        this.config,
-        RuntimeConfigSchema,
         "bodyPose"
       );
     } else {
       pipeline = poseDetection.SupportedModels.MoveNet;
-      modelConfig = handleOptions(this.config, MoveNetConfigSchema, "bodyPose");
+      modelConfig = handleOptions(
+        this.userOptions,
+        MoveNetConfigSchema,
+        "bodyPose"
+      );
       // Map the modelType string to the `movenet.modelType` enum
-      switch (this.config.modelType) {
+      switch (modelConfig.modelType) {
         case "SINGLEPOSE_LIGHTNING":
           modelConfig.modelType =
             poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING;
@@ -251,13 +248,13 @@ class BodyPose {
           modelConfig.modelType =
             poseDetection.movenet.modelType.MULTIPOSE_LIGHTNING;
       }
-      this.runtimeConfig = handleOptions(
-        this.config,
-        RuntimeConfigSchema,
-        "bodyPose"
-      );
     }
-
+    // Filter out the runtime config options
+    this.runtimeConfig = handleOptions(
+      this.userOptions,
+      RuntimeConfigSchema,
+      "bodyPose"
+    );
     // Load the TensorFlow.js detector instance
     await tf.ready();
     this.model = await poseDetection.createDetector(pipeline, modelConfig);
@@ -279,11 +276,10 @@ class BodyPose {
       "An html or p5.js image, video, or canvas element argument is required for detect()."
     );
     const { image, callback } = argumentObject;
-
+    // Run the detection
     await mediaReady(image, false);
     const predictions = await this.model.estimatePoses(image);
     let result = predictions;
-
     // Modify the raw tfjs output to a more usable format
     this.renameScoreToConfidence(result);
     if (this.modelName === "MoveNet" && isVideo(image)) {
@@ -301,7 +297,7 @@ class BodyPose {
     }
     this.addKeypoints(result);
     this.resizeBoundingBoxes(result, image.width, image.height);
-
+    // Output the result via callback and promise
     if (typeof callback === "function") callback(result);
     return result;
   }
@@ -309,7 +305,7 @@ class BodyPose {
   /**
    * Repeatedly outputs pose predictions through a callback function.
    * Calls the internal detectLoop() function.
-   * @param {any} media - An HMTL or p5.js image, video, or canvas element to run the prediction on.
+   * @param {any} media - An HTML or p5.js image, video, or canvas element to run the prediction on.
    * @param {gotPoses} callback - A callback function to handle the predictions.
    * @public
    */
@@ -350,7 +346,6 @@ class BodyPose {
     while (!this.signalStop) {
       const predictions = await this.model.estimatePoses(this.detectMedia);
       let result = predictions;
-
       // Modify the raw tfjs output to a more usable format
       this.renameScoreToConfidence(result);
       if (this.modelName === "MoveNet" && isVideo(this.detectMedia)) {
@@ -489,7 +484,6 @@ class BodyPose {
    * @private
    */
   resizeBoundingBoxes(poses, imageWidth, imageHeight) {
-    // Only MoveNet model has box property
     if (poses[0] && poses[0].box) {
       poses.forEach((pose) => {
         pose.box.height = pose.box.height * imageHeight;
@@ -523,7 +517,7 @@ class BodyPose {
 /**
  * Factory function that returns a BodyPose instance.
  * @param {string} modelName - The underlying model to use, `MoveNet` or `BlazePose`.
- * @param {MoveNetOptions|BlazePoseOptions} options - An options object for the model.
+ * @param {MoveNetOptions|BlazePoseOptions} options - A user-defined options object for the model.
  * @param {function} callback  - A callback function that is called once the model has been loaded.
  * @returns {BodyPose} A BodyPose instance.
  */
