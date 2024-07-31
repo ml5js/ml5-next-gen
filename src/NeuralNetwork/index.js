@@ -1102,7 +1102,12 @@ class DiyNeuralNetwork {
     if (meta !== null) {
       const label = Object.keys(meta.outputs)[0];
       const vals = Object.entries(meta.outputs[label].legend);
-
+      vals.sort((a, b) => {
+        return (
+          b[1].reduce((acc, curr) => acc * 2 + curr, 0) -
+          a[1].reduce((acc, curr) => acc * 2 + curr, 0)
+        );
+      });
       const formattedResults = unformattedResults.map((unformattedResult) => {
         return vals
           .map((item, idx) => {
