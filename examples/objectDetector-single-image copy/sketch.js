@@ -3,7 +3,7 @@
  * Learn more about the ml5.js project: https://ml5js.org/
  * ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
  *
- * This example demonstrates hand tracking on an image through ml5.objectDetector.
+ * This example demonstrates object detection on an image through ml5.objectDetector.
  */
 
 let objectDetector;
@@ -13,6 +13,11 @@ let hands = [];
 function preload() {
   // Load the image to be detected
   img = loadImage("hand.jpg");
+
+  // trying to work around "WebGPU readSync is only available for CPU-resident tensors."
+  // see https://github.com/ml5js/ml5-next-gen/issues/117
+  ml5.setBackend("webgl");
+
   // Load the objectDetector model
   objectDetector = ml5.objectDetector();
 }

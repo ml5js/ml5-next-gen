@@ -9,7 +9,8 @@
  */
 
 import * as tf from "@tensorflow/tfjs";
-import * as cocoSsD from "@tensorflow-models/coco-ssd";
+import * as handPoseDetection from "@tensorflow-models/hand-pose-detection";
+import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import handleOptions from "../utils/handleOptions";
@@ -45,7 +46,8 @@ class ObjectDetector {
       "MediaPipeHands",
       "handPose"
     );
-    this.model = null;
+    this.model = null; // currently still handPose
+    this.model2 = null; // temp. for cocoSsd
     this.config = options;
     this.runtimeConfig = {};
     this.detectMedia = null;
@@ -120,6 +122,10 @@ class ObjectDetector {
     await tf.ready();
     this.model = await handPoseDetection.createDetector(pipeline, modelConfig);
 
+    console.log('Loading cocoSsd');
+    this.model2 = await cocoSsd.load();
+    console.log('Finished loading cocoSsd');
+
     return this;
   }
 
@@ -146,6 +152,8 @@ class ObjectDetector {
     const { image, callback } = argumentObject;
 
     await mediaReady(image, false);
+    // This is the actual handPose code
+    /*
     const predictions = await this.model.estimateHands(
       image,
       this.runtimeConfig
@@ -154,6 +162,13 @@ class ObjectDetector {
     let result = predictions;
     this.renameScoreToConfidence(result);
     this.addKeypoints(result);
+    */
+
+    const predictions = await this.model2.detect(image);
+    console.log('raw result from cocoSsd', predictions);
+
+    // return an empty array for now
+    const result = [];
 
     if (typeof callback === "function") callback(result);
     return result;
