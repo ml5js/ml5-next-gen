@@ -136,7 +136,6 @@ class BodySegmentation {
       for (let key in BODYPIX_PALETTE) {
         this[key] = BODYPIX_PALETTE[key].id;
       }
-
     } else {
       pipeline = tfBodySegmentation.SupportedModels.MediaPipeSelfieSegmentation;
       modelConfig = handleOptions(
@@ -186,7 +185,6 @@ class BodySegmentation {
       // add constants to the instance variable
       this.BACKGROUND = 0;
       this.PERSON = 255;
-
     }
 
     await tf.ready();
@@ -221,10 +219,16 @@ class BodySegmentation {
 
     // add array of raw values to output
     if (segmentation.length) {
+      // flip the image data if flipped is true
+      if (this.runtimeConfig.flipHorizontal) {
+        segmentation[0].mask.mask = this.flipImageData(
+          segmentation[0].mask.mask
+        );
+      }
       result.imageData = await segmentation[0].mask.toImageData();
       let data = new Array(result.imageData.width * result.imageData.height);
-      for (let i=0; i < data.length; i++) {
-        data[i] = result.imageData.data[i*4];
+      for (let i = 0; i < data.length; i++) {
+        data[i] = result.imageData.data[i * 4];
       }
       result.data = data;
     } else {
@@ -316,10 +320,17 @@ class BodySegmentation {
 
       // add array of raw values to output
       if (segmentation.length) {
+        // flip the image data if flipped is true
+        if (this.runtimeConfig.flipHorizontal) {
+          segmentation[0].mask.mask = this.flipImageData(
+            segmentation[0].mask.mask
+          );
+        }
         result.imageData = await segmentation[0].mask.toImageData();
+
         let data = new Array(result.imageData.width * result.imageData.height);
-        for (let i=0; i < data.length; i++) {
-          data[i] = result.imageData.data[i*4];
+        for (let i = 0; i < data.length; i++) {
+          data[i] = result.imageData.data[i * 4];
         }
         result.data = data;
       } else {
@@ -357,6 +368,26 @@ class BodySegmentation {
 
     this.detecting = false;
     this.signalStop = false;
+  }
+
+  /** Flip the image data horizontally
+   * @param imageData - a ImageData object
+   */
+  flipImageData(imageData) {
+    const { width, height, data } = imageData;
+    const newData = new Uint8ClampedArray(width * height * 4);
+    for (let i = 0; i < height; i++) {
+      for (let j = 0; j < width; j++) {
+        const flippedJ = width - j - 1;
+        const index = (i * width + j) * 4;
+        const flippedIndex = (i * width + flippedJ) * 4;
+        newData[flippedIndex] = data[index];
+        newData[flippedIndex + 1] = data[index + 1];
+        newData[flippedIndex + 2] = data[index + 2];
+        newData[flippedIndex + 3] = data[index + 3];
+      }
+    }
+    return new ImageData(newData, width, height);
   }
 
   /**
