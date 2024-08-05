@@ -18,7 +18,6 @@ class TimeSeriesUtils {
 
   verifyAndFormatInputs(xInputs, options = null,classOptions){
     const dataFormat = this.checkInputStructure(xInputs, options);
-    console.log(dataFormat);
     return this.formatInputsToObjects(xInputs,options,classOptions,dataFormat);
   }
 
@@ -90,6 +89,7 @@ class TimeSeriesUtils {
     if (options !== null){
       if (options.inputLabels){
         label = options.inputLabels
+        console.log('here1')
       }
     } else if (classOptions !== null){
       if (classOptions.inputs){
@@ -97,8 +97,9 @@ class TimeSeriesUtils {
       }
     } 
     
-    if (label === '') {
-        const label = this.getLabelFromNestedArray(xInputs);
+    if ((typeof label === 'string' && label === '') || 
+    (Array.isArray(label) && label.length === 0)) {
+      label = this.getLabelFromNestedArray(xInputs);
     }
 
     return xInputs.map((input)=>{
@@ -177,11 +178,11 @@ class TimeSeriesUtils {
 
     // input-based values to assign  
     } else {
-      inputLabels = this.labelsFromNestedArray(xInputs);
+      inputLabels = this.getLabelFromNestedArray(xInputs);
       if (typeof yInputs === "object") {
         outputLabels = Object.keys(yInputs);
       } else {
-        inputLabels = this.labelsFromNestedArray(yInputs);
+        inputLabels = this.getLabelFromNestedArray(yInputs);
       }
     }
   
@@ -214,67 +215,95 @@ class TimeSeriesUtils {
       return null;
     }
   
-    if (Array.isArray(data)) {
-      return traverseArray(data);
+    if (Array.isArray(xInputs)) {
+      return traverseArray(xInputs);
     } else {
       throw new Error('Input data must be an array.');
     }    
   }
-  labelsFromNestedArray(data){
-    function processData(data, prefix = 'label') {
-      // Recursive function to find the deepest level of the data and return the result
-      function traverse(value) {
-        if (Array.isArray(value)) {
-          if (value.length > 0 && typeof value[0] === 'string') {
-            // If the deepest unit is an array with strings
-            return { type: 'array', data: value };
-          } else if (value.length > 0 && typeof value[0] === 'number') {
-            // If the deepest unit is an array with numbers
-            return { type: 'array', data: value };
-          } else {
-            for (const item of value) {
-              const result = traverse(item);
-              if (result) return result;
-            }
-          }
-        } else if (value !== null && typeof value === 'object') {
-          return { type: 'object', data: value };  // If the deepest unit is an object
-        }
-        return null;
-      }
-    
-      const result = traverse(data);
-    
-      if (result) {
-        if (result.type === 'object') {
-          // If the deepest level is an object, get the unique keys
-          return Object.keys(result.data);
-        } else if (result.type === 'array') {
-          // If the deepest level is an array with strings or numbers, get the labels
-          return result.data.map((_, index) => `${prefix}_${index}`);
-        }
-      } else {
-        // No recognizable structure found
-        throw new Error('Data does not match expected structure for objects or arrays.');
-      }
-    }
-  }
 
+  // labelsFromNestedArray(data){
+  //   function processData(data, prefix = 'label') {
+  //     // Recursive function to find the deepest level of the data and return the result
+  //     function traverse(value) {
+  //       if (Array.isArray(value)) {
+  //         if (value.length > 0 && typeof value[0] === 'string') {
+  //           // If the deepest unit is an array with strings
+  //           return { type: 'array', data: value };
+  //         } else if (value.length > 0 && typeof value[0] === 'number') {
+  //           // If the deepest unit is an array with numbers
+  //           return { type: 'array', data: value };
+  //         } else {
+  //           for (const item of value) {
+  //             const result = traverse(item);
+  //             if (result) return result;
+  //           }
+  //         }
+  //       } else if (value !== null && typeof value === 'object') {
+  //         return { type: 'object', data: value };  // If the deepest unit is an object
+  //       }
+  //       return null;
+  //     }
+    
+  //     const result = traverse(data);
+    
+  //     if (result) {
+  //       if (result.type === 'object') {
+  //         // If the deepest level is an object, get the unique keys
+  //         return Object.keys(result.data);
+  //       } else if (result.type === 'array') {
+  //         // If the deepest level is an array with strings or numbers, get the labels
+  //         return result.data.map((_, index) => `${prefix}_${index}`);
+  //       }
+  //     } else {
+  //       // No recognizable structure found
+  //       throw new Error('Data does not match expected structure for objects or arrays.');
+  //     }
+  //   }
+
+  //   output = processData(data, "label");
+
+  //   console.log('labeling',output);
+  //   return processData(data, "label");
+  // }
 
 
   // normalize utilities
   reshapeTo3DArray(data, shape) {
+    const [batch, timeStep, feature] = shape;
     let result = [];
     let index = 0;
-    for (let i = 0; i < shape[0]; i++) {
-        let subArray = [];
-        for (let j = 0; j < shape[1]; j++) {
-            subArray.push(data[index]);
-            index++;
+
+    for (let i = 0; i < batch; i++) {
+        let batchArray = [];
+        for (let j = 0; j < timeStep; j++) {
+            let timeStepArray = [];
+            for (let k = 0; k < feature; k++) {
+                timeStepArray.push(data[index]);
+                index++;
+            }
+            batchArray.push(timeStepArray);
         }
-        result.push(subArray);
+        result.push(batchArray);
     }
+    
+
     return result;
+  }
+
+  zipArraySequence(arr1, arr2) {
+    if (arr1.length !== arr2.length) {
+      console.error("arrays do not have the same length");
+      return [];
+    }
+  
+    return arr1.map((xs, idx) => {
+      const ys = arr2[idx].ys; // Extract the inner `ys` object
+      return {
+        xs: xs,
+        ys: ys
+      };
+    });
   }
 }
   

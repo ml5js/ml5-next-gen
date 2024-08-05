@@ -4,6 +4,8 @@ import { saveBlob } from "../utils/io";
 import modelLoader from '../utils/modelLoader';
 import nnUtils from "../NeuralNetwork/NeuralNetworkUtils";
 
+import tsUtils from "./timeSeriesUtils";
+
 class NeuralNetworkData {
   constructor() {
     this.meta = {
@@ -19,7 +21,7 @@ class NeuralNetworkData {
     this.isWarmedUp = false;
 
     this.data = {
-      raw: [], // array of {xs:{}, ys:{}}
+      raw: [], // array of {xs:[{},{}], ys:{}}
     };
   }
 
@@ -40,8 +42,6 @@ class NeuralNetworkData {
       xs: xInputObj,
       ys: yInputObj,
     });
-
-    console.log(this.data.raw);
   }
 
 
@@ -71,47 +71,44 @@ class NeuralNetworkData {
     this.getDataOneHot();
     // calculate the input units from the data
     this.getDataUnits(inputShape);
+    // get the shape of batch
 
     this.isMetadataReady = true;
   }
 
-    /**
+  /**
    * getDTypesFromData
    * gets the data types of the data we're using
    * important for handling oneHot
    * @private
    * @void - updates this.meta
    */
-    getDTypesFromSeriesData() {
-      const meta = {
-        ...this.meta,
-        inputs: {},
-        outputs: {},
+  getDTypesFromSeriesData() {
+    const meta = {
+      ...this.meta,
+      inputs: {},
+      outputs: {},
+    };
+
+    const sample = this.data.raw[0];
+
+    //consistent dTypes have already been checked at add data
+    const xs = Object.keys(sample.xs[0]); //since time series data is in form of array
+    const ys = Object.keys(sample.ys);
+    xs.forEach((prop) => {
+      meta.inputs[prop] = {
+        dtype: nnUtils.getDataType(sample.xs[0][prop]),
       };
-  
-      const sample = this.data.raw[0];
+    });
 
-      
-  
-      const xs = Object.keys(sample.xs[0]); //since time series data is in form of array
-      const ys = Object.keys(sample.ys);
+    ys.forEach((prop) => {
+      meta.outputs[prop] = {
+        dtype: nnUtils.getDataType(sample.ys[prop]),
+      };
+    });
 
-      xs.forEach((prop) => {
-        meta.inputs[prop] = {
-          dtype: nnUtils.getDataType(sample.xs[0][prop]),
-        };
-      });
-  
-      ys.forEach((prop) => {
-        meta.outputs[prop] = {
-          dtype: nnUtils.getDataType(sample.ys[prop]),
-        };
-      });
-  
-      // TODO: check if all entries have the same dtype.
-      // otherwise throw an error
-      this.meta = meta;
-    }
+    this.meta = meta;
+  }
 
   /**
    * get stats about the data
@@ -138,7 +135,6 @@ class NeuralNetworkData {
         inputMeta[k].min = 0;
         inputMeta[k].max = 1;
       } else if (inputMeta[k].dtype === "number") {
-        console.log('raw',this.data.raw)
         const dataAsArray = this.data.raw.flatMap((item) => item[xsOrYs].map((obj) => obj[k]));
         inputMeta[k].min = nnUtils.getMin(dataAsArray);
         inputMeta[k].max = nnUtils.getMax(dataAsArray);
@@ -193,43 +189,7 @@ class NeuralNetworkData {
    return inputsMeta;
   }
 
-   /**
-   * Returns a legend mapping the
-   * data values to oneHot encoded values
-   * @private
-   * @param {Array<string>} _uniqueValuesArray
-   * @return {Object}
-   */
-  // eslint-disable-next-line class-methods-use-this, no-unused-vars
-  createOneHotEncodings(_uniqueValuesArray) {
-    return tf.tidy(() => {
-      const output = {
-        uniqueValues: _uniqueValuesArray,
-        legend: {},
-      };
-
-      const uniqueVals = _uniqueValuesArray; // [...new Set(this.data.raw.map(obj => obj.xs[prop]))]
-      // get back values from 0 to the length of the uniqueVals array
-      const onehotValues = uniqueVals.map((item, idx) => idx);
-      // oneHot encode the values in the 1d tensor
-      const oneHotEncodedValues = tf.oneHot(
-        tf.tensor1d(onehotValues, "int32"),
-        uniqueVals.length
-      );
-      // convert them from tensors back out to an array
-      const oneHotEncodedValuesArray = oneHotEncodedValues.arraySync();
-
-      // populate the legend with the key/values
-      uniqueVals.forEach((uVal, uIdx) => {
-        output.legend[uVal] = oneHotEncodedValuesArray[uIdx];
-      });
-
-      return output;
-    });
-  }
-
-
-  /**
+    /**
    * get the data units, inputshape and output units
    * @private
    * @param {Array<number>} arrayShape
@@ -274,6 +234,42 @@ class NeuralNetworkData {
     return units;
   }
 
+   /**
+   * Returns a legend mapping the
+   * data values to oneHot encoded values
+   * @private
+   * @param {Array<string>} _uniqueValuesArray
+   * @return {Object}
+   */
+  // eslint-disable-next-line class-methods-use-this, no-unused-vars
+  createOneHotEncodings(_uniqueValuesArray) {
+    return tf.tidy(() => {
+      const output = {
+        uniqueValues: _uniqueValuesArray,
+        legend: {},
+      };
+
+      const uniqueVals = _uniqueValuesArray; // [...new Set(this.data.raw.map(obj => obj.xs[prop]))]
+      // get back values from 0 to the length of the uniqueVals array
+      const onehotValues = uniqueVals.map((item, idx) => idx);
+      // oneHot encode the values in the 1d tensor
+      const oneHotEncodedValues = tf.oneHot(
+        tf.tensor1d(onehotValues, "int32"),
+        uniqueVals.length
+      );
+      // convert them from tensors back out to an array
+      const oneHotEncodedValuesArray = oneHotEncodedValues.arraySync();
+
+      // populate the legend with the key/values
+      uniqueVals.forEach((uVal, uIdx) => {
+        output.legend[uVal] = oneHotEncodedValuesArray[uIdx];
+      });
+
+      return output;
+    });
+  }
+
+
 
 
   /**
@@ -298,14 +294,19 @@ class NeuralNetworkData {
       const inputArr = [];
       const outputArr = [];
 
+  
+
       dataRaw.forEach((row) => {
         // get xs
-        const xs = Object.keys(meta.inputs)
-          .map((k) => {
-            return row.xs[k];
-          })
-          .flat();
+        // const xs = Object.keys(meta.inputs)
+        //   .map((k) => {
+        //     return row.xs[k];
+        //   })
+        //   .flat();
 
+        // inputArr.push(xs);
+  
+        const xs = row.xs;
         inputArr.push(xs);
 
         // get ys
@@ -317,15 +318,21 @@ class NeuralNetworkData {
 
         outputArr.push(ys);
       });
+      
 
-      const inputs = tf.tensor(inputArr.flat(), [
-        dataLength,
-        ...meta.inputUnits,
-      ]);
+      // const inputs = tf.tensor(inputArr.flat(), [
+      //   dataLength,
+      //   ...meta.inputUnits,
+      // ]);
+      const inputs = tf.tensor(inputArr);
+      
+
       const outputs = tf.tensor(outputArr.flat(), [
         dataLength,
         meta.outputUnits,
       ]);
+
+      
 
       return {
         inputs,
@@ -345,36 +352,12 @@ class NeuralNetworkData {
    * @return {Array<object>}
    */
   normalizeDataRaw() {
+    
     const normXs = this.normalizeInputData(this.meta.inputs, "xs");
     const normYs = this.normalizeInputData(this.meta.outputs, "ys");
-
-    const normalizedData = nnUtils.zipArrays(normXs, normYs);
-
-    return normalizedData;
-  }
-
-  normalizer(inputOrOutputMeta,xsOrYs){
-    const dataRaw = this.data.raw;
-    // the data length
-    const dataLength = dataRaw.length;
-    // the copy of the inputs.meta[inputOrOutput]
-    const inputMeta = Object.assign({}, inputOrOutputMeta);
-
-    const normalized = {};
-    Object.keys(inputMeta).forEach((k) => {
-      console.log(k);
-      // get the min and max values
-      const options = {
-        min: inputMeta[k].min,
-        max: inputMeta[k].max,
-      };
-
-      const dataAsArray = this.data.raw.flatMap((item) => item[xsOrYs].map((obj) => obj[k]));
-      normalized[k] = this.normalizeArray(dataAsArray, options);
-
-    });    
-
+    const normalizedData = tsUtils.zipArraySequence(normXs, normYs);
     
+    return normalizedData;
   }
 
   /**
@@ -384,25 +367,21 @@ class NeuralNetworkData {
    */
   normalizeInputData(inputOrOutputMeta, xsOrYs) {
     const dataRaw = this.data.raw;
+    
     // the data length
     const dataLength = dataRaw.length;
+
     // the copy of the inputs.meta[inputOrOutput]
     const inputMeta = Object.assign({}, inputOrOutputMeta);
 
-
-
-    console.log('heremeta', inputOrOutputMeta);
     // normalized output object
     const normalized = {};
     Object.keys(inputMeta).forEach((k) => {
-      console.log(k);
       // get the min and max values
       const options = {
         min: inputMeta[k].min,
         max: inputMeta[k].max,
       };
-
-      
 
       // depending on the input type, normalize accordingly
       if (inputMeta[k].dtype === "string") {
@@ -412,7 +391,6 @@ class NeuralNetworkData {
       } else if (inputMeta[k].dtype === "number") {
         const dataAsArray = this.data.raw.flatMap((item) => item[xsOrYs].map((obj) => obj[k]));
         normalized[k] = this.normalizeArray(dataAsArray, options);
-
       } else if (inputMeta[k].dtype === "array") {
         const dataAsArray = dataRaw.map((item) => item[xsOrYs][k]);
         normalized[k] = dataAsArray.map((item) =>
@@ -421,23 +399,45 @@ class NeuralNetworkData {
       }
       
     });
-
-    console.log('opopp',normalized);
-    // create a normalized version of data.raws
-    const output = [...new Array(dataLength).fill(null)].map((item, idx) => {
-      const row = {
-        [xsOrYs]: {},
-      };
-
-      Object.keys(inputMeta).forEach((k) => {
-        row[xsOrYs][k] = normalized[k][idx];
-      });
-
-      return row;
-    });
-
     
 
+    let output;
+    if (xsOrYs == "ys"){
+      output = [...new Array(dataLength).fill(null)].map((item, idx) => {
+        const row = {
+          [xsOrYs]: {},
+        };
+  
+        Object.keys(inputMeta).forEach((k) => {
+          row[xsOrYs][k] = normalized[k][idx];
+        });
+  
+        return row;
+      });
+    } else if ((xsOrYs == "xs")){
+      // reshape array - already ready for tensorconversion
+      const features = Object.keys(inputMeta);
+      const feature_length = features.length;
+      
+      const seriesStep = dataRaw[0]['xs'].length;
+      
+      const batch = normalized[features[0]].length / seriesStep;
+
+      this.meta.seriesShape = [seriesStep,feature_length];
+
+      let zipped = [];
+
+      // zip arrays before reshaping
+      for (let idx =0; idx < seriesStep*feature_length*batch; idx++){
+        features.forEach((k) => {
+          zipped.push(normalized[k][idx])
+        })
+      }
+
+      // reshaping
+      output = tsUtils.reshapeTo3DArray(zipped,[batch,seriesStep,feature_length])
+    }
+    
     return output;
   }
 
@@ -473,46 +473,87 @@ class NeuralNetworkData {
     throw new Error("error in inputArray of normalizeArray() function");
   }
 
+  normalizePredictData(dataRaw, inputOrOutputMeta){
+    const inputMeta = Object.assign({}, inputOrOutputMeta);
+    const xsOrYs = "xs"
+    const predict_normalized = {};
+    Object.keys(inputMeta).forEach((k) => {
+      // get the min and max values
+      const options = {
+        min: inputMeta[k].min,
+        max: inputMeta[k].max,
+      };
+      if (inputMeta[k].dtype === "string") {
+        const dataAsArray = dataRaw.map((item) => item[xsOrYs][k]);
+        options.legend = inputMeta[k].legend;
+        predict_normalized[k] = this.normalizeArray(dataAsArray, options);
+      } else if (inputMeta[k].dtype === "number") {
+        const dataAsArray = Array(dataRaw).flatMap((item) => item.map((obj) => (obj[k])));
+        console.log(dataAsArray);
+        predict_normalized[k] = this.normalizeArray(dataAsArray, options);
+      }
+
+    });
+
+    console.log('done', predict_normalized);
+
+    const features = Object.keys(inputMeta);
+    const feature_length = features.length;
+    
+    const seriesStep = dataRaw.length;
+    
+    const batch = 1;
+    let zipped = [];
+
+    // zip arrays before reshaping
+    for (let idx =0; idx < seriesStep*feature_length*batch; idx++){
+      features.forEach((k) => {zipped.push(predict_normalized[k][idx])})
+    }
+      // reshaping
+    const output = tsUtils.reshapeTo3DArray(zipped,[batch,seriesStep,feature_length])
+    return output
+  }
+
   /**
    * unNormalizeArray
    * @param {*} _input
    * @param {*} _options
    */
   // eslint-disable-next-line no-unused-vars, class-methods-use-this
-  unnormalizeArray(inputArray, options) {
-    const { min, max } = options;
+  // unnormalizeArray(inputArray, options) {
+  //   const { min, max } = options;
 
-    // if the data is onehot encoded then remap the
-    // values from those oneHot arrays
-    if (options.legend) {
-      const unnormalized = inputArray.map((v) => {
-        let res;
-        Object.entries(options.legend).forEach((item) => {
-          const key = item[0];
-          const val = item[1];
-          const matches = v
-            .map((num, idx) => num === val[idx])
-            .every((truthy) => truthy === true);
-          if (matches) res = key;
-        });
-        return res;
-      });
+  //   // if the data is onehot encoded then remap the
+  //   // values from those oneHot arrays
+  //   if (options.legend) {
+  //     const unnormalized = inputArray.map((v) => {
+  //       let res;
+  //       Object.entries(options.legend).forEach((item) => {
+  //         const key = item[0];
+  //         const val = item[1];
+  //         const matches = v
+  //           .map((num, idx) => num === val[idx])
+  //           .every((truthy) => truthy === true);
+  //         if (matches) res = key;
+  //       });
+  //       return res;
+  //     });
 
-      return unnormalized;
-    }
+  //     return unnormalized;
+  //   }
 
-    // if the dtype is a number
-    if (inputArray.every((v) => typeof v === "number")) {
-      const unnormalized = inputArray.map((v) =>
-        nnUtils.unnormalizeValue(v, min, max)
-      );
-      return unnormalized;
-    }
+  //   // if the dtype is a number
+  //   if (inputArray.every((v) => typeof v === "number")) {
+  //     const unnormalized = inputArray.map((v) =>
+  //       nnUtils.unnormalizeValue(v, min, max)
+  //     );
+  //     return unnormalized;
+  //   }
 
-    // otherwise return the input array
-    // return inputArray;
-    throw new Error("error in inputArray of normalizeArray() function");
-  }
+  //   // otherwise return the input array
+  //   // return inputArray;
+  //   throw new Error("error in inputArray of normalizeArray() function");
+  // }
 
   /*
    * ////////////////////////////////////////////////
@@ -529,12 +570,15 @@ class NeuralNetworkData {
     const meta = Object.assign({}, this.meta);
 
     const output = this.data.raw.map((row) => {
+
+
       const xs = {
         ...row.xs,
       };
       const ys = {
         ...row.ys,
       };
+
       // get xs
       Object.keys(meta.inputs).forEach((k) => {
         if (meta.inputs[k].legend) {
@@ -554,7 +598,6 @@ class NeuralNetworkData {
         ys,
       };
     });
-    console.log('onhot',output);
     return output;
   }
 
@@ -609,7 +652,9 @@ class NeuralNetworkData {
       }
 
       // format the data.raw array
-      this.formatRawData(json, inputLabels, outputLabels);
+      // this.formatRawData(json, inputLabels, outputLabels);
+      return this.findEntries(json);
+
     } catch (err) {
       console.error("error loading json");
       throw new Error(err);
@@ -631,7 +676,9 @@ class NeuralNetworkData {
         entries: loadedData,
       };
       // format the data.raw array
-      this.formatRawData(json, inputLabels, outputLabels);
+      // this.formatRawData(json, inputLabels, outputLabels);
+      return this.findEntries(json);
+
     } catch (err) {
       console.error("error loading csv", err);
       throw new Error(err);
@@ -689,6 +736,7 @@ class NeuralNetworkData {
         const text = JSON.stringify(loadedData.data);
         if (nnUtils.isJsonOrString(text)) {
           loadedData = JSON.parse(text);
+          console.log(loadedData);
         } else {
           console.log(
             "Whoops! something went wrong. Either this kind of data is not supported yet or there is an issue with .loadData"
@@ -740,11 +788,13 @@ class NeuralNetworkData {
    * @return {Promise<void>}
    */
   async saveMeta(modelName = "model") {
+    console.log("meta saved");
     await saveBlob(
       JSON.stringify(this.meta),
       `${modelName}_meta.json`,
       "text/plain"
     );
+    
   }
 
   /**
@@ -798,45 +848,22 @@ class NeuralNetworkData {
    * @param {Array<string>} outputLabels
    * @void
    */
-  formatRawData(json, inputLabels, outputLabels) {
-    // Recurse through the json object to find
-    // an array containing `entries` or `data`
-    const dataArray = this.findEntries(json);
+  // formatRawData(json, inputLabels, outputLabels) {
 
-    if (!dataArray.length > 0) {
-      console.log(`your data must be contained in an array in \n
-        a property called 'entries' or 'data' of your json object`);
-    }
+  //   // Recurse through the json object to find
+  //   // an array containing `entries` or `data`
+  //   const dataArray = this.findEntries(json);
 
-    // create an array of json objects [{xs,ys}]
-    const result = dataArray.map((item, idx) => {
-      const output = {
-        xs: {},
-        ys: {},
-      };
+  //   if (!dataArray.length > 0) {
+  //     console.log(`your data must be contained in an array in \n
+  //       a property called 'entries' or 'data' of your json object`);
+  //   }
 
-      inputLabels.forEach((k) => {
-        if (item[k] !== undefined) {
-          output.xs[k] = item[k];
-        } else {
-          console.error(`the input label ${k} does not exist at row ${idx}`);
-        }
-      });
+  //   ////////////
 
-      outputLabels.forEach((k) => {
-        if (item[k] !== undefined) {
-          output.ys[k] = item[k];
-        } else {
-          console.error(`the output label ${k} does not exist at row ${idx}`);
-        }
-      });
-
-      return output;
-    });
-
-    // set this.data.raw
-    this.data.raw = result;
-  }
+  //   // set this.data.raw
+  //   this.data.raw = result;
+  // }
 
   /**
    * csvToJSON

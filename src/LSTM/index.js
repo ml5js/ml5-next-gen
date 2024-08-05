@@ -54,11 +54,23 @@ class timeSeries {
     this.data = {
       training: [],
     };
+
+    this.init = this.init.bind(this);
+
+    this.ready = callCallback(this.init(), callback);
   }
 
   // mainly for loading data - should be async
   async init() {
-    return 0;
+    console.log('init yeah')
+    if (this.options.dataUrl) {
+      console.log('URL provided, will load data')
+      await this.loadDataFromUrl(this.options.dataUrl);
+    } else if (this.options.modelUrl) {
+      // will take a URL to model.json, an object, or files array
+      await this.load(this.options.modelUrl);
+    }
+    return this;
   }
 
 
@@ -202,26 +214,31 @@ class timeSeries {
   }
 
   createMetaData() {
+    // this method does not get shape for images but instead for timesteps
     const { inputs } = this.options;
 
-    let inputShape;
-    if (Array.isArray(inputs) && inputs.length > 0) {
-      inputShape =
-        inputs.every((item) => typeof item === "number") && inputs.length > 0
-          ? inputs
-          : null;
-    }
+    console.log('meta',inputs);
+
+    let inputShape; 
+    if (typeof inputs === 'number'){
+      inputShape = inputs;
+    } else if (Array.isArray(inputs) && inputs.length > 0){
+      inputShape = inputs.length; //will be fed into the tensors later
+    } 
+
+    console.log('inputshape',inputShape);
 
     this.neuralNetworkData.createMetadata(inputShape);
   }
 
   prepareForTraining() {
-    this.data.training = this.neuralNetworkData.applyOneHotEncodingsToDataRaw();
+    // this.data.training = this.neuralNetworkData.applyOneHotEncodingsToDataRaw();
     this.neuralNetworkData.isWarmedUp = true;
   }
 
   convertTrainingDataToTensors() {
-    return this.neuralNetworkData.convertRawToTensors(this.data.training);
+    console.log('training',this.data.training);
+    return this.neuralNetworkData.convertRawToTensors(this.data.training);  
   }
 
   createNetworkLayers(layerJsonArray) {
@@ -258,15 +275,86 @@ class timeSeries {
       case "classification":
         layers = [
           {
+            type: "conv1d",
+            filters: 64,
+            kernelSize: 3,
+            activation: "relu",
+            inputShape: this.neuralNetworkData.meta.seriesShape,
+          },
+          {
+            type: "maxPooling1d",
+            poolSize: 2,
+          },
+          {
+            type: "conv1d",
+            filters: 128,
+            kernelSize: 3,
+            activation: "relu",
+            inputShape: this.neuralNetworkData.meta.seriesShape,
+          },
+          {
+            type: "maxPooling1d",
+            poolSize: 2,
+          },
+          {
+            type: "flatten",
+          },
+          {
             type: "dense",
-            units: this.options.hiddenUnits,
+            units: 128,
             activation: "relu",
           },
           {
             type: "dense",
+            units:2,
             activation: "softmax",
           },
         ];
+        // let shape = this.neuralNetworkData.meta.seriesShape
+        // layers = [
+        //   {
+        //     type: "input",
+        //     shape: shape,
+        //   },
+        //   {
+        //     type: "reshape",
+        //     targetShape: [shape[0],shape[1]*shape[2]],
+        //   },
+        //   {
+        //     type: "conv1d",
+        //     filters: 64,
+        //     kernelSize: 3,
+        //     activation: "relu",
+        //     inputShape: shape,
+        //   },
+        //   {
+        //     type: "maxPooling1d",
+        //     poolSize: 2,
+        //   },
+        //   {
+        //     type: "conv1d",
+        //     filters: 128,
+        //     kernelSize: 3,
+        //     activation: "relu",
+        //   },
+        //   {
+        //     type: "maxPooling1d",
+        //     poolSize: 2,
+        //   },
+        //   {
+        //     type: "flatten",
+        //   },
+        //   {
+        //     type: "dense",
+        //     units: 128,
+        //     activation: "relu",
+        //   },
+        //   {
+        //     type: "dense",
+        //     units:2,
+        //     activation: "softmax",
+        //   },
+        // ];
 
         return this.createNetworkLayers(layers);
       // if the task is regression
@@ -355,7 +443,7 @@ class timeSeries {
     ) {
       options = {
         loss: "categoricalCrossentropy",
-        optimizer: tf.train.sgd,
+        optimizer: tf.train.adam,
         metrics: ["accuracy"],
       };
     } else if (this.options.task === "regression") {
@@ -398,16 +486,213 @@ class timeSeries {
 
     const trainingData = this.neuralNetworkData.normalizeDataRaw();
 
-    console.log('normalized', trainingData);
-
     // set this equal to the training data
     this.data.training = trainingData;
 
     // set isNormalized to true
     this.neuralNetworkData.meta.isNormalized = true;
+
+    console.log('train',this.data.training)
+  }
+
+  classify(_input, _cb) {
+    return callCallback(this.classifyInternal(_input), _cb);
+  }
+
+  async classifyInternal(_input){
+    const { meta } = this.neuralNetworkData;
+    const inputData = this.formatInputsForPredictionAll(_input);
+
+    const unformattedResults = await this.neuralNetwork.classify(inputData);
+    inputData.dispose();
+
+    return unformattedResults;
+  }
+
+  // async classifyInternal(_input) {
+  //   const { meta } = this.neuralNetworkData;
+  //   const headers = Object.keys(meta.inputs);
+
+  //   let inputData;
+  //   console.log(_input)
+  //   // inputData = this.neuralNetworkData.
+  //   inputData = this.formatInputsForPredictionAll(_input);
+
+  //   const unformattedResults = await this.neuralNetwork.classify(inputData);
+  //   inputData.dispose();
+
+  //   if (meta !== null) {
+  //     const label = Object.keys(meta.outputs)[0];
+  //     const vals = Object.entries(meta.outputs[label].legend);
+
+  //     const formattedResults = unformattedResults.map((unformattedResult) => {
+  //       return vals
+  //         .map((item, idx) => {
+  //           return {
+  //             [item[0]]: unformattedResult[idx],
+  //             label: item[0],
+  //             confidence: unformattedResult[idx],
+  //           };
+  //         })
+  //         .sort((a, b) => b.confidence - a.confidence);
+  //     });
+
+  //     // return single array if the length is less than 2,
+  //     // otherwise return array of arrays
+  //     if (formattedResults.length < 2) {
+  //       return formattedResults[0];
+  //     }
+  //     return formattedResults;
+  //   }
+
+  //   return unformattedResults;
+  // }
+
+  
+
+  formatInputsForPredictionAll(_input) {
+    const { meta } = this.neuralNetworkData;
+    const inputHeaders = Object.keys(meta.inputs);
+
+    const formatted_inputs = tsUtils.verifyAndFormatInputs(_input,null,this.options);
+    const normalized_inputs = this.neuralNetworkData.normalizePredictData(formatted_inputs, meta.inputs);
+    const output = tf.tensor(normalized_inputs);
+
+    return output;
   }
 
 
+  /**
+   * ////////////////////////////////////////////////////////////
+   * Save / Load Data
+   * ////////////////////////////////////////////////////////////
+   */
+
+  /**
+   * @public
+   * saves the training data to a JSON file.
+   * @param {string} [name] Optional - The name for the saved file.
+   *  Should not include the file extension.
+   *  Defaults to the current date and time.
+   * @param {ML5Callback<void>} [callback] Optional - A function to call when the save is complete.
+   * @return {Promise<void>}
+   */
+  saveData(name, callback) {
+    const args = handleArguments(name, callback);
+    return callCallback(this.neuralNetworkData.saveData(args.name), args.callback);
+  }
+
+  /**
+   * @public
+   * load data
+   * @param {string | FileList | Object} filesOrPath - The URL of the file to load,
+   *  or a FileList object (.files) from an HTML element <input type="file">.
+   * @param {ML5Callback<void>} [callback] Optional - A function to call when the loading is complete.
+   * @return {Promise<void>}
+   */
+  async loadData(filesOrPath, callback) {
+    return callCallback(this.neuralNetworkData.loadData(filesOrPath), callback);
+  }
+
+  /**
+ * Loads data from a URL using the appropriate function
+ * @param {*} dataUrl
+ * @param {*} inputs
+ * @param {*} outputs
+ * @void
+ */
+  async loadDataFromUrl(dataUrl, inputs, outputs) {
+    let json;
+    let dataFromUrl
+    try {
+      if (dataUrl.endsWith(".csv")) {
+        dataFromUrl = await this.neuralNetworkData.loadCSV(dataUrl, inputs, outputs);
+      } else if (dataUrl.endsWith(".json")) {
+        dataFromUrl = await this.neuralNetworkData.loadJSON(dataUrl, inputs, outputs);
+      } else if (dataUrl.includes("blob")) {
+        dataFromUrl = await this.loadBlob(dataUrl, inputs, outputs);
+      } else {
+        throw new Error("Not a valid data format. Must be csv or json");
+      }
+    } catch (error) {
+      console.error(error);
+      throw new Error(error);
+    }
+
+    dataFromUrl.map((item) => {
+      this.addData(item.xs, item.ys)
+    })
+
+    this.createMetaData();
+
+    this.prepareForTraining();    
+  }
+
+  // async loadDataFromUrl() {
+  //   const { dataUrl, inputs, outputs } = this.options;
+
+  //   console.log(this.options)
+  //   await this.neuralNetworkData.loadDataFromUrl(
+  //     dataUrl,
+  //     inputs,
+  //     outputs
+  //   );
+
+  //   // once the data are loaded, create the metadata
+  //   // and prep the data for training
+  //   // if the inputs are defined as an array of [img_width, img_height, channels]
+  //   this.createMetaData();
+
+  //   this.prepareForTraining();
+  // }
+
+  /**
+   * ////////////////////////////////////////////////////////////
+   * Save / Load Model
+   * ////////////////////////////////////////////////////////////
+   */
+
+  /**
+   * @public
+   * saves the model, weights, and metadata
+   * @param {string} [name] Optional - The name for the saved file.
+   *  Should not include the file extension.
+   *  Defaults to 'model'.
+   * @param {ML5Callback<void[]>} [callback] Optional - A function to call when the save is complete.
+   * @return {Promise<void[]>}
+   */
+  async save(name, callback) {
+    const args = handleArguments(name, callback);
+    const modelName = args.string || 'model';
+    console.log("hello")
+    // save the model
+    return callCallback(Promise.all([
+      this.neuralNetwork.save(modelName),
+      this.neuralNetworkData.saveMeta(modelName)
+    ]), args.callback);
+  }
+
+  /**
+   * @public - also called internally by init() when there is a modelUrl in the options
+   * load a model and metadata
+   * @param {string | FileList | Object} filesOrPath - The URL of the file to load,
+   *  or a FileList object (.files) from an HTML element <input type="file">.
+   * @param {ML5Callback<void[]>} [callback] Optional - A function to call when the loading is complete.
+   * @return {Promise<void[]>}
+   */
+  async load(filesOrPath, callback) {
+    return callCallback(Promise.all([
+      this.neuralNetwork.load(filesOrPath),
+      this.neuralNetworkData.loadMeta(filesOrPath)
+    ]), callback);
+  }
+
+  /**
+   * dispose and release memory for a model
+   */
+  dispose() {
+    this.neuralNetwork.dispose();
+  }
 }
 
 const TimeSeries = (inputsOrOptions, outputsOrCallback, callback) => {

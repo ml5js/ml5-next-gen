@@ -10,7 +10,6 @@ Things changed from neural network class:
 
 1. No neuro evolution
 
-
 */
 
 class NeuralNetwork {

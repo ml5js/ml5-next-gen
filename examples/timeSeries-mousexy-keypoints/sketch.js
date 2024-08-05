@@ -20,11 +20,11 @@ let sequence = [];
 function setup() {
   ml5.setBackend('webgl')
   let options = {
-    inputs: ['x', 'y'],
+    inputs: ['x','y'],
     outputs: ['label'],
     task: 'classification',
     debug: 'true',
-    learningRate: 0.5
+    learningRate: 0.05
   };
   model = ml5.timeSeries(options);
   createCanvas(600, 400);
@@ -78,11 +78,11 @@ function gotResults(results) {
   // if (error) {
   //   console.log(error);
   // }
-  // console.log('hello', results);
-  stroke(0);
-  fill(0, 0, 255, 100);
-  let label = results[0].label;
-  text("Prediction: " + label, 50,50);
+  console.log('hello', results);
+  // stroke(0);
+  // fill(0, 0, 255, 100);
+  // let label = results[0].label;
+  // text("Prediction: " + label, 50,50);
   // let label = error[0].label;
 
 }
@@ -152,7 +152,7 @@ function UI(){
     text("Training...", 50,50);
     model.normalizeData();
     let options = {
-      epochs: 100
+      epochs: 20
     }
     model.train(options,whileTraining,finishedTraining);
   }
