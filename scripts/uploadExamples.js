@@ -212,9 +212,10 @@ function createFolderObject(folderID, folderPath) {
  * @returns {string} The content with the CDN URL.
  */
 function replaceWithCdnURL(content) {
+  const version = ml5Version.split(".")[0];
   return content.replace(
     "../../dist/ml5.js",
-    `https://unpkg.com/ml5@${ml5Version}/dist/ml5.min.js`
+    `https://unpkg.com/ml5@${version}/dist/ml5.min.js`
   );
 }
 
