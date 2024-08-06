@@ -89,6 +89,8 @@ yarn
 yarn start
 ```
 
+_Note: If you are using nvm and run into issues with yarn versioning, it might be due to interference from another yarn installation. You can list your node.js installations with_ `nvm ls` _and remove all other node.js installations with yarn using the_ `nvm uninstall <version>` _command. Then, repeat the above steps._
+
 You should see something similar to this in the terminal:
 
 ```
