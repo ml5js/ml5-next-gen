@@ -14,19 +14,17 @@ const readmePath = "README.md";
  * @returns {string} The new section of text to be inserted into the README.
  */
 function makeNewVersionString(newVersionNumber) {
-  const newVersionString = `
-<!-- Anchor for automatic version update script, do not remove this comment -->
+  const newVersionString = `<!-- Anchor for automatic version update script, do not remove this comment -->
 
 - You can use the latest version (${newVersionNumber}) by adding it to the head section of your HTML document:
 
-  **${newVersionNumber}**
+  **v${newVersionNumber}**
 
   \`\`\`html
   <script src="https://unpkg.com/ml5@${newVersionNumber}/dist/ml5.js"></script>
   \`\`\`
 
-<!-- Anchor for automatic version update script, do not remove this comment -->
-`;
+<!-- Anchor for automatic version update script, do not remove this comment -->`;
 
   return newVersionString;
 }
