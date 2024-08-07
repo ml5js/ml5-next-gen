@@ -144,48 +144,54 @@ This will create a production version of the library in `/dist` directory.
 
 ## Making Releases
 
-1. Create a new pull request on the main branch to update the SemVer number in `package.json`. Increment the version number based on [semantic versioning rules](https://semver.org/).
+1. Create a new branch from the main branch and edit the SemVer number in `package.json`. Increment the version number based on [semantic versioning rules](https://semver.org/).
 
-2. Merge the pull request.
+2. Run the following command to update the version number in `README.md`.
 
-3. Switch to the main branch and make sure the code is up to date by running the following command:
+   ```
+   yarn run update-readme
+   ```
 
-```
-git checkout main
-git pull
-```
+3. Commit the changes. Then, make a pull request from the new branch to main and merge it.
 
-4. Make sure all dependencies have been installed by running the following command:
+4. Switch to the main branch and make sure the code is up to date by running the following command:
 
-```
-yarn
-```
+   ```
+   git checkout main
+   git pull
+   ```
 
-5. Build the project with the following command and wait for the build to complete:
+5. Make sure all dependencies have been installed by running the following command:
 
-```
-yarn run build
-```
+   ```
+   yarn
+   ```
 
-6. Run the following command and log in with an npm account that has write access to the `ml5` package. You may be redirected to a browser window for authentication.
+6. Build the project with the following command and wait for the build to complete:
 
-```
-npm login
-```
+   ```
+   yarn run build
+   ```
 
-7. Publish the package with the following command. You may be redirected to a browser window for authentication.
+7. Run the following command and log in with an npm account that has write access to the `ml5` package. You may be redirected to a browser window for authentication.
 
-```
-npm publish --access public
-```
+   ```
+   npm login
+   ```
 
-8. The package should now be available at. (Replace `<version>` with the new SemVer set in step 1).
+8. Publish the package with the following command. You may be redirected to a browser window for authentication.
 
-```
-   https://unpkg.com/ml5@<version>/dist/ml5.js
-```
+   ```
+   npm publish --access public
+   ```
 
-9. Update the example code on the p5 web editor. Follow the instructions in the [Update p5 Web Editor Sketches](#update-p5-web-editor-sketches) section.
+9. The package should now be available at. (Replace `<version>` with the new SemVer set in step 1).
+
+   ```
+     https://unpkg.com/ml5@<version>/dist/ml5.js
+   ```
+
+10. Update the example code on the p5 web editor. Follow the instructions in the [Update p5 Web Editor Sketches](#update-p5-web-editor-sketches) section.
 
 ## Unit Tests
 

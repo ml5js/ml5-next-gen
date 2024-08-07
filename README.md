@@ -20,7 +20,7 @@ Please read our [Code of Conduct](https://github.com/ml5js/Code-of-Conduct), whi
 
 Before getting started with ml5.js, review our [Code of Conduct](https://github.com/ml5js/Code-of-Conduct). There are several ways you can use the ml5.js library:
 
-<p id="latest-version">
+<!-- Anchor for automatic version update script, do not remove this comment -->
 
 - You can use the latest version (1.0.2) by adding it to the head section of your HTML document:
 
@@ -30,7 +30,7 @@ Before getting started with ml5.js, review our [Code of Conduct](https://github.
   <script src="https://unpkg.com/ml5@1.0.2/dist/ml5.js"></script>
   ```
 
-</p data-id="latest-version">
+<!-- Anchor for automatic version update script, do not remove this comment -->
 
 - If you need to use an earlier version for any reason, you can change the version number. The [previous versions of ml5.js can be found here](https://www.npmjs.com/package/ml5?activeTab=versions). You can use those previous versions by replacing `<version>` with the ml5 version of interest:
 
