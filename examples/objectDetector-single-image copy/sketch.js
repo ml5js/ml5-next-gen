@@ -12,7 +12,7 @@ let hands = [];
 
 function preload() {
   // Load the image to be detected
-  img = loadImage("hand.jpg");
+  img = loadImage("family.jpeg");
 
   // trying to work around "WebGPU readSync is only available for CPU-resident tensors."
   // see https://github.com/ml5js/ml5-next-gen/issues/117
@@ -23,7 +23,7 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(640, 480);
+  createCanvas(800, 800);
   // Draw the image
   image(img, 0, 0);
   // Detect hands in an image
@@ -32,15 +32,7 @@ function setup() {
 
 function draw() {
   // Draw all the hand keypoints
-  for (let i = 0; i < hands.length; i++) {
-    let hand = hands[i];
-    for (let j = 0; j < hand.keypoints.length; j++) {
-      let keypoint = hand.keypoints[j];
-      fill(0, 255, 0);
-      noStroke();
-      circle(keypoint.x, keypoint.y, 10);
-    }
-  }
+  
 }
 
 // Callback function for when objectDetector outputs data
