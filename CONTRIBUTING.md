@@ -152,7 +152,7 @@ This will create a production version of the library in `/dist` directory.
    yarn run update-readme
    ```
 
-3. Commit the changes. Then, make a pull request from the new branch and merge it.
+3. Commit the changes. Then, make a pull request from the new branch to main and merge it.
 
 4. Switch to the main branch and make sure the code is up to date by running the following command:
 
