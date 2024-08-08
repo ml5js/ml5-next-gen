@@ -106,7 +106,7 @@ class NeuralNetwork {
 
     const xs = TRAINING_OPTIONS.inputs;
     const ys = TRAINING_OPTIONS.outputs;
-
+    console.log('train',xs,ys);
     const { batchSize, epochs, shuffle, validationSplit, whileTraining } =
       TRAINING_OPTIONS;
 
@@ -193,12 +193,13 @@ class NeuralNetwork {
             },
           ],
         };
-
+        console.log('data.weightData',data.weightData);
         await saveBlob(
           data.weightData,
           `${modelName}.weights.bin`,
           "application/octet-stream"
         );
+        console.log('this.weightsManifest',this.weightsManifest)
         await saveBlob(
           JSON.stringify(this.weightsManifest),
           `${modelName}.json`,

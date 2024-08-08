@@ -25,13 +25,13 @@ class TimeSeriesUtils {
     if(!Array.isArray(xInputs)){
       throw new error('Syntax Error: Data Should be in an Array')
     } 
-  
     let isObjects = true;
     let isArrays = true;
     let isValues = true;
-  
+    
     for (let i = 0; i < xInputs.length ; i++){
       if (nnUtils.getDataType(xInputs[i]) === 'object'){
+        console.log('here')
         isArrays = false;
         isValues = false;
         if ( i > 0 ) {
@@ -40,6 +40,7 @@ class TimeSeriesUtils {
           }
         }
       } else if (Array.isArray(xInputs[i])){
+        console.log('here2')
         isObjects = false;
         isValues = false;
         if ( i > 0 ) {

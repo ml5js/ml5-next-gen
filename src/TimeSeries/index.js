@@ -1,10 +1,8 @@
 import * as tf from "@tensorflow/tfjs";
 import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
-import { imgToPixelArray, isInstanceOfSupportedElement, } from "../utils/imageUtilities";
 import NeuralNetwork from "./timeSeries";
 import NeuralNetworkData from "./timeSeriesData";
-
 import nnUtils from "../NeuralNetwork/NeuralNetworkUtils";
 import NeuralNetworkVis from "../NeuralNetwork/NeuralNetworkVis";
 
@@ -17,29 +15,26 @@ const DEFAULTS = {
   modelUrl: null,
   layers: [],
   task: null,
+  dataModality: null,
   debug: false,
   learningRate: 0.2,
   hiddenUnits: 16,
-  neuroEvolution: false,
 };
-
-
 /*
 as far as the p5 sketch is concerned, it will directly call only a few functions in the class,
 these are the following:
 
-model.addData
+model.addData - Done
 model.saveData, model etc
 model.train
 model.classify/predict etc
 
 
-
+No image classification
+No neural evolution
 */
 
 class timeSeries {
-
-  //reviewed
   constructor(options, callback) {
     this.options =
       {
@@ -60,14 +55,10 @@ class timeSeries {
     this.ready = callCallback(this.init(), callback);
   }
 
-  // mainly for loading data - should be async
   async init() {
-    console.log('init yeah')
     if (this.options.dataUrl) {
-      console.log('URL provided, will load data')
       await this.loadDataFromUrl(this.options.dataUrl);
     } else if (this.options.modelUrl) {
-      // will take a URL to model.json, an object, or files array
       await this.load(this.options.modelUrl);
     }
     return this;
@@ -91,6 +82,11 @@ class timeSeries {
   
     - for yInputs:
       1. similar to neural network, so use same logic
+
+    - at the end of the adding data, the data is formatted to a sequence of objects similar to 1 of xinputs
+    - 
+
+    - new parameter dataModality, either spatial or sequential, spatial uses cnn1d and sequential uses lstm
   */ 
 
   addData(xInputs, yInputs, options = null){
@@ -217,16 +213,12 @@ class timeSeries {
     // this method does not get shape for images but instead for timesteps
     const { inputs } = this.options;
 
-    console.log('meta',inputs);
-
     let inputShape; 
     if (typeof inputs === 'number'){
       inputShape = inputs;
     } else if (Array.isArray(inputs) && inputs.length > 0){
       inputShape = inputs.length; //will be fed into the tensors later
     } 
-
-    console.log('inputshape',inputShape);
 
     this.neuralNetworkData.createMetadata(inputShape);
   }
@@ -237,7 +229,6 @@ class timeSeries {
   }
 
   convertTrainingDataToTensors() {
-    console.log('training',this.data.training);
     return this.neuralNetworkData.convertRawToTensors(this.data.training);  
   }
 
@@ -270,13 +261,16 @@ class timeSeries {
   addDefaultLayers() {
     let layers;
     const task = this.options.task;
-    switch (task.toLowerCase()) {
-      // if the task is classification
-      case "classification":
+    const dataModality = this.options.dataModality;
+    let taskConditions = `${task}_${dataModality}`;
+    console.log(this.neuralNetworkData.meta.seriesShape)
+    switch (taskConditions.toLowerCase()) {
+      // if the task is classification and spatial modality
+      case "classification_spatial":
         layers = [
           {
             type: "conv1d",
-            filters: 64,
+            filters: 8,
             kernelSize: 3,
             activation: "relu",
             inputShape: this.neuralNetworkData.meta.seriesShape,
@@ -287,7 +281,7 @@ class timeSeries {
           },
           {
             type: "conv1d",
-            filters: 128,
+            filters: 16,
             kernelSize: 3,
             activation: "relu",
             inputShape: this.neuralNetworkData.meta.seriesShape,
@@ -301,65 +295,73 @@ class timeSeries {
           },
           {
             type: "dense",
-            units: 128,
+            units: this.options.hiddenUnits,
             activation: "relu",
           },
           {
             type: "dense",
-            units:2,
             activation: "softmax",
           },
         ];
-        // let shape = this.neuralNetworkData.meta.seriesShape
-        // layers = [
-        //   {
-        //     type: "input",
-        //     shape: shape,
-        //   },
-        //   {
-        //     type: "reshape",
-        //     targetShape: [shape[0],shape[1]*shape[2]],
-        //   },
-        //   {
-        //     type: "conv1d",
-        //     filters: 64,
-        //     kernelSize: 3,
-        //     activation: "relu",
-        //     inputShape: shape,
-        //   },
-        //   {
-        //     type: "maxPooling1d",
-        //     poolSize: 2,
-        //   },
-        //   {
-        //     type: "conv1d",
-        //     filters: 128,
-        //     kernelSize: 3,
-        //     activation: "relu",
-        //   },
-        //   {
-        //     type: "maxPooling1d",
-        //     poolSize: 2,
-        //   },
-        //   {
-        //     type: "flatten",
-        //   },
-        //   {
-        //     type: "dense",
-        //     units: 128,
-        //     activation: "relu",
-        //   },
-        //   {
-        //     type: "dense",
-        //     units:2,
-        //     activation: "softmax",
-        //   },
-        // ];
 
         return this.createNetworkLayers(layers);
-      // if the task is regression
-      case "regression":
+      // if the task is classification and sequential modality
+      case "classification_sequential":
         layers = [
+          {
+            type: "lstm",
+            units: 16,
+            activation: "relu",
+            inputShape: this.neuralNetworkData.meta.seriesShape,
+            returnSequences: true,
+          },
+          {
+            type: "lstm",
+            units: 8,
+            activation: "relu",
+            returnSequences: false,
+          },
+          {
+            type: "dense",
+            units: this.options.hiddenUnits,
+            activation: "relu",
+          },
+          {
+            type: "dense",
+            activation: "softmax",
+          },
+        ];
+
+        return this.createNetworkLayers(layers);
+
+      // if the task is regression
+      case "regression_spatial":
+        layers = [
+          {
+            type: "conv1d",
+            filters: 8,
+            kernelSize: 3,
+            activation: "relu",
+            inputShape: this.neuralNetworkData.meta.seriesShape,
+          },
+          {
+            type: "maxPooling1d",
+            poolSize: 2,
+          },
+          {
+            type: "conv1d",
+            filters: 16,
+            kernelSize: 3,
+            activation: "relu",
+            inputShape: this.neuralNetworkData.meta.seriesShape,
+          },
+          {
+            type: "maxPooling1d",
+            poolSize: 2,
+          },
+          {
+            type: "flatten",
+          },
           {
             type: "dense",
             units: this.options.hiddenUnits,
@@ -370,50 +372,50 @@ class timeSeries {
             activation: "sigmoid",
           },
         ];
+
         return this.createNetworkLayers(layers);
-      // if the task is imageClassification
-      case "imageclassification":
+
+      case "regression_sequential":
         layers = [
           {
-            type: "conv2d",
-            filters: 8,
-            kernelSize: 5,
-            strides: 1,
+            type: "lstm",
+            units: 16,
             activation: "relu",
-            kernelInitializer: "varianceScaling",
+            inputShape: this.neuralNetworkData.meta.seriesShape,
+            returnSequences: true,
           },
           {
-            type: "maxPooling2d",
-            poolSize: [2, 2],
-            strides: [2, 2],
-          },
-          {
-            type: "conv2d",
-            filters: 16,
-            kernelSize: 5,
-            strides: 1,
+            type: "lstm",
+            units: 8,
             activation: "relu",
-            kernelInitializer: "varianceScaling",
-          },
-          {
-            type: "maxPooling2d",
-            poolSize: [2, 2],
-            strides: [2, 2],
-          },
-          {
-            type: "flatten",
           },
           {
             type: "dense",
-            kernelInitializer: "varianceScaling",
-            activation: "softmax",
+            units: this.options.hiddenUnits,
+            activation: "relu",
+          },
+          {
+            type: "dense",
+            activation: "sigmoid",
           },
         ];
-        return this.createNetworkLayers(layers);
 
+        return this.createNetworkLayers(layers);
+      
       default:
-        console.log("no imputUnits or outputUnits defined");
+        console.log("no inputUnits or outputUnits defined");
         layers = [
+          {
+            type: "lstm",
+            units: 16,
+            activation: "relu",
+            inputShape: this.neuralNetworkData.meta.seriesShape,
+          },
+          {
+            type: "lstm",
+            units: 8,
+            activation: "relu",
+          },
           {
             type: "dense",
             units: this.options.hiddenUnits,
@@ -475,8 +477,10 @@ class timeSeries {
   }
 
   normalizeData() {
+    if (!this.neuralNetworkData.data.raw.length > 0){
+      throw new Error('Empty Data Error: You Cannot Normalize/Train without adding any data! Please add data first')
+    }
     if (!this.neuralNetworkData.isMetadataReady) {
-      // if the inputs are defined as an array of [img_width, img_height, channels]
       this.createMetaData();
     }
 
@@ -492,63 +496,76 @@ class timeSeries {
     // set isNormalized to true
     this.neuralNetworkData.meta.isNormalized = true;
 
-    console.log('train',this.data.training)
   }
+
+  // ////////
 
   classify(_input, _cb) {
     return callCallback(this.classifyInternal(_input), _cb);
   }
 
-  async classifyInternal(_input){
+  async classifyInternal(_input) {
     const { meta } = this.neuralNetworkData;
-    const inputData = this.formatInputsForPredictionAll(_input);
+    const headers = Object.keys(meta.inputs);
+
+    let inputData;
+
+    if (this.options.task === "imageClassification") {
+      // get the inputData for classification
+      // if it is a image type format it and
+      // flatten it
+      inputData = this.searchAndFormat(_input);
+      if (Array.isArray(inputData)) {
+        inputData = inputData.flat();
+      } else {
+        inputData = inputData[headers[0]];
+      }
+
+      if (meta.isNormalized) {
+        // TODO: check to make sure this property is not static!!!!
+        const { min, max } = meta.inputs[headers[0]];
+        inputData = this.neuralNetworkData.normalizeArray(
+          Array.from(inputData),
+          { min, max }
+        );
+      } else {
+        inputData = Array.from(inputData);
+      }
+
+      inputData = tf.tensor([inputData], [1, ...meta.inputUnits]);
+    } else {
+      inputData = this.formatInputsForPredictionAll(_input);
+    }
 
     const unformattedResults = await this.neuralNetwork.classify(inputData);
     inputData.dispose();
 
+    if (meta !== null) {
+      const label = Object.keys(meta.outputs)[0];
+      const vals = Object.entries(meta.outputs[label].legend);
+
+      const formattedResults = unformattedResults.map((unformattedResult) => {
+        return vals
+          .map((item, idx) => {
+            return {
+              [item[0]]: unformattedResult[idx],
+              label: item[0],
+              confidence: unformattedResult[idx],
+            };
+          })
+          .sort((a, b) => b.confidence - a.confidence);
+      });
+
+      // return single array if the length is less than 2,
+      // otherwise return array of arrays
+      if (formattedResults.length < 2) {
+        return formattedResults[0];
+      }
+      return formattedResults;
+    }
+
     return unformattedResults;
   }
-
-  // async classifyInternal(_input) {
-  //   const { meta } = this.neuralNetworkData;
-  //   const headers = Object.keys(meta.inputs);
-
-  //   let inputData;
-  //   console.log(_input)
-  //   // inputData = this.neuralNetworkData.
-  //   inputData = this.formatInputsForPredictionAll(_input);
-
-  //   const unformattedResults = await this.neuralNetwork.classify(inputData);
-  //   inputData.dispose();
-
-  //   if (meta !== null) {
-  //     const label = Object.keys(meta.outputs)[0];
-  //     const vals = Object.entries(meta.outputs[label].legend);
-
-  //     const formattedResults = unformattedResults.map((unformattedResult) => {
-  //       return vals
-  //         .map((item, idx) => {
-  //           return {
-  //             [item[0]]: unformattedResult[idx],
-  //             label: item[0],
-  //             confidence: unformattedResult[idx],
-  //           };
-  //         })
-  //         .sort((a, b) => b.confidence - a.confidence);
-  //     });
-
-  //     // return single array if the length is less than 2,
-  //     // otherwise return array of arrays
-  //     if (formattedResults.length < 2) {
-  //       return formattedResults[0];
-  //     }
-  //     return formattedResults;
-  //   }
-
-  //   return unformattedResults;
-  // }
-
-  
 
   formatInputsForPredictionAll(_input) {
     const { meta } = this.neuralNetworkData;
@@ -561,6 +578,68 @@ class timeSeries {
     return output;
   }
 
+  predict(_input, _cb) {
+    return callCallback(this.predictInternal(_input), _cb);
+  }
+
+  async predictInternal(_input) {
+    const { meta } = this.neuralNetworkData;
+
+    const inputData = this.formatInputsForPredictionAll(_input);
+
+    const unformattedResults = await this.neuralNetwork.predict(inputData);
+    inputData.dispose();
+
+    if (meta !== null) {
+      const labels = Object.keys(meta.outputs);
+
+      const formattedResults = unformattedResults.map((unformattedResult) => {
+        return labels.map((item, idx) => {
+          // check to see if the data were normalized
+          // if not, then send back the values, otherwise
+          // unnormalize then return
+          let val;
+          let unNormalized;
+          if (meta.isNormalized) {
+            const { min, max } = meta.outputs[item];
+            val = nnUtils.unnormalizeValue(unformattedResult[idx], min, max);
+            unNormalized = unformattedResult[idx];
+          } else {
+            val = unformattedResult[idx];
+          }
+
+          const d = {
+            [labels[idx]]: val,
+            label: item,
+            value: val,
+          };
+
+          // if unNormalized is not undefined, then
+          // add that to the output
+          if (unNormalized) {
+            d.unNormalizedValue = unNormalized;
+          }
+
+          return d;
+        });
+      });
+
+      // return single array if the length is less than 2,
+      // otherwise return array of arrays
+      if (formattedResults.length < 2) {
+        return formattedResults[0];
+      }
+      return formattedResults;
+    }
+
+    // if no meta exists, then return unformatted results;
+    return unformattedResults;
+  }
+
+
+
+
+
 
   /**
    * ////////////////////////////////////////////////////////////
@@ -568,39 +647,15 @@ class timeSeries {
    * ////////////////////////////////////////////////////////////
    */
 
-  /**
-   * @public
-   * saves the training data to a JSON file.
-   * @param {string} [name] Optional - The name for the saved file.
-   *  Should not include the file extension.
-   *  Defaults to the current date and time.
-   * @param {ML5Callback<void>} [callback] Optional - A function to call when the save is complete.
-   * @return {Promise<void>}
-   */
   saveData(name, callback) {
     const args = handleArguments(name, callback);
     return callCallback(this.neuralNetworkData.saveData(args.name), args.callback);
   }
 
-  /**
-   * @public
-   * load data
-   * @param {string | FileList | Object} filesOrPath - The URL of the file to load,
-   *  or a FileList object (.files) from an HTML element <input type="file">.
-   * @param {ML5Callback<void>} [callback] Optional - A function to call when the loading is complete.
-   * @return {Promise<void>}
-   */
   async loadData(filesOrPath, callback) {
     return callCallback(this.neuralNetworkData.loadData(filesOrPath), callback);
   }
 
-  /**
- * Loads data from a URL using the appropriate function
- * @param {*} dataUrl
- * @param {*} inputs
- * @param {*} outputs
- * @void
- */
   async loadDataFromUrl(dataUrl, inputs, outputs) {
     let json;
     let dataFromUrl
@@ -628,43 +683,15 @@ class timeSeries {
     this.prepareForTraining();    
   }
 
-  // async loadDataFromUrl() {
-  //   const { dataUrl, inputs, outputs } = this.options;
-
-  //   console.log(this.options)
-  //   await this.neuralNetworkData.loadDataFromUrl(
-  //     dataUrl,
-  //     inputs,
-  //     outputs
-  //   );
-
-  //   // once the data are loaded, create the metadata
-  //   // and prep the data for training
-  //   // if the inputs are defined as an array of [img_width, img_height, channels]
-  //   this.createMetaData();
-
-  //   this.prepareForTraining();
-  // }
-
   /**
    * ////////////////////////////////////////////////////////////
    * Save / Load Model
    * ////////////////////////////////////////////////////////////
    */
 
-  /**
-   * @public
-   * saves the model, weights, and metadata
-   * @param {string} [name] Optional - The name for the saved file.
-   *  Should not include the file extension.
-   *  Defaults to 'model'.
-   * @param {ML5Callback<void[]>} [callback] Optional - A function to call when the save is complete.
-   * @return {Promise<void[]>}
-   */
   async save(name, callback) {
     const args = handleArguments(name, callback);
     const modelName = args.string || 'model';
-    console.log("hello")
     // save the model
     return callCallback(Promise.all([
       this.neuralNetwork.save(modelName),

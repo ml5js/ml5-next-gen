@@ -135,7 +135,12 @@ class NeuralNetworkData {
         inputMeta[k].min = 0;
         inputMeta[k].max = 1;
       } else if (inputMeta[k].dtype === "number") {
-        const dataAsArray = this.data.raw.flatMap((item) => item[xsOrYs].map((obj) => obj[k]));
+        let dataAsArray;
+        if (xsOrYs === 'ys'){
+          dataAsArray = this.data.raw.map((item) => item[xsOrYs][k]);
+        } else if (xsOrYs === 'xs'){
+          dataAsArray = this.data.raw.flatMap((item) => item[xsOrYs].map((obj) => obj[k]));
+        }
         inputMeta[k].min = nnUtils.getMin(dataAsArray);
         inputMeta[k].max = nnUtils.getMax(dataAsArray);
       } else if (inputMeta[k].dtype === "array") {
@@ -389,7 +394,12 @@ class NeuralNetworkData {
         options.legend = inputMeta[k].legend;
         normalized[k] = this.normalizeArray(dataAsArray, options);
       } else if (inputMeta[k].dtype === "number") {
-        const dataAsArray = this.data.raw.flatMap((item) => item[xsOrYs].map((obj) => obj[k]));
+        let dataAsArray;
+        if (xsOrYs === 'ys'){
+          dataAsArray = this.data.raw.map((item) => item[xsOrYs][k]);
+        } else if (xsOrYs === 'xs'){
+          dataAsArray = this.data.raw.flatMap((item) => item[xsOrYs].map((obj) => obj[k]));
+        }
         normalized[k] = this.normalizeArray(dataAsArray, options);
       } else if (inputMeta[k].dtype === "array") {
         const dataAsArray = dataRaw.map((item) => item[xsOrYs][k]);
@@ -424,7 +434,7 @@ class NeuralNetworkData {
       const batch = normalized[features[0]].length / seriesStep;
 
       this.meta.seriesShape = [seriesStep,feature_length];
-
+      console.log('series shape',this.meta.seriesShape)
       let zipped = [];
 
       // zip arrays before reshaping
@@ -438,6 +448,7 @@ class NeuralNetworkData {
       output = tsUtils.reshapeTo3DArray(zipped,[batch,seriesStep,feature_length])
     }
     
+    console.log('thismeta',this.meta)
     return output;
   }
 
@@ -794,7 +805,6 @@ class NeuralNetworkData {
       `${modelName}_meta.json`,
       "text/plain"
     );
-    
   }
 
   /**

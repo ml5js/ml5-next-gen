@@ -7,7 +7,7 @@ import imageClassifier from "./ImageClassifier";
 import soundClassifier from "./SoundClassifier";
 import setBackend from "./utils/setBackend";
 import bodySegmentation from "./BodySegmentation";
-import timeSeries from "./LSTM";
+import timeSeries from "./TimeSeries";
 import communityStatement from "./utils/communityStatement";
 import * as tf from "@tensorflow/tfjs";
 import * as tfvis from "@tensorflow/tfjs-vis";
