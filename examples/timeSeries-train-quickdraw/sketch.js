@@ -3,7 +3,7 @@
  * Learn more about the ml5.js project: https://ml5js.org/
  * ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
  *
- * This example demonstrates training a shape classifier based on mouse movements (coordinates) through ml5.timeSeries
+ * This example demonstrates How to train your own quickdraw classifier through ml5.TimeSeries.
  */
 
 let model;

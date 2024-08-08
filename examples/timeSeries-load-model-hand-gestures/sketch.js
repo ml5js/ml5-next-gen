@@ -3,14 +3,17 @@
  * Learn more about the ml5.js project: https://ml5js.org/
  * ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
  *
- * This example demonstrates training a color classifier through ml5.neuralNetwork.
+ * This example demonstrates loading a Sign Language classifier through ml5.TimeSeries.
  */
+
+// change this to make the recording longer
+const seqlength = 50;
+
 
 let handPose;
 let video;
 let hands = [];
 let sequence = [];
-const seqlength = 50;
 let recording_finished = false;
 let predicted_word = ''
 
@@ -22,6 +25,7 @@ function preload() {
 function setup() {
   createCanvas(640, 480);
 
+  // create video capture
   video = createCapture(VIDEO);
   video.size(640, 480);
   video.hide();
@@ -31,59 +35,52 @@ function setup() {
   handPose.detectStart(video, gotHands);
   
   let options = {
-    outputs: ['label'],
     task: 'classification',
-    debug: 'true',
-    learningRate: 0.001, 
+    dataModality: 'spatial',
   };
   
   model = ml5.timeSeries(options);
 
+  // setup the model files to load
   const modelDetails = {
     model: "model/model.json",
     metadata: "model/model_meta.json",
     weights: "model/model.weights.bin",
   };
-  model.load(modelDetails, modelLoaded);
-  
-  nameField = createInput('')
-  nameField.attribute('placeholder', 'word to train')
-  nameField.position(100, 100)
-  nameField.size(250)
-}
 
+  // load the model and call modelLoaded once finished
+  model.load(modelDetails, modelLoaded);
+}
+// call back for load model
 function modelLoaded(){
   console.log('model loaded!')
 }
 
 function draw() {
-  
-
+  // draw video on the canvas
   image(video, 0, 0, width, height);
   
-  textSize(100)
-  fill(255)
-  text(predicted_word, 100, height/2)
+  // put the text on screen after a prediction
+  placePredictedText()
 
+  // if hands are found then start recording
   if(hands.length>0 && recording_finished == false){
     if (sequence.length <= seqlength){
+      // get coordinates from hands (21 points)
       handpoints = drawPoints();
       sequence.push(handpoints);
-    } else if (sequence.length>0){
-      recording_finished = true;
-      
-      let word = nameField.value()
 
-      if (word.length > 0){
-        let target = {label:word}
-        console.log(sequence, target);
-        model.addData(sequence, target);
-      } else {
-        model.classify(sequence, gotResults);
-      }
+    // once sequence reaches the seqlength, add sequence as just one X value
+    } else if (sequence.length>0){
+      // classify based on the collected data
+      model.classify(sequence, gotResults);
       
+      // reset the sequence
       sequence = [];
+      recording_finished = true;
     }
+
+  // can only record again when hand is out of frame
   } else {
     if (hands.length == 0){
       recording_finished = false;
@@ -91,6 +88,7 @@ function draw() {
   }
 }
 
+// draw the points on the hands
 function drawPoints(){
   let handpoints = []
   for (let i = 0; i < hands.length; i++) {
@@ -113,33 +111,16 @@ function gotHands(results) {
   hands = results;
 }
 
-function keyPressed(){
-  if (key == 's'){
-    model.save('hello');
-  }
-  if (key == 'z'){
-    model.saveData();
-  }
-
-  if (key == 't'){
-    model.normalizeData();
-    let options = {
-      epochs: 100
-    }
-    model.train(options,whileTraining,finishedTraining);
-  }
-}
-
-function whileTraining(epoch, loss) {
-  console.log(epoch);
-}
-
-function finishedTraining() {
-  console.log('finished training.');
-}
-
+// call back for accessing the results
 function gotResults(results){
   predicted_word = results[0].label
   console.log(predicted_word)
-  text(predicted_word, 200,200)
+  text(predicted_word, 100,100)
+}
+
+// for drawing text on screen
+function placePredictedText(){
+  textSize(100)
+  fill(255)
+  text(predicted_word, 100, height/2)
 }

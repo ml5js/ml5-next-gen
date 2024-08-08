@@ -84,8 +84,7 @@ class timeSeries {
       1. similar to neural network, so use same logic
 
     - at the end of the adding data, the data is formatted to a sequence of objects similar to 1 of xinputs
-    - 
-
+ 
     - new parameter dataModality, either spatial or sequential, spatial uses cnn1d and sequential uses lstm
   */ 
 
