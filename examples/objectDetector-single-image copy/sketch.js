@@ -42,7 +42,6 @@ function draw() {
     let w = object.bbox[2];
     let h = object.bbox[3];
 
-    // Set the color
     stroke(object.color.r, object.color.g, object.color.b);
     noFill();
 
@@ -69,6 +68,6 @@ function gotObjects(results) {
     return object;
   });
 
-  // Redraw the canvas to update the bounding boxes
+  // Redraw canvas to update the bounding boxes
   redraw();
 }
