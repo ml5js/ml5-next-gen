@@ -1,7 +1,7 @@
 import * as tf from "@tensorflow/tfjs";
 import axios from "axios";
 import { saveBlob } from "../utils/io";
-import modelLoader from '../utils/modelLoader';
+import modelLoader from "../utils/modelLoader";
 import nnUtils from "../NeuralNetwork/NeuralNetworkUtils";
 
 import tsUtils from "./timeSeriesUtils";
@@ -25,7 +25,7 @@ class NeuralNetworkData {
     };
   }
 
-    /**
+  /**
    * ////////////////////////////////////////////////////////
    * Add Data
    * ////////////////////////////////////////////////////////
@@ -43,8 +43,6 @@ class NeuralNetworkData {
       ys: yInputObj,
     });
   }
-
-
 
   /**
    * ////////////////////////////////////////////////////////
@@ -136,10 +134,12 @@ class NeuralNetworkData {
         inputMeta[k].max = 1;
       } else if (inputMeta[k].dtype === "number") {
         let dataAsArray;
-        if (xsOrYs === 'ys'){
+        if (xsOrYs === "ys") {
           dataAsArray = this.data.raw.map((item) => item[xsOrYs][k]);
-        } else if (xsOrYs === 'xs'){
-          dataAsArray = this.data.raw.flatMap((item) => item[xsOrYs].map((obj) => obj[k]));
+        } else if (xsOrYs === "xs") {
+          dataAsArray = this.data.raw.flatMap((item) =>
+            item[xsOrYs].map((obj) => obj[k])
+          );
         }
         inputMeta[k].min = nnUtils.getMin(dataAsArray);
         inputMeta[k].max = nnUtils.getMax(dataAsArray);
@@ -165,36 +165,36 @@ class NeuralNetworkData {
     this.meta.outputs = this.getInputMetaOneHot(this.meta.outputs, "ys");
   }
 
-   /**
+  /**
    * getOneHotMeta
    * @param {Object} _inputsMeta
    * @param {"xs" | "ys"} xsOrYs
    * @return {Object}
    */
   getInputMetaOneHot(_inputsMeta, xsOrYs) {
-   const inputsMeta = Object.assign({}, _inputsMeta);
-   
-   Object.entries(inputsMeta).forEach((arr) => {
-     // the key
-     const key = arr[0];
-     // the value
-     const { dtype } = arr[1];
- 
-     if (dtype === "string") {
-       const uniqueVals = [
-         ...new Set(this.data.raw.map((obj) => obj[xsOrYs][key])),
-       ];
-       const oneHotMeta = this.createOneHotEncodings(uniqueVals);
-       inputsMeta[key] = {
-         ...inputsMeta[key],
-         ...oneHotMeta,
-       };
-     }
-   });
-   return inputsMeta;
+    const inputsMeta = Object.assign({}, _inputsMeta);
+
+    Object.entries(inputsMeta).forEach((arr) => {
+      // the key
+      const key = arr[0];
+      // the value
+      const { dtype } = arr[1];
+
+      if (dtype === "string") {
+        const uniqueVals = [
+          ...new Set(this.data.raw.map((obj) => obj[xsOrYs][key])),
+        ];
+        const oneHotMeta = this.createOneHotEncodings(uniqueVals);
+        inputsMeta[key] = {
+          ...inputsMeta[key],
+          ...oneHotMeta,
+        };
+      }
+    });
+    return inputsMeta;
   }
 
-    /**
+  /**
    * get the data units, inputshape and output units
    * @private
    * @param {Array<number>} arrayShape
@@ -239,7 +239,7 @@ class NeuralNetworkData {
     return units;
   }
 
-   /**
+  /**
    * Returns a legend mapping the
    * data values to oneHot encoded values
    * @private
@@ -274,9 +274,6 @@ class NeuralNetworkData {
     });
   }
 
-
-
-
   /**
    * ////////////////////////////////////////////////////////
    * Tensor handling
@@ -299,8 +296,6 @@ class NeuralNetworkData {
       const inputArr = [];
       const outputArr = [];
 
-  
-
       dataRaw.forEach((row) => {
         // get xs
         // const xs = Object.keys(meta.inputs)
@@ -310,7 +305,7 @@ class NeuralNetworkData {
         //   .flat();
 
         // inputArr.push(xs);
-  
+
         const xs = row.xs;
         inputArr.push(xs);
 
@@ -323,21 +318,17 @@ class NeuralNetworkData {
 
         outputArr.push(ys);
       });
-      
 
       // const inputs = tf.tensor(inputArr.flat(), [
       //   dataLength,
       //   ...meta.inputUnits,
       // ]);
       const inputs = tf.tensor(inputArr);
-      
 
       const outputs = tf.tensor(outputArr.flat(), [
         dataLength,
         meta.outputUnits,
       ]);
-
-      
 
       return {
         inputs,
@@ -357,11 +348,10 @@ class NeuralNetworkData {
    * @return {Array<object>}
    */
   normalizeDataRaw() {
-    
     const normXs = this.normalizeInputData(this.meta.inputs, "xs");
     const normYs = this.normalizeInputData(this.meta.outputs, "ys");
     const normalizedData = tsUtils.zipArraySequence(normXs, normYs);
-    
+
     return normalizedData;
   }
 
@@ -372,7 +362,7 @@ class NeuralNetworkData {
    */
   normalizeInputData(inputOrOutputMeta, xsOrYs) {
     const dataRaw = this.data.raw;
-    
+
     // the data length
     const dataLength = dataRaw.length;
 
@@ -395,10 +385,12 @@ class NeuralNetworkData {
         normalized[k] = this.normalizeArray(dataAsArray, options);
       } else if (inputMeta[k].dtype === "number") {
         let dataAsArray;
-        if (xsOrYs === 'ys'){
+        if (xsOrYs === "ys") {
           dataAsArray = this.data.raw.map((item) => item[xsOrYs][k]);
-        } else if (xsOrYs === 'xs'){
-          dataAsArray = this.data.raw.flatMap((item) => item[xsOrYs].map((obj) => obj[k]));
+        } else if (xsOrYs === "xs") {
+          dataAsArray = this.data.raw.flatMap((item) =>
+            item[xsOrYs].map((obj) => obj[k])
+          );
         }
         normalized[k] = this.normalizeArray(dataAsArray, options);
       } else if (inputMeta[k].dtype === "array") {
@@ -407,48 +399,50 @@ class NeuralNetworkData {
           this.normalizeArray(item, options)
         );
       }
-      
     });
-    
 
     let output;
-    if (xsOrYs == "ys"){
+    if (xsOrYs == "ys") {
       output = [...new Array(dataLength).fill(null)].map((item, idx) => {
         const row = {
           [xsOrYs]: {},
         };
-  
+
         Object.keys(inputMeta).forEach((k) => {
           row[xsOrYs][k] = normalized[k][idx];
         });
-  
+
         return row;
       });
-    } else if ((xsOrYs == "xs")){
+    } else if (xsOrYs == "xs") {
       // reshape array - already ready for tensorconversion
       const features = Object.keys(inputMeta);
       const feature_length = features.length;
-      
-      const seriesStep = dataRaw[0]['xs'].length;
-      
+
+      const seriesStep = dataRaw[0]["xs"].length;
+
       const batch = normalized[features[0]].length / seriesStep;
 
-      this.meta.seriesShape = [seriesStep,feature_length];
-      console.log('series shape',this.meta.seriesShape)
+      this.meta.seriesShape = [seriesStep, feature_length];
+      console.log("series shape", this.meta.seriesShape);
       let zipped = [];
 
       // zip arrays before reshaping
-      for (let idx =0; idx < seriesStep*feature_length*batch; idx++){
+      for (let idx = 0; idx < seriesStep * feature_length * batch; idx++) {
         features.forEach((k) => {
-          zipped.push(normalized[k][idx])
-        })
+          zipped.push(normalized[k][idx]);
+        });
       }
 
       // reshaping
-      output = tsUtils.reshapeTo3DArray(zipped,[batch,seriesStep,feature_length])
+      output = tsUtils.reshapeTo3DArray(zipped, [
+        batch,
+        seriesStep,
+        feature_length,
+      ]);
     }
-    
-    console.log('thismeta',this.meta)
+
+    console.log("thismeta", this.meta);
     return output;
   }
 
@@ -484,9 +478,9 @@ class NeuralNetworkData {
     throw new Error("error in inputArray of normalizeArray() function");
   }
 
-  normalizePredictData(dataRaw, inputOrOutputMeta){
+  normalizePredictData(dataRaw, inputOrOutputMeta) {
     const inputMeta = Object.assign({}, inputOrOutputMeta);
-    const xsOrYs = "xs"
+    const xsOrYs = "xs";
     const predict_normalized = {};
     Object.keys(inputMeta).forEach((k) => {
       // get the min and max values
@@ -499,30 +493,37 @@ class NeuralNetworkData {
         options.legend = inputMeta[k].legend;
         predict_normalized[k] = this.normalizeArray(dataAsArray, options);
       } else if (inputMeta[k].dtype === "number") {
-        const dataAsArray = Array(dataRaw).flatMap((item) => item.map((obj) => (obj[k])));
+        const dataAsArray = Array(dataRaw).flatMap((item) =>
+          item.map((obj) => obj[k])
+        );
         console.log(dataAsArray);
         predict_normalized[k] = this.normalizeArray(dataAsArray, options);
       }
-
     });
 
-    console.log('done', predict_normalized);
+    console.log("done", predict_normalized);
 
     const features = Object.keys(inputMeta);
     const feature_length = features.length;
-    
+
     const seriesStep = dataRaw.length;
-    
+
     const batch = 1;
     let zipped = [];
 
     // zip arrays before reshaping
-    for (let idx =0; idx < seriesStep*feature_length*batch; idx++){
-      features.forEach((k) => {zipped.push(predict_normalized[k][idx])})
+    for (let idx = 0; idx < seriesStep * feature_length * batch; idx++) {
+      features.forEach((k) => {
+        zipped.push(predict_normalized[k][idx]);
+      });
     }
-      // reshaping
-    const output = tsUtils.reshapeTo3DArray(zipped,[batch,seriesStep,feature_length])
-    return output
+    // reshaping
+    const output = tsUtils.reshapeTo3DArray(zipped, [
+      batch,
+      seriesStep,
+      feature_length,
+    ]);
+    return output;
   }
 
   /**
@@ -581,8 +582,6 @@ class NeuralNetworkData {
     const meta = Object.assign({}, this.meta);
 
     const output = this.data.raw.map((row) => {
-
-
       const xs = {
         ...row.xs,
       };
@@ -603,7 +602,6 @@ class NeuralNetworkData {
         }
       });
 
-      
       return {
         xs,
         ys,
@@ -611,7 +609,6 @@ class NeuralNetworkData {
     });
     return output;
   }
-
 
   /**
    * ////////////////////////////////////////////////
@@ -628,7 +625,6 @@ class NeuralNetworkData {
    */
   async loadDataFromUrl(dataUrl, inputs, outputs) {
     try {
-
       if (dataUrl.endsWith(".csv")) {
         await this.loadCSV(dataUrl, inputs, outputs);
       } else if (dataUrl.endsWith(".json")) {
@@ -665,7 +661,6 @@ class NeuralNetworkData {
       // format the data.raw array
       // this.formatRawData(json, inputLabels, outputLabels);
       return this.findEntries(json);
-
     } catch (err) {
       console.error("error loading json");
       throw new Error(err);
@@ -689,7 +684,6 @@ class NeuralNetworkData {
       // format the data.raw array
       // this.formatRawData(json, inputLabels, outputLabels);
       return this.findEntries(json);
-
     } catch (err) {
       console.error("error loading csv", err);
       throw new Error(err);
@@ -818,7 +812,7 @@ class NeuralNetworkData {
         file.name.includes("_meta.json")
       );
       if (!file) {
-        console.warn('no model_meta.json file found in FileList');
+        console.warn("no model_meta.json file found in FileList");
         return;
       }
       const text = await file.text();

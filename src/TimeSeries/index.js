@@ -15,7 +15,7 @@ const DEFAULTS = {
   modelUrl: null,
   layers: [],
   task: null,
-  dataModality: null,
+  spatialData: false,
   debug: false,
   learningRate: 0.2,
   hiddenUnits: 16,
@@ -56,6 +56,7 @@ class timeSeries {
   }
 
   async init() {
+    await tf.ready();
     if (this.options.dataUrl) {
       await this.loadDataFromUrl(this.options.dataUrl);
     } else if (this.options.modelUrl) {
@@ -63,8 +64,6 @@ class timeSeries {
     }
     return this;
   }
-
-
   /**
    * ////////////////////////////////////////////////////////////
    *                   Add and Format Data
@@ -85,20 +84,19 @@ class timeSeries {
 
     - at the end of the adding data, the data is formatted to a sequence of objects similar to 1 of xinputs
  
-    - new parameter dataModality, either spatial or sequential, spatial uses cnn1d and sequential uses lstm
-  */ 
+    - changed data Modality into spatialData so its a boolean, true if coordinate data and false if normal lstm
+  */
 
-  addData(xInputs, yInputs, options = null){
+  addData(xInputs, yInputs, options = null) {
     // 1. verify format between the three possible types of xinputs
-    const xs = tsUtils.verifyAndFormatInputs(xInputs,options,this.options);
+    const xs = tsUtils.verifyAndFormatInputs(xInputs, options, this.options);
 
     // 2. format the yInput - same logic as NN class
-    const ys = tsUtils.verifyAndFormatOutputs(yInputs,options,this.options);
-    
-    // 3. add data to raw
-    this.neuralNetworkData.addData(xs,ys);
-  }
+    const ys = tsUtils.verifyAndFormatOutputs(yInputs, options, this.options);
 
+    // 3. add data to raw
+    this.neuralNetworkData.addData(xs, ys);
+  }
 
   /**
    * ////////////////////////////////////////////////////////////
@@ -112,21 +110,24 @@ class timeSeries {
     let finishedTrainingCb;
 
     if (typeof optionsOrCallback === "object") {
-        options = optionsOrCallback;
-        if (typeof optionsOrWhileTraining === "function") {
-            whileTrainingCb = null;
-            finishedTrainingCb = callback || optionsOrWhileTraining;
-        } else {
-            finishedTrainingCb = optionsOrWhileTraining;
-        }
-    } else if (typeof optionsOrCallback === "function") {
-        whileTrainingCb = optionsOrCallback;
+      options = optionsOrCallback;
+      if (typeof optionsOrWhileTraining === "function") {
+        whileTrainingCb = null;
+        finishedTrainingCb = callback || optionsOrWhileTraining;
+      } else {
         finishedTrainingCb = optionsOrWhileTraining;
+      }
+    } else if (typeof optionsOrCallback === "function") {
+      whileTrainingCb = optionsOrCallback;
+      finishedTrainingCb = optionsOrWhileTraining;
     } else {
-        finishedTrainingCb = optionsOrCallback;
+      finishedTrainingCb = optionsOrCallback;
     }
 
-    return callCallback(this.trainInternal(options, whileTrainingCb), finishedTrainingCb);
+    return callCallback(
+      this.trainInternal(options, whileTrainingCb),
+      finishedTrainingCb
+    );
   }
 
   async trainInternal(_options, whileTrainingCb) {
@@ -187,9 +188,7 @@ class timeSeries {
     // then use those to create your architecture
     if (!this.neuralNetwork.isLayered) {
       // TODO: don't update this.options.layers - Linda
-      this.options.layers = this.createNetworkLayers(
-        this.options.layers
-      );
+      this.options.layers = this.createNetworkLayers(this.options.layers);
     }
 
     // if the model does not have any layers defined yet
@@ -212,12 +211,12 @@ class timeSeries {
     // this method does not get shape for images but instead for timesteps
     const { inputs } = this.options;
 
-    let inputShape; 
-    if (typeof inputs === 'number'){
+    let inputShape;
+    if (typeof inputs === "number") {
       inputShape = inputs;
-    } else if (Array.isArray(inputs) && inputs.length > 0){
+    } else if (Array.isArray(inputs) && inputs.length > 0) {
       inputShape = inputs.length; //will be fed into the tensors later
-    } 
+    }
 
     this.neuralNetworkData.createMetadata(inputShape);
   }
@@ -228,7 +227,7 @@ class timeSeries {
   }
 
   convertTrainingDataToTensors() {
-    return this.neuralNetworkData.convertRawToTensors(this.data.training);  
+    return this.neuralNetworkData.convertRawToTensors(this.data.training);
   }
 
   createNetworkLayers(layerJsonArray) {
@@ -260,12 +259,11 @@ class timeSeries {
   addDefaultLayers() {
     let layers;
     const task = this.options.task;
-    const dataModality = this.options.dataModality;
-    let taskConditions = `${task}_${dataModality}`;
-    console.log(this.neuralNetworkData.meta.seriesShape)
+    const ifSpatialData = this.options.spatialData;
+    let taskConditions = `${task}_${ifSpatialData}`;
     switch (taskConditions.toLowerCase()) {
       // if the task is classification and spatial modality
-      case "classification_spatial":
+      case "classification_true":
         layers = [
           {
             type: "conv1d",
@@ -305,7 +303,7 @@ class timeSeries {
 
         return this.createNetworkLayers(layers);
       // if the task is classification and sequential modality
-      case "classification_sequential":
+      case "classification_false":
         layers = [
           {
             type: "lstm",
@@ -334,7 +332,7 @@ class timeSeries {
         return this.createNetworkLayers(layers);
 
       // if the task is regression
-      case "regression_spatial":
+      case "regression_true":
         layers = [
           {
             type: "conv1d",
@@ -374,7 +372,7 @@ class timeSeries {
 
         return this.createNetworkLayers(layers);
 
-      case "regression_sequential":
+      case "regression_false":
         layers = [
           {
             type: "lstm",
@@ -400,7 +398,7 @@ class timeSeries {
         ];
 
         return this.createNetworkLayers(layers);
-      
+
       default:
         console.log("no inputUnits or outputUnits defined");
         layers = [
@@ -433,7 +431,7 @@ class timeSeries {
     this.neuralNetwork.addLayer(layer);
   }
 
-  compile(){
+  compile() {
     const LEARNING_RATE = this.options.learningRate;
 
     let options = {};
@@ -475,9 +473,11 @@ class timeSeries {
     }
   }
 
-  normalizeData() {
-    if (!this.neuralNetworkData.data.raw.length > 0){
-      throw new Error('Empty Data Error: You Cannot Normalize/Train without adding any data! Please add data first')
+  async normalizeData() {
+    if (!this.neuralNetworkData.data.raw.length > 0) {
+      throw new Error(
+        "Empty Data Error: You Cannot Normalize/Train without adding any data! Please add data first"
+      );
     }
     if (!this.neuralNetworkData.isMetadataReady) {
       this.createMetaData();
@@ -494,7 +494,6 @@ class timeSeries {
 
     // set isNormalized to true
     this.neuralNetworkData.meta.isNormalized = true;
-
   }
 
   // ////////
@@ -570,8 +569,15 @@ class timeSeries {
     const { meta } = this.neuralNetworkData;
     const inputHeaders = Object.keys(meta.inputs);
 
-    const formatted_inputs = tsUtils.verifyAndFormatInputs(_input,null,this.options);
-    const normalized_inputs = this.neuralNetworkData.normalizePredictData(formatted_inputs, meta.inputs);
+    const formatted_inputs = tsUtils.verifyAndFormatInputs(
+      _input,
+      null,
+      this.options
+    );
+    const normalized_inputs = this.neuralNetworkData.normalizePredictData(
+      formatted_inputs,
+      meta.inputs
+    );
     const output = tf.tensor(normalized_inputs);
 
     return output;
@@ -635,11 +641,6 @@ class timeSeries {
     return unformattedResults;
   }
 
-
-
-
-
-
   /**
    * ////////////////////////////////////////////////////////////
    * Save / Load Data
@@ -648,7 +649,10 @@ class timeSeries {
 
   saveData(name, callback) {
     const args = handleArguments(name, callback);
-    return callCallback(this.neuralNetworkData.saveData(args.name), args.callback);
+    return callCallback(
+      this.neuralNetworkData.saveData(args.name),
+      args.callback
+    );
   }
 
   async loadData(filesOrPath, callback) {
@@ -657,12 +661,20 @@ class timeSeries {
 
   async loadDataFromUrl(dataUrl, inputs, outputs) {
     let json;
-    let dataFromUrl
+    let dataFromUrl;
     try {
       if (dataUrl.endsWith(".csv")) {
-        dataFromUrl = await this.neuralNetworkData.loadCSV(dataUrl, inputs, outputs);
+        dataFromUrl = await this.neuralNetworkData.loadCSV(
+          dataUrl,
+          inputs,
+          outputs
+        );
       } else if (dataUrl.endsWith(".json")) {
-        dataFromUrl = await this.neuralNetworkData.loadJSON(dataUrl, inputs, outputs);
+        dataFromUrl = await this.neuralNetworkData.loadJSON(
+          dataUrl,
+          inputs,
+          outputs
+        );
       } else if (dataUrl.includes("blob")) {
         dataFromUrl = await this.loadBlob(dataUrl, inputs, outputs);
       } else {
@@ -674,12 +686,12 @@ class timeSeries {
     }
 
     dataFromUrl.map((item) => {
-      this.addData(item.xs, item.ys)
-    })
+      this.addData(item.xs, item.ys);
+    });
 
     this.createMetaData();
 
-    this.prepareForTraining();    
+    this.prepareForTraining();
   }
 
   /**
@@ -690,12 +702,15 @@ class timeSeries {
 
   async save(name, callback) {
     const args = handleArguments(name, callback);
-    const modelName = args.string || 'model';
+    const modelName = args.string || "model";
     // save the model
-    return callCallback(Promise.all([
-      this.neuralNetwork.save(modelName),
-      this.neuralNetworkData.saveMeta(modelName)
-    ]), args.callback);
+    return callCallback(
+      Promise.all([
+        this.neuralNetwork.save(modelName),
+        this.neuralNetworkData.saveMeta(modelName),
+      ]),
+      args.callback
+    );
   }
 
   /**
@@ -707,10 +722,13 @@ class timeSeries {
    * @return {Promise<void[]>}
    */
   async load(filesOrPath, callback) {
-    return callCallback(Promise.all([
-      this.neuralNetwork.load(filesOrPath),
-      this.neuralNetworkData.loadMeta(filesOrPath)
-    ]), callback);
+    return callCallback(
+      Promise.all([
+        this.neuralNetwork.load(filesOrPath),
+        this.neuralNetworkData.loadMeta(filesOrPath),
+      ]),
+      callback
+    );
   }
 
   /**

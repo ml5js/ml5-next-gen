@@ -23,7 +23,7 @@ const withPreload = {
   neuralNetwork,
   sentiment,
   soundClassifier,
-  
+  timeSeries,
 };
 
 const ml5 = Object.assign({ p5Utils }, withPreload, {
@@ -32,7 +32,6 @@ const ml5 = Object.assign({ p5Utils }, withPreload, {
   setBackend,
   version: packageInfo.version,
   setP5: p5Utils.setP5.bind(p5Utils),
-  timeSeries
 });
 
 p5Utils.shouldPreload(ml5, Object.keys(withPreload));

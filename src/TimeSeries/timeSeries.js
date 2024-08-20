@@ -2,8 +2,6 @@ import * as tf from "@tensorflow/tfjs";
 import { saveBlob } from "../utils/io";
 import { randomGaussian } from "../utils/random";
 
-
-
 /*
 
 Things changed from neural network class:
@@ -106,7 +104,7 @@ class NeuralNetwork {
 
     const xs = TRAINING_OPTIONS.inputs;
     const ys = TRAINING_OPTIONS.outputs;
-    console.log('train',xs,ys);
+    console.log("train", xs, ys);
     const { batchSize, epochs, shuffle, validationSplit, whileTraining } =
       TRAINING_OPTIONS;
 
@@ -193,13 +191,13 @@ class NeuralNetwork {
             },
           ],
         };
-        console.log('data.weightData',data.weightData);
+        console.log("data.weightData", data.weightData);
         await saveBlob(
           data.weightData,
           `${modelName}.weights.bin`,
           "application/octet-stream"
         );
-        console.log('this.weightsManifest',this.weightsManifest)
+        console.log("this.weightsManifest", this.weightsManifest);
         await saveBlob(
           JSON.stringify(this.weightsManifest),
           `${modelName}.json`,
@@ -217,7 +215,9 @@ class NeuralNetwork {
     if (filesOrPath instanceof FileList) {
       const files = Array.from(filesOrPath);
       // find the correct files
-      const model = files.find((file) => file.name.includes(".json") && !file.name.includes("_meta"));
+      const model = files.find(
+        (file) => file.name.includes(".json") && !file.name.includes("_meta")
+      );
       const weights = files.find((file) => file.name.includes(".bin"));
       // load the model
       this.model = await tf.loadLayersModel(
@@ -229,7 +229,7 @@ class NeuralNetwork {
           // Override the weights path from the JSON weightsManifest
           weightUrlConverter: (weightFileName) => {
             return filesOrPath.weights || weightFileName;
-          }
+          },
         })
       );
     } else {
