@@ -1,11 +1,21 @@
-// Copyright (c) 2020-2024 ml5
-//
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
+/**
+ * @license
+ * Copyright (c) 2020-2024 ml5
+ * This software is released under the ml5.js License.
+ * https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
+ */
 
-/*
- * HandPose: Palm detector and hand-skeleton finger tracking in the browser
- * Ported and integrated from all the hard work by: https://github.com/tensorflow/tfjs-models/tree/master/hand-pose-detection
+/**
+ * @file HandPose
+ *
+ * The file contains the main code of HandPose, a pretrained hand landmark
+ * estimation model that can estimate poses and track key body parts in real-time.
+ * The HandPose model is built on top of the hand detection model of TensorFlow.
+ *
+ * TensorFlow Hand Pose Detection repo:
+ * https://github.com/tensorflow/tfjs-models/tree/master/hand-pose-detection
+ * ml5.js BodyPose reference documentation:
+ * https://docs.ml5js.org/#/reference/handpose
  */
 
 import * as tf from "@tensorflow/tfjs";
@@ -17,25 +27,78 @@ import { handleModelName } from "../utils/handleOptions";
 import { mediaReady } from "../utils/imageUtilities";
 import objectRenameKey from "../utils/objectRenameKey";
 
+/**
+ * User provided options object for HandPose. See config schema below for default and available values.
+ * @typedef {object} configOptions
+ * @property {number} [maxHands]           - The maximum number of hands to detect.
+ * @property {string} [modelType]          - The type of model to use.
+ * @property {boolean} [flipHorizontal]    - Whether to mirror the landmark results.
+ * @property {string} [runtime]            - The runtime of the model.
+ * @property {string} [solutionPath]       - The file path or URL to mediaPipe solution. Only for
+ *                                           `mediapipe` runtime.
+ * @property {string} [detectorModelUrl]   - The file path or URL to the hand detector model. Only
+ *                                           for `tfjs` runtime.
+ * @property {string} [landmarkModelUrl]   - The file path or URL to the hand landmark model. Only
+ *                                           for `tfjs` runtime.
+ */
+
+/**
+ * Schema for initialization options, used by `handleOptions` to
+ * validate the user's options object.
+ */
+const configSchema = {
+  maxHands: {
+    type: "number",
+    min: 1,
+    max: 2147483647,
+    integer: true,
+    default: 2,
+  },
+  runtime: {
+    type: "enum",
+    enums: ["mediapipe", "tfjs"],
+    default: "tfjs",
+  },
+  modelType: {
+    type: "enum",
+    enums: ["lite", "full"],
+    default: "full",
+  },
+  solutionPath: {
+    type: "string",
+    default: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
+    ignore: (config) => config.runtime !== "mediapipe",
+  },
+  detectorModelUrl: {
+    type: "string",
+    default: undefined,
+    ignore: (config) => config.runtime !== "tfjs",
+  },
+  landmarkModelUrl: {
+    type: "string",
+    default: undefined,
+    ignore: (config) => config.runtime !== "tfjs",
+  },
+};
+
+/**
+ * Schema for runtime options, used by `handleOptions` to
+ * validate the user's options object.
+ */
+const runtimeConfigSchema = {
+  flipHorizontal: {
+    type: "boolean",
+    alias: "flipped",
+    default: false,
+  },
+};
+
 class HandPose {
   /**
-   * An object for configuring HandPose options.
-   * @typedef {Object} configOptions
-   * @property {number} maxHands - Optional. The maximum number of hands to detect. Default: 2.
-   * @property {string} modelType - Optional. The type of model to use: "lite" or "full". Default: "full".
-   * @property {boolean} flipHorizontal - Optional. Flip the result data horizontally. Default: false.
-   * @property {string} runtime - Optional. The runtime of the model: "mediapipe" or "tfjs". Default: "mediapipe".
-   *
-   * // For using custom or offline models
-   * @property {string} solutionPath - Optional. The file path or URL to the model. Only used when using "mediapipe" runtime.
-   * @property {string} detectorModelUrl - Optional. The file path or URL to the hand detector model. Only used when using "tfjs" runtime.
-   * @property {string} landmarkModelUrl - Optional. The file path or URL to the hand landmark model Only used when using "tfjs" runtime.
-   */
-
-  /**
-   * Creates HandPose.
-   * @param {configOptions} options - An object containing HandPose configuration options.
-   * @param {function} callback - A callback to be called when the model is ready.
+   * Creates an instance of HandPose model.
+   * @param {string} [modelName] - The underlying model to use, must be `MediaPipeHands` or undefined.
+   * @param {configOptions} options -An options object for the model.
+   * @param {function} callback - A callback function that is called once the model has been loaded.
    * @private
    */
   constructor(modelName, options, callback) {
@@ -67,53 +130,10 @@ class HandPose {
   async loadModel() {
     const pipeline = handPoseDetection.SupportedModels.MediaPipeHands;
     //filter out model config options
-    const modelConfig = handleOptions(
-      this.config,
-      {
-        maxHands: {
-          type: "number",
-          min: 1,
-          max: 2147483647,
-          integer: true,
-          default: 2,
-        },
-        runtime: {
-          type: "enum",
-          enums: ["mediapipe", "tfjs"],
-          default: "tfjs",
-        },
-        modelType: {
-          type: "enum",
-          enums: ["lite", "full"],
-          default: "full",
-        },
-        solutionPath: {
-          type: "string",
-          default: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
-          ignore: (config) => config.runtime !== "mediapipe",
-        },
-        detectorModelUrl: {
-          type: "string",
-          default: undefined,
-          ignore: (config) => config.runtime !== "tfjs",
-        },
-        landmarkModelUrl: {
-          type: "string",
-          default: undefined,
-          ignore: (config) => config.runtime !== "tfjs",
-        },
-      },
-      "handPose"
-    );
+    const modelConfig = handleOptions(this.config, configSchema, "handPose");
     this.runtimeConfig = handleOptions(
       this.config,
-      {
-        flipHorizontal: {
-          type: "boolean",
-          alias: "flipped",
-          default: false,
-        },
-      },
+      runtimeConfigSchema,
       "handPose"
     );
 
