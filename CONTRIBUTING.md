@@ -16,6 +16,7 @@ Welcome to the ml5.js project! Developing ml5.js is not just about developing ma
     - [For Command Line](#for-command-line)
   - [Building the Library](#building-the-library)
   - [Making Releases](#making-releases)
+  - [Release Notes](#release-notes)
   - [Unit Tests](#unit-tests)
   - [Update p5 Web Editor Sketches](#update-p5-web-editor-sketches)
   - [All Contributors](#all-contributors)
@@ -156,44 +157,60 @@ This will create a production version of the library in `/dist` directory.
 
 3. Commit the changes. Then, make a pull request from the new branch to main and merge it.
 
-4. Switch to the main branch and make sure the code is up to date by running the following command:
+4. Make a release note about the new release on GitHub. Check the [Release Notes](#release-notes) section for detailed instruction.
+
+5. Switch to the main branch and make sure the code is up to date by running the following command:
 
    ```
    git checkout main
    git pull
    ```
 
-5. Make sure all dependencies have been installed by running the following command:
+6. Make sure all dependencies have been installed by running the following command:
 
    ```
    yarn
    ```
 
-6. Build the project with the following command and wait for the build to complete:
+7. Build the project with the following command and wait for the build to complete:
 
    ```
    yarn run build
    ```
 
-7. Run the following command and log in with an npm account that has write access to the `ml5` package. You may be redirected to a browser window for authentication.
+8. Run the following command and log in with an npm account that has write access to the `ml5` package. You may be redirected to a browser window for authentication.
 
    ```
    npm login
    ```
 
-8. Publish the package with the following command. You may be redirected to a browser window for authentication.
+9. Publish the package with the following command. You may be redirected to a browser window for authentication.
 
    ```
    npm publish --access public
    ```
 
-9. The package should now be available at. (Replace `<version>` with the new SemVer set in step 1).
+10. The package should now be available at. (Replace `<version>` with the new SemVer set in step 1).
 
-   ```
-     https://unpkg.com/ml5@<version>/dist/ml5.js
-   ```
+    ```
+    https://unpkg.com/ml5@<version>/dist/ml5.js
+    ```
 
-10. Update the example code on the p5 web editor. Follow the instructions in the [Update p5 Web Editor Sketches](#update-p5-web-editor-sketches) section.
+11. Update the example code on the p5 web editor. Follow the instructions in the [Update p5 Web Editor Sketches](#update-p5-web-editor-sketches) section.
+
+## Release Notes
+
+ml5.js produce release notes alongside each new release. The release notes provides a brief overview of the changes, updates, and additions made to the ml5.js library. This section is a brief guide on generating release notes on GitHub.
+
+1. Go to [ml5's Releases Page](https://github.com/ml5js/ml5-next-gen/releases) on Github.
+2. Click on **Draft a new release**.
+3. Click on **Choose a tag** and enter the version number of the new release in the format of `v<major>.<minor>.<patch>`. For example, `v1.0.3`.
+4. Click on **Create new tag: vx.x.x on publish**.
+5. For the **Target**, make sure `main` is selected.
+6. For the **Previous tag**, select the previous release. For example, if the new release is `v1.0.3`, select tag `v1.0.2`.
+7. Click on **Generate release notes**, and a release note will be automatically generated. If needed, make manual edits to the release note.
+8. Make sure **Set as the latest release** is selected and click **Publish release**.
+9. You just created a new release note!
 
 ## Unit Tests
 
