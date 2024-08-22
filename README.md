@@ -20,17 +20,17 @@ Please read our [Code of Conduct](https://github.com/ml5js/Code-of-Conduct), whi
 
 Before getting started with ml5.js, review our [Code of Conduct](https://github.com/ml5js/Code-of-Conduct). There are several ways you can use the ml5.js library:
 
-<p id="latest-version">
+<!-- Anchor for automatic version update script, do not remove this comment -->
 
-- You can use the latest version (1.0.1) by adding it to the head section of your HTML document:
+- You can use the latest version (1.0.2) by adding it to the head section of your HTML document:
 
-  **v1.0.1**
+  **v1.0.2**
 
   ```html
-  <script src="https://unpkg.com/ml5@1.0.1/dist/ml5.js"></script>
+  <script src="https://unpkg.com/ml5@1.0.2/dist/ml5.js"></script>
   ```
 
-</p data-id="latest-version">
+<!-- Anchor for automatic version update script, do not remove this comment -->
 
 - If you need to use an earlier version for any reason, you can change the version number. The [previous versions of ml5.js can be found here](https://www.npmjs.com/package/ml5?activeTab=versions). You can use those previous versions by replacing `<version>` with the ml5 version of interest:
 
@@ -276,6 +276,11 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="http://twitter.com/mrgohai"><img src="https://avatars.githubusercontent.com/u/4945451?v=4?s=100" width="100px;" alt="Gottfried Haider"/><br /><sub><b>Gottfried Haider</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=gohai" title="Code">💻</a> <a href="#example-gohai" title="Examples">💡</a> <a href="#maintenance-gohai" title="Maintenance">🚧</a> <a href="https://github.com/ml5js/ml5-next-gen/pulls?q=is%3Apr+reviewed-by%3Agohai" title="Reviewed Pull Requests">👀</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/douaaz"><img src="https://avatars.githubusercontent.com/u/94295853?v=4?s=100" width="100px;" alt="douaaz"/><br /><sub><b>douaaz</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=douaaz" title="Code">💻</a> <a href="#maintenance-douaaz" title="Maintenance">🚧</a> <a href="#research-douaaz" title="Research">🔬</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/XiaozaoWang"><img src="https://avatars.githubusercontent.com/u/115412906?v=4?s=100" width="100px;" alt="Xiaozao Wang"/><br /><sub><b>Xiaozao Wang</b></sub></a><br /><a href="#content-XiaozaoWang" title="Content">🖋</a> <a href="#design-XiaozaoWang" title="Design">🎨</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Ricci-Liu"><img src="https://avatars.githubusercontent.com/u/131328073?v=4?s=100" width="100px;" alt="Ricci-Liu"/><br /><sub><b>Ricci-Liu</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=Ricci-Liu" title="Code">💻</a> <a href="#research-Ricci-Liu" title="Research">🔬</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Lisa-HuangZijin"><img src="https://avatars.githubusercontent.com/u/124145801?v=4?s=100" width="100px;" alt="Lisa-HuangZijin"/><br /><sub><b>Lisa-HuangZijin</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=Lisa-HuangZijin" title="Code">💻</a> <a href="#research-Lisa-HuangZijin" title="Research">🔬</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/chanel1130"><img src="https://avatars.githubusercontent.com/u/131328076?v=4?s=100" width="100px;" alt="chanel1130"/><br /><sub><b>chanel1130</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=chanel1130" title="Code">💻</a> <a href="#research-chanel1130" title="Research">🔬</a></td>
     </tr>
   </tbody>
 </table>

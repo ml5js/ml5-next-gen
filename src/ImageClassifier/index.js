@@ -248,7 +248,7 @@ class ImageClassifier {
       "image",
       "No input image provided. If you want to classify a video, use classifyStart."
     );
-    return callCallback(this.classifyInternal(image, number), callback);
+    return callCallback(this.classifyInternal(image, number || this.topk), callback);
   }
 
   /**
@@ -269,10 +269,9 @@ class ImageClassifier {
     // Function to classify a single frame
     const classifyFrame = async () => {
       await mediaReady(image, true);
-      await this.classifyInternal(image, number);
       // call the callback function
-      callCallback(this.classifyInternal(image, number), callback);
-
+      await callCallback(this.classifyInternal(image, number || this.topk), callback);
+      
       // call recursively for continuous classification
       if (!this.signalStop) {
         requestAnimationFrame(classifyFrame);

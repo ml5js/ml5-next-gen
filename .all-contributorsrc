@@ -1068,6 +1068,41 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/4945451?v=4",
       "profile": "http://twitter.com/mrgohai",
       "contributions": ["code", "example", "maintenance", "review"]
+    },
+    {
+      "login": "douaaz",
+      "name": "douaaz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/94295853?v=4",
+      "profile": "https://github.com/douaaz",
+      "contributions": ["code", "maintenance", "research"]
+    },
+    {
+      "login": "XiaozaoWang",
+      "name": "Xiaozao Wang",
+      "avatar_url": "https://avatars.githubusercontent.com/u/115412906?v=4",
+      "profile": "https://github.com/XiaozaoWang",
+      "contributions": ["content", "design"]
+    },
+    {
+      "login": "Ricci-Liu",
+      "name": "Ricci-Liu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/131328073?v=4",
+      "profile": "https://github.com/Ricci-Liu",
+      "contributions": ["code", "research"]
+    },
+    {
+      "login": "Lisa-HuangZijin",
+      "name": "Lisa-HuangZijin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/124145801?v=4",
+      "profile": "https://github.com/Lisa-HuangZijin",
+      "contributions": ["code", "research"]
+    },
+    {
+      "login": "chanel1130",
+      "name": "chanel1130",
+      "avatar_url": "https://avatars.githubusercontent.com/u/131328076?v=4",
+      "profile": "https://github.com/chanel1130",
+      "contributions": ["code", "research"]
     }
   ],
   "contributorsPerLine": 7,
