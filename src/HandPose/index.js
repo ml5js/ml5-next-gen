@@ -102,44 +102,56 @@ class HandPose {
    * @private
    */
   constructor(modelName, options, callback) {
+    /** The underlying model used. */
     this.modelName = this.modelName = handleModelName(
       modelName,
       ["MediaPipeHands"],
       "MediaPipeHands",
       "handPose"
     );
+    /** The underlying TensorFlow.js detector instance.*/
     this.model = null;
-    this.config = options;
+    /** The user provided options object. */
+    this.userOptions = options;
+    /** The config passed to underlying detector instance during inference. */
     this.runtimeConfig = {};
+    /** The media source being continuously detected. Only used in continuous mode. */
     this.detectMedia = null;
+    /** The callback function for detection results. Only used in continuous mode. */
     this.detectCallback = null;
-
-    // flags for detectStart() and detectStop()
-    this.detecting = false; // True when detection loop is running
-    this.signalStop = false; // Signal to stop the loop
-    this.prevCall = ""; // Track previous call to detectStart() or detectStop()
-
+    /** A flag for continuous mode, set to true when detection loop is running.*/
+    this.detecting = false;
+    /** A flag to signal stop to the detection loop.*/
+    this.signalStop = false;
+    /** A flag to track the previous call to`detectStart` and `detectStop`. */
+    this.prevCall = "";
+    /** A promise that resolves when the model is ready. */
     this.ready = callCallback(this.loadModel(), callback);
   }
 
   /**
-   * Loads the model.
-   * @return {this} the HandPose model.
+   * Loads the HandPose instance.
+   * @return {this} the HandPose instance.
    * @private
    */
   async loadModel() {
     const pipeline = handPoseDetection.SupportedModels.MediaPipeHands;
-    //filter out model config options
-    const modelConfig = handleOptions(this.config, configSchema, "handPose");
+    // Filter out initialization config options
+    const modelConfig = handleOptions(
+      this.userOptions,
+      configSchema,
+      "handPose"
+    );
+    // Filter out the runtime config options
     this.runtimeConfig = handleOptions(
-      this.config,
+      this.userOptions,
       runtimeConfigSchema,
       "handPose"
     );
 
+    // Load the Tensorflow.js detector instance
     await tf.ready();
     this.model = await handPoseDetection.createDetector(pipeline, modelConfig);
-
     return this;
   }
 
@@ -152,37 +164,37 @@ class HandPose {
   /**
    * Asynchronously outputs a single hand landmark detection result when called.
    * Supports both callback and promise.
-   * @param {*} [media] - An HMTL or p5.js image, video, or canvas element to run the detection on.
-   * @param {gotHands} [callback] - Optional. A callback to handle the hand detection result.
-   * @returns {Promise<Array>} The detection result.
+   * @param {any} media - An HTML or p5.js image, video, or canvas element to run the detection on.
+   * @param {gotHands} [callback] - A callback to handle the hand detection result.
+   * @returns {Promise<Array>} An array of hand detection results.
    */
   async detect(...inputs) {
-    //Parse out the input parameters
+    //Parse the input parameters
     const argumentObject = handleArguments(...inputs);
     argumentObject.require(
       "image",
       "An html or p5.js image, video, or canvas element argument is required for detect()."
     );
     const { image, callback } = argumentObject;
-
+    // Run the detection
     await mediaReady(image, false);
     const predictions = await this.model.estimateHands(
       image,
       this.runtimeConfig
     );
-    // Modify the prediction result to make it more user-friendly
+    // Modify the raw tfjs output to make it more user-friendly
     let result = predictions;
     this.renameScoreToConfidence(result);
     this.addKeypoints(result);
-
+    // Output the result via callback or promise
     if (typeof callback === "function") callback(result);
     return result;
   }
 
   /**
    * Repeatedly outputs hand predictions through a callback function.
-   * @param {*} [media] - An HMTL or p5.js image, video, or canvas element to run the prediction on.
-   * @param {gotHands} [callback] - A callback to handle the hand detection results.
+   * @param {any} media - An HTML or p5.js image, video, or canvas element to run the prediction on.
+   * @param {gotHands} callback - A callback to handle the hand detection results.
    */
   detectStart(...inputs) {
     // Parse out the input parameters
