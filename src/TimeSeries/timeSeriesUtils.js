@@ -275,10 +275,10 @@ class TimeSeriesUtils {
   }
 
   // point simplification utilities - Ramer-Douglas-Peucker (RDP) algorithm
-  simplifyPoints(allPoints, targetPointCount, maxEpsilon = 50) {
+  padCoordinates(allPoints, targetPointCount, maxEpsilon = 50) {
     const rdpPoints = [];
 
-    const epsilon = findEpsilonForPointCount(
+    const epsilon = this.findEpsilonForPointCount(
       allPoints,
       targetPointCount,
       maxEpsilon
@@ -288,8 +288,19 @@ class TimeSeriesUtils {
     const start = allPoints[0];
     const end = allPoints[total - 1];
     rdpPoints.push(start);
-    rdp(0, total - 1, allPoints, rdpPoints, epsilon);
+    this.rdp(0, total - 1, allPoints, rdpPoints, epsilon);
     rdpPoints.push(end);
+
+    if (rdpPoints.length > targetPointCount) {
+      return rdpPoints.slice(0, targetPointCount);
+    } else if (rdpPoints.length < targetPointCount) {
+      const filler = new Array(targetPointCount - rdpPoints.length).fill(
+        rdpPoints[rdpPoints.length - 1]
+      );
+
+      rdpPoints.push(...filler);
+      return rdpPoints;
+    }
 
     return rdpPoints;
   }
@@ -303,7 +314,7 @@ class TimeSeriesUtils {
     while (high - low > 0.001) {
       // Tolerance for approximation
       mid = (low + high) / 2;
-      simplifiedPointsCount = getSimplifiedPointCount(points, mid);
+      simplifiedPointsCount = this.getSimplifiedPointCount(points, mid);
       if (simplifiedPointsCount > targetCount) {
         low = mid;
       } else {
@@ -320,20 +331,25 @@ class TimeSeriesUtils {
     const start = points[0];
     const end = points[total - 1];
     rdpPoints.push(start);
-    rdp(0, total - 1, points, rdpPoints, epsilon);
+    this.rdp(0, total - 1, points, rdpPoints, epsilon);
     rdpPoints.push(end);
     return rdpPoints.length;
   }
 
   rdp(startIndex, endIndex, allPoints, rdpPoints, epsilon) {
-    const nextIndex = findFurthest(allPoints, startIndex, endIndex, epsilon);
+    const nextIndex = this.findFurthest(
+      allPoints,
+      startIndex,
+      endIndex,
+      epsilon
+    );
     if (nextIndex > 0) {
       if (startIndex != nextIndex) {
-        rdp(startIndex, nextIndex, allPoints, rdpPoints, epsilon);
+        this.rdp(startIndex, nextIndex, allPoints, rdpPoints, epsilon);
       }
       rdpPoints.push(allPoints[nextIndex]);
       if (endIndex != nextIndex) {
-        rdp(nextIndex, endIndex, allPoints, rdpPoints, epsilon);
+        this.rdp(nextIndex, endIndex, allPoints, rdpPoints, epsilon);
       }
     }
   }
@@ -345,7 +361,7 @@ class TimeSeriesUtils {
     let furthestIndex = -1;
     for (let i = a + 1; i < b; i++) {
       const currentPoint = points[i];
-      const d = lineDist(currentPoint, start, end);
+      const d = this.lineDist(currentPoint, start, end);
       if (d > recordDistance) {
         recordDistance = d;
         furthestIndex = i;
@@ -359,7 +375,7 @@ class TimeSeriesUtils {
   }
 
   lineDist(c, a, b) {
-    const norm = scalarProjection(c, a, b);
+    const norm = this.scalarProjection(c, a, b);
     return dist(c.x, c.y, norm.x, norm.y);
   }
 

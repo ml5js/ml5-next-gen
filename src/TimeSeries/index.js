@@ -6,6 +6,8 @@ import NeuralNetworkData from "./timeSeriesData";
 import nnUtils from "../NeuralNetwork/NeuralNetworkUtils";
 import NeuralNetworkVis from "../NeuralNetwork/NeuralNetworkVis";
 
+import setBackend from "../utils/setBackend";
+
 import tsUtils from "./timeSeriesUtils";
 
 const DEFAULTS = {
@@ -56,6 +58,7 @@ class timeSeries {
   }
 
   async init() {
+    setBackend("webgl");
     await tf.ready();
     if (this.options.dataUrl) {
       await this.loadDataFromUrl(this.options.dataUrl);
@@ -508,32 +511,7 @@ class timeSeries {
 
     let inputData;
 
-    if (this.options.task === "imageClassification") {
-      // get the inputData for classification
-      // if it is a image type format it and
-      // flatten it
-      inputData = this.searchAndFormat(_input);
-      if (Array.isArray(inputData)) {
-        inputData = inputData.flat();
-      } else {
-        inputData = inputData[headers[0]];
-      }
-
-      if (meta.isNormalized) {
-        // TODO: check to make sure this property is not static!!!!
-        const { min, max } = meta.inputs[headers[0]];
-        inputData = this.neuralNetworkData.normalizeArray(
-          Array.from(inputData),
-          { min, max }
-        );
-      } else {
-        inputData = Array.from(inputData);
-      }
-
-      inputData = tf.tensor([inputData], [1, ...meta.inputUnits]);
-    } else {
-      inputData = this.formatInputsForPredictionAll(_input);
-    }
+    inputData = this.formatInputsForPredictionAll(_input);
 
     const unformattedResults = await this.neuralNetwork.classify(inputData);
     inputData.dispose();
@@ -736,6 +714,11 @@ class timeSeries {
    */
   dispose() {
     this.neuralNetwork.dispose();
+  }
+
+  padCoordinates(coordinates, targetPointCount) {
+    const maxEpsilon = int(coordinates.length / 2);
+    return tsUtils.padCoordinates(coordinates, targetPointCount, maxEpsilon);
   }
 }
 

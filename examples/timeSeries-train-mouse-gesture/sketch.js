@@ -57,6 +57,7 @@ function draw() {
     frameCount++;
 
     let inputs = { x: mouseX, y: mouseY };
+
     sequence.push(inputs);
 
     if (sequence.length == num_seq * ink_multiplier) {
