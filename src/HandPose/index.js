@@ -167,6 +167,7 @@ class HandPose {
    * @param {any} media - An HTML or p5.js image, video, or canvas element to run the detection on.
    * @param {gotHands} [callback] - A callback to handle the hand detection result.
    * @returns {Promise<Array>} An array of hand detection results.
+   * @public
    */
   async detect(...inputs) {
     //Parse the input parameters
@@ -186,7 +187,7 @@ class HandPose {
     let result = predictions;
     this.renameScoreToConfidence(result);
     this.addKeypoints(result);
-    // Output the result via callback or promise
+    // Output the result via callback and/or promise
     if (typeof callback === "function") callback(result);
     return result;
   }
@@ -195,9 +196,10 @@ class HandPose {
    * Repeatedly outputs hand predictions through a callback function.
    * @param {any} media - An HTML or p5.js image, video, or canvas element to run the prediction on.
    * @param {gotHands} callback - A callback to handle the hand detection results.
+   * @public
    */
   detectStart(...inputs) {
-    // Parse out the input parameters
+    // Parse the input parameters
     const argumentObject = handleArguments(...inputs);
     argumentObject.require(
       "image",
@@ -213,6 +215,7 @@ class HandPose {
     this.signalStop = false;
     if (!this.detecting) {
       this.detecting = true;
+      // Call the internal detection loop
       this.detectLoop();
     }
     if (this.prevCall === "start") {
@@ -225,6 +228,7 @@ class HandPose {
 
   /**
    * Stops the detection loop before next detection loop runs.
+   * @public
    */
   detectStop() {
     if (this.detecting) this.signalStop = true;
@@ -233,7 +237,7 @@ class HandPose {
 
   /**
    * Calls estimateHands in a loop.
-   * Can be started by detectStart() and terminated by detectStop().
+   * Can be started by `detectStart` and terminated by `detectStop`.
    * @private
    */
   async detectLoop() {
@@ -257,8 +261,9 @@ class HandPose {
   }
 
   /**
-   * Renames the score key to confidence in the detection results.
+   * Renames the `score` key to `confidence` in the detection results.
    * @param {Object[]} hands - The detection results.
+   * @private
    */
   renameScoreToConfidence(hands) {
     hands.forEach((hand) => {
@@ -267,14 +272,12 @@ class HandPose {
   }
 
   /**
-   * Returns a new array of results with named keypoints added.
+   * Add the named keypoints to the detection results.
    * @param {Array} hands - the original detection results.
-   * @return {Array} the detection results with named keypoints added.
-   *
    * @private
    */
   addKeypoints(hands) {
-    const result = hands.map((hand) => {
+    hands = hands.map((hand) => {
       for (let i = 0; i < hand.keypoints.length; i++) {
         let keypoint = hand.keypoints[i];
         let keypoint3D = hand.keypoints3D[i];
@@ -288,12 +291,14 @@ class HandPose {
       }
       return hand;
     });
-    return result;
   }
 }
 
 /**
  * Factory function that returns a new HandPose instance.
+ * @param {string} [modelName] - The underlying model to use, must be `MediaPipeHands`
+ * @param {configOptions} [options] - A user-defined options object for the model.
+ * @param {function} [callback] - A callback function that is called once the model has been loaded.
  * @returns {HandPose} A new handPose instance.
  */
 const handPose = (...inputs) => {
