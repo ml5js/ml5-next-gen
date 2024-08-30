@@ -263,7 +263,7 @@ class BodyPose {
 
   /**
    * Asynchronously outputs a single pose prediction result when called.
-   * @param {any} media - An HMTL or p5.js image, video, or canvas element to run the prediction on.
+   * @param {any} media - An HTML or p5.js image, video, or canvas element to run the prediction on.
    * @param {function} callback - A callback function to handle the predictions.
    * @returns {Promise<Array>} an array of poses.
    * @public
