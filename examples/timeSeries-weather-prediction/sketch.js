@@ -124,7 +124,7 @@ function predictData() {
 // put the new data in the dataset so this will be considered for any new predictions
 function gotResults(results) {
   console.log(results);
-  addNewData(results);
+  addNewData(results); //optional but will be helpful in using new prediction as part of dataset
 }
 
 // code for adding new data to the dataset to be used for future prediction
@@ -173,20 +173,11 @@ function draw() {
   }
 }
 
+// get buttons and assign functions (UI)
 function trainAndPredictButtons() {
-  train_but = createButton("Train Model");
+  train_but = select("#train_but");
   train_but.mouseClicked(trainData);
-  train_but.style("font-family", "Georgia");
-  train_but.style("font-size", "20px");
-  train_but.position(100, 350);
 
-  pred_but = createButton("Predict Next Hour");
+  pred_but = select("#pred_but");
   pred_but.mouseClicked(predictData);
-  pred_but.style("font-family", "Georgia");
-  pred_but.style("font-size", "20px");
-  pred_but.position(350, 350);
-
-  instructionP = createP(
-    "Instructions: <br> <br> 1.) Press the 'Train Model' Button and wait for training to finish. <br> 2.) Press 'Predict Next Hour' to see the weather in the next hour!"
-  );
 }

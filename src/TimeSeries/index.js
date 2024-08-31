@@ -45,7 +45,9 @@ class timeSeries {
   }
 
   async init() {
+    // workaround for Error
     setBackend("webgl");
+
     await tf.ready();
     if (this.options.dataUrl) {
       await this.loadDataFromUrl(this.options.dataUrl);
