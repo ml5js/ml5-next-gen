@@ -11,9 +11,9 @@ let model;
 let currShape = "circle";
 let state = "collection";
 
-let pressedOnce = true;
 let datapoints;
 let sequence = [];
+let targetSequence = 30;
 let recCircle, recSquare, trainBut;
 
 function preload() {
@@ -21,7 +21,7 @@ function preload() {
     inputs: ["x", "y"],
     outputs: ["label"],
     task: "classification",
-    spatialData: "true",
+    dataMode: "spatial",
     debug: "true",
     learningRate: 0.005,
   };
@@ -53,11 +53,11 @@ function mouseReleased() {
     // if state is collection, add whole sequence as X, and shape as Y
     if (state == "collection") {
       let target = { label: currShape };
-      let paddedCoordinates = model.padCoordinates(sequence, 100);
+      let paddedCoordinates = model.padCoordinates(sequence, targetSequence);
       model.addData(paddedCoordinates, target);
       clearScreen();
     } else if (state == "prediction") {
-      let paddedCoordinates = model.padCoordinates(sequence, 100);
+      let paddedCoordinates = model.padCoordinates(sequence, targetSequence);
       model.classify(paddedCoordinates, gotResults);
       clearScreen();
     }
@@ -127,6 +127,7 @@ function UI() {
     currShape = "circle";
 
     background(220);
+    text(state + " : " + currShape, 50, 50);
   }
 
   function recordSquare() {
@@ -134,5 +135,6 @@ function UI() {
     currShape = "square";
 
     background(220);
+    text(state + " : " + currShape, 50, 50);
   }
 }

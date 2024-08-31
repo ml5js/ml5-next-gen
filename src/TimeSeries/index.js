@@ -17,24 +17,11 @@ const DEFAULTS = {
   modelUrl: null,
   layers: [],
   task: null,
-  spatialData: false,
+  dataMode: "linear",
   debug: false,
   learningRate: 0.2,
   hiddenUnits: 16,
 };
-/*
-as far as the p5 sketch is concerned, it will directly call only a few functions in the class,
-these are the following:
-
-model.addData - Done
-model.saveData, model etc
-model.train
-model.classify/predict etc
-
-
-No image classification
-No neural evolution
-*/
 
 class timeSeries {
   constructor(options, callback) {
@@ -262,11 +249,11 @@ class timeSeries {
   addDefaultLayers() {
     let layers;
     const task = this.options.task;
-    const ifSpatialData = this.options.spatialData;
-    let taskConditions = `${task}_${ifSpatialData}`;
+    const dataMode = this.options.dataMode;
+    let taskConditions = `${task}_${dataMode}`;
     switch (taskConditions.toLowerCase()) {
       // if the task is classification and spatial modality
-      case "classification_true":
+      case "classification_spatial":
         layers = [
           {
             type: "conv1d",
@@ -306,7 +293,7 @@ class timeSeries {
 
         return this.createNetworkLayers(layers);
       // if the task is classification and sequential modality
-      case "classification_false":
+      case "classification_linear":
         layers = [
           {
             type: "lstm",
@@ -335,7 +322,7 @@ class timeSeries {
         return this.createNetworkLayers(layers);
 
       // if the task is regression
-      case "regression_true":
+      case "regression_spatial":
         layers = [
           {
             type: "conv1d",
@@ -375,7 +362,7 @@ class timeSeries {
 
         return this.createNetworkLayers(layers);
 
-      case "regression_false":
+      case "regression_linear":
         layers = [
           {
             type: "lstm",

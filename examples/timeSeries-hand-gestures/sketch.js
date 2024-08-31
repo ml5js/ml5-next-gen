@@ -28,7 +28,7 @@ function preload() {
   let options = {
     outputs: ["label"],
     task: "classification",
-    spatialData: "true",
+    dataMode: "spatial",
     debug: "true",
     learningRate: 0.001,
   };
