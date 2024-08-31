@@ -1,7 +1,8 @@
-import ml5 from "../index.js";
+import ml5 from "../index";
 
-ml5.testLog = function () {
-  alert("test log");
-};
+import { HandPose } from "../HandPose";
+import loadHandPoseOfflineModel from "./HandPose";
+
+HandPose.prototype.loadOfflineModel = loadHandPoseOfflineModel;
 
 export default ml5;

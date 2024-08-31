@@ -149,6 +149,10 @@ class HandPose {
       "handPose"
     );
 
+    if (this.loadOfflineModel) {
+      this.loadOfflineModel(modelConfig);
+    }
+
     // Load the Tensorflow.js detector instance
     await tf.ready();
     this.model = await handPoseDetection.createDetector(pipeline, modelConfig);
@@ -308,3 +312,4 @@ const handPose = (...inputs) => {
 };
 
 export default handPose;
+export { HandPose };
