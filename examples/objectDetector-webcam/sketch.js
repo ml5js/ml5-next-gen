@@ -3,7 +3,7 @@
  * Learn more about the ml5.js project: https://ml5js.org/
  * ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
  *
- * This example demonstrates object detection on an image through ml5.objectDetector.
+ * This example demonstrates object detection on a video through ml5.objectDetector.
  */
 
 let objectDetector;
