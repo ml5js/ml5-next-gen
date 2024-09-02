@@ -76,10 +76,10 @@ class ObjectDetector {
     );
     const { image, callback } = argumentObject;
 
-    await mediaReady(image, false);
+   // await mediaReady(image, false);
 
-    const predictions = await this.model.detect(image);
-    console.log("raw result from cocoSsd", predictions);
+   // const predictions = await this.model.detect(image);
+   // console.log("raw result from cocoSsd", predictions);
 
     const result = predictions;
 
