@@ -19,7 +19,7 @@ function preload() {
   ml5.setBackend("webgl");
 
   // Load the objectDetector model
-  objectDetector = ml5.objectDetector('cocossd', modelReady);
+  objectDetector = ml5.objectDetector("cocossd", modelReady);
 }
 
 function setup() {
@@ -58,9 +58,9 @@ function draw() {
 
       // Draw the label with the class name
       noStroke();
-    fill(object.color.r, object.color.g, object.color.b);
-    textSize(16);
-    text(object.class, x + 5, y + 15);
+      fill(object.color.r, object.color.g, object.color.b);
+      textSize(16);
+      text(object.class, x + 5, y + 15);
     }
   }
 }
@@ -80,11 +80,11 @@ function videoReady() {
 // Callback function for when objectDetector outputs data
 function gotObjects(results) {
   // Save the output to the objects variable and assign a random color to each object
-  objects = results.map(object => {
+  objects = results.map((object) => {
     object.color = {
       r: random(255),
       g: random(255),
-      b: random(255)
+      b: random(255),
     };
     return object;
   });

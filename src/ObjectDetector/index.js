@@ -29,7 +29,12 @@ class ObjectDetector {
    * @private
    */
   constructor(modelName, options, callback) {
-    this.modelName = handleModelName(modelName, ["cocoSsd"], "cocoSsd", "objectDetector");
+    this.modelName = handleModelName(
+      modelName,
+      ["cocoSsd"],
+      "cocoSsd",
+      "objectDetector"
+    );
     this.model = null;
     this.config = options;
     this.runtimeConfig = {};
@@ -52,7 +57,7 @@ class ObjectDetector {
   async loadModel() {
     await tf.ready();
     this.model = await cocoSsd.load();
-    console.log('Finished loading cocoSsd');
+    console.log("Finished loading cocoSsd");
     return this;
   }
 
@@ -65,13 +70,16 @@ class ObjectDetector {
    */
   async detect(...inputs) {
     const argumentObject = handleArguments(...inputs);
-    argumentObject.require("image", "An html or p5.js image, video, or canvas element argument is required for detect().");
+    argumentObject.require(
+      "image",
+      "An html or p5.js image, video, or canvas element argument is required for detect()."
+    );
     const { image, callback } = argumentObject;
 
     await mediaReady(image, false);
 
     const predictions = await this.model.detect(image);
-    console.log('raw result from cocoSsd', predictions);
+    console.log("raw result from cocoSsd", predictions);
 
     const result = predictions;
 
@@ -86,8 +94,14 @@ class ObjectDetector {
    */
   detectStart(...inputs) {
     const argumentObject = handleArguments(...inputs);
-    argumentObject.require("image", "An html or p5.js image, video, or canvas element argument is required for detectStart().");
-    argumentObject.require("callback", "A callback function argument is required for detectStart().");
+    argumentObject.require(
+      "image",
+      "An html or p5.js image, video, or canvas element argument is required for detectStart()."
+    );
+    argumentObject.require(
+      "callback",
+      "A callback function argument is required for detectStart()."
+    );
     this.detectMedia = argumentObject.image;
     this.detectCallback = argumentObject.callback;
 
@@ -97,7 +111,9 @@ class ObjectDetector {
       this.detectLoop();
     }
     if (this.prevCall === "start") {
-      console.warn("detectStart() was called more than once without calling detectStop(). Only the latest detectStart() call will take effect.");
+      console.warn(
+        "detectStart() was called more than once without calling detectStop(). Only the latest detectStart() call will take effect."
+      );
     }
     this.prevCall = "start";
   }

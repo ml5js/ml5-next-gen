@@ -59,11 +59,11 @@ function draw() {
 // Callback function for when objectDetector outputs data
 function gotObjects(results) {
   // Save the output to the objects variable and assign a random color to each object
-  objects = results.map(object => {
+  objects = results.map((object) => {
     object.color = {
       r: random(255),
       g: random(255),
-      b: random(255)
+      b: random(255),
     };
     return object;
   });
