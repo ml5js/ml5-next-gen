@@ -12,7 +12,8 @@
     "test": "jest --config tests/jest.config.js",
     "upload-examples": "node scripts/uploadExamples.js",
     "update-p5-version": "node scripts/updateP5Version.js",
-    "update-readme": "node scripts/updateReadme.js"
+    "update-readme": "node scripts/updateReadme.js",
+    "convert-model-file-to-js": "node scripts/convertModelFileToJs.js"
   },
   "files": [
     "dist"
@@ -45,6 +46,7 @@
     "postinstall-postinstall": "^2.1.0",
     "prettier": "2.8.8",
     "rimraf": "^5.0.5",
+    "tar": "^7.4.3",
     "terser-webpack-plugin": "^5.3.10",
     "webpack": "^5.76.1",
     "webpack-cli": "^5.0.1",
