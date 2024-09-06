@@ -1,7 +1,7 @@
-import landmarkModelLiteJson from "./landmarkModelLiteJson.js";
-import landmarkModelLiteBin from "./landmarkModelLiteBin.js";
-import detectorModelLiteJson from "./detectorModelLiteJson.js";
-import detectorModelLiteBin from "./detectorModelLiteBin.js";
+import landmarkModelLiteJson from "../models/landmarkModelLiteJson.js";
+import landmarkModelLiteBin from "../models/landmarkModelLiteBin.js";
+import detectorModelLiteJson from "../models/detectorModelLiteJson.js";
+import detectorModelLiteBin from "../models/detectorModelLiteBin.js";
 
 function loadOfflineModel(configObject) {
   const landmarkModelBinArray = hexStringToUint8Array(landmarkModelLiteBin);
