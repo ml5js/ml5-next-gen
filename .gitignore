@@ -14,6 +14,7 @@ training/lstm/data/t
 dist
 /dist_examples
 .yarn
+/offline_models
 
 website/translated_docs
 website/build/
