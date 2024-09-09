@@ -4,15 +4,14 @@ const path = require("path");
 const rimraf = require("rimraf");
 const { Readable } = require("stream");
 
-const outputDir = "offline_models";
-const tmpDir = "offline_models/tmp";
-const extracted = [];
+const outputDir = "src/offline/models";
+const tmpDir = "src/offline/models/tmp";
 
 /**
  * URLs of the models to fetch.
  */
 const modelURLs = {
-  handPose: {
+  HandPose: {
     detectorLite:
       "https://www.kaggle.com/api/v1/models/mediapipe/handpose-3d/tfJs/detector-lite/1/download",
     landmarkLite:
