@@ -43,7 +43,7 @@ const loadFile = async (path, callback) =>
  */
 function uint8ArrayToFile(uint8Array, fileName) {
   const blob = new Blob([uint8Array], { type: "application/octet-stream" });
-  return new File([blob], fileName, { type: mimeType });
+  return new File([blob], fileName, { type: "application/octet-stream" });
 }
 
 export { saveBlob, loadFile, uint8ArrayToFile };

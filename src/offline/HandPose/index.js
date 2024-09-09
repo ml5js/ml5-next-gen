@@ -1,8 +1,8 @@
 import { uint8ArrayToFile } from "../../utils/io.js";
 import landmarkLiteJson from "../models/HandPose/landmarkLite/model.json.js";
-import landmarkLiteBin from "../models/HandPose/landmarkLite/group1-shard1of1.bin.js";
+import landmarkLiteBinArray from "../models/HandPose/landmarkLite/group1-shard1of1.bin.js";
 import detectorLiteJson from "../models/HandPose/detectorLite/model.json.js";
-import detectorLiteBin from "../models/HandPose/detectorLite/group1-shard1of1.bin.js";
+import detectorLiteBinArray from "../models/HandPose/detectorLite/group1-shard1of1.bin.js";
 
 /**
  * Define the loadOfflineModel function.
@@ -19,18 +19,18 @@ function loadOfflineModel(configObject) {
   // Select the correct model to load based on the config object.
   if (configObject.modelType === "lite") {
     landmarkJson = landmarkLiteJson;
-    landmarkBinArray = landmarkLiteBin;
+    landmarkBinArray = landmarkLiteBinArray;
     detectorJson = detectorLiteJson;
-    detectorBinArray = detectorLiteBin;
+    detectorBinArray = detectorLiteBinArray;
   }
 
   // Convert the binary data to a file object.
   const landmarkBinFile = uint8ArrayToFile(
-    landmarkLiteBin,
+    landmarkBinArray,
     "group1-shard1of1.bin"
   );
   const detectorBinFile = uint8ArrayToFile(
-    detectorModelBinArray,
+    detectorBinArray,
     "group1-shard1of1.bin"
   );
 
@@ -44,12 +44,12 @@ function loadOfflineModel(configObject) {
 
   // Convert the json data to file objects.
   const landmarkJsonFile = new File(
-    [JSON.stringify(landmarkModelLiteJson)],
+    [JSON.stringify(landmarkJson)],
     "model.json",
     { type: "application/json" }
   );
   const detectorJsonFile = new File(
-    [JSON.stringify(detectorModelLiteJson)],
+    [JSON.stringify(detectorJson)],
     "model.json",
     { type: "application/json" }
   );
