@@ -26,19 +26,70 @@ import { mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
 
-class FaceMesh {
-  /**
-   * An options object to configure FaceMesh settings
-   * @typedef {Object} configOptions
-   * @property {number} maxFacess - The maximum number of faces to detect. Defaults to 2.
-   * @property {boolean} refineLandmarks - Refine the ladmarks. Defaults to false.
-   * @property {boolean} flipHorizontal - Flip the result horizontally. Defaults to false.
-   * @property {string} runtime - The runtime to use. "mediapipe"(default) or "tfjs".
-   *
-   * // For using custom or offline models
-   * @property {string} solutionPath - The file path or URL to the model.
-   */
+/**
+ * User provided options object for FaceMesh. See config schema below for default and available values.
+ * @typedef {Object} configOptions
+ * @property {number} [maxFaces]           The maximum number of faces to detect.
+ * @property {boolean} [refineLandmarks]   Whether to refine the landmarks.
+ * @property {boolean} [flipHorizontal]    Whether to mirror the results.
+ * @property {string} [runtime]            The runtime to use.
+ * @property {string} [solutionPath]       The file path or URL to the MediaPipe solution. Only
+ *                                           for `mediapipe` runtime.
+ * @property {string} [detectorModelUrl]   The file path or URL to the detector model. Only for
+ *                                           `tfjs` runtime.
+ * @property {string} [landmarkModelUrl]   The file path or URL to the landmark model. Only for
+ *                                           `tfjs` runtime.
+ */
 
+/**
+ * Schema for initialization options, used by `handleOptions` to
+ * validate the user's options object.
+ */
+const configSchema = {
+  runtime: {
+    type: "enum",
+    enums: ["mediapipe", "tfjs"],
+    default: "tfjs",
+  },
+  maxFaces: {
+    type: "number",
+    min: 1,
+    default: 1,
+  },
+  refineLandmarks: {
+    type: "boolean",
+    default: false,
+  },
+  solutionPath: {
+    type: "string",
+    default: "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh",
+    ignore: (config) => config.runtime !== "mediapipe",
+  },
+  detectorModelUrl: {
+    type: "string",
+    default: undefined,
+    ignore: (config) => config.runtime !== "tfjs",
+  },
+  landmarkModelUrl: {
+    type: "string",
+    default: undefined,
+    ignore: (config) => config.runtime !== "tfjs",
+  },
+};
+
+/**
+ * Schema for runtime options, used by `handleOptions` to
+ * validate the user's options object.
+ */
+const runtimeSchema = {
+  flipHorizontal: {
+    type: "boolean",
+    alias: "flipped",
+    default: false,
+  },
+};
+
+class FaceMesh {
   /**
    * Create FaceMesh.
    * @param {configOptions} options - An object with options.
@@ -76,53 +127,8 @@ class FaceMesh {
   async loadModel() {
     const pipeline = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
     // filter out model config options
-    const modelConfig = handleOptions(
-      this.config,
-      {
-        runtime: {
-          type: "enum",
-          enums: ["mediapipe", "tfjs"],
-          default: "tfjs",
-        },
-        maxFaces: {
-          type: "number",
-          min: 1,
-          default: 1,
-        },
-        refineLandmarks: {
-          type: "boolean",
-          default: false,
-        },
-        solutionPath: {
-          type: "string",
-          default: "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh",
-          ignore: (config) => config.runtime !== "mediapipe",
-        },
-        detectorModelUrl: {
-          type: "string",
-          default: undefined,
-          ignore: (config) => config.runtime !== "tfjs",
-        },
-        landmarkModelUrl: {
-          type: "string",
-          default: undefined,
-          ignore: (config) => config.runtime !== "tfjs",
-        },
-      },
-      "faceMesh"
-    );
-
-    this.runtimeConfig = handleOptions(
-      this.config,
-      {
-        flipHorizontal: {
-          type: "boolean",
-          alias: "flipped",
-          default: false,
-        },
-      },
-      "faceMesh"
-    );
+    const modelConfig = handleOptions(this.config, configSchema, "faceMesh");
+    this.runtimeConfig = handleOptions(this.config, runtimeSchema, "faceMesh");
 
     await tf.ready();
     this.model = await faceLandmarksDetection.createDetector(
