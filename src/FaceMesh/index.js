@@ -1,11 +1,21 @@
-// Copyright (c) 2020-2023 ml5
-//
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
+/**
+ * @license
+ * Copyright (c) 2020-2024 ml5
+ * This software is released under the ml5.js License.
+ * https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
+ */
 
-/*
- * FaceMesh: Face landmarks tracking in the browser
- * Ported and integrated from all the hard work by: https://github.com/tensorflow/tfjs-models/tree/master/face-landmarks-detection
+/**
+ * @file HandPose
+ *
+ * The file contains the main code of FaceMesh, a pretrained face landmark
+ * estimation model that detects and tracks faces and facial features with landmark points.
+ * The FaceMesh model is built on top of the face detection model of TensorFlow.
+ *
+ * TensorFlow Face Detection repo:
+ * https://github.com/tensorflow/tfjs-models/tree/master/face-detection
+ * ml5.js BodyPose reference documentation:
+ * https://docs.ml5js.org/#/reference/facemesh
  */
 
 import * as tf from "@tensorflow/tfjs";
