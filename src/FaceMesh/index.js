@@ -8,7 +8,7 @@
 /**
  * @file HandPose
  *
- * The file contains the main code of FaceMesh, a pretrained face landmark
+ * The file contains the main source code of FaceMesh, a pretrained face landmark
  * estimation model that detects and tracks faces and facial features with landmark points.
  * The FaceMesh model is built on top of the face detection model of TensorFlow.
  *
@@ -29,15 +29,15 @@ import { handleModelName } from "../utils/handleOptions";
 /**
  * User provided options object for FaceMesh. See config schema below for default and available values.
  * @typedef {Object} configOptions
- * @property {number} [maxFaces]           The maximum number of faces to detect.
- * @property {boolean} [refineLandmarks]   Whether to refine the landmarks.
- * @property {boolean} [flipHorizontal]    Whether to mirror the results.
- * @property {string} [runtime]            The runtime to use.
- * @property {string} [solutionPath]       The file path or URL to the MediaPipe solution. Only
+ * @property {number} [maxFaces]           - The maximum number of faces to detect.
+ * @property {boolean} [refineLandmarks]   - Whether to refine the landmarks.
+ * @property {boolean} [flipHorizontal]    - Whether to mirror the results.
+ * @property {string} [runtime]            - The runtime to use.
+ * @property {string} [solutionPath]       - The file path or URL to the MediaPipe solution. Only
  *                                           for `mediapipe` runtime.
- * @property {string} [detectorModelUrl]   The file path or URL to the detector model. Only for
+ * @property {string} [detectorModelUrl]   - The file path or URL to the detector model. Only for
  *                                           `tfjs` runtime.
- * @property {string} [landmarkModelUrl]   The file path or URL to the landmark model. Only for
+ * @property {string} [landmarkModelUrl]   - The file path or URL to the landmark model. Only for
  *                                           `tfjs` runtime.
  */
 
@@ -91,10 +91,10 @@ const runtimeSchema = {
 
 class FaceMesh {
   /**
-   * Create FaceMesh.
+   * Creates an instance of FaceMesh.
+   * @param {string} [modelName] - The name of the model to use.
    * @param {configOptions} options - An object with options.
    * @param {function} callback - A callback to be called when the model is ready.
-   *
    * @private
    */
   constructor(modelName, options, callback) {
@@ -104,32 +104,46 @@ class FaceMesh {
       "FaceMesh",
       "faceMesh"
     );
+    /** The underlying TensorFlow.js detector instance.*/
     this.model = null;
-    this.config = options;
+    /** The user provided options object. */
+    this.userOptions = options;
+    /** The config passed to underlying detector instance during inference. */
     this.runtimeConfig = {};
+    /** The media source being continuously detected. Only used in continuous mode. */
     this.detectMedia = null;
+    /** The callback function for detection results. Only used in continuous mode. */
     this.detectCallback = null;
-
-    // flags for detectStart() and detectStop()
-    this.detecting = false; // true when detection loop is running
-    this.signalStop = false; // true when detectStop() is called and detecting is true
-    this.prevCall = ""; // "start" or "stop", used for giving warning messages with detectStart() is called twice in a row
-
+    /** A flag for continuous mode, set to true when detection loop is running.*/
+    this.detecting = false;
+    /** A flag to signal stop to the detection loop.*/
+    this.signalStop = false;
+    /** A flag to track the previous call to`detectStart` and `detectStop`. */
+    this.prevCall = "";
+    /** A promise that resolves when the model is ready. */
     this.ready = callCallback(this.loadModel(), callback);
   }
 
   /**
-   * Load the model and set it to this.model
+   * Load the FaceMesh instance.
    * @return {this} the FaceMesh model.
-   *
    * @private
    */
   async loadModel() {
     const pipeline = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
-    // filter out model config options
-    const modelConfig = handleOptions(this.config, configSchema, "faceMesh");
-    this.runtimeConfig = handleOptions(this.config, runtimeSchema, "faceMesh");
+    // Filter out model config options
+    const modelConfig = handleOptions(
+      this.userOptions,
+      configSchema,
+      "faceMesh"
+    );
+    this.runtimeConfig = handleOptions(
+      this.userOptions,
+      runtimeSchema,
+      "faceMesh"
+    );
 
+    // Load the model once tfjs is ready
     await tf.ready();
     this.model = await faceLandmarksDetection.createDetector(
       pipeline,
@@ -140,20 +154,21 @@ class FaceMesh {
   }
 
   /**
-   * Asynchronously output a single face prediction result when called
-   * @param {*} [media] - An HMTL or p5.js image, video, or canvas element to run the prediction on.
-   * @param {function} [callback] - A callback function to handle the predictions.
-   * @returns {Promise<Array>} an array of predictions.
+   * Asynchronously outputs a single face prediction result when called.
+   * @param {any} media - An HTML or p5.js image, video, or canvas element to run the prediction on.
+   * @param {function} [callback] - A callback function to handle the detection result.
+   * @returns {Promise<Array>} an array of predicted faces.
+   * @public
    */
   async detect(...inputs) {
-    // Parse out the input parameters
+    // Parse the input parameters
     const argumentObject = handleArguments(...inputs);
     argumentObject.require(
       "image",
       "An html or p5.js image, video, or canvas element argument is required for detect()."
     );
     const { image, callback } = argumentObject;
-
+    // Run the prediction
     await mediaReady(image, false);
     const predictions = await this.model.estimateFaces(
       image,
@@ -166,13 +181,13 @@ class FaceMesh {
   }
 
   /**
-   * Repeatedly output face predictions through a callback function
-   * @param {*} [media] - An HMTL or p5.js image, video, or canvas element to run the prediction on.
-   * @param {function} [callback] - A callback function to handle the predictions.
-   * @returns {Promise<Array>} an array of predictions.
+   * Repeatedly outputs face predictions through a callback function.
+   * @param {any} media - An HTML or p5.js image, video, or canvas element to run the prediction on.
+   * @param {function} [callback] - A callback function to handle the prediction results.
+   * @public
    */
   detectStart(...inputs) {
-    // Parse out the input parameters
+    // Parse the input parameters
     const argumentObject = handleArguments(...inputs);
     argumentObject.require(
       "image",
@@ -185,6 +200,7 @@ class FaceMesh {
     this.detectMedia = argumentObject.image;
     this.detectCallback = argumentObject.callback;
 
+    // Set the flags and call the detection loop
     this.signalStop = false;
     if (!this.detecting) {
       this.detecting = true;
@@ -199,7 +215,8 @@ class FaceMesh {
   }
 
   /**
-   * Stop the detection loop before next detection loop runs.
+   * Stop the continuous detection before next detection loop runs.
+   * @public
    */
   detectStop() {
     if (this.detecting) this.signalStop = true;
@@ -207,9 +224,8 @@ class FaceMesh {
   }
 
   /**
-   * Internal function to call estimateFaces in a loop
-   * Can be started by detectStart() and terminated by detectStop()
-   *
+   * Calls estimateFaces in a loop.
+   * Can be started by `detectStart` and terminated by `detectStop`.
    * @private
    */
   async detectLoop() {
@@ -230,21 +246,22 @@ class FaceMesh {
   }
 
   /**
-   * Return a new array of results with named keypoints added
-   * @param {Array} faces - the original detection results
-   * @return {Array} the detection results with named keypoints added
-   *
+   * Return a new array of results with named features added.
+   * The keypoints in each named feature is sorted the order of the contour.
+   * @param {Array} faces - The original detection results.
+   * @return {Array} - The detection results with named keypoints added.
    * @private
    */
   addKeypoints(faces) {
     const contours = faceLandmarksDetection.util.getKeypointIndexByContour(
       faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh
     );
+    // Add the missing keypoint to the lips contour
     // Remove the following line when the tfjs fix the lips issue
+    // https://github.com/tensorflow/tfjs/issues/8221
     if (contours.lips[20] !== 291) contours.lips.splice(20, 0, 291);
     for (let face of faces) {
       // Remove the following line when the tfjs fix the lips issue
-      // https://github.com/tensorflow/tfjs/issues/8221
       face.keypoints[291].name = "lips";
       for (let contourLabel in contours) {
         for (let keypointIndex of contours[contourLabel]) {
@@ -309,8 +326,11 @@ class FaceMesh {
 }
 
 /**
- * Factory function that returns a FaceMesh instance
- * @returns {Object} A new faceMesh instance
+ * Factory function that returns a FaceMesh instance.
+ * @param {string} [modelName] - The name of the model to use.
+ * @param {configOptions} [options] - A user-defined options object.
+ * @param {function} [callback] - A callback to be called when the model is ready.
+ * @returns {Object} A new faceMesh instance.
  */
 const faceMesh = (...inputs) => {
   const { string, options = {}, callback } = handleArguments(...inputs);
