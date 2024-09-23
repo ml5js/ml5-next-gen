@@ -11,6 +11,10 @@ class NeuralNetworkUtils {
    */
   // eslint-disable-next-line class-methods-use-this
   normalizeValue(value, min, max) {
+    // When min is equal to max, set everything to 0
+    if (min === max) {
+      return 0;
+    }
     return (value - min) / (max - min);
   }
 
