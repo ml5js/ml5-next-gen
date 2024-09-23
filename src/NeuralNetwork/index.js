@@ -1,7 +1,10 @@
 import * as tf from "@tensorflow/tfjs";
 import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
-import { imgToPixelArray, isInstanceOfSupportedElement, } from "../utils/imageUtilities";
+import {
+  imgToPixelArray,
+  isInstanceOfSupportedElement,
+} from "../utils/imageUtilities";
 import NeuralNetwork from "./NeuralNetwork";
 import NeuralNetworkData from "./NeuralNetworkData";
 
@@ -22,7 +25,6 @@ const DEFAULTS = {
 };
 class DiyNeuralNetwork {
   constructor(options, callback) {
-
     // Is there a better way to handle a different
     // default learning rate for image classification tasks?
     if (options.task === "imageClassification") {
@@ -227,11 +229,7 @@ class DiyNeuralNetwork {
   async loadDataFromUrl() {
     const { dataUrl, inputs, outputs } = this.options;
 
-    await this.neuralNetworkData.loadDataFromUrl(
-      dataUrl,
-      inputs,
-      outputs
-    );
+    await this.neuralNetworkData.loadDataFromUrl(dataUrl, inputs, outputs);
 
     // once the data are loaded, create the metadata
     // and prep the data for training
@@ -512,7 +510,10 @@ class DiyNeuralNetwork {
       finishedTrainingCb = optionsOrCallback;
     }
 
-    return callCallback(this.trainInternal(options, whileTrainingCb), finishedTrainingCb);
+    return callCallback(
+      this.trainInternal(options, whileTrainingCb),
+      finishedTrainingCb
+    );
   }
 
   /**
@@ -579,9 +580,7 @@ class DiyNeuralNetwork {
     // then use those to create your architecture
     if (!this.neuralNetwork.isLayered) {
       // TODO: don't update this.options.layers - Linda
-      this.options.layers = this.createNetworkLayers(
-        this.options.layers
-      );
+      this.options.layers = this.createNetworkLayers(this.options.layers);
     }
 
     // if the model does not have any layers defined yet
@@ -1150,7 +1149,10 @@ class DiyNeuralNetwork {
    */
   saveData(name, callback) {
     const args = handleArguments(name, callback);
-    return callCallback(this.neuralNetworkData.saveData(args.name), args.callback);
+    return callCallback(
+      this.neuralNetworkData.saveData(args.name),
+      args.callback
+    );
   }
 
   /**
@@ -1182,13 +1184,16 @@ class DiyNeuralNetwork {
    */
   async save(name, callback) {
     const args = handleArguments(name, callback);
-    const modelName = args.string || 'model';
+    const modelName = args.string || "model";
 
     // save the model
-    return callCallback(Promise.all([
-      this.neuralNetwork.save(modelName),
-      this.neuralNetworkData.saveMeta(modelName)
-    ]), args.callback);
+    return callCallback(
+      Promise.all([
+        this.neuralNetwork.save(modelName),
+        this.neuralNetworkData.saveMeta(modelName),
+      ]),
+      args.callback
+    );
   }
 
   /**
@@ -1200,10 +1205,13 @@ class DiyNeuralNetwork {
    * @return {Promise<void[]>}
    */
   async load(filesOrPath, callback) {
-    return callCallback(Promise.all([
-      this.neuralNetwork.load(filesOrPath),
-      this.neuralNetworkData.loadMeta(filesOrPath)
-    ]), callback);
+    return callCallback(
+      Promise.all([
+        this.neuralNetwork.load(filesOrPath),
+        this.neuralNetworkData.loadMeta(filesOrPath),
+      ]),
+      callback
+    );
   }
 
   /**
