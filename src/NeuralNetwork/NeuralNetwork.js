@@ -206,7 +206,9 @@ class NeuralNetwork {
     if (filesOrPath instanceof FileList) {
       const files = Array.from(filesOrPath);
       // find the correct files
-      const model = files.find((file) => file.name.includes(".json") && !file.name.includes("_meta"));
+      const model = files.find(
+        (file) => file.name.includes(".json") && !file.name.includes("_meta")
+      );
       const weights = files.find((file) => file.name.includes(".bin"));
       // load the model
       this.model = await tf.loadLayersModel(
@@ -218,7 +220,7 @@ class NeuralNetwork {
           // Override the weights path from the JSON weightsManifest
           weightUrlConverter: (weightFileName) => {
             return filesOrPath.weights || weightFileName;
-          }
+          },
         })
       );
     } else {
