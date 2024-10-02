@@ -1,7 +1,7 @@
 import * as tf from "@tensorflow/tfjs";
 import axios from "axios";
 import { saveBlob } from "../utils/io";
-import modelLoader from '../utils/modelLoader';
+import modelLoader from "../utils/modelLoader";
 import nnUtils from "./NeuralNetworkUtils";
 
 class NeuralNetworkData {
@@ -532,7 +532,6 @@ class NeuralNetworkData {
    */
   async loadDataFromUrl(dataUrl, inputs, outputs) {
     try {
-
       if (dataUrl.endsWith(".csv")) {
         await this.loadCSV(dataUrl, inputs, outputs);
       } else if (dataUrl.endsWith(".json")) {
@@ -643,23 +642,21 @@ class NeuralNetworkData {
           );
         }
       } else {
-        loadedData = await axios.get(filesOrPath, { responseType: "text" });
-        const text = JSON.stringify(loadedData.data);
-        if (nnUtils.isJsonOrString(text)) {
-          loadedData = JSON.parse(text);
+        let response = await axios.get(filesOrPath, { responseType: "text" });
+
+        if (nnUtils.isJsonOrString(response.data)) {
+          loadedData = JSON.parse(response.data);
         } else {
-          console.log(
-            "Whoops! something went wrong. Either this kind of data is not supported yet or there is an issue with .loadData"
+          console.error(
+            "🟪 ml5.js error: `NeuralNetwork.loadData` only accepts JSON data."
           );
         }
       }
-
       this.data.raw = this.findEntries(loadedData);
-
       // check if a data or entries property exists
       if (!this.data.raw.length > 0) {
-        console.log(
-          'data must be a json object containing an array called "data" '
+        console.error(
+          "🟪 ml5.js error: `NeuralNetwork.loadData` only accepts JSON objects with a 'data' property."
         );
       }
     } catch (error) {
@@ -716,7 +713,7 @@ class NeuralNetworkData {
         file.name.includes("_meta.json")
       );
       if (!file) {
-        console.warn('no model_meta.json file found in FileList');
+        console.warn("no model_meta.json file found in FileList");
         return;
       }
       const text = await file.text();
