@@ -284,7 +284,6 @@ class NeuralNetworkData {
     const dataLength = dataRaw.length;
     // the copy of the inputs.meta[inputOrOutput]
     const inputMeta = Object.assign({}, inputOrOutputMeta);
-
     // normalized output object
     const normalized = {};
     Object.keys(inputMeta).forEach((k) => {
@@ -343,6 +342,11 @@ class NeuralNetworkData {
       return normalized;
     }
 
+    if (min === max) {
+      console.warn(
+        "🟪 ml5.js NeuralNetwork warns: Normalization failed, all data entries for an input parameter are identical (min === max). The data for this input parameter will be set to 0, effectively removing it from the model. Please check your input data."
+      );
+    }
     // if the dtype is a number
     if (inputArray.every((v) => typeof v === "number")) {
       const normalized = inputArray.map((v) =>
