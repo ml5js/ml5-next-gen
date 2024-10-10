@@ -20,11 +20,12 @@ import { handleModelName } from "../utils/handleOptions";
 class BodySegmentation {
   /**
    * Create BodyPix.
+   * @param {String} [modelName] - A name of a model to use.
    * @param {HTMLVideoElement} [video] - An HTMLVideoElement.
    * @param {object} [options] - An object with options.
    * @param {function} [callback] - A callback to be called when the model is ready.
    */
-  constructor(modelName, options, callback) {
+  constructor(modelName, video, options, callback) {
     this.modelName = handleModelName(
       modelName,
       ["BodyPix", "SelfieSegmentation"],
