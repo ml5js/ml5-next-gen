@@ -470,7 +470,6 @@ class BodyPose {
           y: keypoint.y,
           confidence: keypoint.confidence,
         };
-        if (keypoint.z) pose[keypoint.name].z = keypoint.z;
       });
     });
   }
