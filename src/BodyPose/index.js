@@ -470,8 +470,22 @@ class BodyPose {
           y: keypoint.y,
           confidence: keypoint.confidence,
         };
-        if (keypoint.z) pose[keypoint.name].z = keypoint.z;
       });
+
+      // Add the 3d keypoints if in BlazePose mode
+      if (pose.keypoints3D) {
+        pose.keypoints3D.forEach((keypoint) => {
+          pose[keypoint.name] = {
+            ...pose[keypoint.name],
+            keypoint3D: {
+              x: keypoint.x,
+              y: keypoint.y,
+              z: keypoint.z,
+              confidence: keypoint.confidence,
+            },
+          };
+        });
+      }
     });
   }
 
