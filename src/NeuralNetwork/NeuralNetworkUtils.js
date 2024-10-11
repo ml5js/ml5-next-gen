@@ -4,13 +4,16 @@ class NeuralNetworkUtils {
   }
 
   /**
-   * normalizeValue
-   * @param {*} value
-   * @param {*} min
-   * @param {*} max
+   * Normalize a value between min and max, return 0 if min === max
+   * @param {number} value - The value to normalize
+   * @param {number} min - The minimum bound
+   * @param {number} max - The maximum bound
    */
-  // eslint-disable-next-line class-methods-use-this
   normalizeValue(value, min, max) {
+    // When min is equal to max, set everything to 0
+    if (min === max) {
+      return 0;
+    }
     return (value - min) / (max - min);
   }
 
@@ -22,6 +25,9 @@ class NeuralNetworkUtils {
    */
   // eslint-disable-next-line class-methods-use-this
   unnormalizeValue(value, min, max) {
+    if (min === max) {
+      return min;
+    }
     return value * (max - min) + min;
   }
 
