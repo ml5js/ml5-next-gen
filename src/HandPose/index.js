@@ -1,11 +1,21 @@
-// Copyright (c) 2020-2024 ml5
-//
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
+/**
+ * @license
+ * Copyright (c) 2020-2024 ml5
+ * This software is released under the ml5.js License.
+ * https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
+ */
 
-/*
- * HandPose: Palm detector and hand-skeleton finger tracking in the browser
- * Ported and integrated from all the hard work by: https://github.com/tensorflow/tfjs-models/tree/master/hand-pose-detection
+/**
+ * @file HandPose
+ *
+ * The file contains the main code of HandPose, a pretrained hand landmark
+ * estimation model that can estimate poses and track key body parts in real-time.
+ * The HandPose model is built on top of the hand detection model of TensorFlow.
+ *
+ * TensorFlow Hand Pose Detection repo:
+ * https://github.com/tensorflow/tfjs-models/tree/master/hand-pose-detection
+ * ml5.js BodyPose reference documentation:
+ * https://docs.ml5js.org/#/reference/handpose
  */
 
 import * as tf from "@tensorflow/tfjs";
@@ -17,109 +27,131 @@ import { handleModelName } from "../utils/handleOptions";
 import { mediaReady } from "../utils/imageUtilities";
 import objectRenameKey from "../utils/objectRenameKey";
 
+/**
+ * User provided options object for HandPose. See config schema below for default and available values.
+ * @typedef {object} configOptions
+ * @property {number} [maxHands]           - The maximum number of hands to detect.
+ * @property {string} [modelType]          - The type of model to use.
+ * @property {boolean} [flipHorizontal]    - Whether to mirror the landmark results.
+ * @property {string} [runtime]            - The runtime of the model.
+ * @property {string} [solutionPath]       - The file path or URL to mediaPipe solution. Only for
+ *                                           `mediapipe` runtime.
+ * @property {string} [detectorModelUrl]   - The file path or URL to the hand detector model. Only
+ *                                           for `tfjs` runtime.
+ * @property {string} [landmarkModelUrl]   - The file path or URL to the hand landmark model. Only
+ *                                           for `tfjs` runtime.
+ */
+
+/**
+ * Schema for initialization options, used by `handleOptions` to
+ * validate the user's options object.
+ */
+const configSchema = {
+  maxHands: {
+    type: "number",
+    min: 1,
+    max: 2147483647,
+    integer: true,
+    default: 2,
+  },
+  runtime: {
+    type: "enum",
+    enums: ["mediapipe", "tfjs"],
+    default: "tfjs",
+  },
+  modelType: {
+    type: "enum",
+    enums: ["lite", "full"],
+    default: "full",
+  },
+  solutionPath: {
+    type: "string",
+    default: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
+    ignore: (config) => config.runtime !== "mediapipe",
+  },
+  detectorModelUrl: {
+    type: "string",
+    default: undefined,
+    ignore: (config) => config.runtime !== "tfjs",
+  },
+  landmarkModelUrl: {
+    type: "string",
+    default: undefined,
+    ignore: (config) => config.runtime !== "tfjs",
+  },
+};
+
+/**
+ * Schema for runtime options, used by `handleOptions` to
+ * validate the user's options object.
+ */
+const runtimeConfigSchema = {
+  flipHorizontal: {
+    type: "boolean",
+    alias: "flipped",
+    default: false,
+  },
+};
+
 class HandPose {
   /**
-   * An object for configuring HandPose options.
-   * @typedef {Object} configOptions
-   * @property {number} maxHands - Optional. The maximum number of hands to detect. Default: 2.
-   * @property {string} modelType - Optional. The type of model to use: "lite" or "full". Default: "full".
-   * @property {boolean} flipHorizontal - Optional. Flip the result data horizontally. Default: false.
-   * @property {string} runtime - Optional. The runtime of the model: "mediapipe" or "tfjs". Default: "mediapipe".
-   *
-   * // For using custom or offline models
-   * @property {string} solutionPath - Optional. The file path or URL to the model. Only used when using "mediapipe" runtime.
-   * @property {string} detectorModelUrl - Optional. The file path or URL to the hand detector model. Only used when using "tfjs" runtime.
-   * @property {string} landmarkModelUrl - Optional. The file path or URL to the hand landmark model Only used when using "tfjs" runtime.
-   */
-
-  /**
-   * Creates HandPose.
-   * @param {configOptions} options - An object containing HandPose configuration options.
-   * @param {function} callback - A callback to be called when the model is ready.
+   * Creates an instance of HandPose model.
+   * @param {string} [modelName] - The underlying model to use, must be `MediaPipeHands` or undefined.
+   * @param {configOptions} options -An options object for the model.
+   * @param {function} callback - A callback function that is called once the model has been loaded.
    * @private
    */
   constructor(modelName, options, callback) {
+    /** The underlying model used. */
     this.modelName = this.modelName = handleModelName(
       modelName,
       ["MediaPipeHands"],
       "MediaPipeHands",
       "handPose"
     );
+    /** The underlying TensorFlow.js detector instance.*/
     this.model = null;
-    this.config = options;
+    /** The user provided options object. */
+    this.userOptions = options;
+    /** The config passed to underlying detector instance during inference. */
     this.runtimeConfig = {};
+    /** The media source being continuously detected. Only used in continuous mode. */
     this.detectMedia = null;
+    /** The callback function for detection results. Only used in continuous mode. */
     this.detectCallback = null;
-
-    // flags for detectStart() and detectStop()
-    this.detecting = false; // True when detection loop is running
-    this.signalStop = false; // Signal to stop the loop
-    this.prevCall = ""; // Track previous call to detectStart() or detectStop()
-
+    /** A flag for continuous mode, set to true when detection loop is running.*/
+    this.detecting = false;
+    /** A flag to signal stop to the detection loop.*/
+    this.signalStop = false;
+    /** A flag to track the previous call to`detectStart` and `detectStop`. */
+    this.prevCall = "";
+    /** A promise that resolves when the model is ready. */
     this.ready = callCallback(this.loadModel(), callback);
   }
 
   /**
-   * Loads the model.
-   * @return {this} the HandPose model.
+   * Loads the HandPose instance.
+   * @return {this} the HandPose instance.
    * @private
    */
   async loadModel() {
     const pipeline = handPoseDetection.SupportedModels.MediaPipeHands;
-    //filter out model config options
+    // Filter out initialization config options
     const modelConfig = handleOptions(
-      this.config,
-      {
-        maxHands: {
-          type: "number",
-          min: 1,
-          max: 2147483647,
-          integer: true,
-          default: 2,
-        },
-        runtime: {
-          type: "enum",
-          enums: ["mediapipe", "tfjs"],
-          default: "tfjs",
-        },
-        modelType: {
-          type: "enum",
-          enums: ["lite", "full"],
-          default: "full",
-        },
-        solutionPath: {
-          type: "string",
-          default: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
-          ignore: (config) => config.runtime !== "mediapipe",
-        },
-        detectorModelUrl: {
-          type: "string",
-          default: undefined,
-          ignore: (config) => config.runtime !== "tfjs",
-        },
-        landmarkModelUrl: {
-          type: "string",
-          default: undefined,
-          ignore: (config) => config.runtime !== "tfjs",
-        },
-      },
+      this.userOptions,
+      configSchema,
       "handPose"
     );
+    // Filter out the runtime config options
     this.runtimeConfig = handleOptions(
-      this.config,
-      {
-        flipHorizontal: {
-          type: "boolean",
-          alias: "flipped",
-          default: false,
-        },
-      },
+      this.userOptions,
+      runtimeConfigSchema,
       "handPose"
     );
 
+    // Load the Tensorflow.js detector instance
     await tf.ready();
     this.model = await handPoseDetection.createDetector(pipeline, modelConfig);
-
     return this;
   }
 
@@ -132,40 +164,42 @@ class HandPose {
   /**
    * Asynchronously outputs a single hand landmark detection result when called.
    * Supports both callback and promise.
-   * @param {*} [media] - An HMTL or p5.js image, video, or canvas element to run the detection on.
-   * @param {gotHands} [callback] - Optional. A callback to handle the hand detection result.
-   * @returns {Promise<Array>} The detection result.
+   * @param {any} media - An HTML or p5.js image, video, or canvas element to run the detection on.
+   * @param {gotHands} [callback] - A callback to handle the hand detection result.
+   * @returns {Promise<Array>} An array of hand detection results.
+   * @public
    */
   async detect(...inputs) {
-    //Parse out the input parameters
+    //Parse the input parameters
     const argumentObject = handleArguments(...inputs);
     argumentObject.require(
       "image",
       "An html or p5.js image, video, or canvas element argument is required for detect()."
     );
     const { image, callback } = argumentObject;
-
+    // Run the detection
     await mediaReady(image, false);
     const predictions = await this.model.estimateHands(
       image,
       this.runtimeConfig
     );
-    // Modify the prediction result to make it more user-friendly
+    // Modify the raw tfjs output to make it more user-friendly
     let result = predictions;
     this.renameScoreToConfidence(result);
     this.addKeypoints(result);
-
+    // Output the result via callback and/or promise
     if (typeof callback === "function") callback(result);
     return result;
   }
 
   /**
    * Repeatedly outputs hand predictions through a callback function.
-   * @param {*} [media] - An HMTL or p5.js image, video, or canvas element to run the prediction on.
-   * @param {gotHands} [callback] - A callback to handle the hand detection results.
+   * @param {any} media - An HTML or p5.js image, video, or canvas element to run the prediction on.
+   * @param {gotHands} callback - A callback to handle the hand detection results.
+   * @public
    */
   detectStart(...inputs) {
-    // Parse out the input parameters
+    // Parse the input parameters
     const argumentObject = handleArguments(...inputs);
     argumentObject.require(
       "image",
@@ -181,6 +215,7 @@ class HandPose {
     this.signalStop = false;
     if (!this.detecting) {
       this.detecting = true;
+      // Call the internal detection loop
       this.detectLoop();
     }
     if (this.prevCall === "start") {
@@ -193,6 +228,7 @@ class HandPose {
 
   /**
    * Stops the detection loop before next detection loop runs.
+   * @public
    */
   detectStop() {
     if (this.detecting) this.signalStop = true;
@@ -201,7 +237,7 @@ class HandPose {
 
   /**
    * Calls estimateHands in a loop.
-   * Can be started by detectStart() and terminated by detectStop().
+   * Can be started by `detectStart` and terminated by `detectStop`.
    * @private
    */
   async detectLoop() {
@@ -225,8 +261,9 @@ class HandPose {
   }
 
   /**
-   * Renames the score key to confidence in the detection results.
+   * Renames the `score` key to `confidence` in the detection results.
    * @param {Object[]} hands - The detection results.
+   * @private
    */
   renameScoreToConfidence(hands) {
     hands.forEach((hand) => {
@@ -235,14 +272,12 @@ class HandPose {
   }
 
   /**
-   * Returns a new array of results with named keypoints added.
+   * Add the named keypoints to the detection results.
    * @param {Array} hands - the original detection results.
-   * @return {Array} the detection results with named keypoints added.
-   *
    * @private
    */
   addKeypoints(hands) {
-    const result = hands.map((hand) => {
+    hands = hands.map((hand) => {
       for (let i = 0; i < hand.keypoints.length; i++) {
         let keypoint = hand.keypoints[i];
         let keypoint3D = hand.keypoints3D[i];
@@ -256,12 +291,14 @@ class HandPose {
       }
       return hand;
     });
-    return result;
   }
 }
 
 /**
  * Factory function that returns a new HandPose instance.
+ * @param {string} [modelName] - The underlying model to use, must be `MediaPipeHands`
+ * @param {configOptions} [options] - A user-defined options object for the model.
+ * @param {function} [callback] - A callback function that is called once the model has been loaded.
  * @returns {HandPose} A new handPose instance.
  */
 const handPose = (...inputs) => {

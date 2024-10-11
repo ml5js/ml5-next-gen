@@ -263,7 +263,7 @@ class BodyPose {
 
   /**
    * Asynchronously outputs a single pose prediction result when called.
-   * @param {any} media - An HMTL or p5.js image, video, or canvas element to run the prediction on.
+   * @param {any} media - An HTML or p5.js image, video, or canvas element to run the prediction on.
    * @param {function} callback - A callback function to handle the predictions.
    * @returns {Promise<Array>} an array of poses.
    * @public
@@ -470,8 +470,22 @@ class BodyPose {
           y: keypoint.y,
           confidence: keypoint.confidence,
         };
-        if (keypoint.z) pose[keypoint.name].z = keypoint.z;
       });
+
+      // Add the 3d keypoints if in BlazePose mode
+      if (pose.keypoints3D) {
+        pose.keypoints3D.forEach((keypoint) => {
+          pose[keypoint.name] = {
+            ...pose[keypoint.name],
+            keypoint3D: {
+              x: keypoint.x,
+              y: keypoint.y,
+              z: keypoint.z,
+              confidence: keypoint.confidence,
+            },
+          };
+        });
+      }
     });
   }
 
