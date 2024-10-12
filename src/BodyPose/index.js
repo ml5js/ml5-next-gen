@@ -465,6 +465,11 @@ class BodyPose {
   addKeypoints(poses) {
     poses.forEach((pose) => {
       pose.keypoints.forEach((keypoint) => {
+        // Remove the z property that is not documented
+        if (keypoint.z) {
+          delete keypoint.z;
+        }
+
         pose[keypoint.name] = {
           x: keypoint.x,
           y: keypoint.y,
@@ -475,14 +480,11 @@ class BodyPose {
       // Add the 3d keypoints if in BlazePose mode
       if (pose.keypoints3D) {
         pose.keypoints3D.forEach((keypoint) => {
-          pose[keypoint.name] = {
-            ...pose[keypoint.name],
-            keypoint3D: {
-              x: keypoint.x,
-              y: keypoint.y,
-              z: keypoint.z,
-              confidence: keypoint.confidence,
-            },
+          pose[keypoint.name].keypoint3D = {
+            x: keypoint.x,
+            y: keypoint.y,
+            z: keypoint.z,
+            confidence: keypoint.confidence,
           };
         });
       }
