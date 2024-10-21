@@ -135,10 +135,10 @@ class BodySegmentation {
       this.getPartsId = () => {
         let parts = {};
         for (let key in BODYPIX_PALETTE) {
-         parts[key] = BODYPIX_PALETTE[key].id;
-       }
-       return parts;
-     }
+          parts[key] = BODYPIX_PALETTE[key].id;
+        }
+        return parts;
+      };
     } else {
       pipeline = tfBodySegmentation.SupportedModels.MediaPipeSelfieSegmentation;
       modelConfig = handleOptions(
@@ -184,10 +184,6 @@ class BodySegmentation {
         },
         "bodySegmentation"
       );
-
-      // add constants to the instance variable
-      this.BACKGROUND = 0;
-      this.PERSON = 255;
     }
 
     await tf.ready();
