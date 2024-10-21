@@ -323,6 +323,29 @@ class FaceMesh {
     }
     return faces;
   }
+
+  /**
+   * Returns the trio of keypoint indices that form each triangle in the face mesh.
+   * @returns {number[][]} an array of triangles, each containing three keypoint indices.
+   * @public
+   */
+  getTriangles() {
+    const connectingPairs = faceLandmarksDetection.util.getAdjacentPairs(
+      faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh
+    );
+
+    const triangles = [];
+    for (let i = 0; i < connectingPairs.length; i += 3) {
+      const triangle = [
+        connectingPairs[i][0],
+        connectingPairs[i + 1][0],
+        connectingPairs[i + 2][0],
+      ];
+      triangles.push(triangle);
+    }
+
+    return triangles;
+  }
 }
 
 /**
