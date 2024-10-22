@@ -25,6 +25,7 @@ import handleArguments from "../utils/handleArguments";
 import { mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
+import { UV_COORDS } from "./uv_coords";
 
 /**
  * User provided options object for FaceMesh. See config schema below for default and available values.
@@ -345,6 +346,25 @@ class FaceMesh {
     }
 
     return triangles;
+  }
+
+  /**
+   * Returns the pairs of keypoint indices that are connected in the face mesh.
+   * @returns {number[][]} an array of keypoint indices that form each face contour.
+   * @public
+   */
+  getConnections() {
+    return faceLandmarksDetection.util.getAdjacentPairs(
+      faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh
+    );
+  }
+
+  /**
+   * Returns the UV coordinates for the face mesh.
+   * @returns {number[][]} an array of UV coordinates for the face mesh.
+   */
+  getUVCoords() {
+    return UV_COORDS;
   }
 }
 
