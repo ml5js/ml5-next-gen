@@ -20,6 +20,7 @@
 
 import * as tf from "@tensorflow/tfjs";
 import * as handPoseDetection from "@tensorflow-models/hand-pose-detection";
+import { MEDIAPIPE_CONNECTED_KEYPOINTS_PAIRS } from "@tensorflow-models/hand-pose-detection/dist/constants";
 import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import handleOptions from "../utils/handleOptions";
@@ -291,6 +292,15 @@ class HandPose {
       }
       return hand;
     });
+  }
+
+  /**
+   * Returns the pairs of keypoint indices that are connected by a skeletal representation.
+   * @returns {number[][]} The connected keypoint pairs.
+   * @public
+   */
+  getConnections() {
+    return MEDIAPIPE_CONNECTED_KEYPOINTS_PAIRS;
   }
 }
 
