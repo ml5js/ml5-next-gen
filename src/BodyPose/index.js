@@ -531,10 +531,9 @@ class BodyPose {
 
   /**
    * Returns the skeletal connections pairs for the model.
-   * An alias for `getConnections`. This method is deprecated and will be removed in the future.
+   * An alias for `getConnections`.
    * @returns {number[][]} an array of pairs of indices containing the connected keypoints.
    * @public
-   * @deprecated
    */
   getSkeleton() {
     return this.getConnections();
