@@ -1,0 +1,44 @@
+name: README/Wiki Update
+description: Suggest improvements to the README or Wiki
+labels: ["documentation"]
+projects: []
+assignees: []
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Update Type
+      multiple: true
+      options:
+        - README Update
+        - Code Examples
+        - Wiki
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: current_state
+    attributes:
+      label: Current Documentation
+      description: What's currently in the documentation? Link to relevant sections if possible.
+    validations:
+      required: true
+  - type: textarea
+    id: proposed_changes
+    attributes:
+      label: Proposed Changes
+      description: What would you like to see changed or added?
+      placeholder: |
+        Examples:
+        - Add more examples for specific use cases
+        - Update outdated information about X
+    validations:
+      required: true
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct]() 
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true

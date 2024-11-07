@@ -1,0 +1,48 @@
+name: Feature Request
+description: |
+  Suggest new features or enhancements for ml5. 
+labels: ["enhancement"]
+projects: []
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature for our library!
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem would this feature solve? What becomes easier or possible?
+      placeholder: |
+        Example: "When working with UV Mapping for FaceMesh, I often need to load the UV coordinates, 
+        but currently have to implement it manually each time..."
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe how you envision this feature working
+      placeholder: |
+        Example API usage:
+        ```javascript
+        // Your example code showing how the feature might work
+        ```
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: What alternatives have you considered? How are you solving this now?
+    validations:
+      required: false
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct]() 
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
