@@ -25,6 +25,7 @@ import handleArguments from "../utils/handleArguments";
 import { mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
+import { UV_COORDS } from "./uv_coords";
 
 /**
  * User provided options object for FaceMesh. See config schema below for default and available values.
@@ -322,6 +323,48 @@ class FaceMesh {
       }
     }
     return faces;
+  }
+
+  /**
+   * Returns the trio of keypoint indices that form each triangle in the face mesh.
+   * @returns {number[][]} an array of triangles, each containing three keypoint indices.
+   * @public
+   */
+  getTriangles() {
+    const connectingPairs = faceLandmarksDetection.util.getAdjacentPairs(
+      faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh
+    );
+
+    const triangles = [];
+    for (let i = 0; i < connectingPairs.length; i += 3) {
+      const triangle = [
+        connectingPairs[i][0],
+        connectingPairs[i + 1][0],
+        connectingPairs[i + 2][0],
+      ];
+      triangles.push(triangle);
+    }
+
+    return triangles;
+  }
+
+  /**
+   * Returns the pairs of keypoint indices that are connected in the face mesh.
+   * @returns {number[][]} an array of keypoint indices that form each face contour.
+   * @public
+   */
+  getConnections() {
+    return faceLandmarksDetection.util.getAdjacentPairs(
+      faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh
+    );
+  }
+
+  /**
+   * Returns the UV coordinates for the face mesh.
+   * @returns {number[][]} an array of UV coordinates for the face mesh.
+   */
+  getUVCoords() {
+    return UV_COORDS;
   }
 }
 

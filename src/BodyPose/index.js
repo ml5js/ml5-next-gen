@@ -513,11 +513,11 @@ class BodyPose {
   }
 
   /**
-   * Returns the skeleton connections pairs for the model.
+   * Returns the skeletal connections pairs for the model.
    * @returns {number[][]} an array of pairs of indices containing the connected keypoints.
    * @public
    */
-  getSkeleton() {
+  getConnections() {
     if (this.modelName === "BlazePose") {
       return poseDetection.util.getAdjacentPairs(
         poseDetection.SupportedModels.BlazePose
@@ -527,6 +527,16 @@ class BodyPose {
         poseDetection.SupportedModels.MoveNet
       );
     }
+  }
+
+  /**
+   * Returns the skeletal connections pairs for the model.
+   * An alias for `getConnections`.
+   * @returns {number[][]} an array of pairs of indices containing the connected keypoints.
+   * @public
+   */
+  getSkeleton() {
+    return this.getConnections();
   }
 }
 

@@ -26,8 +26,8 @@ function setup() {
 
   // Start detecting poses in the webcam video
   bodyPose.detectStart(video, gotPoses);
-  // Get the skeleton connection information
-  connections = bodyPose.getSkeleton();
+  // Get the skeletal connection information
+  connections = bodyPose.getConnections();
 }
 
 function draw() {

@@ -32,12 +32,11 @@ function draw() {
   background(255);
   image(video, 0, 0);
   if (segmentation) {
+    let parts = bodySegmentation.getPartsId();
     let gridSize = 10;
     for (let x = 0; x < video.width; x += gridSize) {
       for (let y = 0; y < video.height; y += gridSize) {
-        if (
-          segmentation.data[y * video.width + x] == bodySegmentation.TORSO_FRONT
-        ) {
+        if (segmentation.data[y * video.width + x] == parts.TORSO_FRONT) {
           fill(255, 0, 0);
           noStroke();
           circle(x, y, gridSize);
