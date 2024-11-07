@@ -1,7 +1,7 @@
 name: Feature Request
 description: |
   Suggest new features or enhancements for ml5. 
-labels: ["enhancement"]
+labels: ["feature request"]
 projects: []
 assignees: []
 body:
