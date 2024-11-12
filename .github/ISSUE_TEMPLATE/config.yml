@@ -2,7 +2,7 @@ blank_issues_enabled: true
 contact_links:
   - name: ml5.js Discord Server
     url: https://discord.gg/FRc2SDyfKN
-    about: For question like "How to fix this in my code?", Please ask it on our Discord server.
-  - name: ml5.js documentation repo
+    about: For questions like "How do I fix this in my code?", please ask on our Discord server.
+  - name: ml5.js Documentation Repo
     url: https://github.com/ml5js/ml5-website-v02-docsify/issues
-    about: For issue related to the documentation, please create issue in this repo. 
+    about: For issues related to the documentation, please create an issue in the documentation repo.
