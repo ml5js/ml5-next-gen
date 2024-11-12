@@ -1,6 +1,5 @@
 name: Bug & Maintenance Report
 description: Report bugs, runtime errors, or other technical issues with the library
-title: "[Bug]: "
 labels: ["bug"]
 projects: []
 assignees: []
