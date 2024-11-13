@@ -1,0 +1,79 @@
+name: Bug & Maintenance Report
+description: Report bugs, runtime errors, or other technical issues with the library
+labels: ["bug"]
+projects: []
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to fill out this bug report!
+  - type: dropdown
+    id: type
+    attributes:
+      label: Issue Type
+      multiple: true
+      options:
+        - Runtime Error
+        - Unexpected Behavior
+        - Performance Issue
+        - Broken API/Method
+        - Other
+      default: 0
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: ml5.js Version
+      description: Which version of ml5.js are you using? (You can find the version in the browser's developer tools and with `console.log(ml5.version)`)
+      placeholder: e.g., 1.1.0 / ml5@1
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Development Environment
+      description: Where are you using ml5.js?
+      placeholder: Local setup, p5.js Web Editor, CodePen, etc.
+    validations:
+      required: true
+  - type: input
+    id: browser_os
+    attributes:
+      label: Browser & Operating System
+      description: Which browser and operating system are you using?
+      placeholder: Chrome 120 on Windows 11, Safari on iOS 17, etc.
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Issue Description
+      placeholder: |
+        Please describe the bug and how to reproduce it. Include:
+        1. A code snippet showing the issue
+        2. The expected behavior
+        3. The actual behavior
+        4. Screenshots or console errors (if applicable)
+    validations:
+      required: true
+  - type: textarea
+    id: minimal_example
+    attributes:
+      label: Minimal Reproducible Example
+      description: Please provide a minimal code example that demonstrates the issue.
+      placeholder: |
+        ```javascript
+        // Your code here
+        ```
+    validations:
+      required: false
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/ml5js/Code-of-Conduct) 
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
