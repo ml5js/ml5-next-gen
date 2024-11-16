@@ -35,4 +35,15 @@ const loadFile = async (path, callback) =>
       throw error;
     });
 
-export { saveBlob, loadFile };
+/**
+ * Convert a Uint8Array to a binary File object.
+ * @param {Uint8Array} uint8Array - The Uint8Array to convert to a file.
+ * @param {string} fileName - The name of the file.
+ * @returns {File} A file object.
+ */
+function uint8ArrayToFile(uint8Array, fileName) {
+  const blob = new Blob([uint8Array], { type: "application/octet-stream" });
+  return new File([blob], fileName, { type: "application/octet-stream" });
+}
+
+export { saveBlob, loadFile, uint8ArrayToFile };

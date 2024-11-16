@@ -5,15 +5,19 @@ const TerserPlugin = require("terser-webpack-plugin");
 
 const commonConfig = {
   context: __dirname,
-  entry: "./src/index.js",
+  entry: {
+    ml5: "./src/index.js",
+    "ml5-offline": "./src/offline/index.js",
+  },
   output: {
-    filename: "ml5.js",
+    filename: "[name].js",
     path: resolve(__dirname, "dist"),
     library: {
       name: "ml5",
       type: "umd",
       export: "default",
     },
+    globalObject: "this",
   },
 };
 
@@ -48,18 +52,20 @@ const developmentConfig = {
   resolve: {
     fallback: {
       fs: false,
-      util: false
+      util: false,
     },
-  }
+  },
 };
 
 const productionConfig = {
   mode: "production",
+  devtool: "source-map",
   entry: {
     ml5: "./src/index.js",
     "ml5.min": "./src/index.js",
+    "ml5-offline": "./src/offline/index.js",
+    "ml5-offline.min": "./src/offline/index.js",
   },
-  devtool: "source-map",
   output: {
     publicPath: "/",
     filename: "[name].js",
@@ -68,8 +74,7 @@ const productionConfig = {
     minimize: true,
     minimizer: [
       new TerserPlugin({
-        include: "ml5.min.js",
-        exclude: "ml5.js",
+        include: /\.min\.js$/,
         extractComments: false,
       }),
     ],
@@ -77,9 +82,9 @@ const productionConfig = {
   resolve: {
     fallback: {
       fs: false,
-      util: false
+      util: false,
     },
-  }
+  },
 };
 
 module.exports = function (env, args) {
