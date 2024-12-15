@@ -35,12 +35,12 @@ function draw() {
 
     noFill();
     // draw the lips
-    face.lips.keypoints.splice(10, 0, face.lips.keypoints[20]);
+    face.lips.keypoints.splice(10, 0, face.lips.keypoints[20]); // Extreme left point for lower outer lip
     face.lips.keypoints.splice(
       32,
       0,
       face.lips.keypoints[face.lips.keypoints.length - 1]
-    );
+    ); // Extreme left point for lower inner lip
     stroke(255, 0, 255);
     beginShape();
     for (let i = 0; i < face.lips.keypoints.length; i++) {
