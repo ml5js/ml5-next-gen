@@ -34,8 +34,13 @@ function draw() {
     let face = faces[j];
 
     noFill();
-
     // draw the lips
+    face.lips.keypoints.splice(10, 0, face.lips.keypoints[20]);
+    face.lips.keypoints.splice(
+      32,
+      0,
+      face.lips.keypoints[face.lips.keypoints.length - 1]
+    );
     stroke(255, 0, 255);
     beginShape();
     for (let i = 0; i < face.lips.keypoints.length; i++) {
