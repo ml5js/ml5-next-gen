@@ -7,7 +7,7 @@ import * as tf from "@tensorflow/tfjs";
 /**
  * Standard input accepted by most TensorFlow models.
  * @typedef InputImage
- * @type {ImageData | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement | tf.Tensor3D}
+ * @type {ImageData | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas | HTMLVideoElement | tf.Tensor3D}
  */
 
 /**
@@ -40,13 +40,13 @@ export const isAudio = (img) => {
 };
 
 /**
- * Check if a variable is an HTMLCanvasElement.
+ * Check if a variable is an HTMLCanvasElement or OffscreenCanvas
  * @param {any} img
  * @returns {img is HTMLCanvasElement}
  */
 export const isCanvas = (img) => {
   return (
-    typeof HTMLCanvasElement !== "undefined" && img instanceof HTMLCanvasElement
+    typeof HTMLCanvasElement !== "undefined" && (img instanceof HTMLCanvasElement || img instanceof OffscreenCanvas)
   );
 };
 
