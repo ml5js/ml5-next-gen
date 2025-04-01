@@ -1268,4 +1268,5 @@ const neuralNetwork = (inputsOrOptions, outputsOrCallback, callback) => {
   return instance;
 };
 
-export default neuralNetwork;
+export { DiyNeuralNetwork }; // Named export for extending
+export default neuralNetwork; // Default export remains
