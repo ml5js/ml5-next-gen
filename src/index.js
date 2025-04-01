@@ -1,4 +1,5 @@
 import neuralNetwork from "./NeuralNetwork";
+import timeSeries from "./TimeSeries";
 import handPose from "./HandPose";
 import sentiment from "./Sentiment";
 import faceMesh from "./FaceMesh";
@@ -22,6 +23,7 @@ const withPreload = {
   neuralNetwork,
   sentiment,
   soundClassifier,
+  timeSeries,
 };
 
 const ml5 = Object.assign({ p5Utils }, withPreload, {
