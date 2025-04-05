@@ -7,7 +7,6 @@ import setBackend from "../utils/setBackend";
 
 import tsUtils from "./timeSeriesUtils";
 
-// import TimeSeries from "./timeSeries";
 import TimeSeriesData from "./timeSeriesData";
 
 // call an extension of DIY Neural Network as a new class, override select methods
@@ -17,7 +16,6 @@ class DIYTimesSeries extends DiyNeuralNetwork {
     super(
       {
         ...options,
-        // neuralNetwork: null,
         neuralNetworkData: null,
       },
       callback
