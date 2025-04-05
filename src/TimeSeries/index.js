@@ -52,9 +52,27 @@ class DIYTimesSeries extends DiyNeuralNetwork {
 
     // 2. format the yInput - same logic as NN class
     const ys = tsUtils.verifyAndFormatOutputs(yInputs, options, this.options);
-    console.log(xs, ys);
+
     // 3. add data to raw
     this.neuralNetworkData.addData(xs, ys);
+  }
+
+  formatInputsForPredictionAll(_input) {
+    const { meta } = this.neuralNetworkData;
+    const inputHeaders = Object.keys(meta.inputs);
+
+    const formatted_inputs = tsUtils.verifyAndFormatInputs(
+      _input,
+      null,
+      this.options
+    );
+    const normalized_inputs = this.neuralNetworkData.normalizePredictData(
+      formatted_inputs,
+      meta.inputs
+    );
+    const output = tf.tensor(normalized_inputs);
+
+    return output;
   }
 
   createMetaData() {
@@ -242,95 +260,46 @@ class DIYTimesSeries extends DiyNeuralNetwork {
     }
   }
 
-  async loadDataFromUrl(dataUrl, inputs, outputs) {
-    let json;
-    let dataFromUrl;
-    try {
-      if (dataUrl.endsWith(".csv")) {
-        dataFromUrl = await this.neuralNetworkData.loadCSV(
-          dataUrl,
-          inputs,
-          outputs
-        );
-      } else if (dataUrl.endsWith(".json")) {
-        dataFromUrl = await this.neuralNetworkData.loadJSON(
-          dataUrl,
-          inputs,
-          outputs
-        );
-      } else if (dataUrl.includes("blob")) {
-        dataFromUrl = await this.loadBlob(dataUrl, inputs, outputs);
-      } else {
-        throw new Error("Not a valid data format. Must be csv or json");
-      }
-    } catch (error) {
-      console.error(error);
-      throw new Error(error);
+  compile() {
+    const LEARNING_RATE = this.options.learningRate;
+
+    let options = {};
+
+    if (
+      this.options.task === "classification" ||
+      this.options.task === "imageClassification"
+    ) {
+      options = {
+        loss: "categoricalCrossentropy",
+        optimizer: tf.train.adam,
+        metrics: ["accuracy"],
+      };
+    } else if (this.options.task === "regression") {
+      options = {
+        loss: "meanSquaredError",
+        optimizer: tf.train.adam,
+        metrics: ["accuracy"],
+      };
     }
 
-    dataFromUrl.map((item) => {
-      this.addData(item.xs, item.ys);
-    });
+    options.optimizer = options.optimizer
+      ? this.neuralNetwork.setOptimizerFunction(
+          LEARNING_RATE,
+          options.optimizer
+        )
+      : this.neuralNetwork.setOptimizerFunction(LEARNING_RATE, tf.train.sgd);
 
-    this.createMetaData();
+    this.neuralNetwork.compile(options);
 
-    this.prepareForTraining();
-  }
-
-  formatInputsForPredictionAll(_input) {
-    const { meta } = this.neuralNetworkData;
-    const inputHeaders = Object.keys(meta.inputs);
-
-    const formatted_inputs = tsUtils.verifyAndFormatInputs(
-      _input,
-      null,
-      this.options
-    );
-    const normalized_inputs = this.neuralNetworkData.normalizePredictData(
-      formatted_inputs,
-      meta.inputs
-    );
-    const output = tf.tensor(normalized_inputs);
-
-    return output;
-  }
-
-  async classifyInternal(_input) {
-    const { meta } = this.neuralNetworkData;
-    const headers = Object.keys(meta.inputs);
-
-    let inputData;
-
-    inputData = this.formatInputsForPredictionAll(_input);
-
-    const unformattedResults = await this.neuralNetwork.classify(inputData);
-    inputData.dispose();
-
-    if (meta !== null) {
-      const label = Object.keys(meta.outputs)[0];
-      const vals = Object.entries(meta.outputs[label].legend);
-
-      const formattedResults = unformattedResults.map((unformattedResult) => {
-        return vals
-          .map((item, idx) => {
-            return {
-              [item[0]]: unformattedResult[idx],
-              label: item[0],
-              confidence: unformattedResult[idx],
-            };
-          })
-          .sort((a, b) => b.confidence - a.confidence);
-      });
-
-      // return single array if the length is less than 2,
-      // otherwise return array of arrays
-      if (formattedResults.length < 2) {
-        return formattedResults[0];
-      }
-      return formattedResults;
+    // if debug mode is true, then show the model summary
+    if (this.options.debug) {
+      this.neuralNetworkVis.modelSummary(
+        {
+          name: "Model Summary",
+        },
+        this.neuralNetwork.model
+      );
     }
-
-    return unformattedResults;
   }
 
   padCoordinates(coordinates, targetPointCount) {
