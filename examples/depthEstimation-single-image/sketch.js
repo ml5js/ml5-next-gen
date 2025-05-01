@@ -7,131 +7,59 @@
  */
 
 // Global variables
-let depthEstimator; // The ml5.js depth estimation model instance
-let img;            // The p5.js image object for the input
-let depthResult;    // The object holding the depth estimation results
-let status = "Loading model and image..."; // Status message
+let depthEstimator;
+let img;
+let depthResult;
 
-// Image dimensions (will be updated based on loaded image)
-let imgWidth = 640; // Default width
-let imgHeight = 480; // Default height
-
-// Model and runtime options
-let options = {
-    colormap: "COLOR", // Colormap for visualization ('COLOR', 'GRAYSCALE')
-    minDepth: 0,       // Minimum depth value (0-1) for normalization
-    maxDepth: 1,       // Maximum depth value (0-1) for normalization
+// Default options for depth estimation (can be adjusted if needed)
+const options = {
+    //normalizeDynamically: true, // Default is false
+    minDepth: 0.21,             // Default is 0.0
+    maxDepth: 0.73,              // Default is 1.0
+    applySegmentationMask: true, // Default is false
 };
 
-// We don't use preload anymore, setup will handle async loading
-// function preload() {}
+function preload() {
+    img = loadImage('face.png');
+    // Load the depth estimation model
+    depthEstimator = ml5.depthEstimation(options);
+}
 
 async function setup() {
-    // Create a canvas twice the width of the image to show image and depth map side-by-side
-    // Initial size is default, will be resized later
-    createCanvas(imgWidth * 2, imgHeight);
-    console.log("Setup started.");
+    // Create a canvas twice the width of the image
+    createCanvas(img.width * 2, img.height);
 
-    // Initialize the depth estimation model
-    console.log("Loading depth estimation model...");
-    depthEstimator = ml5.depthEstimation(options);
-
-    // Load the sample image using a promise wrapper for await
-    console.log("Loading image...");
-    try {
-        // --- IMPORTANT: Replace with the path to YOUR image ---
-        img = await loadImagePromise('face.png'); // Use the user's image
-        // img = await loadImagePromise('../../3d_photo/images/im1.jpg'); // Original image path
-        console.log("Image loaded successfully!");
-
-        // Update dimensions based on the loaded image
-        imgWidth = img.width;
-        imgHeight = img.height;
-        resizeCanvas(imgWidth * 2, imgHeight); // Resize canvas now
-
-        // Wait for the model to be ready
-        status = "Waiting for model to load...";
-        console.log(status);
-        await depthEstimator.ready; // Wait for the promise returned by the constructor
-        console.log("Model loaded successfully!");
-
-        // Now both image and model are ready, start estimation
-        estimateDepth();
-
-    } catch (error) {
-        console.error("Error loading image:", error);
-        status = "Error loading image. Check console.";
-    }
-}
-
-// Helper function to load image with a Promise
-function loadImagePromise(path) {
-    return new Promise((resolve, reject) => {
-        loadImage(path, img => {
-            if (img) {
-                resolve(img);
-            } else {
-                reject(`Failed to load image at path: ${path}`);
-            }
-        }, err => {
-            reject(`Error loading image: ${err}`);
-        });
-    });
-}
-
-
-// Function to start the depth estimation
-async function estimateDepth() {
-    if (!img || !depthEstimator || !depthEstimator.model) { // Add check for depthEstimator.model
-        console.error("Estimation called before model or image was ready.");
-        status = "Error: Model or image not ready.";
-        return;
-    }
-    status = "Estimating depth...";
-    console.log(status);
     // Estimate depth from the loaded image
-    // Use await here as estimate is async
-    depthResult = await depthEstimator.estimate(img);
-    gotResults(depthResult); // Call gotResults directly after await
+    console.log("Estimating depth...");
+    depthEstimator.estimate(img, gotResults);
 }
-
 
 function draw() {
     background(0); // Clear the background
 
     // Draw the original image on the left half of the canvas
     if (img) {
-        image(img, 0, 0, imgWidth, imgHeight);
-    } else {
-        // Show status if image hasn't loaded yet
-        fill(255);
-        noStroke();
-        textAlign(CENTER, CENTER);
-        textSize(16);
-        text(status, imgWidth / 2, imgHeight / 2);
-        textAlign(LEFT, BASELINE); // Reset text alignment
+        image(img, 0, 0, img.width, img.height);
     }
 
     // Check if depth estimation results are available
-    if (depthResult) {
+    if (depthResult && depthResult.visualizationImage) {
         // Draw the colormapped depth visualization on the right half of the canvas
-        image(depthResult.visualizationImage, imgWidth, 0, imgWidth, imgHeight);
+        image(depthResult.visualizationImage, img.width, 0, img.width, img.height);
     } else {
-        // If no results yet, display the status message on the right half
+        // If no results yet, display a simple status message on the right half
         fill(255);
         noStroke();
         textAlign(CENTER, CENTER);
         textSize(16);
-        text(status, imgWidth + imgWidth / 2, imgHeight / 2);
+        text("Estimating...", img.width + img.width / 2, img.height / 2);
         textAlign(LEFT, BASELINE); // Reset text alignment
     }
 }
 
 // Callback function that receives the depth estimation results
 function gotResults(result) {
-    // Store the result in the global variable (already done by await in estimateDepth)
-    // depthResult = result;
-    status = "Done!"; // Update status
+    depthResult = result; // Store the result
     console.log("Depth estimation complete!");
     console.log("Depth Result:", depthResult); // Log the result object
 }
