@@ -33,25 +33,31 @@ import { handleModelName } from "../utils/handleOptions";
 const COLORMAPS = {
   /** Color colormap: yellow (close) -> green -> cyan -> blue -> purple (far). */
   COLOR: (value) => {
-    let r = 0, g = 0, b = 0;
+    let r = 0,
+      g = 0,
+      b = 0;
     const v = Math.max(0, Math.min(1, value)); // Clamp value to [0, 1]
 
-    if (v < 0.25) { // Yellow (1,1,0) -> Green (0,1,0)
+    if (v < 0.25) {
+      // Yellow (1,1,0) -> Green (0,1,0)
       const t = v * 4; // t goes from 0 to 1
       r = 1 - t;
       g = 1;
       b = 0;
-    } else if (v < 0.5) { // Green (0,1,0) -> Cyan (0,1,1)
+    } else if (v < 0.5) {
+      // Green (0,1,0) -> Cyan (0,1,1)
       const t = (v - 0.25) * 4; // t goes from 0 to 1
       r = 0;
       g = 1;
       b = t;
-    } else if (v < 0.75) { // Cyan (0,1,1) -> Blue (0,0,1)
+    } else if (v < 0.75) {
+      // Cyan (0,1,1) -> Blue (0,0,1)
       const t = (v - 0.5) * 4; // t goes from 0 to 1
       r = 0;
       g = 1 - t;
       b = 1;
-    } else { // Blue (0,0,1) -> Purple (0.5, 0, 1)
+    } else {
+      // Blue (0,0,1) -> Purple (0.5, 0, 1)
       const t = (v - 0.75) * 4; // t goes from 0 to 1
       r = t * 0.5; // Increase red towards purple
       g = 0;
@@ -64,7 +70,7 @@ const COLORMAPS = {
   GRAYSCALE: (value) => {
     const v = Math.round(value * 255);
     return [v, v, v];
-  }
+  },
 };
 
 /**
@@ -138,14 +144,19 @@ class DepthEstimation {
   }
 
   /** Loads the TFJS models (Depth and optionally Segmentation). @private */
-  async loadModels() { // Renamed
+  async loadModels() {
+    // Renamed
     // --- Load Depth Model ---
     const pipeline = tfDepthEstimation.SupportedModels.ARPortraitDepth;
     const modelConfig = handleOptions(
       this.config,
       {
-        segmentationModelUrl: { type: "string", default: undefined, alias: "modelUrl" },
-        depthModelUrl: { type: "string", default: undefined }
+        segmentationModelUrl: {
+          type: "string",
+          default: undefined,
+          alias: "modelUrl",
+        },
+        depthModelUrl: { type: "string", default: undefined },
       },
       "depthEstimation (model loading)"
     );
@@ -155,9 +166,19 @@ class DepthEstimation {
         minDepth: { type: "number", min: 0, max: 1, default: 0.2 }, // Default changed from 0
         maxDepth: { type: "number", min: 0, max: 1, default: 0.9 }, // Default changed from 1
         normalizeDynamically: { type: "boolean", default: false }, // If true, min/maxDepth are ignored and calculated dynamically per frame.
-        normalizationSmoothingFactor: { type: "number", min: 0, max: 1, default: 0.5 }, // Smoothing for dynamic normalization.
+        normalizationSmoothingFactor: {
+          type: "number",
+          min: 0,
+          max: 1,
+          default: 0.5,
+        }, // Smoothing for dynamic normalization.
         flipHorizontal: { type: "boolean", alias: "flipped", default: false }, // Flips the input horizontally before estimation.
-        colormap: { type: "enum", enums: ["color", "grayscale"], default: "COLOR", transform: (v) => v.toUpperCase() },
+        colormap: {
+          type: "enum",
+          enums: ["color", "grayscale"],
+          default: "COLOR",
+          transform: (v) => v.toUpperCase(),
+        },
         targetFps: { type: "number", min: 1, default: null },
         applySegmentationMask: { type: "boolean", default: false },
         segmentationOpacity: { type: "number", min: 0, max: 1, default: 1.0 },
@@ -190,23 +211,32 @@ class DepthEstimation {
     if (this.segmenter) return; // Already loaded
     console.log("Loading body segmentation model for masking...");
     try {
-      const modelType = bodySegmentation.SupportedModels.MediaPipeSelfieSegmentation;
+      const modelType =
+        bodySegmentation.SupportedModels.MediaPipeSelfieSegmentation;
       // Use 'tfjs' runtime for broader compatibility
-      this.segmenter = await bodySegmentation.createSegmenter(modelType, { runtime: 'tfjs' });
+      this.segmenter = await bodySegmentation.createSegmenter(modelType, {
+        runtime: "tfjs",
+      });
       console.log("Body segmentation model loaded.");
     } catch (error) {
       console.error("Failed to load body segmentation model:", error);
       this.segmenter = null; // Ensure it's null on failure
       // Disable the segmentation feature if loading failed to prevent repeated errors
       this.runtimeConfig.applySegmentationMask = false;
-      console.warn("Segmentation mask feature disabled due to model loading error.");
+      console.warn(
+        "Segmentation mask feature disabled due to model loading error."
+      );
     }
   }
 
   /** Creates or returns the reusable canvas for segmentation masking. @private */
   getSegmentationMaskCanvas(width, height) {
-    if (!this.segmentationMaskCanvas || this.segmentationMaskCanvas.width !== width || this.segmentationMaskCanvas.height !== height) {
-      this.segmentationMaskCanvas = document.createElement('canvas');
+    if (
+      !this.segmentationMaskCanvas ||
+      this.segmentationMaskCanvas.width !== width ||
+      this.segmentationMaskCanvas.height !== height
+    ) {
+      this.segmentationMaskCanvas = document.createElement("canvas");
       this.segmentationMaskCanvas.width = width;
       this.segmentationMaskCanvas.height = height;
       // console.log(`Created/Resized segmentation mask canvas: ${width}x${height}`);
@@ -214,11 +244,13 @@ class DepthEstimation {
     return this.segmentationMaskCanvas;
   }
 
-
   /** Estimates depth from a single input. */
   async estimate(...inputs) {
     const argumentObject = handleArguments(...inputs);
-    argumentObject.require("image", "Input image/video/canvas required for estimate().");
+    argumentObject.require(
+      "image",
+      "Input image/video/canvas required for estimate()."
+    );
     const { image, options = {}, callback } = argumentObject;
 
     await this.ready; // Ensure model is loaded
@@ -238,13 +270,20 @@ class DepthEstimation {
             const backgroundColor = { r: 0, g: 0, b: 0, a: 255 }; // Opaque background (will be drawn over)
             // Note: TFJS Body Segmentation `toBinaryMask` might be async
             const backgroundDarkeningMask = await bodySegmentation.toBinaryMask(
-              segmentation, foregroundColor, backgroundColor
+              segmentation,
+              foregroundColor,
+              backgroundColor
             );
 
-            const maskCanvas = this.getSegmentationMaskCanvas(image.width, image.height);
+            const maskCanvas = this.getSegmentationMaskCanvas(
+              image.width,
+              image.height
+            );
             // Draw the original image, then the mask over it
             await bodySegmentation.drawMask(
-              maskCanvas, image, backgroundDarkeningMask,
+              maskCanvas,
+              image,
+              backgroundDarkeningMask,
               currentRuntimeConfig.segmentationOpacity,
               currentRuntimeConfig.segmentationMaskBlur,
               false // Let estimateDepth handle the flip based on its config
@@ -256,13 +295,14 @@ class DepthEstimation {
               backgroundDarkeningMask.dispose();
             } else if (Array.isArray(segmentation)) {
               // Newer versions might return segmentation objects directly
-              segmentation.forEach(seg => {
+              segmentation.forEach((seg) => {
                 if (seg.mask && seg.mask.dispose) seg.mask.dispose(); // Dispose mask if it's a tensor
               });
             }
-
           } else {
-            console.warn("Segmentation did not find people, using original image for depth.");
+            console.warn(
+              "Segmentation did not find people, using original image for depth."
+            );
           }
         } catch (segError) {
           console.error("Error during segmentation pre-processing:", segError);
@@ -270,25 +310,38 @@ class DepthEstimation {
           inputForDepth = image;
         }
       } else {
-        console.warn("Segmentation requested but model not loaded, using original image.");
+        console.warn(
+          "Segmentation requested but model not loaded, using original image."
+        );
       }
     }
     // --- End Segmentation Mask ---
 
     const estimationConfig = {
-      minDepth: currentRuntimeConfig.normalizeDynamically ? 0 : currentRuntimeConfig.minDepth,
-      maxDepth: currentRuntimeConfig.normalizeDynamically ? 1 : currentRuntimeConfig.maxDepth,
-      flipHorizontal: currentRuntimeConfig.flipHorizontal // Apply flip here
+      minDepth: currentRuntimeConfig.normalizeDynamically
+        ? 0
+        : currentRuntimeConfig.minDepth,
+      maxDepth: currentRuntimeConfig.normalizeDynamically
+        ? 1
+        : currentRuntimeConfig.maxDepth,
+      flipHorizontal: currentRuntimeConfig.flipHorizontal, // Apply flip here
     };
 
     let depthMapResult;
     let result = null;
     try {
       // Use the potentially masked input
-      depthMapResult = await this.model.estimateDepth(inputForDepth, estimationConfig);
+      depthMapResult = await this.model.estimateDepth(
+        inputForDepth,
+        estimationConfig
+      );
       if (depthMapResult) {
         // Pass original sourceElement for dimensions in result, not the maskCanvas
-        result = await this.processDepthMap(depthMapResult, image, currentRuntimeConfig);
+        result = await this.processDepthMap(
+          depthMapResult,
+          image,
+          currentRuntimeConfig
+        );
       } else {
         console.warn("Depth estimation returned no result for this input.");
       }
@@ -303,7 +356,8 @@ class DepthEstimation {
   }
 
   /** Processes the DepthMap result object from the model. @private */
-  async processDepthMap(depthMapResult, sourceElement, currentRuntimeConfig) { // Renamed parameter
+  async processDepthMap(depthMapResult, sourceElement, currentRuntimeConfig) {
+    // Renamed parameter
     const result = {};
     let minDepthActual, maxDepthActual;
     let actualTensor; // To hold the actual tensor
@@ -316,9 +370,12 @@ class DepthEstimation {
       if (currentRuntimeConfig.normalizeDynamically) {
         const [minTensor, maxTensor] = tf.tidy(() => [
           actualTensor.min(), // Use actualTensor here
-          actualTensor.max()  // Use actualTensor here
+          actualTensor.max(), // Use actualTensor here
         ]);
-        [minDepthActual, maxDepthActual] = await Promise.all([minTensor.data(), maxTensor.data()]);
+        [minDepthActual, maxDepthActual] = await Promise.all([
+          minTensor.data(),
+          maxTensor.data(),
+        ]);
         minTensor.dispose(); // Dispose intermediate tensors
         maxTensor.dispose(); // Dispose intermediate tensors
         minDepthActual = minDepthActual[0]; // Extract scalar value
@@ -330,12 +387,13 @@ class DepthEstimation {
           this.smoothedMinDepth = minDepthActual;
           this.smoothedMaxDepth = maxDepthActual;
         } else {
-          this.smoothedMinDepth = (minDepthActual * factor) + (this.smoothedMinDepth * (1 - factor));
-          this.smoothedMaxDepth = (maxDepthActual * factor) + (this.smoothedMaxDepth * (1 - factor));
+          this.smoothedMinDepth =
+            minDepthActual * factor + this.smoothedMinDepth * (1 - factor);
+          this.smoothedMaxDepth =
+            maxDepthActual * factor + this.smoothedMaxDepth * (1 - factor);
         }
         result.minDepth = this.smoothedMinDepth;
         result.maxDepth = this.smoothedMaxDepth;
-
       } else {
         // Use fixed config values
         result.minDepth = currentRuntimeConfig.minDepth;
@@ -353,21 +411,40 @@ class DepthEstimation {
       result.tensor = actualTensor; // Provide actual tensor for advanced use (user must dispose)
 
       // Create visualizations using the determined min/max range
-      result.depthMap = this.createImageDataFromDepthValues(depthData, width, height, result.minDepth, result.maxDepth, "GRAYSCALE");
-      result.visualization = this.createImageDataFromDepthValues(depthData, width, height, result.minDepth, result.maxDepth, currentRuntimeConfig.colormap);
+      result.depthMap = this.createImageDataFromDepthValues(
+        depthData,
+        width,
+        height,
+        result.minDepth,
+        result.maxDepth,
+        "GRAYSCALE"
+      );
+      result.visualization = this.createImageDataFromDepthValues(
+        depthData,
+        width,
+        height,
+        result.minDepth,
+        result.maxDepth,
+        currentRuntimeConfig.colormap
+      );
 
       // --- Apply Black Background using Segmentation Mask (if enabled) ---
       if (currentRuntimeConfig.applySegmentationMask && this.segmenter) {
         try {
           // Run segmentation on the *original* source element to get the mask
-          const segmentation = await this.segmenter.segmentPeople(sourceElement);
+          const segmentation = await this.segmenter.segmentPeople(
+            sourceElement
+          );
           if (segmentation && segmentation.length > 0) {
             // Create a mask where background is opaque (alpha=255), foreground is transparent (alpha=0)
             const foregroundColor = { r: 0, g: 0, b: 0, a: 0 };
             const backgroundColor = { r: 0, g: 0, b: 0, a: 255 };
             // Note: TFJS Body Segmentation `toBinaryMask` might be async
-            let binaryMask = await bodySegmentation.toBinaryMask( // Use let
-              segmentation, foregroundColor, backgroundColor
+            let binaryMask = await bodySegmentation.toBinaryMask(
+              // Use let
+              segmentation,
+              foregroundColor,
+              backgroundColor
             );
 
             // If the input was flipped for depth estimation, flip the mask too
@@ -384,7 +461,7 @@ class DepthEstimation {
               // Check the alpha channel of the mask (index i + 3)
               // If mask alpha is 255, it's a background pixel
               if (maskData[i + 3] === 255) {
-                vizData[i] = 0;     // Set Red to 0 (black)
+                vizData[i] = 0; // Set Red to 0 (black)
                 vizData[i + 1] = 0; // Set Green to 0 (black)
                 vizData[i + 2] = 0; // Set Blue to 0 (black)
                 // vizData[i + 3] remains 255 (opaque)
@@ -392,31 +469,36 @@ class DepthEstimation {
             }
 
             // Dispose segmentation tensor(s) from this specific operation
-            if (binaryMask && binaryMask.dispose) { // binaryMask itself is ImageData, check if segmentation has tensor
+            if (binaryMask && binaryMask.dispose) {
+              // binaryMask itself is ImageData, check if segmentation has tensor
               // Newer versions might return segmentation objects directly
               if (Array.isArray(segmentation)) {
-                segmentation.forEach(seg => {
+                segmentation.forEach((seg) => {
                   if (seg.mask && seg.mask.dispose) seg.mask.dispose(); // Dispose mask if it's a tensor
                 });
               }
             }
             // Regenerate p5 image if needed, after modifying ImageData
-            result.visualizationImage = this.generateP5Image(result.visualization);
-
-
+            result.visualizationImage = this.generateP5Image(
+              result.visualization
+            );
           }
           // No else needed, if no people found, visualization remains unchanged
         } catch (segError) {
-          console.error("Error applying segmentation mask to visualization:", segError);
+          console.error(
+            "Error applying segmentation mask to visualization:",
+            segError
+          );
           // Fallback to unmasked visualization if error occurs
-          result.visualizationImage = this.generateP5Image(result.visualization); // Still generate p5 image
+          result.visualizationImage = this.generateP5Image(
+            result.visualization
+          ); // Still generate p5 image
         }
       } else {
         // If segmentation not applied, generate p5 image from original visualization
         result.visualizationImage = this.generateP5Image(result.visualization);
       }
       // --- End Apply Black Background ---
-
 
       result.depthMapImage = this.generateP5Image(result.depthMap);
       // result.visualizationImage = this.generateP5Image(result.visualization); // Moved inside the if/else block above
@@ -434,7 +516,6 @@ class DepthEstimation {
       };
 
       return result;
-
     } catch (error) {
       console.error("Error processing depth map:", error);
       if (actualTensor) actualTensor.dispose(); // Dispose tensor if created before error
@@ -442,12 +523,17 @@ class DepthEstimation {
     }
   }
 
-
   /** Starts continuous estimation. */
   estimateStart(...inputs) {
     const argumentObject = handleArguments(...inputs);
-    argumentObject.require("image", "Input image/video/canvas required for estimateStart().");
-    argumentObject.require("callback", "Callback function required for estimateStart().");
+    argumentObject.require(
+      "image",
+      "Input image/video/canvas required for estimateStart()."
+    );
+    argumentObject.require(
+      "callback",
+      "Callback function required for estimateStart()."
+    );
     const { image, options = {}, callback } = argumentObject; // Allow runtime options override
 
     this.detectMedia = image;
@@ -473,7 +559,9 @@ class DepthEstimation {
       this.detectLoop(); // detectLoop will handle awaiting models
     }
     if (this.prevCall === "start") {
-      console.warn("estimateStart() called again without estimateStop(). Overwriting previous loop.");
+      console.warn(
+        "estimateStart() called again without estimateStop(). Overwriting previous loop."
+      );
     }
     this.prevCall = "start";
   }
@@ -515,16 +603,25 @@ class DepthEstimation {
       // --- Apply Segmentation Mask (if enabled) ---
       if (this.runtimeConfig.applySegmentationMask && this.segmenter) {
         try {
-          const segmentation = await this.segmenter.segmentPeople(this.detectMedia);
+          const segmentation = await this.segmenter.segmentPeople(
+            this.detectMedia
+          );
           if (segmentation && segmentation.length > 0) {
             const foregroundColor = { r: 0, g: 0, b: 0, a: 0 };
             const backgroundColor = { r: 0, g: 0, b: 0, a: 255 };
             const backgroundDarkeningMask = await bodySegmentation.toBinaryMask(
-              segmentation, foregroundColor, backgroundColor
+              segmentation,
+              foregroundColor,
+              backgroundColor
             );
-            const maskCanvas = this.getSegmentationMaskCanvas(this.detectMedia.width, this.detectMedia.height);
+            const maskCanvas = this.getSegmentationMaskCanvas(
+              this.detectMedia.width,
+              this.detectMedia.height
+            );
             await bodySegmentation.drawMask(
-              maskCanvas, this.detectMedia, backgroundDarkeningMask,
+              maskCanvas,
+              this.detectMedia,
+              backgroundDarkeningMask,
               this.runtimeConfig.segmentationOpacity,
               this.runtimeConfig.segmentationMaskBlur,
               false // Let estimateDepth handle the flip based on its config
@@ -534,14 +631,17 @@ class DepthEstimation {
             if (backgroundDarkeningMask && backgroundDarkeningMask.dispose) {
               backgroundDarkeningMask.dispose();
             } else if (Array.isArray(segmentation)) {
-              segmentation.forEach(seg => {
+              segmentation.forEach((seg) => {
                 if (seg.mask && seg.mask.dispose) seg.mask.dispose();
               });
             }
           }
           // No else needed, inputForDepth remains original media if no people found
         } catch (segError) {
-          console.error("Error during continuous segmentation pre-processing:", segError);
+          console.error(
+            "Error during continuous segmentation pre-processing:",
+            segError
+          );
           // Fallback to original media
           inputForDepth = this.detectMedia;
         }
@@ -549,17 +649,28 @@ class DepthEstimation {
       // --- End Segmentation Mask ---
 
       const estimationConfig = {
-        minDepth: this.runtimeConfig.normalizeDynamically ? 0 : this.runtimeConfig.minDepth,
-        maxDepth: this.runtimeConfig.normalizeDynamically ? 1 : this.runtimeConfig.maxDepth,
-        flipHorizontal: this.runtimeConfig.flipHorizontal
+        minDepth: this.runtimeConfig.normalizeDynamically
+          ? 0
+          : this.runtimeConfig.minDepth,
+        maxDepth: this.runtimeConfig.normalizeDynamically
+          ? 1
+          : this.runtimeConfig.maxDepth,
+        flipHorizontal: this.runtimeConfig.flipHorizontal,
       };
       let depthMapResult;
       let result = null;
       try {
-        depthMapResult = await this.model.estimateDepth(inputForDepth, estimationConfig);
+        depthMapResult = await this.model.estimateDepth(
+          inputForDepth,
+          estimationConfig
+        );
         if (depthMapResult) {
           // Pass original detectMedia for dimensions
-          result = await this.processDepthMap(depthMapResult, this.detectMedia, this.runtimeConfig);
+          result = await this.processDepthMap(
+            depthMapResult,
+            this.detectMedia,
+            this.runtimeConfig
+          );
         } else {
           console.warn("Depth estimation returned no result for this frame.");
           await tf.nextFrame();
@@ -583,7 +694,14 @@ class DepthEstimation {
   }
 
   /** Creates ImageData from depth values. @private */
-  createImageDataFromDepthValues(depthValues, width, height, minDepth, maxDepth, colormap = "GRAYSCALE") {
+  createImageDataFromDepthValues(
+    depthValues,
+    width,
+    height,
+    minDepth,
+    maxDepth,
+    colormap = "GRAYSCALE"
+  ) {
     const imageData = new ImageData(width, height);
     const range = maxDepth - minDepth;
     const colormapKey = colormap.toUpperCase();
@@ -592,7 +710,10 @@ class DepthEstimation {
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const depthValue = depthValues[y][x];
-        const normalizedValue = range === 0 ? 0 : Math.max(0, Math.min(1, (depthValue - minDepth) / range));
+        const normalizedValue =
+          range === 0
+            ? 0
+            : Math.max(0, Math.min(1, (depthValue - minDepth) / range));
         const pixelIndex = (y * width + x) * 4;
         const [r, g, b] = colormapFn(normalizedValue);
         imageData.data[pixelIndex] = r;
@@ -612,7 +733,7 @@ class DepthEstimation {
       for (let x = 0; x < width; x++) {
         const sourceIndex = (y * width + x) * 4;
         const targetIndex = (y * width + (width - 1 - x)) * 4;
-        newData[targetIndex] = data[sourceIndex];         // R
+        newData[targetIndex] = data[sourceIndex]; // R
         newData[targetIndex + 1] = data[sourceIndex + 1]; // G
         newData[targetIndex + 2] = data[sourceIndex + 2]; // B
         newData[targetIndex + 3] = data[sourceIndex + 3]; // A
