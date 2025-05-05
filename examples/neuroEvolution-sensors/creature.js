@@ -69,7 +69,7 @@ class Creature {
     }
 
     // Predicting the force to apply
-    const outputs = this.brain.predictSync(inputs);
+    let outputs = this.brain.predictSync(inputs);
     let angle = outputs[0].value * TWO_PI;
     let magnitude = outputs[1].value;
     let force = p5.Vector.fromAngle(angle).setMag(magnitude);
