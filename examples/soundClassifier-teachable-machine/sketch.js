@@ -14,7 +14,7 @@ let classifier;
 let predictedSound = "";
 
 // Link to custom Teachable Machine model
-const modelJson = "https://teachablemachine.withgoogle.com/models/FvsFiSwHW/";
+let modelJson = "https://teachablemachine.withgoogle.com/models/FvsFiSwHW/";
 
 function preload() {
   // Load Teachable Machine model
