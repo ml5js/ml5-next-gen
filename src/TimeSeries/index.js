@@ -8,6 +8,7 @@ import setBackend from "../utils/setBackend";
 import tsUtils from "./timeSeriesUtils";
 
 import TimeSeriesData from "./timeSeriesData";
+import { createTsLayers } from "./tsLayers";
 
 // call an extension of DIY Neural Network as a new class, override select methods
 // which are seen below:
@@ -20,10 +21,9 @@ class DIYTimesSeries extends DiyNeuralNetwork {
       },
       callback
     );
-    // call all options set in the this class which is the default
+    // call all options set in the this class which is the default, extra option for dataMode
     this.options = { ...this.options, dataMode: "linear", ...(options || {}) };
 
-    // this.neuralNetwork = this.options.neuralNetwork || new TimeSeries();
     this.neuralNetworkData =
       this.options.neuralNetworkData || new TimeSeriesData();
 
@@ -89,171 +89,36 @@ class DIYTimesSeries extends DiyNeuralNetwork {
 
   addDefaultLayers() {
     let layers;
+
+    const tsLayers = createTsLayers(
+      this.neuralNetworkData.meta.seriesShape,
+      this.options.hiddenUnits,
+      this.numberOfClasses // For output units if needed
+    );
+
     const task = this.options.task;
     const dataMode = this.options.dataMode;
     let taskConditions = `${task}_${dataMode}`;
     switch (taskConditions.toLowerCase()) {
-      // if the task is classification and spatial modality
       case "classification_spatial":
-        layers = [
-          {
-            type: "conv1d",
-            filters: 8,
-            kernelSize: 3,
-            activation: "relu",
-            inputShape: this.neuralNetworkData.meta.seriesShape,
-          },
-          {
-            type: "maxPooling1d",
-            poolSize: 2,
-          },
-          {
-            type: "conv1d",
-            filters: 16,
-            kernelSize: 3,
-            activation: "relu",
-            inputShape: this.neuralNetworkData.meta.seriesShape,
-          },
-          {
-            type: "maxPooling1d",
-            poolSize: 2,
-          },
-          {
-            type: "flatten",
-          },
-          {
-            type: "dense",
-            units: this.options.hiddenUnits,
-            activation: "relu",
-          },
-          {
-            type: "dense",
-            activation: "softmax",
-          },
-        ];
-
+        layers = tsLayers.classification_spatial;
         return this.createNetworkLayers(layers);
-      // if the task is classification and sequential modality
+
       case "classification_linear":
-        layers = [
-          {
-            type: "lstm",
-            units: 16,
-            activation: "relu",
-            inputShape: this.neuralNetworkData.meta.seriesShape,
-            returnSequences: true,
-          },
-          {
-            type: "lstm",
-            units: 8,
-            activation: "relu",
-            returnSequences: false,
-          },
-          {
-            type: "dense",
-            units: this.options.hiddenUnits,
-            activation: "relu",
-          },
-          {
-            type: "dense",
-            activation: "softmax",
-          },
-        ];
-
+        layers = tsLayers.classification_linear;
         return this.createNetworkLayers(layers);
 
-      // if the task is regression
       case "regression_spatial":
-        layers = [
-          {
-            type: "conv1d",
-            filters: 8,
-            kernelSize: 3,
-            activation: "relu",
-            inputShape: this.neuralNetworkData.meta.seriesShape,
-          },
-          {
-            type: "maxPooling1d",
-            poolSize: 2,
-          },
-          {
-            type: "conv1d",
-            filters: 16,
-            kernelSize: 3,
-            activation: "relu",
-            inputShape: this.neuralNetworkData.meta.seriesShape,
-          },
-          {
-            type: "maxPooling1d",
-            poolSize: 2,
-          },
-          {
-            type: "flatten",
-          },
-          {
-            type: "dense",
-            units: this.options.hiddenUnits,
-            activation: "relu",
-          },
-          {
-            type: "dense",
-            activation: "sigmoid",
-          },
-        ];
-
+        layers = tsLayers.regression_spatial;
         return this.createNetworkLayers(layers);
 
       case "regression_linear":
-        layers = [
-          {
-            type: "lstm",
-            units: 16,
-            activation: "relu",
-            inputShape: this.neuralNetworkData.meta.seriesShape,
-            returnSequences: true,
-          },
-          {
-            type: "lstm",
-            units: 8,
-            activation: "relu",
-          },
-          {
-            type: "dense",
-            units: this.options.hiddenUnits,
-            activation: "relu",
-          },
-          {
-            type: "dense",
-            activation: "sigmoid",
-          },
-        ];
-
+        layers = tsLayers.regression_linear;
         return this.createNetworkLayers(layers);
 
       default:
         console.log("no inputUnits or outputUnits defined");
-        layers = [
-          {
-            type: "lstm",
-            units: 16,
-            activation: "relu",
-            inputShape: this.neuralNetworkData.meta.seriesShape,
-          },
-          {
-            type: "lstm",
-            units: 8,
-            activation: "relu",
-          },
-          {
-            type: "dense",
-            units: this.options.hiddenUnits,
-            activation: "relu",
-          },
-          {
-            type: "dense",
-            activation: "sigmoid",
-          },
-        ];
+        layers = tsLayers.default;
         return this.createNetworkLayers(layers);
     }
   }
