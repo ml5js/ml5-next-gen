@@ -1,0 +1,34 @@
+<!--
+  👋 Hello! This is an ml5.js example made and shared with ❤️.
+  Learn more about the ml5.js project: https://ml5js.org/
+  ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
+ 
+  This example demonstrates Training a Stock Price Predictor through ml5.TimeSeries.
+-->
+
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ml5.js Time Series Weather Prediction Example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+    <script src="../../dist/ml5.js"></script>
+  </head>
+
+  <body>
+    <script src="sketch.js"></script>
+
+    <div style="position: absolute; margin: 350px 0px 0px 100px">
+      <button id="train_but">Train Model</button>
+      <button id="pred_but">Predict Next Hour</button>
+    </div>
+  </body>
+
+  <style>
+    button {
+      font-family: Georgia, "Times New Roman", Times, serif;
+      font-size: 20px;
+    }
+  </style>
+</html>
