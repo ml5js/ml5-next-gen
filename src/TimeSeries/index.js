@@ -32,9 +32,6 @@ class DIYTimesSeries extends DiyNeuralNetwork {
   }
 
   async init() {
-    // workaround for Error
-    setBackend("webgl");
-
     await tf.ready();
     if (this.options.dataUrl) {
       await this.loadDataFromUrl(this.options.dataUrl);
@@ -123,6 +120,7 @@ class DIYTimesSeries extends DiyNeuralNetwork {
     }
   }
 
+  //included here to fix non convergence issue
   compile() {
     const LEARNING_RATE = this.options.learningRate;
 
@@ -165,9 +163,38 @@ class DIYTimesSeries extends DiyNeuralNetwork {
     }
   }
 
+  // RDP algorithm
   padCoordinates(coordinates, targetPointCount) {
     const maxEpsilon = int(coordinates.length / 2);
     return tsUtils.padCoordinates(coordinates, targetPointCount, maxEpsilon);
+  }
+
+  slidingWindow(data, featureKeys, targetKeys, batchLength = null) {
+    this.featureKeys = featureKeys;
+
+    if (batchLength == null) {
+      this.batchLength = int(data.length * 0.2); // set targetlength as a fraction of the total
+    } else if (targetLength >= data.length) {
+      throw new Error("batchLength must be smaller than total length of data");
+    } else {
+      this.batchLength = batchLength;
+    }
+
+    return tsUtils.createSlidingWindowData(
+      data,
+      this.batchLength,
+      this.featureKeys,
+      targetKeys
+    );
+  }
+
+  sampleWindow(data) {
+    if (!this.batchLength || !this.featureKeys) {
+      throw new Error(
+        "Your data must be formated through the slidingWindow method first!"
+      );
+    }
+    return tsUtils.getLatestSequence(data, this.batchLength, this.featureKeys);
   }
 }
 

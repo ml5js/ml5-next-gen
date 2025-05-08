@@ -7,14 +7,11 @@
  */
 
 let model;
-
 let currShape = "circle";
 let state = "collection";
 
-let datapoints;
 let sequence = [];
-let targetSequence = 30;
-let recCircle, recSquare, trainBut;
+let targetLength = 30;
 
 function preload() {
   let options = {
@@ -39,7 +36,7 @@ function setup() {
 
 function draw() {
   // record data when the mouse is pressed inside the canvas
-  if (mouseIsPressed && mouseY < height && mouseX < width) {
+  if (mouseIsPressed) {
     // draw lines through coordinates
     line(pmouseX, pmouseY, mouseX, mouseY);
     let inputs = { x: mouseX, y: mouseY };
@@ -53,25 +50,17 @@ function mouseReleased() {
     // if state is collection, add whole sequence as X, and shape as Y
     if (state == "collection") {
       let target = { label: currShape };
-      let paddedCoordinates = model.padCoordinates(sequence, targetSequence);
+      let paddedCoordinates = model.padCoordinates(sequence, targetLength);
       model.addData(paddedCoordinates, target);
       clearScreen();
     } else if (state == "prediction") {
-      let paddedCoordinates = model.padCoordinates(sequence, targetSequence);
+      let paddedCoordinates = model.padCoordinates(sequence, targetLength);
       model.classify(paddedCoordinates, gotResults);
       clearScreen();
     }
   }
   // reset the sequence
   sequence = [];
-}
-
-// cleanup screen and removed drawn elements, add helpful text
-function clearScreen() {
-  background(220);
-  textSize(20);
-  fill(0);
-  text(state + " : " + currShape, 50, 50);
 }
 
 function trainModel() {
@@ -106,11 +95,12 @@ function finishedTraining() {
 function gotResults(results) {
   // console.log("results", results);
   let label = results[0].label;
-
   currShape = label;
 }
 
 ////////////// UI Elements ////////////
+let recCircle, recSquare, trainBut;
+
 function UI() {
   textSize(20);
 
@@ -137,4 +127,12 @@ function UI() {
     background(220);
     text(state + " : " + currShape, 50, 50);
   }
+}
+
+// cleanup screen and removed drawn elements, add helpful text
+function clearScreen() {
+  background(220);
+  textSize(20);
+  fill(0);
+  text(state + " : " + currShape, 50, 50);
 }
