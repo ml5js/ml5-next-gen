@@ -7,6 +7,7 @@ import imageClassifier from "./ImageClassifier";
 import soundClassifier from "./SoundClassifier";
 import setBackend from "./utils/setBackend";
 import bodySegmentation from "./BodySegmentation";
+import depthEstimation from "./DepthEstimation";
 import communityStatement from "./utils/communityStatement";
 import * as tf from "@tensorflow/tfjs";
 import * as tfvis from "@tensorflow/tfjs-vis";
@@ -16,6 +17,7 @@ import packageInfo from "../package.json";
 const withPreload = {
   bodyPose,
   bodySegmentation,
+  depthEstimation,
   faceMesh,
   handPose,
   imageClassifier,
