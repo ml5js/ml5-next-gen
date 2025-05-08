@@ -39,7 +39,6 @@ class TimeSeriesUtils {
 
     for (let i = 0; i < xInputs.length; i++) {
       if (nnUtils.getDataType(xInputs[i]) === "object") {
-        console.log("here");
         isArrays = false;
         isValues = false;
         if (i > 0) {
@@ -52,7 +51,6 @@ class TimeSeriesUtils {
           }
         }
       } else if (Array.isArray(xInputs[i])) {
-        console.log("here2");
         isObjects = false;
         isValues = false;
         if (i > 0) {
@@ -103,7 +101,6 @@ class TimeSeriesUtils {
     if (options !== null) {
       if (options.inputLabels) {
         label = options.inputLabels;
-        console.log("here1");
       }
     } else if (classOptions !== null) {
       if (classOptions.inputs) {
@@ -390,6 +387,95 @@ class TimeSeriesUtils {
     ab.y /= abMag;
     const dot = ap.x * ab.x + ap.y * ab.y;
     return { x: a.x + ab.x * dot, y: a.y + ab.y * dot };
+  }
+
+  /**
+   * Creates training data using a sliding window approach
+   * @param {Array} data - Array of data objects
+   * @param {number} targetLength - Length of the sequence window
+   * @param {Array} featureKeys - Array of keys to use as input features
+   * @param {Array} targetKeys - Array of keys to predict (can be the same as featureKeys)
+   * @returns {Object} - Object containing sequences and targets arrays
+   */
+  createSlidingWindowData(data, targetLength, featureKeys, targetKeys) {
+    // Validate inputs
+    if (!data || !Array.isArray(data) || data.length <= targetLength) {
+      throw new Error(
+        "Data Format is invalid please check usage of this helper function in documentation"
+      );
+    }
+
+    const sequences = [];
+    const targets = [];
+
+    // Start from the first possible complete sequence
+    for (
+      let dataIndex = targetLength - 1;
+      dataIndex < data.length - 1;
+      dataIndex++
+    ) {
+      let seq = [];
+
+      // Build sequence of previous targetLength steps
+      for (let x = targetLength - 1; x >= 0; x--) {
+        let curr = data[dataIndex - x];
+        let inputs = {};
+
+        // Extract only the specified feature keys
+        featureKeys.forEach((key) => {
+          inputs[key] = curr[key];
+        });
+
+        seq.push(inputs);
+      }
+
+      // The target is the next data point after the sequence
+      let target = data[dataIndex + 1];
+      let output = {};
+
+      // Extract only the specified target keys
+      targetKeys.forEach((key) => {
+        output[key] = target[key];
+      });
+
+      sequences.push(seq);
+      targets.push(output);
+    }
+
+    return { sequences, targets };
+  }
+
+  /**
+   * Creates a sequence from the most recent data points
+   * @param {Array} data - Array of data objects
+   * @param {number} sequenceLength - Length of the sequence to create
+   * @param {Array} featureKeys - Array of keys to include in the sequence
+   * @returns {Array} - Array of objects containing the selected features
+   */
+  getLatestSequence(data, sequenceLength, featureKeys) {
+    // Validate inputs
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      throw new Error("Invalid data input");
+    }
+
+    // Ensure we don't try to get more items than exist in the data
+    const actualLength = Math.min(sequenceLength, data.length);
+
+    // Get the most recent data points
+    const latest = data.slice(-actualLength);
+
+    // Create the sequence with selected features
+    const sequence = latest.map((item) => {
+      const inputs = {};
+
+      featureKeys.forEach((key) => {
+        inputs[key] = item[key];
+      });
+
+      return inputs;
+    });
+
+    return sequence;
   }
 }
 

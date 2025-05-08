@@ -100,14 +100,6 @@ class TimeSeriesData extends NeuralNetworkData {
 
       dataRaw.forEach((row) => {
         // get xs
-        // const xs = Object.keys(meta.inputs)
-        //   .map((k) => {
-        //     return row.xs[k];
-        //   })
-        //   .flat();
-
-        // inputArr.push(xs);
-
         const xs = row.xs;
         inputArr.push(xs);
 
@@ -121,10 +113,6 @@ class TimeSeriesData extends NeuralNetworkData {
         outputArr.push(ys);
       });
 
-      // const inputs = tf.tensor(inputArr.flat(), [
-      //   dataLength,
-      //   ...meta.inputUnits,
-      // ]);
       const inputs = tf.tensor(inputArr);
 
       const outputs = tf.tensor(outputArr.flat(), [
@@ -220,7 +208,6 @@ class TimeSeriesData extends NeuralNetworkData {
       const batch = normalized[features[0]].length / seriesStep;
 
       this.meta.seriesShape = [seriesStep, feature_length];
-      console.log("series shape", this.meta.seriesShape);
       let zipped = [];
 
       // zip arrays before reshaping
@@ -238,7 +225,6 @@ class TimeSeriesData extends NeuralNetworkData {
       ]);
     }
 
-    console.log("thismeta", this.meta);
     return output;
   }
 
@@ -260,12 +246,9 @@ class TimeSeriesData extends NeuralNetworkData {
         const dataAsArray = Array(dataRaw).flatMap((item) =>
           item.map((obj) => obj[k])
         );
-        console.log(dataAsArray);
         predict_normalized[k] = this.normalizeArray(dataAsArray, options);
       }
     });
-
-    console.log("done", predict_normalized);
 
     const features = Object.keys(inputMeta);
     const feature_length = features.length;
@@ -369,7 +352,6 @@ class TimeSeriesData extends NeuralNetworkData {
         entries: loadedData,
       };
       // format the data.raw array
-      // this.formatRawData(json, inputLabels, outputLabels);
       return this.findEntries(json);
     } catch (err) {
       console.error("error loading csv", err);
