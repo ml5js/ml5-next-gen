@@ -18,7 +18,7 @@ function preload() {
     inputs: ["x", "y"],
     outputs: ["label"],
     task: "classification",
-    dataMode: "spatial",
+    spatialData: "true",
     debug: "true",
     learningRate: 0.005,
   };

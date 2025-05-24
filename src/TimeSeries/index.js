@@ -22,7 +22,7 @@ class DIYTimesSeries extends DiyNeuralNetwork {
       callback
     );
     // call all options set in the this class which is the default, extra option for dataMode
-    this.options = { ...this.options, dataMode: "linear", ...(options || {}) };
+    this.options = { ...this.options, spatialData: false, ...(options || {}) };
 
     this.neuralNetworkData =
       this.options.neuralNetworkData || new TimeSeriesData();
@@ -94,23 +94,26 @@ class DIYTimesSeries extends DiyNeuralNetwork {
     );
 
     const task = this.options.task;
-    const dataMode = this.options.dataMode;
-    let taskConditions = `${task}_${dataMode}`;
+    const spatialData = this.options.spatialData;
+    let taskConditions = task;
+    if (spatialData === true || spatialData === "true") {
+      taskConditions = `${task}_spatial`;
+    }
     switch (taskConditions.toLowerCase()) {
+      case "regression":
+        layers = tsLayers.regression;
+        return this.createNetworkLayers(layers);
+
+      case "classification":
+        layers = tsLayers.classification;
+        return this.createNetworkLayers(layers);
+
       case "classification_spatial":
         layers = tsLayers.classification_spatial;
         return this.createNetworkLayers(layers);
 
-      case "classification_linear":
-        layers = tsLayers.classification_linear;
-        return this.createNetworkLayers(layers);
-
       case "regression_spatial":
         layers = tsLayers.regression_spatial;
-        return this.createNetworkLayers(layers);
-
-      case "regression_linear":
-        layers = tsLayers.regression_linear;
         return this.createNetworkLayers(layers);
 
       default:
@@ -120,7 +123,7 @@ class DIYTimesSeries extends DiyNeuralNetwork {
     }
   }
 
-  //included here to fix non convergence issue
+  // included here to fix non convergence issue
   compile() {
     const LEARNING_RATE = this.options.learningRate;
 
