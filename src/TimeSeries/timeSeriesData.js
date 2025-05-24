@@ -29,8 +29,8 @@ class TimeSeriesData extends NeuralNetworkData {
 
     const sample = this.data.raw[0];
 
-    //consistent dTypes have already been checked at add data
-    const xs = Object.keys(sample.xs[0]); //since time series data is in form of array
+    // consistent dTypes have already been checked at add data
+    const xs = Object.keys(sample.xs[0]); // since time series data is in form of array
     const ys = Object.keys(sample.ys);
     xs.forEach((prop) => {
       meta.inputs[prop] = {
@@ -89,7 +89,6 @@ class TimeSeriesData extends NeuralNetworkData {
    *
    * @return {{ inputs: tf.Tensor, outputs: tf.Tensor }}
    */
-  // eslint-disable-next-line class-methods-use-this, no-unused-vars
   convertRawToTensors(dataRaw) {
     const meta = Object.assign({}, this.meta);
     const dataLength = dataRaw.length;

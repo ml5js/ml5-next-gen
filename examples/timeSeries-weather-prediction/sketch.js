@@ -12,6 +12,16 @@ let data;
 let state = "training";
 let precipitation = "";
 
+let features = [
+  "temperature",
+  "humidity",
+  "wind_speed",
+  "pressure",
+  "precipitation",
+];
+
+let targets = features; // must be the same to add predicted to data
+
 // load JSON data with same formatting from the internet, this means
 // loadData() cannot yet be used as it is formatted differently
 function preload() {
@@ -22,8 +32,8 @@ function preload() {
     task: "regression",
     dataMode: "linear",
     debug: "true",
-    learningRate: 0.01,
-    output: ["label"],
+    inputs: features,
+    outputs: targets,
   };
   model = ml5.timeSeries(options);
 }
@@ -32,21 +42,6 @@ function setup() {
   data = json_data.data;
   createCanvas(640, 400);
   background(220);
-
-  let features = [
-    "temperature",
-    "humidity",
-    "wind_speed",
-    "pressure",
-    "precipitation",
-  ];
-  let targets = [
-    "temperature",
-    "humidity",
-    "wind_speed",
-    "pressure",
-    "precipitation",
-  ];
 
   //run a sliding window algorithm for time based data
   let batchData = model.slidingWindow(data, features, targets);

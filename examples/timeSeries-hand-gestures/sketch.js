@@ -30,7 +30,7 @@ function preload() {
     task: "classification",
     dataMode: "spatial",
     debug: "true",
-    learningRate: 0.001,
+    learningRate: 0.001, // the default learning rate of 0.01 didn't converge for this usecase, thus a learning rate of 0.001 is used (make smaller steps of parameters each update)
   };
   model = ml5.timeSeries(options);
 }
@@ -66,12 +66,12 @@ function draw() {
       // once sequence reaches the seqLength, add sequence as just one X value
     } else if (sequence.length > 0) {
       // get the training word from the input box
-      let train_word = nameField.value();
+      let trainWord = nameField.value();
 
       // if there is a word currently in the box then add data with that label
-      if (train_word.length > 0) {
+      if (trainWord.length > 0) {
         // add data to the model
-        let target = { label: train_word };
+        let target = { label: trainWord };
         model.addData(sequence, target);
         trainingWordsUpdate();
 
