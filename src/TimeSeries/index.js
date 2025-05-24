@@ -78,7 +78,7 @@ class DIYTimesSeries extends DiyNeuralNetwork {
     if (typeof inputs === "number") {
       inputShape = inputs;
     } else if (Array.isArray(inputs) && inputs.length > 0) {
-      inputShape = inputs.length; //will be fed into the tensors later
+      inputShape = inputs.length; // will be fed into the tensors later
     }
 
     this.neuralNetworkData.createMetadata(inputShape);
@@ -114,7 +114,7 @@ class DIYTimesSeries extends DiyNeuralNetwork {
         return this.createNetworkLayers(layers);
 
       default:
-        console.log("no inputUnits or outputUnits defined");
+        console.warn("no inputUnits or outputUnits defined");
         layers = tsLayers.default;
         return this.createNetworkLayers(layers);
     }
