@@ -1,4 +1,5 @@
-import neuralNetwork from "./NeuralNetwork";
+// import neuralNetwork from "./NeuralNetwork";
+import neuralNetwork from "./TimeSeries";
 import timeSeries from "./TimeSeries";
 import handPose from "./HandPose";
 import sentiment from "./Sentiment";

@@ -1249,7 +1249,7 @@ class DiyNeuralNetwork {
   }
 }
 
-const neuralNetwork = (inputsOrOptions, outputsOrCallback, callback) => {
+const createNeuralNetwork = (inputsOrOptions, outputsOrCallback, callback) => {
   let options;
   let cb;
 
@@ -1269,4 +1269,4 @@ const neuralNetwork = (inputsOrOptions, outputsOrCallback, callback) => {
 };
 
 export { DiyNeuralNetwork }; // Named export for extending
-export default neuralNetwork; // Default export remains
+export default createNeuralNetwork; // Default export remains

@@ -27,7 +27,7 @@ function preload() {
 
   // setup the timeseries neural network
   let options = {
-    task: "classification",
+    task: "timed_classification",
     spatialData: "true",
   };
 

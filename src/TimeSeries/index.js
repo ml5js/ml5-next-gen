@@ -100,19 +100,19 @@ class DIYTimesSeries extends DiyNeuralNetwork {
       taskConditions = `${task}_spatial`;
     }
     switch (taskConditions.toLowerCase()) {
-      case "regression":
+      case "timed_regression":
         layers = tsLayers.regression;
         return this.createNetworkLayers(layers);
 
-      case "classification":
+      case "timed_classification":
         layers = tsLayers.classification;
         return this.createNetworkLayers(layers);
 
-      case "classification_spatial":
+      case "timed_classification_spatial":
         layers = tsLayers.classification_spatial;
         return this.createNetworkLayers(layers);
 
-      case "regression_spatial":
+      case "timed_regression_spatial":
         layers = tsLayers.regression_spatial;
         return this.createNetworkLayers(layers);
 
@@ -129,16 +129,20 @@ class DIYTimesSeries extends DiyNeuralNetwork {
 
     let options = {};
 
-    if (
-      this.options.task === "classification" ||
-      this.options.task === "imageClassification"
-    ) {
+    if (this.options.task === "timed_classification") {
       options = {
         loss: "categoricalCrossentropy",
         optimizer: tf.train.adam,
         metrics: ["accuracy"],
       };
-    } else if (this.options.task === "regression") {
+    } else if (this.options.task === "timed_regression") {
+      options = {
+        loss: "meanSquaredError",
+        optimizer: tf.train.adam,
+        metrics: ["accuracy"],
+      };
+    } else {
+      // if no task given - must be in NN class instead of this
       options = {
         loss: "meanSquaredError",
         optimizer: tf.train.adam,
@@ -201,7 +205,12 @@ class DIYTimesSeries extends DiyNeuralNetwork {
   }
 }
 
-const timeSeries = (inputsOrOptions, outputsOrCallback, callback) => {
+const isTimeSeriesTask = (task) => {
+  const timeSeriesTasks = ["timed_classification", "timed_regression"];
+  return timeSeriesTasks.includes(task);
+};
+
+const createTimeSeries = (inputsOrOptions, outputsOrCallback, callback) => {
   let options;
   let cb;
 
@@ -220,4 +229,29 @@ const timeSeries = (inputsOrOptions, outputsOrCallback, callback) => {
   return instance;
 };
 
-export default timeSeries;
+import createNeuralNetwork from "../NeuralNetwork";
+
+const neuralNetwork = (inputsOrOptions, outputsOrCallback, callback) => {
+  let options;
+
+  // Parse options first to check the task
+  if (inputsOrOptions instanceof Object) {
+    options = inputsOrOptions;
+  } else {
+    options = {
+      inputs: inputsOrOptions,
+      outputs: outputsOrCallback,
+    };
+  }
+
+  // Choose which factory function to call based on task
+  if (isTimeSeriesTask(options.task)) {
+    return createTimeSeries(inputsOrOptions, outputsOrCallback, callback);
+  } else {
+    return createNeuralNetwork(inputsOrOptions, outputsOrCallback, callback);
+  }
+};
+
+export { DIYTimesSeries };
+// export default timeSeries;
+export default neuralNetwork; // Default export remains
