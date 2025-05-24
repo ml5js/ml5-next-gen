@@ -28,7 +28,7 @@ function preload() {
   // setup the timeseries neural network
   let options = {
     task: "classification",
-    dataMode: "spatial",
+    spatialData: "true",
   };
 
   model = ml5.timeSeries(options);

@@ -40,7 +40,7 @@ export const createTsLayers = (
         activation: "softmax",
       },
     ],
-    classification_linear: [
+    classification: [
       {
         type: "lstm",
         units: 16,
@@ -101,7 +101,7 @@ export const createTsLayers = (
         activation: "sigmoid",
       },
     ],
-    regression_linear: [
+    regression: [
       {
         type: "lstm",
         units: 16,

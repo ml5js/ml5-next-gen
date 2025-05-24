@@ -30,7 +30,6 @@ function preload() {
   // set the options to initialize timeSeries Neural Network
   let options = {
     task: "regression",
-    dataMode: "linear",
     debug: "true",
     inputs: features,
     outputs: targets,
