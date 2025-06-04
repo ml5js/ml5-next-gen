@@ -26,12 +26,11 @@ function preload() {
   // setup the timeseries neural network
   let options = {
     outputs: ["label"],
-    task: "classification",
-    spatialData: "true",
+    task: "sequenceClassificationConv",
     debug: "true",
     learningRate: 0.001, // the default learning rate of 0.01 didn't converge for this usecase, thus a learning rate of 0.001 is used (make smaller steps of parameters each update)
   };
-  model = ml5.timeSeries(options);
+  model = ml5.neuralNetwork(options);
 }
 
 function setup() {

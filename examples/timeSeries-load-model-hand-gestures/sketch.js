@@ -26,11 +26,10 @@ function preload() {
 
   // setup the timeseries neural network
   let options = {
-    task: "classification",
-    spatialData: "true",
+    task: "sequenceClassificationConv",
   };
 
-  model = ml5.timeSeries(options);
+  model = ml5.neuralNetwork(options);
 }
 
 function setup() {

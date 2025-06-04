@@ -3,7 +3,12 @@ import DIYTimesSeries from "../TimeSeries/index.js";
 
 // helper function to check if tasks follows specified convention
 const isTimeSeriesTask = (task) => {
-  const timeSeriesTasks = ["timed_classification", "timed_regression"];
+  const timeSeriesTasks = [
+    "sequenceClassification",
+    "sequenceRegression",
+    "sequenceClassificationConv",
+    "sequenceRegressionConv",
+  ];
   return timeSeriesTasks.includes(task);
 };
 
