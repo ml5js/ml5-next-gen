@@ -4,7 +4,7 @@ export const createTsLayers = (
   outputUnits = null
 ) => {
   return {
-    classification_spatial: [
+    classificationConv: [
       {
         type: "conv1d",
         filters: 8,
@@ -65,7 +65,7 @@ export const createTsLayers = (
         activation: "softmax",
       },
     ],
-    regression_spatial: [
+    regressionConv: [
       {
         type: "conv1d",
         filters: 8,

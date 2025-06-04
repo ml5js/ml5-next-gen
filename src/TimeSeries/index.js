@@ -22,7 +22,7 @@ class DIYTimesSeries extends DiyNeuralNetwork {
       callback
     );
     // call all options set in the this class which is the default, extra option for dataMode
-    this.options = { ...this.options, spatialData: false, ...(options || {}) };
+    this.options = { ...this.options, ...(options || {}) };
 
     this.neuralNetworkData =
       this.options.neuralNetworkData || new TimeSeriesData();
@@ -94,30 +94,26 @@ class DIYTimesSeries extends DiyNeuralNetwork {
     );
 
     const task = this.options.task;
-    const spatialData = this.options.spatialData;
     let taskConditions = task;
-    if (spatialData === true || spatialData === "true") {
-      taskConditions = `${task}_spatial`;
-    }
-    switch (taskConditions.toLowerCase()) {
-      case "regression":
+    switch (taskConditions) {
+      case "sequenceRegression":
         layers = tsLayers.regression;
         return this.createNetworkLayers(layers);
 
-      case "classification":
+      case "sequenceClassification":
         layers = tsLayers.classification;
         return this.createNetworkLayers(layers);
 
-      case "classification_spatial":
-        layers = tsLayers.classification_spatial;
+      case "sequenceClassificationConv":
+        layers = tsLayers.classificationConv;
         return this.createNetworkLayers(layers);
 
-      case "regression_spatial":
-        layers = tsLayers.regression_spatial;
+      case "sequenceRegressionConv":
+        layers = tsLayers.regressionConv;
         return this.createNetworkLayers(layers);
 
       default:
-        console.warn("no inputUnits or outputUnits defined");
+        console.warn("Task is undefined or no inputUnits/outputUnits defined");
         layers = tsLayers.default;
         return this.createNetworkLayers(layers);
     }
@@ -130,15 +126,25 @@ class DIYTimesSeries extends DiyNeuralNetwork {
     let options = {};
 
     if (
-      this.options.task === "classification" ||
-      this.options.task === "imageClassification"
+      this.options.task === "sequenceClassification" ||
+      this.options.task === "sequenceClassificationConv"
     ) {
       options = {
         loss: "categoricalCrossentropy",
         optimizer: tf.train.adam,
         metrics: ["accuracy"],
       };
-    } else if (this.options.task === "regression") {
+    } else if (
+      this.options.task === "sequenceRegression" ||
+      this.options.task === "sequenceRegressionConv"
+    ) {
+      options = {
+        loss: "meanSquaredError",
+        optimizer: tf.train.adam,
+        metrics: ["accuracy"],
+      };
+    } else {
+      // if no task given - must be in NN class instead of this
       options = {
         loss: "meanSquaredError",
         optimizer: tf.train.adam,
@@ -201,23 +207,4 @@ class DIYTimesSeries extends DiyNeuralNetwork {
   }
 }
 
-const timeSeries = (inputsOrOptions, outputsOrCallback, callback) => {
-  let options;
-  let cb;
-
-  if (inputsOrOptions instanceof Object) {
-    options = inputsOrOptions;
-    cb = outputsOrCallback;
-  } else {
-    options = {
-      inputs: inputsOrOptions,
-      outputs: outputsOrCallback,
-    };
-    cb = callback;
-  }
-
-  const instance = new DIYTimesSeries(options, cb);
-  return instance;
-};
-
-export default timeSeries;
+export default DIYTimesSeries; //export for taskSelection

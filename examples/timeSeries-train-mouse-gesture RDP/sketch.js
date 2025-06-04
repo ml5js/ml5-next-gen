@@ -17,13 +17,13 @@ function preload() {
   let options = {
     inputs: ["x", "y"],
     outputs: ["label"],
-    task: "classification",
-    spatialData: "true",
-    debug: "true",
+    task: "sequenceClassificationConv",
+    spatialData: true,
+    debug: true,
     learningRate: 0.005,
   };
 
-  model = ml5.timeSeries(options);
+  model = ml5.neuralNetwork(options);
 }
 
 function setup() {

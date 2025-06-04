@@ -30,13 +30,13 @@ function preload() {
 
   // set the options to initialize timeSeries Neural Network
   let options = {
-    task: "regression",
+    task: "sequenceRegression",
     debug: "true",
     learningRate: 0.0075, // A smaller learning rate used for more stable training
     inputs: features,
     outputs: targets,
   };
-  model = ml5.timeSeries(options);
+  model = ml5.neuralNetwork(options);
 }
 
 function setup() {
