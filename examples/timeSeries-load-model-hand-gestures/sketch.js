@@ -11,14 +11,13 @@
  * Goodbye: https://babysignlanguage.com/dictionary/goodbye/
  */
 
-// change this to make the recording longer
-let seqLength = 50;
-
 let handPose;
 let video;
 let hands = [];
+
 let sequence = [];
-let recordingFinished = false;
+let targetLength = 50;
+
 let predictedWord = "";
 
 function preload() {
@@ -55,6 +54,7 @@ function setup() {
   // load the model and call modelLoaded once finished
   model.load(modelDetails, modelLoaded);
 }
+
 // call back for load model
 function modelLoaded() {
   console.log("model loaded!");
@@ -68,27 +68,18 @@ function draw() {
   placePredictedText();
 
   // if hands are found then start recording
-  if (hands.length > 0 && recordingFinished == false) {
-    if (sequence.length <= seqLength) {
-      // get coordinates from hands (21 points)
-      handpoints = drawPoints();
-      sequence.push(handpoints);
+  if (hands.length > 0) {
+    // get coordinates from hands (21 points)
+    handpoints = drawPoints();
+    sequence.push(handpoints);
 
-      // once sequence reaches the seqLength, add sequence as just one X value
-    } else if (sequence.length > 0) {
-      // classify based on the collected data
-      model.classify(sequence, gotResults);
+    // pad the data and use for prediction
+  } else if (hands.length <= 0 && sequence.length > 0) {
+    let predictData = model.padCoordinates(sequence, targetLength);
+    model.classify(predictData, gotResults);
 
-      // reset the sequence
-      sequence = [];
-      recordingFinished = true;
-    }
-
-    // can only record again when hand is out of frame
-  } else {
-    if (hands.length == 0) {
-      recordingFinished = false;
-    }
+    // reset the sequence
+    sequence = [];
   }
 }
 
@@ -107,6 +98,7 @@ function drawPoints() {
   }
   let output = handpoints;
   handpoints = [];
+
   return output;
 }
 
@@ -119,13 +111,12 @@ function gotHands(results) {
 // call back for accessing the results
 function gotResults(results) {
   predictedWord = results[0].label;
-  console.log(predictedWord);
   text(predictedWord, 100, 100);
 }
 
 // for drawing text on screen
 function placePredictedText() {
-  textSize(100);
-  fill(255);
-  text(predictedWord, 100, height / 2);
+  textSize(20);
+  fill(0);
+  text("Predicted Gesture : " + predictedWord, 50, 50);
 }

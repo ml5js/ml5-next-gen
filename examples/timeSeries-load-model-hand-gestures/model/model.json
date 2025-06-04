@@ -31,7 +31,7 @@
             "bias_constraint": null,
             "name": "conv1d_Conv1D1",
             "trainable": true,
-            "batch_input_shape": [null, 51, 42],
+            "batch_input_shape": [null, 50, 42],
             "dtype": "float32"
           }
         },
@@ -72,7 +72,7 @@
             "bias_constraint": null,
             "name": "conv1d_Conv1D2",
             "trainable": true,
-            "batch_input_shape": [null, 51, 42],
+            "batch_input_shape": [null, 50, 42],
             "dtype": "float32"
           }
         },

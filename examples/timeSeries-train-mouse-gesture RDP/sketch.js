@@ -71,7 +71,7 @@ function trainModel() {
   let options = {
     epochs: 40,
   };
-  model.train(options, whileTraining, finishedTraining);
+  model.train(options, finishedTraining);
 
   background(220);
   state = "training";
@@ -82,10 +82,6 @@ function trainModel() {
   trainBut.attribute("disabled", true);
 }
 
-function whileTraining(epoch, loss) {
-  console.log(epoch);
-}
-
 function finishedTraining() {
   background(220);
   text("Training Finished, Draw again to predict", 50, 50);
@@ -93,7 +89,6 @@ function finishedTraining() {
 }
 
 function gotResults(results) {
-  // console.log("results", results);
   let label = results[0].label;
   currShape = label;
 }
