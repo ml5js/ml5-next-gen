@@ -20,7 +20,8 @@ let features = [
   "precipitation",
 ];
 
-let targets = features; // must be the same to add predicted to data
+let targets = features; // must be the same to add predicted values back to data
+let windowLength = 10; // Optional: define the size of the window for batch
 
 // load JSON data with same formatting from the internet, this means
 // loadData() cannot yet be used as it is formatted differently
@@ -31,6 +32,7 @@ function preload() {
   let options = {
     task: "regression",
     debug: "true",
+    learningRate: 0.0075, // A smaller learning rate used for more stable training
     inputs: features,
     outputs: targets,
   };
@@ -43,7 +45,7 @@ function setup() {
   background(220);
 
   //run a sliding window algorithm for time based data
-  let batchData = model.slidingWindow(data, features, targets);
+  let batchData = model.slidingWindow(data, features, targets, windowLength);
   let inputs = batchData.sequences;
   let outputs = batchData.targets;
 
@@ -55,7 +57,7 @@ function setup() {
   model.normalizeData();
 
   let options = {
-    epochs: 100,
+    epochs: 70,
   };
   model.train(options, finishedTraining);
 
@@ -65,16 +67,23 @@ function setup() {
 function draw() {
   background(220);
   textSize(20);
-  if (state == "training") text("Training", 200, 200);
-  else if (state == "prediction") {
-    text("Predicted Precipitation", 200, 200);
-    text(precipitation, 200, 250);
+  if (state == "training") {
+    text("Training", 320, 200);
+  } else if (state == "prediction") {
+    text("Predicted Precipitation", 320, 200);
+    text(precipitation, 320, 250);
+
+    // helpful visual based on predicted value
+    push();
+    textSize(precipitation * 5 + 10);
+    text("🌧️", 320, 150);
+    pop();
   }
 }
 
 // predict data
 function predictData() {
-  seq = model.sampleWindow(data); //helper function to get sample from data
+  seq = model.sampleWindow(data); //helper function paired with the slidingWindow to get sample from data
   model.predict(seq, gotResults);
 }
 
@@ -87,7 +96,7 @@ function gotResults(results) {
 // code for adding new data to the dataset to be used for future prediction
 function addNewData(results) {
   (new_values = {
-    date: "  for the next hour",
+    date: " for the next hour",
     temperature: results[0].value, // get string convert to float and round to 2 decimal points
     humidity: results[1].value,
     wind_speed: results[2].value,
@@ -98,7 +107,6 @@ function addNewData(results) {
 }
 
 function finishedTraining() {
-  console.log("Training Done!");
   state = "prediction";
 }
 
@@ -106,4 +114,6 @@ function finishedTraining() {
 function UI() {
   pred_but = select("#pred_but");
   pred_but.mouseClicked(predictData);
+
+  textAlign(CENTER);
 }

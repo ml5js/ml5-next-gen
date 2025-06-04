@@ -176,8 +176,8 @@ class DIYTimesSeries extends DiyNeuralNetwork {
     this.featureKeys = featureKeys;
 
     if (batchLength == null) {
-      this.batchLength = int(data.length * 0.2); // set targetlength as a fraction of the total
-    } else if (targetLength >= data.length) {
+      this.batchLength = int(data.length * 0.2); // set batchlength as a fraction of the total
+    } else if (batchLength >= data.length) {
       throw new Error("batchLength must be smaller than total length of data");
     } else {
       this.batchLength = batchLength;
