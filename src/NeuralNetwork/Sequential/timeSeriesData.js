@@ -1,12 +1,12 @@
 import * as tf from "@tensorflow/tfjs";
 import axios from "axios";
-import { saveBlob } from "../utils/io";
-import modelLoader from "../utils/modelLoader";
-import nnUtils from "../NeuralNetwork/NeuralNetworkUtils";
+import { saveBlob } from "../../utils/io";
+import modelLoader from "../../utils/modelLoader";
+import nnUtils from "../NeuralNetworkUtils";
 
 import tsUtils from "./timeSeriesUtils";
 
-import NeuralNetworkData from "../NeuralNetwork/NeuralNetworkData";
+import NeuralNetworkData from "../NeuralNetworkData";
 
 class TimeSeriesData extends NeuralNetworkData {
   constructor() {

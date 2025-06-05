@@ -1,9 +1,9 @@
 import * as tf from "@tensorflow/tfjs";
 
-import { DiyNeuralNetwork } from "../NeuralNetwork";
+import { DiyNeuralNetwork } from "..";
 
-import callCallback from "../utils/callcallback";
-import setBackend from "../utils/setBackend";
+import callCallback from "../../utils/callcallback";
+import setBackend from "../../utils/setBackend";
 
 import tsUtils from "./timeSeriesUtils";
 

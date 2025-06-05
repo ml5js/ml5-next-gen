@@ -3,7 +3,7 @@
  * Learn more about the ml5.js project: https://ml5js.org/
  * ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
  *
- * This example demonstrates How to train your own mouse gesture classifier through ml5.TimeSeries.
+ * This example demonstrates How to train your own mouse gesture classifier through ml5.neuralNetwork with sequeceClassification Task.
  */
 
 let model;
@@ -18,9 +18,8 @@ function preload() {
     inputs: ["x", "y"],
     outputs: ["label"],
     task: "sequenceClassificationConv",
-    spatialData: true,
     debug: true,
-    learningRate: 0.005,
+    learningRate: 0.005, // learning rate decreased for better convergence
   };
 
   model = ml5.neuralNetwork(options);

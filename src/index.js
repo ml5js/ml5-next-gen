@@ -1,5 +1,4 @@
 import neuralNetwork from "./NeuralNetwork/taskSelection";
-import timeSeries from "./TimeSeries";
 import handPose from "./HandPose";
 import sentiment from "./Sentiment";
 import faceMesh from "./FaceMesh";
@@ -31,7 +30,6 @@ const withPreload = {
 
 const withoutAsync = {
   neuralNetwork,
-  timeSeries,
 };
 
 const ml5 = Object.assign({ p5Utils }, withPreload, {

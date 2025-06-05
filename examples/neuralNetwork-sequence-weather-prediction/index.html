@@ -3,7 +3,7 @@
   Learn more about the ml5.js project: https://ml5js.org/
   ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
  
-  This example demonstrates How to train your own quickdraw classifier through ml5.TimeSeries.
+  This example demonstrates Training a Weather Predictor through ml5.neuralNetwork with sequeceRegression Task.
 -->
 
 <html>
@@ -11,20 +11,16 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ml5.js Time Series Train Mouse Gesture classifier Example</title>
+    <title>ml5.js Neural Network Weather Prediction Example</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
     <script src="../../dist/ml5.js"></script>
   </head>
 
   <body>
-    <div id="canvasDiv">
-      <script src="sketch.js"></script>
-    </div>
+    <script src="sketch.js"></script>
 
-    <div>
-      <button id="recCircle">Record Circle</button>
-      <button id="recSquare">Record Square</button>
-      <button id="trainBut">Train & Predict</button>
+    <div style="position: absolute; margin: 350px 0px 0px 100px">
+      <button id="pred_but">Predict Next Hour</button>
     </div>
   </body>
 
