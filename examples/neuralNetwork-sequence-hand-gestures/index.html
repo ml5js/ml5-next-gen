@@ -1,0 +1,42 @@
+<!--
+  👋 Hello! This is an ml5.js example made and shared with ❤️.
+  Learn more about the ml5.js project: https://ml5js.org/
+  ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
+ 
+  This example demonstrates training a Sign Language classifier through ml5.neuralNetwork with sequeceClassification Task.
+-->
+
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ml5.js Neural Network Hand Gesture Train and Save</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+    <script src="../../dist/ml5.js"></script>
+  </head>
+
+  <body>
+    <script src="sketch.js"></script>
+    <div id="canvasDiv"></div>
+
+    <p>
+      Instructions: <br />
+      1.) To add data, press the "Add Gesture #1 Data" button <br />
+      2.) Use one hand to do a gesture in front of the camera <br />
+      3.) Once done with the gesture, take your hand out of the frame<br />
+      4.) Repeat until there is a good amount of data<br />
+      5.) Do the same for gesture #2 by pressing the "Add Gesture #2 Data"
+      button before doing the hand gesture in the frame<br />
+      6.) Press the "Train and Save Model" button to train the model and save it
+      for future use.<br />
+    </p>
+  </body>
+
+  <style>
+    button {
+      font-family: Georgia, "Times New Roman", Times, serif;
+      font-size: 20px;
+    }
+  </style>
+</html>

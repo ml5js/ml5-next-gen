@@ -3,7 +3,7 @@
   Learn more about the ml5.js project: https://ml5js.org/
   ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
  
-  This example demonstrates training a Sign Language classifier through ml5.TimeSeries.
+  This example demonstrates How to train your own quickdraw classifier through ml5.neuralNetwork with sequeceClassification Task.
 -->
 
 <html>
@@ -11,23 +11,21 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ml5.js Time Series Hand Gesture Train and Save</title>
+    <title>ml5.js Neural Network Train Mouse Gesture classifier Example</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
     <script src="../../dist/ml5.js"></script>
   </head>
 
   <body>
-    <script src="sketch.js"></script>
-    <div id="canvasDiv"></div>
+    <div id="canvasDiv">
+      <script src="sketch.js"></script>
+    </div>
 
-    <p>
-      To add data, press the "Add Gesture #1 Data" button and then show your
-      hand to the screen, put down your hand when you are done. You can record
-      again once you show your hand back in the frame. Likewise for gesture #2.
-      When you have a good amount of data for each gesture class, press the
-      "Train and Save Model" button to train the model and save it for future
-      use.
-    </p>
+    <div>
+      <button id="recCircle">Record Circle</button>
+      <button id="recSquare">Record Square</button>
+      <button id="trainBut">Train & Predict</button>
+    </div>
   </body>
 
   <style>

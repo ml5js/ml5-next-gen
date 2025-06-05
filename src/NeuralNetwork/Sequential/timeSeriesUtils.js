@@ -1,5 +1,5 @@
 import { data, input } from "@tensorflow/tfjs";
-import nnUtils from "../NeuralNetwork/NeuralNetworkUtils";
+import nnUtils from "../NeuralNetworkUtils";
 
 class TimeSeriesUtils {
   constructor(options) {

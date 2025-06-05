@@ -1,5 +1,5 @@
 import DiyNeuralNetwork from "./index.js";
-import DIYTimesSeries from "../TimeSeries/index.js";
+import DIYTimesSeries from "./Sequential/index.js";
 
 // helper function to check if tasks follows specified convention
 const isTimeSeriesTask = (task) => {
