@@ -16,6 +16,7 @@ import BODYPIX_PALETTE from "./BODYPIX_PALETTE";
 import { mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
+import p5Utils from "../utils/p5Utils";
 
 class BodySegmentation {
   /**
@@ -411,10 +412,7 @@ class BodySegmentation {
  * Factory function that returns a Facemesh instance
  * @returns {Object} A new bodySegmentation instance
  */
-const bodySegmentation = (...inputs) => {
+export const bodySegmentation = p5Utils.maybeRegisterPreload((...inputs) => {
   const { string, options = {}, callback } = handleArguments(...inputs);
-  const instance = new BodySegmentation(string, options, callback);
-  return instance;
-};
-
-export default bodySegmentation;
+  return new BodySegmentation(string, options, callback);
+});

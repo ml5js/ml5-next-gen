@@ -22,6 +22,7 @@ class P5Util {
      * @type {boolean}
      */
     this.didSetupPreload = false;
+
     /**
      * The `p5` variable, which can be instantiated via `new p5()` and has a `.prototype` property.
      * In browser environments this is `window.p5`.
@@ -62,7 +63,6 @@ class P5Util {
 
     if (isP5Constructor(source.p5)) {
       this.p5Constructor = source.p5;
-      this.registerPreloads();
     }
     if (isP5Extensions(source)) {
       this.p5Extensions = source;
@@ -88,7 +88,6 @@ class P5Util {
     if (isP5Constructor(p5)) {
       this.p5Constructor = p5;
       this.p5Extensions = p5.prototype;
-      this.registerPreloads();
     } else {
       console.warn("Invalid p5 object provided to ml5.setP5().");
     }
@@ -96,70 +95,42 @@ class P5Util {
 
   /**
    * @internal
-   * Pass in the ml5 methods which require p5 preload behavior.
-   * Preload functions must return an object with a property `ready` which is a `Promise`.
-   * Preloading will be set up immediately if p5 is available on the window.
-   * Store the references in case p5 is added later.
-   *
-   * @param {*} ml5Library - the `ml5` variable.
-   * @param {Array<string>} methodNames - an array of ml5 functions to preload.
+   * Register a preload function for a model. If p5 is not loaded or the sketch is not created,
+   * the model will be returned as is. Otherwise, the model will be wrapped to increment and
+   * decrement the p5 preload counter when called, which is for allowing the model to be used in
+   * p5 preload function.
+   * @param {Function} model - The model function to register.
+   * @returns {Function} The wrapped model function.
    */
-  shouldPreload(ml5Library, methodNames) {
-    this.methodsToPreload = methodNames;
-    this.ml5Library = ml5Library;
-    if (this.checkP5()) {
-      this.registerPreloads();
-    }
-  }
-
-  /**
-   * @private
-   * Execute the p5 preload setup using the stored references, provided by shouldPreload().
-   * Won't do anything if `shouldPreload()` has not been called or if p5 is not found.
-   */
-  registerPreloads() {
-    if (this.didSetupPreload) return;
+  maybeRegisterPreload(model) {
     const p5 = this.p5Constructor;
-    const ml5 = this.ml5Library;
-    const preloadMethods = this.methodsToPreload;
-    if (!p5 || !ml5) return;
+    if (!p5) return model;
 
-    // Must shallow copy so that it doesn't reference the replaced method.
-    const original = { ...ml5 };
-    // Must alias `this` so that it can be used inside functions with their own `this` context.
-    const self = this;
+    let sketchCreated = false;
+    let p5Instance;
+    let loaded = false;
 
-    // Function to be called when a sketch is created, either in global or instance mode.
-    p5.prototype.ml5Init = function () {
-      // Bind to this specific p5 instance.
-      const increment = this._incrementPreload.bind(this);
-      const decrement = this._decrementPreload.bind(this);
-      // Replace each preloaded on the ml5 object with a wrapped version which
-      // increments and decrements the p5 preload counter when called.
-      preloadMethods.forEach((method) => {
-        ml5[method] = function (...args) {
-          increment();
-          const result = original[method](...args);
-          result.ready.then(() => {
-            decrement();
-          });
-          return result;
-        };
-      });
-      self.didSetupPreload = true;
-    };
+    // Function to be called when a sketch is created.
+    p5.prototype.registerMethod("init", function () {
+      p5Instance = this;
+      sketchCreated = true;
+    });
 
     // Function to be called when a sketch is destroyed.
-    p5.prototype.ml5Remove = function () {
-      // Resets each ml5 method back to its original version.
-      preloadMethods.forEach((method) => {
-        ml5[method] = original[method];
-      });
-      self.didSetupPreload = false;
-    };
+    p5.prototype.registerMethod("remove", function () {
+      sketchCreated = false;
+      p5Instance = undefined;
+    });
 
-    p5.prototype.registerMethod("init", p5.prototype.ml5Init);
-    p5.prototype.registerMethod("remove", p5.prototype.ml5Remove);
+    return function (...args) {
+      if (!sketchCreated || loaded) return model(...args);
+      loaded = true;
+
+      p5Instance._incrementPreload();
+      const result = model(...args);
+      result.ready.then(() => p5Instance._decrementPreload());
+      return result;
+    };
   }
 
   /**

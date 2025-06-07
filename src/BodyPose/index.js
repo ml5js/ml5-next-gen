@@ -27,6 +27,7 @@ import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
 import objectRenameKey from "../utils/objectRenameKey";
 import { isVideo } from "../utils/handleArguments";
+import p5Utils from "../utils/p5Utils";
 
 /**
  * User provided options object for BodyPose with MoveNet model.
@@ -547,10 +548,7 @@ class BodyPose {
  * @param {function} callback  - A callback function that is called once the model has been loaded.
  * @returns {BodyPose} A BodyPose instance.
  */
-const bodyPose = (...inputs) => {
+export const bodyPose = p5Utils.maybeRegisterPreload((...inputs) => {
   const { string, options = {}, callback } = handleArguments(...inputs);
-  const instance = new BodyPose(string, options, callback);
-  return instance;
-};
-
-export default bodyPose;
+  return new BodyPose(string, options, callback);
+});

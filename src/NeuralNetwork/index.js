@@ -10,6 +10,7 @@ import NeuralNetworkData from "./NeuralNetworkData";
 
 import nnUtils from "./NeuralNetworkUtils";
 import NeuralNetworkVis from "./NeuralNetworkVis";
+import p5Utils from "../utils/p5Utils";
 
 const DEFAULTS = {
   inputs: [],
@@ -1249,23 +1250,22 @@ class DiyNeuralNetwork {
   }
 }
 
-const neuralNetwork = (inputsOrOptions, outputsOrCallback, callback) => {
-  let options;
-  let cb;
+export const neuralNetwork = p5Utils.maybeRegisterPreload(
+  (inputsOrOptions, outputsOrCallback, callback) => {
+    let options;
+    let cb;
 
-  if (inputsOrOptions instanceof Object) {
-    options = inputsOrOptions;
-    cb = outputsOrCallback;
-  } else {
-    options = {
-      inputs: inputsOrOptions,
-      outputs: outputsOrCallback,
-    };
-    cb = callback;
+    if (inputsOrOptions instanceof Object) {
+      options = inputsOrOptions;
+      cb = outputsOrCallback;
+    } else {
+      options = {
+        inputs: inputsOrOptions,
+        outputs: outputsOrCallback,
+      };
+      cb = callback;
+    }
+
+    return new DiyNeuralNetwork(options, cb);
   }
-
-  const instance = new DiyNeuralNetwork(options, cb);
-  return instance;
-};
-
-export default neuralNetwork;
+);

@@ -11,6 +11,7 @@ import * as tf from "@tensorflow/tfjs";
 import handleArguments from "../utils/handleArguments";
 import * as speechCommands from "./speechcommands";
 import callCallback from "../utils/callcallback";
+import p5Utils from "../utils/p5Utils";
 
 const MODEL_OPTIONS = ["speechcommands18w"];
 // exporting the sound classifier instance so that the stop/start flags regarding classification state are accessible to speechcommands.js to use
@@ -98,7 +99,7 @@ class SoundClassifier {
   /**
    * Used to stop the continuous classification of a video
    */
-   classifyStop() {
+  classifyStop() {
     if (this.isClassifying) {
       this.signalStop = true;
     }
@@ -106,24 +107,23 @@ class SoundClassifier {
   }
 }
 
-const soundClassifier = (modelName, optionsOrCallback, cb) => {
-  const {
-    string,
-    options = {},
-    callback,
-  } = handleArguments(modelName, optionsOrCallback, cb).require(
-    "string",
-    'Please specify a model to use. E.g: "SpeechCommands18w"'
-  );
+export const soundClassifier = p5Utils.maybeRegisterPreload(
+  (modelName, optionsOrCallback, cb) => {
+    const {
+      string,
+      options = {},
+      callback,
+    } = handleArguments(modelName, optionsOrCallback, cb).require(
+      "string",
+      'Please specify a model to use. E.g: "SpeechCommands18w"'
+    );
 
-  let model = string;
+    let model = string;
 
-  if (model.indexOf("http") === -1) {
-    model = model.toLowerCase();
+    if (model.indexOf("http") === -1) {
+      model = model.toLowerCase();
+    }
+
+    return new SoundClassifier(model, options, callback);
   }
-
-  instance = new SoundClassifier(model, options, callback);
-  return instance;
-};
-
-export default soundClassifier;
+);

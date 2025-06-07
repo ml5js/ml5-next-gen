@@ -18,6 +18,7 @@ import callCallback from "../utils/callcallback";
 import { imgToTensor, mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
+import p5Utils from "../utils/p5Utils";
 
 const IMAGE_SIZE = 224;
 const MODEL_OPTIONS = ["mobilenet", "darknet", "darknet-tiny", "doodlenet"];
@@ -248,7 +249,10 @@ class ImageClassifier {
       "image",
       "No input image provided. If you want to classify a video, use classifyStart."
     );
-    return callCallback(this.classifyInternal(image, number || this.topk), callback);
+    return callCallback(
+      this.classifyInternal(image, number || this.topk),
+      callback
+    );
   }
 
   /**
@@ -270,8 +274,11 @@ class ImageClassifier {
     const classifyFrame = async () => {
       await mediaReady(image, true);
       // call the callback function
-      await callCallback(this.classifyInternal(image, number || this.topk), callback);
-      
+      await callCallback(
+        this.classifyInternal(image, number || this.topk),
+        callback
+      );
+
       // call recursively for continuous classification
       if (!this.signalStop) {
         requestAnimationFrame(classifyFrame);
@@ -305,13 +312,10 @@ class ImageClassifier {
   }
 }
 
-const imageClassifier = (modelName, optionsOrCallback, cb) => {
-  const args = handleArguments(modelName, optionsOrCallback, cb);
-
-  const { string, options = {}, callback } = args;
-
-  const instance = new ImageClassifier(string, options, callback);
-  return instance;
-};
-
-export default imageClassifier;
+export const imageClassifier = p5Utils.maybeRegisterPreload(
+  (modelName, optionsOrCallback, cb) => {
+    const args = handleArguments(modelName, optionsOrCallback, cb);
+    const { string, options = {}, callback } = args;
+    return new ImageClassifier(string, options, callback);
+  }
+);

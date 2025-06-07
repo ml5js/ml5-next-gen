@@ -20,6 +20,9 @@
   "keywords": [
     "ML5"
   ],
+  "sideEffects": [
+    "src/index.js"
+  ],
   "author": "ml5",
   "license": "MIT",
   "repository": {

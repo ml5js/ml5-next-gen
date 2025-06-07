@@ -27,6 +27,7 @@ import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
 import { mediaReady } from "../utils/imageUtilities";
 import objectRenameKey from "../utils/objectRenameKey";
+import p5Utils from "../utils/p5Utils";
 
 /**
  * User provided options object for HandPose. See config schema below for default and available values.
@@ -311,10 +312,7 @@ class HandPose {
  * @param {function} [callback] - A callback function that is called once the model has been loaded.
  * @returns {HandPose} A new handPose instance.
  */
-const handPose = (...inputs) => {
+export const handPose = p5Utils.maybeRegisterPreload((...inputs) => {
   const { string, options = {}, callback } = handleArguments(...inputs);
-  const instance = new HandPose(string, options, callback);
-  return instance;
-};
-
-export default handPose;
+  return new HandPose(string, options, callback);
+});
