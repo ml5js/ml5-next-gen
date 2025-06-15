@@ -2,6 +2,7 @@ const { resolve } = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { merge } = require("webpack-merge");
 const TerserPlugin = require("terser-webpack-plugin");
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const commonConfig = {
   context: __dirname,
@@ -59,6 +60,7 @@ const developmentConfig = {
     new HtmlWebpackPlugin({
       title: "ml5",
     }),
+    ...(process.env.ANALYZE ? [new BundleAnalyzerPlugin()] : []),
   ],
   resolve: {
     fallback: {
@@ -115,6 +117,9 @@ const productionConfig = {
       util: false,
     },
   },
+  plugins: [
+    ...(process.env.ANALYZE ? [new BundleAnalyzerPlugin()] : []),
+  ],
 };
 
 module.exports = function (env, args) {
