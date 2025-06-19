@@ -146,7 +146,7 @@ class BodySegmentation {
         {
           runtime: {
             type: "enum",
-            enums: ["mediapipe, tfjs"],
+            enums: ["mediapipe", "tfjs"],
             default: "tfjs",
           },
           modelType: {
