@@ -17,18 +17,18 @@ let gestures = ["Gesture #1", "Gesture #2"];
 let counts = { "Gesture #1": 0, "Gesture #2": 0 };
 
 let state = "collection";
-let currGesture = gestures[0]; //set currGesture to gesture 1 by default
+let currGesture = gestures[0]; // Set currGesture to gesture 1 by default
 
 function preload() {
   // Load the handPose model
   handPose = ml5.handPose();
 
-  // setup the timeseries neural network
+  // Setup the timeseries neural network
   let options = {
     outputs: ["label"],
     task: "sequenceClassificationConv",
     debug: "true",
-    learningRate: 0.001, // the default learning rate of 0.01 didn't converge for this usecase, thus a learning rate of 0.001 is used (make smaller steps of parameters each update)
+    learningRate: 0.001, // The default learning rate of 0.01 didn't converge for this usecase, thus a learning rate of 0.001 is used (make smaller steps of parameters each update)
   };
   model = ml5.neuralNetwork(options);
 }
@@ -37,7 +37,7 @@ function setup() {
   let canvas = createCanvas(640, 480);
   canvas.parent("canvasDiv");
 
-  // setup video capture
+  // Setup video capture
   video = createCapture(VIDEO);
   video.size(640, 480);
   video.hide();
@@ -45,46 +45,46 @@ function setup() {
   // Setup the UI buttons for training
   UI();
 
-  // use handpose model on video
+  // Use handpose model on video
   handPose.detectStart(video, gotHands);
 }
 
 function draw() {
-  // draw video on frame
+  // Draw video on frame
   image(video, 0, 0, width, height);
 
-  // helpful tooltip to include
+  // Helpful tooltip to include
   textSize(20);
   stroke(255);
   fill(0);
   text(state + " : " + currGesture, 50, 50);
 
-  // if hand is detected in the frame, start recording gesture
+  // If hand is detected in the frame, start recording gesture
   if (hands.length > 0) {
     handpoints = drawPoints();
     sequence.push(handpoints);
 
-    // add collected data to model once the hand is gone and state is collection
+    // Add collected data to model once the hand is gone and state is collection
   } else if (hands.length <= 0 && sequence.length > 0) {
     if (state == "collection") {
-      // pad the length of the coordinates to targetLength
+      // Pad the length of the coordinates to targetLength
       let inputData = model.padCoordinates(sequence, targetLength);
       let outputData = { label: currGesture };
 
-      // add data to the model
+      // Add data to the model
       model.addData(inputData, outputData);
 
-      // Update the counts for the UI
+      // Udate the counts for the UI
       counts[currGesture]++;
       updateDataCountUI();
 
-      // pad the data and use for prediction if state is prediction
+      // Pad the data and use for prediction if state is prediction
     } else if (state == "prediction") {
       let predictData = model.padCoordinates(sequence, targetLength);
       model.classify(predictData, gotResults);
     }
 
-    // reset the sequence
+    // Reset the sequence
     sequence = [];
   }
 }
@@ -109,7 +109,7 @@ function finishedTraining() {
   model.save();
 }
 
-// callback for predict
+// Callback for predict
 function gotResults(results) {
   currGesture = results[0].label;
 }
@@ -119,14 +119,14 @@ function gotHands(results) {
   hands = results;
 }
 
-// draw visuals for hand points and flatten values into an array
+// Draw visuals for hand points and flatten values into an array
 function drawPoints() {
   let handpoints = [];
-  // iterate through both hands
+  // Iterate through both hands
   for (let i = 0; i < hands.length; i++) {
     let hand = hands[i];
     for (let j = 0; j < hand.keypoints.length; j++) {
-      // access the keypoints in the hand
+      // Access the keypoints in the hand
       let keypoint = hand.keypoints[j];
       handpoints.push(keypoint.x, keypoint.y);
 
@@ -136,14 +136,14 @@ function drawPoints() {
     }
   }
 
-  // assign to a different variable before clearing
+  // Assign to a different variable before clearing
   let output = handpoints;
   handpoints = [];
 
   return output;
 }
 
-////////////// UI Elements ////////////
+// UI Elements
 function UI() {
   dataCountsP = createP(
     "Gesture 1 data: " +
