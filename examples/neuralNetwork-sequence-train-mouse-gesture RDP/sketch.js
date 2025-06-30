@@ -19,14 +19,13 @@ function preload() {
     outputs: ["label"],
     task: "sequenceClassificationConv",
     debug: true,
-    learningRate: 0.005, // learning rate decreased for better convergence
+    learningRate: 0.005, // Learning rate decreased for better convergence
   };
 
   model = ml5.neuralNetwork(options);
 }
 
 function setup() {
-  // p5 js elements
   let canvas = createCanvas(600, 400);
   canvas.parent("canvasDiv");
   background(220);
@@ -34,19 +33,19 @@ function setup() {
 }
 
 function draw() {
-  // record data when the mouse is pressed inside the canvas
+  // Record data when the mouse is pressed inside the canvas
   if (mouseIsPressed) {
-    // draw lines through coordinates
+    // Draw lines through coordinates
     line(pmouseX, pmouseY, mouseX, mouseY);
     let inputs = { x: mouseX, y: mouseY };
     sequence.push(inputs);
   }
 }
 
-// code to signify drawing can be done again
+// Code to signify drawing can be done again
 function mouseReleased() {
   if (mouseY < height && mouseX < width) {
-    // if state is collection, add whole sequence as X, and shape as Y
+    // If state is collection, add whole sequence as X, and shape as Y
     if (state == "collection") {
       let target = { label: currShape };
       let paddedCoordinates = model.padCoordinates(sequence, targetLength);
@@ -58,15 +57,15 @@ function mouseReleased() {
       clearScreen();
     }
   }
-  // reset the sequence
+  // Reset the sequence
   sequence = [];
 }
 
 function trainModel() {
-  // normalize Data first before Training
+  // Normalize Data first before Training
   model.normalizeData();
 
-  // set the number of epochs for training
+  // Set the number of epochs for training
   let options = {
     epochs: 40,
   };
@@ -92,7 +91,7 @@ function gotResults(results) {
   currShape = label;
 }
 
-////////////// UI Elements ////////////
+// UI Elements
 let recCircle, recSquare, trainBut;
 
 function UI() {
@@ -123,7 +122,7 @@ function UI() {
   }
 }
 
-// cleanup screen and removed drawn elements, add helpful text
+// Cleanup screen and removed drawn elements, add helpful text
 function clearScreen() {
   background(220);
   textSize(20);

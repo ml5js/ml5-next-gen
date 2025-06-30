@@ -20,15 +20,15 @@ let features = [
   "precipitation",
 ];
 
-let targets = features; // must be the same to add predicted values back to data
+let targets = features; // Must be the same to add predicted values back to data
 let windowLength = 10; // Optional: define the size of the window for batch
 
-// load JSON data with same formatting from the internet, this means
-// loadData() cannot yet be used as it is formatted differently
+// Load JSON data with same formatting from the internet, this means
+// LoadData() cannot yet be used as it is formatted differently
 function preload() {
   json_data = loadJSON("weather_data.json");
 
-  // set the options to initialize timeSeries Neural Network
+  // Set the options to initialize timeSeries Neural Network
   let options = {
     task: "sequenceRegression",
     debug: "true",
@@ -44,16 +44,16 @@ function setup() {
   createCanvas(640, 400);
   background(220);
 
-  //run a sliding window algorithm for time based data
+  // Run a sliding window algorithm for time based data
   let batchData = model.slidingWindow(data, features, targets, windowLength);
   let inputs = batchData.sequences;
   let outputs = batchData.targets;
 
-  // feed data into the model
+  // Feed data into the model
   for (let i = 0; i < inputs.length; i++) {
     model.addData(inputs[i], outputs[i]);
   }
-  // normalize the data after adding everything
+  // Normalize the data after adding everything
   model.normalizeData();
 
   let options = {
@@ -73,7 +73,7 @@ function draw() {
     text("Predicted Precipitation", 320, 200);
     text(precipitation, 320, 250);
 
-    // helpful visual based on predicted value
+    // Helpful visual based on predicted value
     push();
     textSize(precipitation * 5 + 10);
     text("🌧️", 320, 150);
@@ -81,23 +81,23 @@ function draw() {
   }
 }
 
-// predict data
+// Predict data
 function predictData() {
-  seq = model.sampleWindow(data); //helper function paired with the slidingWindow to get sample from data
+  seq = model.sampleWindow(data); //Helper function paired with the slidingWindow to get sample from data
   model.predict(seq, gotResults);
 }
 
-// put the new data in the dataset so this will be considered for any new predictions
+// Put the new data in the dataset so this will be considered for any new predictions
 function gotResults(results) {
   precipitation = results[4].value;
-  addNewData(results); //optional but will be helpful in using new prediction as part of dataset
+  addNewData(results); // Optional but will be helpful in using new prediction as part of dataset
 }
 
-// code for adding new data to the dataset to be used for future prediction
+// Code for adding new data to the dataset to be used for future prediction
 function addNewData(results) {
   (new_values = {
     date: " for the next hour",
-    temperature: results[0].value, // get string convert to float and round to 2 decimal points
+    temperature: results[0].value, // Get string convert to float and round to 2 decimal points
     humidity: results[1].value,
     wind_speed: results[2].value,
     pressure: results[3].value,
@@ -110,7 +110,7 @@ function finishedTraining() {
   state = "prediction";
 }
 
-// get buttons and assign functions (UI)
+// Get buttons and assign functions (UI)
 function UI() {
   pred_but = select("#pred_but");
   pred_but.mouseClicked(predictData);
