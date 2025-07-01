@@ -19,8 +19,12 @@ class DIYSequential extends DiyNeuralNetwork {
       },
       callback
     );
-    // call all options set in the this class which is the default, extra option for dataMode
-    this.options = { ...this.options, ...(options || {}) };
+    // call all options set in the this class which is the default, extra option for architecture
+    this.options = {
+      ...this.options,
+      architecture: "LSTM",
+      ...(options || {}),
+    };
 
     this.neuralNetworkData =
       this.options.neuralNetworkData || new SequentialData();
@@ -92,22 +96,22 @@ class DIYSequential extends DiyNeuralNetwork {
     );
 
     const task = this.options.task;
-    let taskConditions = task;
+    let taskConditions = task + this.options.architecture;
     switch (taskConditions) {
-      case "sequenceRegression":
-        layers = tsLayers.regression;
+      case "sequenceRegressionLSTM":
+        layers = tsLayers.sequenceRegressionLSTM;
         return this.createNetworkLayers(layers);
 
-      case "sequenceClassification":
-        layers = tsLayers.classification;
+      case "sequenceClassificationLSTM":
+        layers = tsLayers.sequenceClassificationLSTM;
         return this.createNetworkLayers(layers);
 
-      case "sequenceClassificationConv":
-        layers = tsLayers.classificationConv;
+      case "sequenceClassificationCNN":
+        layers = tsLayers.sequenceClassificationCNN;
         return this.createNetworkLayers(layers);
 
-      case "sequenceRegressionConv":
-        layers = tsLayers.regressionConv;
+      case "sequenceRegressionCNN":
+        layers = tsLayers.sequenceRegressionCNN;
         return this.createNetworkLayers(layers);
 
       default:

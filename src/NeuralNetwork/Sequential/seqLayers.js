@@ -4,7 +4,7 @@ export const createSeqLayers = (
   outputUnits = null
 ) => {
   return {
-    classificationConv: [
+    sequenceClassificationCNN: [
       {
         type: "conv1d",
         filters: 8,
@@ -40,7 +40,7 @@ export const createSeqLayers = (
         activation: "softmax",
       },
     ],
-    classification: [
+    sequenceClassificationLSTM: [
       {
         type: "lstm",
         units: 16,
@@ -65,7 +65,7 @@ export const createSeqLayers = (
         activation: "softmax",
       },
     ],
-    regressionConv: [
+    sequenceRegressionCNN: [
       {
         type: "conv1d",
         filters: 8,
@@ -101,7 +101,7 @@ export const createSeqLayers = (
         activation: "sigmoid",
       },
     ],
-    regression: [
+    sequenceRegressionLSTM: [
       {
         type: "lstm",
         units: 16,

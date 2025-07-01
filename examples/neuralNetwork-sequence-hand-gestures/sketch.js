@@ -26,7 +26,8 @@ function preload() {
   // Setup the timeseries neural network
   let options = {
     outputs: ["label"],
-    task: "sequenceClassificationConv",
+    task: "sequenceClassification",
+    architecture: "CNN",
     debug: "true",
     learningRate: 0.001, // The default learning rate of 0.01 didn't converge for this usecase, thus a learning rate of 0.001 is used (make smaller steps of parameters each update)
   };

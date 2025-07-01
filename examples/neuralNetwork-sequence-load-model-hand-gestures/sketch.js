@@ -26,7 +26,8 @@ function preload() {
 
   // Setup the timeseries neural network
   let options = {
-    task: "sequenceClassificationConv",
+    task: "sequenceClassification",
+    architecture: "CNN",
   };
 
   model = ml5.neuralNetwork(options);
