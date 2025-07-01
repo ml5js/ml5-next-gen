@@ -3,12 +3,11 @@ import axios from "axios";
 import { saveBlob } from "../../utils/io";
 import modelLoader from "../../utils/modelLoader";
 import nnUtils from "../NeuralNetworkUtils";
-
-import tsUtils from "./timeSeriesUtils";
+import seqUtils from "./sequentialUtils";
 
 import NeuralNetworkData from "../NeuralNetworkData";
 
-class TimeSeriesData extends NeuralNetworkData {
+class SequentialData extends NeuralNetworkData {
   constructor() {
     super();
   }
@@ -133,7 +132,7 @@ class TimeSeriesData extends NeuralNetworkData {
   normalizeDataRaw() {
     const normXs = this.normalizeInputData(this.meta.inputs, "xs");
     const normYs = this.normalizeInputData(this.meta.outputs, "ys");
-    const normalizedData = tsUtils.zipArraySequence(normXs, normYs);
+    const normalizedData = seqUtils.zipArraySequence(normXs, normYs);
 
     return normalizedData;
   }
@@ -217,7 +216,7 @@ class TimeSeriesData extends NeuralNetworkData {
       }
 
       // reshaping
-      output = tsUtils.reshapeTo3DArray(zipped, [
+      output = seqUtils.reshapeTo3DArray(zipped, [
         batch,
         seriesStep,
         feature_length,
@@ -264,7 +263,7 @@ class TimeSeriesData extends NeuralNetworkData {
       });
     }
     // reshaping
-    const output = tsUtils.reshapeTo3DArray(zipped, [
+    const output = seqUtils.reshapeTo3DArray(zipped, [
       batch,
       seriesStep,
       feature_length,
@@ -359,4 +358,4 @@ class TimeSeriesData extends NeuralNetworkData {
   }
 }
 
-export default TimeSeriesData;
+export default SequentialData;

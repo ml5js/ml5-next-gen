@@ -1,5 +1,5 @@
 import DiyNeuralNetwork from "./index.js";
-import DIYTimesSeries from "./Sequential/index.js";
+import DIYSequential from "./Sequential/index.js";
 
 // helper function to check if tasks follows specified convention
 const isTimeSeriesTask = (task) => {
@@ -33,7 +33,7 @@ const createNeuralNetwork = (inputsOrOptions, outputsOrCallback, callback) => {
 };
 
 // factory function for DIY Timeseries
-const createTimeSeries = (inputsOrOptions, outputsOrCallback, callback) => {
+const createSequential = (inputsOrOptions, outputsOrCallback, callback) => {
   let options;
   let cb;
 
@@ -48,7 +48,7 @@ const createTimeSeries = (inputsOrOptions, outputsOrCallback, callback) => {
     cb = callback;
   }
 
-  const instance = new DIYTimesSeries(options, cb);
+  const instance = new DIYSequential(options, cb);
   return instance;
 };
 
@@ -68,7 +68,7 @@ const neuralNetwork = (inputsOrOptions, outputsOrCallback, callback) => {
 
   // Choose which factory function to call based on task
   if (isTimeSeriesTask(options.task)) {
-    return createTimeSeries(inputsOrOptions, outputsOrCallback, callback);
+    return createSequential(inputsOrOptions, outputsOrCallback, callback);
   } else {
     return createNeuralNetwork(inputsOrOptions, outputsOrCallback, callback);
   }
