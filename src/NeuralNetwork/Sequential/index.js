@@ -1,18 +1,16 @@
 import * as tf from "@tensorflow/tfjs";
-
 import { DiyNeuralNetwork } from "..";
 
 import callCallback from "../../utils/callcallback";
 import setBackend from "../../utils/setBackend";
 
-import tsUtils from "./timeSeriesUtils";
-
-import TimeSeriesData from "./timeSeriesData";
-import { createTsLayers } from "./tsLayers";
+import seqUtils from "./sequentialUtils";
+import SequentialData from "./sequentialData";
+import { createSeqLayers } from "./seqLayers";
 
 // call an extension of DIY Neural Network as a new class, override select methods
 // which are seen below:
-class DIYTimesSeries extends DiyNeuralNetwork {
+class DIYSequential extends DiyNeuralNetwork {
   constructor(options, callback) {
     super(
       {
@@ -25,7 +23,7 @@ class DIYTimesSeries extends DiyNeuralNetwork {
     this.options = { ...this.options, ...(options || {}) };
 
     this.neuralNetworkData =
-      this.options.neuralNetworkData || new TimeSeriesData();
+      this.options.neuralNetworkData || new SequentialData();
 
     this.init = this.init.bind(this);
     this.ready = callCallback(this.init(), callback);
@@ -43,10 +41,10 @@ class DIYTimesSeries extends DiyNeuralNetwork {
 
   addData(xInputs, yInputs, options = null) {
     // 1. verify format between the three possible types of xinputs
-    const xs = tsUtils.verifyAndFormatInputs(xInputs, options, this.options);
+    const xs = seqUtils.verifyAndFormatInputs(xInputs, options, this.options);
 
     // 2. format the yInput - same logic as NN class
-    const ys = tsUtils.verifyAndFormatOutputs(yInputs, options, this.options);
+    const ys = seqUtils.verifyAndFormatOutputs(yInputs, options, this.options);
 
     // 3. add data to raw
     this.neuralNetworkData.addData(xs, ys);
@@ -56,7 +54,7 @@ class DIYTimesSeries extends DiyNeuralNetwork {
     const { meta } = this.neuralNetworkData;
     const inputHeaders = Object.keys(meta.inputs);
 
-    const formatted_inputs = tsUtils.verifyAndFormatInputs(
+    const formatted_inputs = seqUtils.verifyAndFormatInputs(
       _input,
       null,
       this.options
@@ -87,7 +85,7 @@ class DIYTimesSeries extends DiyNeuralNetwork {
   addDefaultLayers() {
     let layers;
 
-    const tsLayers = createTsLayers(
+    const tsLayers = createSeqLayers(
       this.neuralNetworkData.meta.seriesShape,
       this.options.hiddenUnits,
       this.numberOfClasses // For output units if needed
@@ -175,7 +173,7 @@ class DIYTimesSeries extends DiyNeuralNetwork {
   // RDP algorithm
   padCoordinates(coordinates, targetPointCount) {
     const maxEpsilon = int(coordinates.length / 2);
-    return tsUtils.padCoordinates(coordinates, targetPointCount, maxEpsilon);
+    return seqUtils.padCoordinates(coordinates, targetPointCount, maxEpsilon);
   }
 
   slidingWindow(data, featureKeys, targetKeys, batchLength = null) {
@@ -189,7 +187,7 @@ class DIYTimesSeries extends DiyNeuralNetwork {
       this.batchLength = batchLength;
     }
 
-    return tsUtils.createSlidingWindowData(
+    return seqUtils.createSlidingWindowData(
       data,
       this.batchLength,
       this.featureKeys,
@@ -203,8 +201,8 @@ class DIYTimesSeries extends DiyNeuralNetwork {
         "Your data must be formated through the slidingWindow method first!"
       );
     }
-    return tsUtils.getLatestSequence(data, this.batchLength, this.featureKeys);
+    return seqUtils.getLatestSequence(data, this.batchLength, this.featureKeys);
   }
 }
 
-export default DIYTimesSeries; //export for taskSelection
+export default DIYSequential; //export for taskSelection

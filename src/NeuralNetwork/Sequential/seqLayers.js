@@ -1,4 +1,4 @@
-export const createTsLayers = (
+export const createSeqLayers = (
   seriesShape,
   hiddenUnits,
   outputUnits = null

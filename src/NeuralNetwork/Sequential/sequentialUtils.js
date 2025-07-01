@@ -1,7 +1,7 @@
 import { data, input } from "@tensorflow/tfjs";
 import nnUtils from "../NeuralNetworkUtils";
 
-class TimeSeriesUtils {
+class SequentialUtils {
   constructor(options) {
     this.options = options || {};
   }
@@ -479,9 +479,9 @@ class TimeSeriesUtils {
   }
 }
 
-const timeSeriesUtils = () => {
-  const instance = new TimeSeriesUtils();
+const sequentialUtils = () => {
+  const instance = new SequentialUtils();
   return instance;
 };
 
-export default timeSeriesUtils();
+export default sequentialUtils();
