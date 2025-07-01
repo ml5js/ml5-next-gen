@@ -34,8 +34,18 @@ function draw() {
     let face = faces[j];
 
     noFill();
-
+    const minPointsPerLip = Math.floor((face.lips.keypoints.length - 2) / 4);
     // draw the lips
+    face.lips.keypoints.splice(
+      minPointsPerLip,
+      0,
+      face.lips.keypoints[2 * minPointsPerLip]
+    ); // Extreme left point for lower outer lip
+    face.lips.keypoints.splice(
+      3 * minPointsPerLip + 2,
+      0,
+      face.lips.keypoints[face.lips.keypoints.length - 1]
+    ); // Extreme left point for lower inner lip
     stroke(255, 0, 255);
     beginShape();
     for (let i = 0; i < face.lips.keypoints.length; i++) {
