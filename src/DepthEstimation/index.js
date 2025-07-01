@@ -176,7 +176,7 @@ class DepthEstimation {
         colormap: {
           type: "enum",
           enums: ["color", "grayscale"],
-          default: "COLOR",
+          default: "GRAYSCALE",
           transform: (v) => v.toUpperCase(),
         },
         targetFps: { type: "number", min: 1, default: null },

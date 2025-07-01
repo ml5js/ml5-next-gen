@@ -21,7 +21,7 @@ const options = {
   // maxDepth: 0.75,              // Default is 1.0
   normalizationSmoothingFactor: 1, // Default is 0.5 (only used if normalizeDynamically is true)
   applySegmentationMask: true, // Default is false
-  // colormap: 'grayscale', // Default is 'color'
+  // colormap: 'color', // Default is 'grayscale'
   flipped: true, // Default is false
 };
 
