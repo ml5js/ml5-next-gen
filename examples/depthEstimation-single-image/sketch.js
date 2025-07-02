@@ -25,12 +25,11 @@ function preload() {
   depthEstimator = ml5.depthEstimation(options);
 }
 
-async function setup() {
+function setup() {
   // Create a canvas twice the width of the image
   createCanvas(img.width * 2, img.height);
 
   // Estimate depth from the loaded image
-  console.log("Estimating depth...");
   depthEstimator.estimate(img, gotResults);
 }
 
@@ -60,6 +59,4 @@ function draw() {
 // Callback function that receives the depth estimation results
 function gotResults(result) {
   depthResult = result; // Store the result
-  console.log("Depth estimation complete!");
-  console.log("Depth Result:", depthResult); // Log the result object
 }

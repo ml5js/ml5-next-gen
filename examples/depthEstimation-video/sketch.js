@@ -27,9 +27,7 @@ const options = {
 
 function preload() {
   // Initialize the depth estimation model
-  console.log("Loading depth estimation model...");
   depthEstimator = ml5.depthEstimation(options);
-  console.log("Model loaded successfully!");
 }
 
 function setup() {
@@ -41,7 +39,6 @@ function setup() {
   video.size(videoWidth, videoHeight); // Set video size
   video.hide(); // Hide the default HTML video element
 
-  console.log("Starting depth estimation...");
   // Start continuous depth estimation on the video feed
   depthEstimator.estimateStart(video, gotResults);
 }
@@ -77,11 +74,4 @@ function draw() {
 function gotResults(result) {
   // Store the latest result in the global variable
   depthResult = result;
-}
-
-// Optional: Log the full result object when the mouse is pressed
-function mousePressed() {
-  if (depthResult) {
-    console.log("Current Depth Result:", depthResult);
-  }
 }
