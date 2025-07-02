@@ -2,7 +2,8 @@ const { resolve } = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { merge } = require("webpack-merge");
 const TerserPlugin = require("terser-webpack-plugin");
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin =
+  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 const commonConfig = {
   context: __dirname,
@@ -117,9 +118,7 @@ const productionConfig = {
       util: false,
     },
   },
-  plugins: [
-    ...(process.env.ANALYZE ? [new BundleAnalyzerPlugin()] : []),
-  ],
+  plugins: [...(process.env.ANALYZE ? [new BundleAnalyzerPlugin()] : [])],
 };
 
 module.exports = function (env, args) {
