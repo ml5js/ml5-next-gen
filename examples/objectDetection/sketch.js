@@ -21,14 +21,10 @@ function setup() {
 }
 
 function videoReady() {
-  // Models available are 'cocossd', 'yolo'
   detector = ml5.objectDetector('cocossd', modelReady);
 }
 
-function gotDetections(error, results) {
-  if (error) {
-    console.error(error);
-  }
+function gotDetections(results) {
   detections = results;
   detector.detect(video, gotDetections);
 }

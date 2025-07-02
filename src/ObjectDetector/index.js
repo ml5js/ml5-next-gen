@@ -7,6 +7,8 @@
   ObjectDetection
 */
 
+console.log("running ObjectDetection/index.js");
+
 import handleArguments from "../utils/handleArguments";
 import {CocoSsd} from "./cocossd.js";
 
@@ -32,11 +34,11 @@ class ObjectDetector {
 
     switch (modelNameOrUrl) {
       case "cocossd":
-        this.model = new CocoSsd(this.video, this.options, callback);
+        this.model = CocoSsd(this.video, this.options, callback);
         return this;
       default:
         // use cocossd as default
-        this.model = new CocoSsd(this.video, this.options, callback);
+        this.model = CocoSsd(this.video, this.options, callback);
         return this;
     }
   }
@@ -53,6 +55,8 @@ const objectDetector = (...inputs) => {
   }
 
   const instance = new ObjectDetector(model, video, options, callback);
+
+  console.log("model", instance.model, instance.model.ready);
 
   return instance.model.callback ? instance.model : instance.model.ready;
 };

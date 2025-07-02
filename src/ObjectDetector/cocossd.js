@@ -40,6 +40,8 @@ export class CocoSsdBase {
    * load model
    */
   async loadModel() {
+    await tf.ready();
+
     this.model = await cocoSsd.load(this.config);
 
     this.modelReady = true;
@@ -115,4 +117,4 @@ export const CocoSsd = (...inputs) => {
   return new CocoSsdBase(video, options, callback);
 };
 
-// export default CocoSsd;
+export default CocoSsd;
