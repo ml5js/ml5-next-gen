@@ -26,6 +26,7 @@ import { mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
 import { UV_COORDS } from "./uv_coords";
+import p5Utils from "../utils/p5Utils";
 
 /**
  * User provided options object for FaceMesh. See config schema below for default and available values.
@@ -375,10 +376,7 @@ class FaceMesh {
  * @param {function} [callback] - A callback to be called when the model is ready.
  * @returns {Object} A new faceMesh instance.
  */
-const faceMesh = (...inputs) => {
+export const faceMesh = p5Utils.maybeRegisterPreload((...inputs) => {
   const { string, options = {}, callback } = handleArguments(...inputs);
-  const instance = new FaceMesh(string, options, callback);
-  return instance;
-};
-
-export default faceMesh;
+  return new FaceMesh(string, options, callback);
+});

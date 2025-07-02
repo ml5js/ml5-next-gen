@@ -2,6 +2,8 @@ const { resolve } = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { merge } = require("webpack-merge");
 const TerserPlugin = require("terser-webpack-plugin");
+const BundleAnalyzerPlugin =
+  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 const commonConfig = {
   context: __dirname,
@@ -12,16 +14,31 @@ const commonConfig = {
     library: {
       name: "ml5",
       type: "umd",
-      export: "default",
     },
   },
 };
 
 const developmentConfig = {
   mode: "development",
+  entry: {
+    ml5: "./src/index.js",
+    "ml5-body-pose": "./src/BodyPose/index.js",
+    "ml5-body-segmentation": "./src/BodySegmentation/index.js",
+    "ml5-face-mesh": "./src/FaceMesh/index.js",
+    "ml5-hand-pose": "./src/HandPose/index.js",
+    "ml5-image-classifier": "./src/ImageClassifier/index.js",
+    "ml5-neural-network": "./src/NeuralNetwork/index.js",
+    "ml5-sentiment": "./src/Sentiment/index.js",
+    "ml5-sound-classifier": "./src/SoundClassifier/index.js",
+  },
   devtool: "inline-source-map",
   output: {
     publicPath: "/dist/",
+    filename: "[name].js",
+    library: {
+      name: ["ml5"],
+      type: "umd",
+    },
   },
   devServer: {
     port: 8080,
@@ -44,13 +61,14 @@ const developmentConfig = {
     new HtmlWebpackPlugin({
       title: "ml5",
     }),
+    ...(process.env.ANALYZE ? [new BundleAnalyzerPlugin()] : []),
   ],
   resolve: {
     fallback: {
       fs: false,
-      util: false
+      util: false,
     },
-  }
+  },
 };
 
 const productionConfig = {
@@ -58,18 +76,38 @@ const productionConfig = {
   entry: {
     ml5: "./src/index.js",
     "ml5.min": "./src/index.js",
+    "ml5-body-pose": "./src/BodyPose/index.js",
+    "ml5-body-pose.min": "./src/BodyPose/index.js",
+    "ml5-body-segmentation": "./src/BodySegmentation/index.js",
+    "ml5-body-segmentation.min": "./src/BodySegmentation/index.js",
+    "ml5-face-mesh": "./src/FaceMesh/index.js",
+    "ml5-face-mesh.min": "./src/FaceMesh/index.js",
+    "ml5-hand-pose": "./src/HandPose/index.js",
+    "ml5-hand-pose.min": "./src/HandPose/index.js",
+    "ml5-image-classifier": "./src/ImageClassifier/index.js",
+    "ml5-image-classifier.min": "./src/ImageClassifier/index.js",
+    "ml5-neural-network": "./src/NeuralNetwork/index.js",
+    "ml5-neural-network.min": "./src/NeuralNetwork/index.js",
+    "ml5-sentiment": "./src/Sentiment/index.js",
+    "ml5-sentiment.min": "./src/Sentiment/index.js",
+    "ml5-sound-classifier": "./src/SoundClassifier/index.js",
+    "ml5-sound-classifier.min": "./src/SoundClassifier/index.js",
   },
   devtool: "source-map",
   output: {
     publicPath: "/",
     filename: "[name].js",
+    library: {
+      name: ["ml5"],
+      type: "umd",
+    },
   },
   optimization: {
     minimize: true,
     minimizer: [
       new TerserPlugin({
-        include: "ml5.min.js",
-        exclude: "ml5.js",
+        include: /\.min\.js$/,
+        exclude: /^(?!.*\.min\.js$).*\.js$/,
         extractComments: false,
       }),
     ],
@@ -77,9 +115,10 @@ const productionConfig = {
   resolve: {
     fallback: {
       fs: false,
-      util: false
+      util: false,
     },
-  }
+  },
+  plugins: [...(process.env.ANALYZE ? [new BundleAnalyzerPlugin()] : [])],
 };
 
 module.exports = function (env, args) {

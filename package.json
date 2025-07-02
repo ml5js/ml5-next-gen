@@ -12,13 +12,17 @@
     "test": "jest --config tests/jest.config.js",
     "upload-examples": "node scripts/uploadExamples.js",
     "update-p5-version": "node scripts/updateP5Version.js",
-    "update-readme": "node scripts/updateReadme.js"
+    "update-readme": "node scripts/updateReadme.js",
+    "analyze": "ANALYZE=true webpack --config webpack.config.js --mode production"
   },
   "files": [
     "dist"
   ],
   "keywords": [
     "ML5"
+  ],
+  "sideEffects": [
+    "src/index.js"
   ],
   "author": "ml5",
   "license": "MIT",
@@ -46,6 +50,7 @@
     "rimraf": "^5.0.5",
     "terser-webpack-plugin": "^5.3.10",
     "webpack": "^5.76.1",
+    "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^5.0.1",
     "webpack-dev-server": "^4.15.1"
   },

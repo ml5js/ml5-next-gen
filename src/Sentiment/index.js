@@ -3,6 +3,8 @@ import callCallback from "../utils/callcallback";
 import modelLoader from "../utils/modelLoader";
 import handleArguments from "../utils/handleArguments";
 import { handleModelName } from "../utils/handleOptions";
+import p5Utils from "../utils/p5Utils";
+
 /**
  * Initializes the Sentiment demo.
  */
@@ -143,10 +145,7 @@ class Sentiment {
   }
 }
 
-const sentiment = (...inputs) => {
+export const sentiment = p5Utils.maybeRegisterPreload((...inputs) => {
   const { string, callback } = handleArguments(...inputs);
-  const instance = new Sentiment(string, callback);
-  return instance;
-};
-
-export default sentiment;
+  return new Sentiment(string, callback);
+});
