@@ -54,9 +54,9 @@ function draw() {
       let a = face.keypoints[indexA];
       let b = face.keypoints[indexB];
       let c = face.keypoints[indexC];
-      const uvA = { x: uvCoords[indexA][0], y: uvCoords[indexA][1] };
-      const uvB = { x: uvCoords[indexB][0], y: uvCoords[indexB][1] };
-      const uvC = { x: uvCoords[indexC][0], y: uvCoords[indexC][1] };
+      let uvA = { x: uvCoords[indexA][0], y: uvCoords[indexA][1] };
+      let uvB = { x: uvCoords[indexB][0], y: uvCoords[indexB][1] };
+      let uvC = { x: uvCoords[indexC][0], y: uvCoords[indexC][1] };
       vertex(a.x, a.y, uvA.x, uvA.y);
       vertex(b.x, b.y, uvB.x, uvB.y);
       vertex(c.x, c.y, uvC.x, uvC.y);

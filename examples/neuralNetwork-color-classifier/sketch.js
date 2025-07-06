@@ -58,7 +58,7 @@ function setup() {
   classifier.normalizeData();
 
   // Step 6: train your neural network
-  const trainingOptions = {
+  let trainingOptions = {
     epochs: 32,
     batchSize: 12,
   };
@@ -71,7 +71,7 @@ function finishedTraining() {
 
 // Step 8: make a classification
 function classify() {
-  const input = [r, g, b];
+  let input = [r, g, b];
   classifier.classify(input, handleResults);
 }
 

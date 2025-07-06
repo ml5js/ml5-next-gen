@@ -36,7 +36,7 @@ function setup() {
   };
   classifier = ml5.neuralNetwork(classifierOptions);
 
-  const modelDetails = {
+  let modelDetails = {
     model: "model/model.json",
     metadata: "model/model_meta.json",
     weights: "model/model.weights.bin",
