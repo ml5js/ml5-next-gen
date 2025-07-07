@@ -16,6 +16,14 @@ function isP5Extensions(source) {
   return Boolean(source && typeof source.loadImage === "function");
 }
 
+function promisifyModel(model) {
+  return (...args) => {
+    const result = model(...args);
+    if (result.ready) return result.ready.then(() => result);
+    return Promise.resolve(result);
+  };
+}
+
 class P5Util {
   constructor() {
     /**
@@ -102,13 +110,19 @@ class P5Util {
    * Store the references in case p5 is added later.
    *
    * @param {*} ml5Library - the `ml5` variable.
-   * @param {Array<string>} methodNames - an array of ml5 functions to preload.
+   * @param {Array<string>} withPreloadMethods - an array of ml5 functions to preload.
+   * @param {Array<string>} withoutAsyncMethods - an array of ml5 functions to not promiseify.
    */
-  shouldPreload(ml5Library, methodNames) {
-    this.methodsToPreload = methodNames;
+  shouldPreload(ml5Library, withPreloadMethods, withoutAsyncMethods) {
+    this.methodsToPreload = withPreloadMethods;
     this.ml5Library = ml5Library;
     if (this.checkP5()) {
       this.registerPreloads();
+    } else {
+      this.methodsToPreload.forEach((method) => {
+        if (withoutAsyncMethods.includes(method)) return;
+        ml5Library[method] = promisifyModel(ml5Library[method]);
+      });
     }
   }
 

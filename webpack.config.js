@@ -24,7 +24,6 @@ const developmentConfig = {
     publicPath: "/dist/",
   },
   devServer: {
-    port: 8080,
     allowedHosts: "all",
     static: [
       {
@@ -37,8 +36,12 @@ const developmentConfig = {
         publicPath: "/examples",
         watch: true,
       },
+      {
+        directory: resolve(__dirname, "examples-next"),
+        publicPath: "/examples-next",
+        watch: true,
+      },
     ],
-    open: "/examples",
   },
   plugins: [
     new HtmlWebpackPlugin({

@@ -24,6 +24,10 @@ const withPreload = {
   soundClassifier,
 };
 
+const withoutAsync = {
+  neuralNetwork,
+};
+
 const ml5 = Object.assign({ p5Utils }, withPreload, {
   tf,
   tfvis,
@@ -32,7 +36,7 @@ const ml5 = Object.assign({ p5Utils }, withPreload, {
   setP5: p5Utils.setP5.bind(p5Utils),
 });
 
-p5Utils.shouldPreload(ml5, Object.keys(withPreload));
+p5Utils.shouldPreload(ml5, Object.keys(withPreload), Object.keys(withoutAsync));
 
 communityStatement();
 

@@ -6,7 +6,8 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "webpack --config webpack.config.js --mode production",
-    "start": "webpack serve --config webpack.config.js --mode development",
+    "start": "webpack serve --config webpack.config.js --mode development --open /examples --port 8080",
+    "start:next": "webpack serve --config webpack.config.js --mode development --open /examples-next --port 8081",
     "format": "prettier --write \"**/*.js\"",
     "postinstall": "patch-package",
     "test": "jest --config tests/jest.config.js",
