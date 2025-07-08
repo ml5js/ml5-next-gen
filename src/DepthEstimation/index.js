@@ -86,7 +86,7 @@ const COLORMAPS = {
  * @property {boolean} [normalizeDynamically=false] - If true, calculate min/max depth from each frame for normalization, overriding `minDepth` and `maxDepth`.
  * @property {number} [normalizationSmoothingFactor=0.5] - Smoothing factor (0-1) for dynamic normalization range. Higher values react faster to changes. Only used if `normalizeDynamically` is true.
  * @property {boolean} [flipHorizontal=false] - Whether to flip the input image horizontally. Alias: `flipped`.
- * @property {ColormapName | string} [colormap='COLOR'] - The colormap for `visualization` output. Options: 'color', 'grayscale'.
+ * @property {ColormapName | string} [colormap='GRAYSCALE'] - The colormap for `result.image` output. Options: 'color', 'grayscale'.
  * @property {number | null} [targetFps=null] - Target FPS for continuous estimation (`estimateStart`). If set, skips frames to approximate the target. `null` runs as fast as possible.
  * @property {boolean} [applySegmentationMask=false] - If true, applies a body segmentation mask to the input before depth estimation. May improve focus on foreground subjects but adds overhead.
  * @property {number} [segmentationOpacity=1.0] - Opacity of the background mask when `applySegmentationMask` is true.
@@ -96,10 +96,8 @@ const COLORMAPS = {
 /**
  * @typedef {Object} DepthEstimationResult The result object from a depth estimation.
  * @property {number[][]} data - Raw depth map as a 2D array.
- * @property {ImageData} depthMap - Grayscale ImageData visualization (normalized).
- * @property {ImageData} visualization - Colormapped ImageData visualization (normalized).
- * @property {p5.Image | ImageData} depthMapImage - p5.Image (if available) or ImageData of grayscale depth map.
- * @property {p5.Image | ImageData} visualizationImage - p5.Image (if available) or ImageData of colormapped visualization.
+ * @property {p5.Image | ImageData} image - p5.Image (if p5 is running) or ImageData of depth map with chosen colormap.
+ * @property {ImageData} imageData - ImageData visualization (normalized) with chosen colormap.
  * @property {number} width - Width of the depth map.
  * @property {number} height - Height of the depth map.
  * @property {number} minDepth - The minimum depth value used for normalization in this result (either fixed or dynamically calculated/smoothed).
@@ -410,16 +408,8 @@ class DepthEstimation {
       result.data = depthData;
       result.tensor = actualTensor; // Provide actual tensor for advanced use (user must dispose)
 
-      // Create visualizations using the determined min/max range
-      result.depthMap = this.createImageDataFromDepthValues(
-        depthData,
-        width,
-        height,
-        result.minDepth,
-        result.maxDepth,
-        "GRAYSCALE"
-      );
-      result.visualization = this.createImageDataFromDepthValues(
+      // Create an ImageData using the determined min/max range
+      result.imageData = this.createImageDataFromDepthValues(
         depthData,
         width,
         height,
@@ -453,10 +443,10 @@ class DepthEstimation {
               binaryMask = this._flipImageDataHorizontally(binaryMask);
             }
 
-            const vizData = result.visualization.data;
+            const vizData = result.imageData.data; //this is a reference to the ImageData data array. Changes to this also change imageData
             const maskData = binaryMask.data; // Use potentially flipped mask data
 
-            // Iterate through the visualization ImageData
+            // Iterate through the imageData pixels and mask with the segmentation result
             for (let i = 0; i < vizData.length; i += 4) {
               // Check the alpha channel of the mask (index i + 3)
               // If mask alpha is 255, it's a background pixel
@@ -478,10 +468,6 @@ class DepthEstimation {
                 });
               }
             }
-            // Regenerate p5 image if needed, after modifying ImageData
-            result.visualizationImage = this.generateP5Image(
-              result.visualization
-            );
           }
           // No else needed, if no people found, visualization remains unchanged
         } catch (segError) {
@@ -489,19 +475,12 @@ class DepthEstimation {
             "Error applying segmentation mask to visualization:",
             segError
           );
-          // Fallback to unmasked visualization if error occurs
-          result.visualizationImage = this.generateP5Image(
-            result.visualization
-          ); // Still generate p5 image
         }
-      } else {
-        // If segmentation not applied, generate p5 image from original visualization
-        result.visualizationImage = this.generateP5Image(result.visualization);
       }
       // --- End Apply Black Background ---
 
-      result.depthMapImage = this.generateP5Image(result.depthMap);
-      // result.visualizationImage = this.generateP5Image(result.visualization); // Moved inside the if/else block above
+      //Make the p5.Image version of the depth image
+      result.image = this.generateP5Image(result.imageData);
 
       result.width = width;
       result.height = height;

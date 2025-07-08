@@ -9,7 +9,7 @@
 // Global variables
 let depthEstimator;
 let img;
-let depthResult;
+let depthMap;
 
 // Default options for depth estimation (can be adjusted if needed)
 const options = {
@@ -42,9 +42,9 @@ function draw() {
   }
 
   // Check if depth estimation results are available
-  if (depthResult && depthResult.visualizationImage) {
+  if (depthMap && depthMap.image) {
     // Draw the colormapped depth visualization on the right half of the canvas
-    image(depthResult.visualizationImage, img.width, 0, img.width, img.height);
+    image(depthMap.image, img.width, 0, img.width, img.height);
   } else {
     // If no results yet, display a simple status message on the right half
     fill(255);
@@ -58,5 +58,5 @@ function draw() {
 
 // Callback function that receives the depth estimation results
 function gotResults(result) {
-  depthResult = result; // Store the result
+  depthMap = result; // Store the resulr
 }

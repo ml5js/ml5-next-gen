@@ -8,7 +8,7 @@
 
 let depthEstimator;
 let video;
-let depthResult;
+let depthMap;
 
 // Video dimensions
 const videoWidth = 640;
@@ -22,7 +22,7 @@ const options = {
   normalizationSmoothingFactor: 1, // Default is 0.5 (only used if normalizeDynamically is true)
   applySegmentationMask: true, // Default is false
   // colormap: 'color', // Default is 'grayscale'
-  flipped: true, // Default is false
+  flipped: false, // Default is false
 };
 
 function preload() {
@@ -50,10 +50,10 @@ function draw() {
   image(video, 0, 0, videoWidth, videoHeight);
 
   // Check if depth estimation results are available
-  if (depthResult && depthResult.visualizationImage) {
+  if (depthMap && depthMap.image) {
     // Draw the colormapped depth visualization on the right half of the canvas
     image(
-      depthResult.visualizationImage,
+      depthMap.image,
       videoWidth,
       0,
       videoWidth,
@@ -73,5 +73,5 @@ function draw() {
 // Callback function that receives the depth estimation results
 function gotResults(result) {
   // Store the latest result in the global variable
-  depthResult = result;
+  depthMap = result;
 }
