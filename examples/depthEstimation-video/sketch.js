@@ -11,11 +11,11 @@ let video;
 let depthMap;
 
 // Video dimensions
-const videoWidth = 640;
-const videoHeight = 480;
+let videoWidth = 640;
+let videoHeight = 480;
 
 // Default options for depth estimation (can be adjusted if needed)
-const options = {
+let options = {
   normalizeDynamically: true, // Default is false
   // minDepth: 0.25,             // Default is 0.0
   // maxDepth: 0.75,              // Default is 1.0

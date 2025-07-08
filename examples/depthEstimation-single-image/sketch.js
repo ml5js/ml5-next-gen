@@ -12,7 +12,7 @@ let img;
 let depthMap;
 
 // Default options for depth estimation (can be adjusted if needed)
-const options = {
+let options = {
   //normalizeDynamically: true, // Default is false
   minDepth: 0.21, // Default is 0.0
   maxDepth: 0.73, // Default is 1.0
