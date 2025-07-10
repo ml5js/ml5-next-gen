@@ -6,8 +6,8 @@ const isSequenceTask = (task) => {
   const sequenceTask = [
     "sequenceClassification",
     "sequenceRegression",
-    "sequenceClassificationConv",
-    "sequenceRegressionConv",
+    "sequenceClassificationWithCNN",
+    "sequenceRegressionWithCNN",
   ];
   return sequenceTask.includes(task);
 };

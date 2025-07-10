@@ -17,7 +17,7 @@ function preload() {
   let options = {
     inputs: ["x", "y"],
     outputs: ["label"],
-    task: "sequenceClassificationConv",
+    task: "sequenceClassificationWithCNN",
     debug: true,
     learningRate: 0.005, // Learning rate decreased for better convergence
   };
