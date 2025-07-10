@@ -256,6 +256,7 @@ class DepthEstimation {
 
     const currentRuntimeConfig = { ...this.runtimeConfig, ...options };
     let inputForDepth = image; // Default to original image
+    let backgroundDarkeningMask = null;
 
     // --- Apply Segmentation Mask (if enabled) ---
     if (currentRuntimeConfig.applySegmentationMask) {
@@ -266,8 +267,8 @@ class DepthEstimation {
           if (segmentation && segmentation.length > 0) {
             const foregroundColor = { r: 0, g: 0, b: 0, a: 0 }; // Transparent foreground
             const backgroundColor = { r: 0, g: 0, b: 0, a: 255 }; // Opaque background (will be drawn over)
-            // Note: TFJS Body Segmentation `toBinaryMask` might be async
-            const backgroundDarkeningMask = await bodySegmentation.toBinaryMask(
+           
+            backgroundDarkeningMask = await bodySegmentation.toBinaryMask(
               segmentation,
               foregroundColor,
               backgroundColor
@@ -290,6 +291,7 @@ class DepthEstimation {
 
             // Dispose segmentation tensor(s) - crucial!
             if (backgroundDarkeningMask && backgroundDarkeningMask.dispose) {
+              //I belive this never occurs, because toBinaryMask returns ImageData or null only
               backgroundDarkeningMask.dispose();
             } else if (Array.isArray(segmentation)) {
               // Newer versions might return segmentation objects directly
@@ -338,7 +340,8 @@ class DepthEstimation {
         result = await this.processDepthMap(
           depthMapResult,
           image,
-          currentRuntimeConfig
+          currentRuntimeConfig,
+          backgroundDarkeningMask
         );
       } else {
         console.warn("Depth estimation returned no result for this input.");
@@ -354,7 +357,12 @@ class DepthEstimation {
   }
 
   /** Processes the DepthMap result object from the model. @private */
-  async processDepthMap(depthMapResult, sourceElement, currentRuntimeConfig) {
+  async processDepthMap(
+    depthMapResult,
+    sourceElement,
+    currentRuntimeConfig,
+    binaryMask = null
+  ) {
     // Renamed parameter
     const result = {};
     let minDepthActual, maxDepthActual;
@@ -419,62 +427,26 @@ class DepthEstimation {
       );
 
       // --- Apply Black Background using Segmentation Mask (if enabled) ---
-      if (currentRuntimeConfig.applySegmentationMask && this.segmenter) {
-        try {
-          // Run segmentation on the *original* source element to get the mask
-          const segmentation = await this.segmenter.segmentPeople(
-            sourceElement
-          );
-          if (segmentation && segmentation.length > 0) {
-            // Create a mask where background is opaque (alpha=255), foreground is transparent (alpha=0)
-            const foregroundColor = { r: 0, g: 0, b: 0, a: 0 };
-            const backgroundColor = { r: 0, g: 0, b: 0, a: 255 };
-            // Note: TFJS Body Segmentation `toBinaryMask` might be async
-            let binaryMask = await bodySegmentation.toBinaryMask(
-              // Use let
-              segmentation,
-              foregroundColor,
-              backgroundColor
-            );
+      if (currentRuntimeConfig.applySegmentationMask && binaryMask) {
+        // If the input was flipped for depth estimation, flip the mask too
+        // so it aligns with the visualization derived from the (potentially flipped) depth map.
+        if (currentRuntimeConfig.flipHorizontal) {
+          binaryMask = this._flipImageDataHorizontally(binaryMask);
+        }
 
-            // If the input was flipped for depth estimation, flip the mask too
-            // so it aligns with the visualization derived from the (potentially flipped) depth map.
-            if (currentRuntimeConfig.flipHorizontal) {
-              binaryMask = this._flipImageDataHorizontally(binaryMask);
-            }
+        const vizData = result.imageData.data; //this is a reference to the ImageData data array. Changes to this also change imageData
+        const maskData = binaryMask.data; // Use potentially flipped mask data
 
-            const vizData = result.imageData.data; //this is a reference to the ImageData data array. Changes to this also change imageData
-            const maskData = binaryMask.data; // Use potentially flipped mask data
-
-            // Iterate through the imageData pixels and mask with the segmentation result
-            for (let i = 0; i < vizData.length; i += 4) {
-              // Check the alpha channel of the mask (index i + 3)
-              // If mask alpha is 255, it's a background pixel
-              if (maskData[i + 3] === 255) {
-                vizData[i] = 0; // Set Red to 0 (black)
-                vizData[i + 1] = 0; // Set Green to 0 (black)
-                vizData[i + 2] = 0; // Set Blue to 0 (black)
-                // vizData[i + 3] remains 255 (opaque)
-              }
-            }
-
-            // Dispose segmentation tensor(s) from this specific operation
-            if (binaryMask && binaryMask.dispose) {
-              // binaryMask itself is ImageData, check if segmentation has tensor
-              // Newer versions might return segmentation objects directly
-              if (Array.isArray(segmentation)) {
-                segmentation.forEach((seg) => {
-                  if (seg.mask && seg.mask.dispose) seg.mask.dispose(); // Dispose mask if it's a tensor
-                });
-              }
-            }
+        // Iterate through the imageData pixels and mask with the segmentation result
+        for (let i = 0; i < vizData.length; i += 4) {
+          // Check the alpha channel of the mask (index i + 3)
+          // If mask alpha is 255, it's a background pixel
+          if (maskData[i + 3] === 255) {
+            vizData[i] = 0; // Set Red to 0 (black)
+            vizData[i + 1] = 0; // Set Green to 0 (black)
+            vizData[i + 2] = 0; // Set Blue to 0 (black)
+            // vizData[i + 3] remains 255 (opaque)
           }
-          // No else needed, if no people found, visualization remains unchanged
-        } catch (segError) {
-          console.error(
-            "Error applying segmentation mask to visualization:",
-            segError
-          );
         }
       }
       // --- End Apply Black Background ---
@@ -579,6 +551,7 @@ class DepthEstimation {
       // --- End FPS Control ---
 
       let inputForDepth = this.detectMedia;
+      let backgroundDarkeningMask = null; // Reset for each frame
       // --- Apply Segmentation Mask (if enabled) ---
       if (this.runtimeConfig.applySegmentationMask && this.segmenter) {
         try {
@@ -588,7 +561,7 @@ class DepthEstimation {
           if (segmentation && segmentation.length > 0) {
             const foregroundColor = { r: 0, g: 0, b: 0, a: 0 };
             const backgroundColor = { r: 0, g: 0, b: 0, a: 255 };
-            const backgroundDarkeningMask = await bodySegmentation.toBinaryMask(
+            backgroundDarkeningMask = await bodySegmentation.toBinaryMask(
               segmentation,
               foregroundColor,
               backgroundColor
@@ -648,7 +621,8 @@ class DepthEstimation {
           result = await this.processDepthMap(
             depthMapResult,
             this.detectMedia,
-            this.runtimeConfig
+            this.runtimeConfig,
+            backgroundDarkeningMask
           );
         } else {
           console.warn("Depth estimation returned no result for this frame.");
