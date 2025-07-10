@@ -13,17 +13,19 @@ let hands = [];
 let sequence = [];
 let targetLength = 30;
 
-let gestures = ["Gesture #1", "Gesture #2"];
-let counts = { "Gesture #1": 0, "Gesture #2": 0 };
+let gestures = ["gesture #1", "gesture #2"];
+let counts = { "gesture #1": 0, "gesture #2": 0 };
 
-let state = "collection";
+let state = "collecting";
 let currGesture = gestures[0]; // Set currGesture to gesture 1 by default
+let predGesture = "";
 
 function preload() {
   // Load the handPose model
-  handPose = ml5.handPose();
+  // Set options to have data points flipped
+  handPose = ml5.handPose({ flipHorizontal: true });
 
-  // Setup the timeseries neural network
+  // Setup the neural network using sequenceClassification
   let options = {
     outputs: ["label"],
     task: "sequenceClassificationConv",
@@ -38,7 +40,7 @@ function setup() {
   canvas.parent("canvasDiv");
 
   // Setup video capture
-  video = createCapture(VIDEO);
+  video = createCapture(VIDEO, { flipped: true });
   video.size(640, 480);
   video.hide();
 
@@ -53,20 +55,28 @@ function draw() {
   // Draw video on frame
   image(video, 0, 0, width, height);
 
-  // Helpful tooltip to include
-  textSize(20);
-  stroke(255);
-  fill(0);
-  text(state + " : " + currGesture, 50, 50);
-
   // If hand is detected in the frame, start recording gesture
   if (hands.length > 0) {
     handpoints = drawPoints();
     sequence.push(handpoints);
 
-    // Add collected data to model once the hand is gone and state is collection
+    // Helpful text to signify recording
+    textSize(20);
+    stroke(255);
+    fill(0);
+    if (state == "collecting") {
+      text(
+        state + " : " + currGesture + ", put hand down once done with gesture",
+        50,
+        50
+      );
+    } else if (state == "prediction") {
+      text("predicting... put hand down once done with gesture", 50, 50);
+    }
+
+    // Add collected data to model once the hand is gone and state is collecting
   } else if (hands.length <= 0 && sequence.length > 0) {
-    if (state == "collection") {
+    if (state == "collecting") {
       // Pad the length of the coordinates to targetLength
       let inputData = model.padCoordinates(sequence, targetLength);
       let outputData = { label: currGesture };
@@ -74,7 +84,7 @@ function draw() {
       // Add data to the model
       model.addData(inputData, outputData);
 
-      // Udate the counts for the UI
+      // Update the counts for the UI
       counts[currGesture]++;
       updateDataCountUI();
 
@@ -86,6 +96,29 @@ function draw() {
 
     // Reset the sequence
     sequence = [];
+
+    // Tell users to put hand up to start recording
+  } else {
+    textSize(20);
+    stroke(255);
+    fill(0);
+    if (state == "collecting") {
+      text(
+        "put hand up in screen to start collecting for: " + currGesture,
+        50,
+        50
+      );
+    } else if (state == "prediction") {
+      if (!predGesture) {
+        text("do one of the trained gestures to predict", 50, 50);
+      } else {
+        text(
+          "prediction: " + predGesture + ", try again with another gesture!",
+          50,
+          50
+        );
+      }
+    }
   }
 }
 
@@ -111,7 +144,7 @@ function finishedTraining() {
 
 // Callback for predict
 function gotResults(results) {
-  currGesture = results[0].label;
+  predGesture = results[0].label;
 }
 
 // Callback function for when handPose outputs data
@@ -151,9 +184,9 @@ function UI() {
       "<br>Gesture 2 data: " +
       counts[gestures[0]]
   );
-  rockButton = createButton("Add Gesture #1 Data");
+  rockButton = createButton("Record Gesture #1");
   rockButton.mousePressed(addGesture1);
-  paperButton = createButton("Add Gesture #2 Data");
+  paperButton = createButton("Record Gesture #2");
   paperButton.mousePressed(addGesture2);
   trainButton = createButton("Train and Save Model");
   trainButton.mousePressed(train);

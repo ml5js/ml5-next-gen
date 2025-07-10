@@ -1249,5 +1249,5 @@ class DiyNeuralNetwork {
   }
 }
 
-export { DiyNeuralNetwork }; // Named export for extending in DIY TimeSeries
+export { DiyNeuralNetwork }; // Named export for extending for Sequential Neural Network
 export default DiyNeuralNetwork; //export for taskSelection.js

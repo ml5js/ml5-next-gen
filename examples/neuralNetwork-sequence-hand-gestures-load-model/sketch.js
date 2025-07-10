@@ -18,13 +18,14 @@ let hands = [];
 let sequence = [];
 let targetLength = 50;
 
-let predictedWord = "";
+let predGesture = "";
 
 function preload() {
   // Load the handPose model
-  handPose = ml5.handPose();
+  // Set options to have data points flipped
+  handPose = ml5.handPose({ flipHorizontal: true });
 
-  // Setup the timeseries neural network
+  // Setup the neural network using sequenceClassification
   let options = {
     task: "sequenceClassificationConv",
   };
@@ -37,7 +38,7 @@ function setup() {
   canvas.parent("canvasDiv");
 
   // Create video capture
-  video = createCapture(VIDEO);
+  video = createCapture(VIDEO, { flipped: true });
   video.size(640, 480);
   video.hide();
 
@@ -63,14 +64,17 @@ function draw() {
   // Draw video on the canvas
   image(video, 0, 0, width, height);
 
-  // Put the text on screen after a prediction
-  placePredictedText();
-
   // If hands are found then start recording
   if (hands.length > 0) {
     // Get coordinates from hands (21 points)
     handpoints = drawPoints();
     sequence.push(handpoints);
+
+    // Helpful text to signify recording
+    textSize(20);
+    stroke(255);
+    fill(0);
+    text("predicting... put hand down once done with gesture", 50, 50);
 
     // Pad the data and use for prediction
   } else if (hands.length <= 0 && sequence.length > 0) {
@@ -79,6 +83,21 @@ function draw() {
 
     // Reset the sequence
     sequence = [];
+
+    // Tell users to put hand up to start recording
+  } else {
+    textSize(20);
+    stroke(255);
+    fill(0);
+    if (!predGesture) {
+      text("do one of the gestures below to predict", 50, 50);
+    } else {
+      text(
+        "prediction: " + predGesture + ", try again with another gesture!",
+        50,
+        50
+      );
+    }
   }
 }
 
@@ -109,13 +128,5 @@ function gotHands(results) {
 
 // Call back for accessing the results
 function gotResults(results) {
-  predictedWord = results[0].label;
-  text(predictedWord, 100, 100);
-}
-
-// For drawing text on screen
-function placePredictedText() {
-  textSize(20);
-  fill(0);
-  text("Predicted Gesture : " + predictedWord, 50, 50);
+  predGesture = results[0].label;
 }

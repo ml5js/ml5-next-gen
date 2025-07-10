@@ -69,6 +69,11 @@ class DIYSequential extends DiyNeuralNetwork {
   }
 
   createMetaData() {
+    // check if the data is empty
+    if (this.neuralNetworkData.data.raw.length <= 0) {
+      throw new Error("Must add data before training!");
+    }
+
     // this method does not get shape for images but instead for timesteps
     const { inputs } = this.options;
 

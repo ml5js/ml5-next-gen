@@ -8,6 +8,7 @@
 
 let model;
 let data;
+let graphValues = [];
 
 let state = "training";
 let precipitation = "";
@@ -28,7 +29,7 @@ let windowLength = 10; // Optional: define the size of the window for batch
 function preload() {
   json_data = loadJSON("weather_data.json");
 
-  // Set the options to initialize timeSeries Neural Network
+  // Set the options to initialize Neural Network wit sequenceRegression Task
   let options = {
     task: "sequenceRegression",
     debug: "true",
@@ -79,6 +80,7 @@ function draw() {
     text("🌧️", 320, 150);
     pop();
   }
+  drawBarGraph();
 }
 
 // Predict data
@@ -94,16 +96,22 @@ function gotResults(results) {
 }
 
 // Code for adding new data to the dataset to be used for future prediction
-function addNewData(results) {
+function addNewData(newResults) {
   (new_values = {
     date: " for the next hour",
-    temperature: results[0].value, // Get string convert to float and round to 2 decimal points
-    humidity: results[1].value,
-    wind_speed: results[2].value,
-    pressure: results[3].value,
-    precipitation: results[4].value,
+    temperature: newResults[0].value, // Get string convert to float and round to 2 decimal points
+    humidity: newResults[1].value,
+    wind_speed: newResults[2].value,
+    pressure: newResults[3].value,
+    precipitation: newResults[4].value,
   }),
     data.push(new_values);
+
+  // Add data to the bar graph
+  graphValues.push(newResults[4].value);
+  if (graphValues.length > maxBars) {
+    graphValues.shift(); // Remove first element
+  }
 }
 
 function finishedTraining() {
@@ -116,4 +124,24 @@ function UI() {
   pred_but.mouseClicked(predictData);
 
   textAlign(CENTER);
+
+  maxBars = 12;
+  barWidth = width / maxBars;
+  maxDataValue = 35;
+}
+
+function drawBarGraph() {
+  for (let i = 0; i < graphValues.length && i < maxBars; i++) {
+    let barHeight = map(graphValues[i], 0, maxDataValue, 0, height - 180);
+    let x = i * barWidth;
+    let y = height - barHeight - 20;
+
+    // Bar color gradient based on value
+    let barColor = map(graphValues[i], 0, maxDataValue, 0, 255);
+    fill(barColor, 100, 255 - barColor);
+    stroke(100);
+
+    // Draw bar
+    rect(x + 5, y, barWidth - 10, barHeight);
+  }
 }

@@ -276,19 +276,77 @@ class SequentialUtils {
 
   // point simplification utilities - Ramer-Douglas-Peucker (RDP) algorithm
   padCoordinates(allPoints, targetPointCount, maxEpsilon = 50) {
-    const rdpPoints = [];
+    if (allPoints.length === 0) return [];
 
-    const epsilon = this.findEpsilonForPointCount(
+    // Check if it's an array of objects with .x and .y properties
+    if (this.isObjectFormat(allPoints[0])) {
+      // Original format: array of objects with .x and .y
+      return this.simplifyObjectCoordinates(
+        allPoints,
+        targetPointCount,
+        maxEpsilon
+      );
+    }
+
+    // Array format
+    const numColumns = allPoints[0].length;
+
+    if (numColumns === 2) {
+      // Simple case: [n,2] - just one pair of coordinates
+      return this.simplifyCoordinatePair(
+        allPoints,
+        targetPointCount,
+        maxEpsilon
+      );
+    } else if (numColumns % 2 === 0) {
+      // Multiple coordinate pairs: [n,42] -> 21 pairs
+      const numPairs = numColumns / 2;
+      const simplifiedPairs = [];
+
+      // Process each coordinate pair separately
+      for (let pairIndex = 0; pairIndex < numPairs; pairIndex++) {
+        const coordinatePair = this.extractCoordinatePair(allPoints, pairIndex);
+        const simplified = this.simplifyCoordinatePair(
+          coordinatePair,
+          targetPointCount,
+          maxEpsilon
+        );
+        simplifiedPairs.push(simplified);
+      }
+
+      // Recombine all simplified pairs back into [targetPointCount, 42] format
+      return this.recombineCoordinatePairs(simplifiedPairs, targetPointCount);
+    } else {
+      throw new Error(
+        `Invalid array format: expected even number of columns, got ${numColumns}`
+      );
+    }
+  }
+
+  // Check if data is in object format (has .x and .y properties)
+  isObjectFormat(point) {
+    return (
+      point &&
+      typeof point === "object" &&
+      typeof point.x === "number" &&
+      typeof point.y === "number"
+    );
+  }
+
+  // Handle original object format - your exact original algorithm
+  simplifyObjectCoordinates(allPoints, targetPointCount, maxEpsilon) {
+    const rdpPoints = [];
+    const epsilon = this.findEpsilonForPointCountObjects(
       allPoints,
       targetPointCount,
       maxEpsilon
     );
-
     const total = allPoints.length;
     const start = allPoints[0];
     const end = allPoints[total - 1];
+
     rdpPoints.push(start);
-    this.rdp(0, total - 1, allPoints, rdpPoints, epsilon);
+    this.rdpObjects(0, total - 1, allPoints, rdpPoints, epsilon);
     rdpPoints.push(end);
 
     if (rdpPoints.length > targetPointCount) {
@@ -297,25 +355,222 @@ class SequentialUtils {
       const filler = new Array(targetPointCount - rdpPoints.length).fill(
         rdpPoints[rdpPoints.length - 1]
       );
-
       rdpPoints.push(...filler);
       return rdpPoints;
     }
-
     return rdpPoints;
   }
 
-  findEpsilonForPointCount(points, targetCount, maxEpsilon) {
+  // Original object-based helper functions
+  findEpsilonForPointCountObjects(points, targetCount, maxEpsilon) {
     let low = 0;
     let high = maxEpsilon;
     let mid;
     let simplifiedPointsCount = 0;
 
     while (high - low > 0.001) {
-      // Tolerance for approximation
       mid = (low + high) / 2;
-      simplifiedPointsCount = this.getSimplifiedPointCount(points, mid);
+      simplifiedPointsCount = this.getSimplifiedPointCountObjects(points, mid);
       if (simplifiedPointsCount > targetCount) {
+        low = mid;
+      } else {
+        high = mid;
+      }
+    }
+    return mid;
+  }
+
+  getSimplifiedPointCountObjects(points, epsilon) {
+    const rdpPoints = [];
+    const total = points.length;
+    const start = points[0];
+    const end = points[total - 1];
+    rdpPoints.push(start);
+    this.rdpObjects(0, total - 1, points, rdpPoints, epsilon);
+    rdpPoints.push(end);
+    return rdpPoints.length;
+  }
+
+  rdpObjects(startIndex, endIndex, allPoints, rdpPoints, epsilon) {
+    const nextIndex = this.findFurthestObjects(
+      allPoints,
+      startIndex,
+      endIndex,
+      epsilon
+    );
+    if (nextIndex > 0) {
+      if (startIndex !== nextIndex) {
+        this.rdpObjects(startIndex, nextIndex, allPoints, rdpPoints, epsilon);
+      }
+      rdpPoints.push(allPoints[nextIndex]);
+      if (endIndex !== nextIndex) {
+        this.rdpObjects(nextIndex, endIndex, allPoints, rdpPoints, epsilon);
+      }
+    }
+  }
+
+  findFurthestObjects(points, a, b, epsilon) {
+    let recordDistance = -1;
+    const start = points[a];
+    const end = points[b];
+    let furthestIndex = -1;
+
+    for (let i = a + 1; i < b; i++) {
+      const currentPoint = points[i];
+      const d = this.lineDistObjects(currentPoint, start, end);
+      if (d > recordDistance) {
+        recordDistance = d;
+        furthestIndex = i;
+      }
+    }
+
+    if (recordDistance > epsilon) {
+      return furthestIndex;
+    } else {
+      return -1;
+    }
+  }
+
+  lineDistObjects(c, a, b) {
+    const norm = this.scalarProjectionObjects(c, a, b);
+    return Math.sqrt(Math.pow(c.x - norm.x, 2) + Math.pow(c.y - norm.y, 2));
+  }
+
+  scalarProjectionObjects(p, a, b) {
+    const ap = { x: p.x - a.x, y: p.y - a.y };
+    const ab = { x: b.x - a.x, y: b.y - a.y };
+    const abMag = Math.sqrt(ab.x * ab.x + ab.y * ab.y);
+
+    if (abMag === 0) {
+      return a;
+    }
+
+    ab.x /= abMag;
+    ab.y /= abMag;
+    const dot = ap.x * ab.x + ap.y * ab.y;
+    return { x: a.x + ab.x * dot, y: a.y + ab.y * dot };
+  }
+
+  // Extract one coordinate pair from the data
+  extractCoordinatePair(allPoints, pairIndex) {
+    const coordinatePair = [];
+    const xIndex = pairIndex * 2;
+    const yIndex = pairIndex * 2 + 1;
+
+    for (let i = 0; i < allPoints.length; i++) {
+      coordinatePair.push([allPoints[i][xIndex], allPoints[i][yIndex]]);
+    }
+
+    return coordinatePair;
+  }
+
+  // Simplify a single coordinate pair using RDP
+  simplifyCoordinatePair(coordinatePair, targetPointCount, maxEpsilon) {
+    const rdpPoints = [];
+    const epsilon = this.findEpsilonForPointCount(
+      coordinatePair,
+      targetPointCount,
+      maxEpsilon
+    );
+    const total = coordinatePair.length;
+
+    if (total <= 2) {
+      // If we have 2 or fewer points, just pad to target
+      return this.padToTarget(coordinatePair, targetPointCount);
+    }
+
+    const start = coordinatePair[0];
+    const end = coordinatePair[total - 1];
+
+    rdpPoints.push(start);
+    this.rdp(0, total - 1, coordinatePair, rdpPoints, epsilon);
+    rdpPoints.push(end);
+
+    // Remove duplicates and sort by original order
+    const uniquePoints = this.removeDuplicatesAndSort(
+      rdpPoints,
+      coordinatePair
+    );
+
+    return this.padToTarget(uniquePoints, targetPointCount);
+  }
+
+  // Recombine simplified coordinate pairs back into original format
+  recombineCoordinatePairs(simplifiedPairs, targetPointCount) {
+    const result = [];
+
+    for (let i = 0; i < targetPointCount; i++) {
+      const row = [];
+      for (let pairIndex = 0; pairIndex < simplifiedPairs.length; pairIndex++) {
+        const pair = simplifiedPairs[pairIndex][i];
+        row.push(pair[0], pair[1]); // x, y
+      }
+      result.push(row);
+    }
+
+    return result;
+  }
+
+  // Remove duplicates and maintain original order
+  removeDuplicatesAndSort(rdpPoints, originalPoints) {
+    const seen = new Set();
+    const unique = [];
+
+    // Create a map of original indices
+    const indexMap = new Map();
+    for (let i = 0; i < originalPoints.length; i++) {
+      const key = `${originalPoints[i][0]},${originalPoints[i][1]}`;
+      if (!indexMap.has(key)) {
+        indexMap.set(key, i);
+      }
+    }
+
+    // Sort by original index and remove duplicates
+    rdpPoints.sort((a, b) => {
+      const keyA = `${a[0]},${a[1]}`;
+      const keyB = `${b[0]},${b[1]}`;
+      return indexMap.get(keyA) - indexMap.get(keyB);
+    });
+
+    for (const point of rdpPoints) {
+      const key = `${point[0]},${point[1]}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        unique.push(point);
+      }
+    }
+
+    return unique;
+  }
+
+  // Pad array to target length
+  padToTarget(points, targetPointCount) {
+    if (points.length > targetPointCount) {
+      return points.slice(0, targetPointCount);
+    } else if (points.length < targetPointCount) {
+      const filler = new Array(targetPointCount - points.length).fill(
+        points[points.length - 1]
+      );
+      return [...points, ...filler];
+    }
+    return points;
+  }
+
+  // Find epsilon that gives approximately the target point count
+  findEpsilonForPointCount(points, targetCount, maxEpsilon) {
+    if (points.length <= targetCount) {
+      return 0; // No simplification needed
+    }
+
+    let low = 0;
+    let high = maxEpsilon;
+    let mid;
+
+    while (high - low > 0.001) {
+      mid = (low + high) / 2;
+      const simplifiedCount = this.getSimplifiedPointCount(points, mid);
+
+      if (simplifiedCount > targetCount) {
         low = mid;
       } else {
         high = mid;
@@ -325,17 +580,24 @@ class SequentialUtils {
     return mid;
   }
 
+  // Get count of points after simplification with given epsilon
   getSimplifiedPointCount(points, epsilon) {
     const rdpPoints = [];
     const total = points.length;
+
+    if (total <= 2) return total;
+
     const start = points[0];
     const end = points[total - 1];
+
     rdpPoints.push(start);
     this.rdp(0, total - 1, points, rdpPoints, epsilon);
     rdpPoints.push(end);
-    return rdpPoints.length;
+
+    return new Set(rdpPoints.map((p) => `${p[0]},${p[1]}`)).size;
   }
 
+  // Core RDP algorithm
   rdp(startIndex, endIndex, allPoints, rdpPoints, epsilon) {
     const nextIndex = this.findFurthest(
       allPoints,
@@ -343,30 +605,35 @@ class SequentialUtils {
       endIndex,
       epsilon
     );
+
     if (nextIndex > 0) {
-      if (startIndex != nextIndex) {
+      if (startIndex !== nextIndex) {
         this.rdp(startIndex, nextIndex, allPoints, rdpPoints, epsilon);
       }
       rdpPoints.push(allPoints[nextIndex]);
-      if (endIndex != nextIndex) {
+      if (endIndex !== nextIndex) {
         this.rdp(nextIndex, endIndex, allPoints, rdpPoints, epsilon);
       }
     }
   }
 
+  // Find furthest point from line segment
   findFurthest(points, a, b, epsilon) {
     let recordDistance = -1;
     const start = points[a];
     const end = points[b];
     let furthestIndex = -1;
+
     for (let i = a + 1; i < b; i++) {
       const currentPoint = points[i];
       const d = this.lineDist(currentPoint, start, end);
+
       if (d > recordDistance) {
         recordDistance = d;
         furthestIndex = i;
       }
     }
+
     if (recordDistance > epsilon) {
       return furthestIndex;
     } else {
@@ -374,19 +641,29 @@ class SequentialUtils {
     }
   }
 
+  // Calculate distance from point to line
   lineDist(c, a, b) {
     const norm = this.scalarProjection(c, a, b);
-    return dist(c.x, c.y, norm.x, norm.y);
+    return Math.sqrt(Math.pow(c[0] - norm[0], 2) + Math.pow(c[1] - norm[1], 2));
   }
 
+  // Project point onto line segment
   scalarProjection(p, a, b) {
-    const ap = { x: p.x - a.x, y: p.y - a.y };
-    const ab = { x: b.x - a.x, y: b.y - a.y };
-    const abMag = Math.sqrt(ab.x * ab.x + ab.y * ab.y);
-    ab.x /= abMag;
-    ab.y /= abMag;
-    const dot = ap.x * ab.x + ap.y * ab.y;
-    return { x: a.x + ab.x * dot, y: a.y + ab.y * dot };
+    const ap = [p[0] - a[0], p[1] - a[1]];
+    const ab = [b[0] - a[0], b[1] - a[1]];
+
+    const abMag = Math.sqrt(ab[0] * ab[0] + ab[1] * ab[1]);
+
+    if (abMag === 0) {
+      return a; // Start and end points are the same
+    }
+
+    ab[0] /= abMag;
+    ab[1] /= abMag;
+
+    const dot = ap[0] * ab[0] + ap[1] * ab[1];
+
+    return [a[0] + ab[0] * dot, a[1] + ab[1] * dot];
   }
 
   /**
