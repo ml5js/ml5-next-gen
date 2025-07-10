@@ -27,7 +27,7 @@ function preload() {
 
   // Setup the neural network using sequenceClassification
   let options = {
-    task: "sequenceClassificationConv",
+    task: "sequenceClassificationWithCNN",
   };
 
   model = ml5.neuralNetwork(options);

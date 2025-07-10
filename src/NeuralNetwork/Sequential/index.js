@@ -107,11 +107,11 @@ class DIYSequential extends DiyNeuralNetwork {
         layers = tsLayers.classification;
         return this.createNetworkLayers(layers);
 
-      case "sequenceClassificationConv":
+      case "sequenceClassificationWithCNN":
         layers = tsLayers.classificationConv;
         return this.createNetworkLayers(layers);
 
-      case "sequenceRegressionConv":
+      case "sequenceRegressionWithCNN":
         layers = tsLayers.regressionConv;
         return this.createNetworkLayers(layers);
 
@@ -130,7 +130,7 @@ class DIYSequential extends DiyNeuralNetwork {
 
     if (
       this.options.task === "sequenceClassification" ||
-      this.options.task === "sequenceClassificationConv"
+      this.options.task === "sequenceClassificationWithCNN"
     ) {
       options = {
         loss: "categoricalCrossentropy",
@@ -139,7 +139,7 @@ class DIYSequential extends DiyNeuralNetwork {
       };
     } else if (
       this.options.task === "sequenceRegression" ||
-      this.options.task === "sequenceRegressionConv"
+      this.options.task === "sequenceRegressionWithCNN"
     ) {
       options = {
         loss: "meanSquaredError",
