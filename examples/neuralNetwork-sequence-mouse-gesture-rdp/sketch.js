@@ -8,7 +8,7 @@
 
 let model;
 let currShape = "circle";
-let state = "collection";
+let state = "collecting";
 
 let sequence = [];
 let targetLength = 30;
@@ -45,11 +45,12 @@ function draw() {
 // Code to signify drawing can be done again
 function mouseReleased() {
   if (mouseY < height && mouseX < width) {
-    // If state is collection, add whole sequence as X, and shape as Y
-    if (state == "collection") {
+    // If state is collecting, add whole sequence as X, and shape as Y
+    if (state == "collecting") {
       let target = { label: currShape };
       let paddedCoordinates = model.padCoordinates(sequence, targetLength);
       model.addData(paddedCoordinates, target);
+
       clearScreen();
     } else if (state == "prediction") {
       let paddedCoordinates = model.padCoordinates(sequence, targetLength);
@@ -105,8 +106,10 @@ function UI() {
   recSquare.mouseClicked(recordSquare);
   trainBut.mouseClicked(trainModel);
 
+  text(state + " : " + currShape, 50, 50);
+
   function recordCircle() {
-    state = "collection";
+    state = "collecting";
     currShape = "circle";
 
     background(220);
@@ -114,7 +117,7 @@ function UI() {
   }
 
   function recordSquare() {
-    state = "collection";
+    state = "collecting";
     currShape = "square";
 
     background(220);
