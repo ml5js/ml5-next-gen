@@ -13,23 +13,22 @@ let video;
 let detector;
 let detections = [];
 
-function setup() {
-  createCanvas(640, 480);
-  video = createCapture(VIDEO, videoReady);
-  video.size(640, 480);
-  video.hide();
+function preload(){
+  detector = ml5.objectDetector("cocossd");
 }
 
-function videoReady() {
-  detector = ml5.objectDetector('cocossd', modelReady);
+function setup() {
+  createCanvas(640, 480);
+
+  video = createCapture(VIDEO);
+  video.size(640, 480);
+  video.hide();
+
+  detector.detect(video, gotDetections);
 }
 
 function gotDetections(results) {
   detections = results;
-  detector.detect(video, gotDetections);
-}
-
-function modelReady() {
   detector.detect(video, gotDetections);
 }
 
@@ -38,10 +37,14 @@ function draw() {
 
   for (let i = 0; i < detections.length; i += 1) {
     const object = detections[i];
+
+    // draw bounding box
     stroke(0, 255, 0);
     strokeWeight(4);
     noFill();
     rect(object.x, object.y, object.width, object.height);
+
+    // draw label
     noStroke();
     fill(255);
     textSize(24);

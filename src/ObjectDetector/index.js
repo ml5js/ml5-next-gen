@@ -7,8 +7,6 @@
   ObjectDetection
 */
 
-console.log("running ObjectDetection/index.js");
-
 import handleArguments from "../utils/handleArguments";
 import {CocoSsd} from "./cocossd.js";
 
@@ -27,7 +25,7 @@ class ObjectDetector {
    * @param {function} callback - Optional. A callback function that is called once the model has loaded.
    */
   constructor(modelNameOrUrl, video, options, callback) {
-    this.video = video;
+    this.video = video || null;
     this.modelNameOrUrl = modelNameOrUrl;
     this.options = options || {};
     this.callback = callback;
@@ -56,9 +54,8 @@ const objectDetector = (...inputs) => {
 
   const instance = new ObjectDetector(model, video, options, callback);
 
-  console.log("model", instance.model, instance.model.ready);
-
-  return instance.model.callback ? instance.model : instance.model.ready;
+  // return instance.model.callback ? instance.model : instance.model.ready;
+  return instance.model;
 };
 
 export default objectDetector;

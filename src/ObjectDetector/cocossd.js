@@ -11,6 +11,7 @@ import * as tf from "@tensorflow/tfjs";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
+import { mediaReady } from "../utils/imageUtilities";
 
 const DEFAULTS = {
   base: "lite_mobilenet_v2",
@@ -40,6 +41,7 @@ export class CocoSsdBase {
    * load model
    */
   async loadModel() {
+    await tf.setBackend("webgl"); // this line resolves warning : performance is poor on webgpu backend
     await tf.ready();
 
     this.model = await cocoSsd.load(this.config);
@@ -73,6 +75,9 @@ export class CocoSsdBase {
    */
   async detectInternal(imgToPredict) {
     this.isPredicting = true;
+    mediaReady(imgToPredict, true)
+    await tf.nextFrame();
+
     const predictions = await this.model.detect(imgToPredict);
     const formattedPredictions = predictions.map(prediction => {
       return {
@@ -107,6 +112,8 @@ export class CocoSsdBase {
 
     const args = handleArguments(this.video, inputOrCallback, cb);
     args.require("image", "Detection subject not supported");
+
+    await mediaReady(args.image, true);
 
     return callCallback(this.detectInternal(args.image), args.callback);
   }
