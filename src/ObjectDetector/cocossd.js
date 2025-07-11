@@ -27,7 +27,11 @@ export class CocoSsdBase {
   constructor(video, options, constructorCallback) {
     this.video = video || null;
     this.modelReady = false;
+
     this.isPredicting = false;
+    this.signalStop = false;
+    this.prevCall = "";
+
     this.config = {
       base: options.base || DEFAULTS.base,
       modelUrl: options.modelUrl || DEFAULTS.modelUrl,
@@ -37,9 +41,6 @@ export class CocoSsdBase {
     this.ready = callCallback(this.loadModel(), this.callback);
   }
 
-  /**
-   * load model
-   */
   async loadModel() {
     await tf.setBackend("webgl"); // this line resolves warning : performance is poor on webgpu backend
     await tf.ready();
@@ -74,8 +75,11 @@ export class CocoSsdBase {
    * @returns {ObjectDetectorPrediction}
    */
   async detectInternal(imgToPredict) {
-    this.isPredicting = true;
-    mediaReady(imgToPredict, true)
+    // this.isPredicting = true;
+    await this.ready;
+    
+    mediaReady(imgToPredict, true);
+
     await tf.nextFrame();
 
     const predictions = await this.model.detect(imgToPredict);
@@ -95,7 +99,9 @@ export class CocoSsdBase {
         },
       };
     });
+
     this.isPredicting = false;
+    
     return formattedPredictions;
   }
 
@@ -107,15 +113,47 @@ export class CocoSsdBase {
    * @returns {ObjectDetectorPrediction}
    */
   async detect(inputOrCallback, cb) {
-    await this.ready;
-    await tf.nextFrame();
-
     const args = handleArguments(this.video, inputOrCallback, cb);
     args.require("image", "Detection subject not supported");
 
-    await mediaReady(args.image, true);
-
     return callCallback(this.detectInternal(args.image), args.callback);
+  }
+
+  async detectStart(inputNumOrCallback, numOrCallback, cb){
+    const { image, number, callback } = handleArguments(
+      inputNumOrCallback,
+      numOrCallback,
+      cb
+    ).require("image", "No input provided.");
+
+    const detectFrame = async () => {
+      await mediaReady(image, true);
+
+      await callCallback(this.detectInternal(image), callback);
+
+      if(!this.signalStop){
+        requestAnimationFrame(detectFrame);
+      } else {
+        this.isPredicting = false;
+      }
+    };
+
+    // start the detection
+    this.signalStop = false;
+    if (!this.isPredicting) {
+      this.isPredicting = true;
+      detectFrame();
+    }
+
+    if (this.prevCall === "start") {
+      console.warn("warning");
+    }
+    this.prevCall = "start";
+  }
+
+  detectStop(){
+    if (this.isPredicting) { this.signalStop = true; }
+    this.prevCall = "stop";
   }
 }
 

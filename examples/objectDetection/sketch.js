@@ -24,12 +24,14 @@ function setup() {
   video.size(640, 480);
   video.hide();
 
-  detector.detect(video, gotDetections);
+  // detector.detect(video, gotDetections);
+  detector.detectStart(video, gotDetections);
 }
 
 function gotDetections(results) {
   detections = results;
-  detector.detect(video, gotDetections);
+  // console.log(results);
+  // detector.detect(video, gotDetections);
 }
 
 function draw() {
