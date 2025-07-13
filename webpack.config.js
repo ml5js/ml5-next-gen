@@ -37,8 +37,8 @@ const developmentConfig = {
         watch: true,
       },
       {
-        directory: resolve(__dirname, "examples-next"),
-        publicPath: "/examples-next",
+        directory: resolve(__dirname, "examples-p5-2.0"),
+        publicPath: "/examples-p5-2.0",
         watch: true,
       },
     ],
