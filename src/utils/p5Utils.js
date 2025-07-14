@@ -8,7 +8,7 @@ function isP5Constructor(source) {
     source &&
       typeof source === "function" &&
       source.prototype &&
-      source.prototype.registerMethod
+      source.prototype.registerMethod // p5 1.x only
   );
 }
 
@@ -116,6 +116,9 @@ class P5Util {
   setupP5Integration(ml5Library, withPreloadMethods, withoutAsyncMethods) {
     this.methodsToPreload = withPreloadMethods;
     this.ml5Library = ml5Library;
+
+    // checkP5 returns true only with p5 1.x, because p5 2.x does not have registerMethod method,
+    // which is checked in isP5Constructor function.
     if (this.checkP5()) {
       this.registerPreloads();
     } else {
