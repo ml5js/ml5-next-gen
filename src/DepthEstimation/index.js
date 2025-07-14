@@ -103,7 +103,6 @@ const COLORMAPS = {
  * @property {number} minDepth - The minimum depth value used for normalization in this result (either fixed or dynamically calculated/smoothed).
  * @property {number} maxDepth - The maximum depth value used for normalization in this result (either fixed or dynamically calculated/smoothed).
  * @property {function(number, number): number | null} getDepthAt - Get raw depth at (x, y).
- * @property {tf.Tensor} tensor - The raw depth tensor (remember to dispose!). Included for advanced use.
  */
 
 /**
@@ -267,13 +266,18 @@ class DepthEstimation {
           if (segmentation && segmentation.length > 0) {
             const foregroundColor = { r: 0, g: 0, b: 0, a: 0 }; // Transparent foreground
             const backgroundColor = { r: 0, g: 0, b: 0, a: 255 }; // Opaque background (will be drawn over)
-           
+
             backgroundDarkeningMask = await bodySegmentation.toBinaryMask(
               segmentation,
               foregroundColor,
               backgroundColor
             );
-
+            //dispose segmentation tensors
+            segmentation.map((singleSegmentation) =>
+              singleSegmentation.mask
+                .toTensor()
+                .then((tensor) => tensor.dispose())
+            );
             const maskCanvas = this.getSegmentationMaskCanvas(
               image.width,
               image.height
@@ -289,16 +293,7 @@ class DepthEstimation {
             );
             inputForDepth = maskCanvas; // Use the masked canvas as input
 
-            // Dispose segmentation tensor(s) - crucial!
-            if (backgroundDarkeningMask && backgroundDarkeningMask.dispose) {
-              //I belive this never occurs, because toBinaryMask returns ImageData or null only
-              backgroundDarkeningMask.dispose();
-            } else if (Array.isArray(segmentation)) {
-              // Newer versions might return segmentation objects directly
-              segmentation.forEach((seg) => {
-                if (seg.mask && seg.mask.dispose) seg.mask.dispose(); // Dispose mask if it's a tensor
-              });
-            }
+            
           } else {
             console.warn(
               "Segmentation did not find people, using original image for depth."
@@ -349,7 +344,7 @@ class DepthEstimation {
     } catch (error) {
       console.error("Error estimating depth:", error);
       // Cannot dispose depthMapResult here as it's not a tensor.
-      // Tensor disposal (if created) is handled within processDepthMap or by the user via result.tensor.
+      // Tensor disposal (if created) is handled within processDepthMap.
     }
 
     if (callback) callback(result);
@@ -409,12 +404,13 @@ class DepthEstimation {
 
       // Get depth values as 2D array from the actual tensor
       const depthData = await actualTensor.array(); // Use actualTensor here
+      actualTensor.dispose(); // Dispose the tensor
 
       const width = sourceElement.width;
       const height = sourceElement.height;
 
       result.data = depthData;
-      result.tensor = actualTensor; // Provide actual tensor for advanced use (user must dispose)
+      
 
       // Create an ImageData using the determined min/max range
       result.imageData = this.createImageDataFromDepthValues(
@@ -566,6 +562,12 @@ class DepthEstimation {
               foregroundColor,
               backgroundColor
             );
+            //dispose segmentation tensors
+            segmentation.map((singleSegmentation) =>
+              singleSegmentation.mask
+                .toTensor()
+                .then((tensor) => tensor.dispose())
+            );
             const maskCanvas = this.getSegmentationMaskCanvas(
               this.detectMedia.width,
               this.detectMedia.height
@@ -579,14 +581,6 @@ class DepthEstimation {
               false // Let estimateDepth handle the flip based on its config
             );
             inputForDepth = maskCanvas;
-            // Dispose segmentation tensor(s)
-            if (backgroundDarkeningMask && backgroundDarkeningMask.dispose) {
-              backgroundDarkeningMask.dispose();
-            } else if (Array.isArray(segmentation)) {
-              segmentation.forEach((seg) => {
-                if (seg.mask && seg.mask.dispose) seg.mask.dispose();
-              });
-            }
           }
           // No else needed, inputForDepth remains original media if no people found
         } catch (segError) {
