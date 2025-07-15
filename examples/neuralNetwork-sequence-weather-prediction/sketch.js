@@ -4,7 +4,7 @@
  * ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
  *
  * This example demonstrates loading JSON data and training a Weather Predictor
- * through ml5.neuralNetwork with the sequeceRegression task.
+ * through ml5.neuralNetwork with the sequenceRegression task.
  * XXX: let us know what this dataset is from/about
  */
 
