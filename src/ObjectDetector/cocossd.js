@@ -4,13 +4,11 @@
 // https://opensource.org/licenses/MIT
 
 /*
-    COCO-SSD Object detection
+    COCO-SSD Object detection model
     Wraps the coco-ssd model in tfjs to be used in ml5
 */
 import * as tf from "@tensorflow/tfjs";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
-import callCallback from "../utils/callcallback";
-import handleArguments from "../utils/handleArguments";
 import { mediaReady } from "../utils/imageUtilities";
 
 const DEFAULTS = {
@@ -18,72 +16,34 @@ const DEFAULTS = {
   modelUrl: undefined,
 };
 
-export class CocoSsdBase {
-  /**
-   * Create CocoSsd model. Works on video and images.
-   * @param {function} constructorCallback - Optional. A callback function that is called once the model has loaded. If no callback is provided, it will return a promise
-   *    that will be resolved once the model has loaded.
-   */
-  constructor(video, options, constructorCallback) {
-    this.video = video || null;
-    this.modelReady = false;
-
-    this.isPredicting = false;
-    this.signalStop = false;
-    this.prevCall = "";
-
+export class CocoSsd {
+  constructor(options = {}) {
+    this.model = null;
     this.config = {
       base: options.base || DEFAULTS.base,
       modelUrl: options.modelUrl || DEFAULTS.modelUrl,
     };
-    this.callback = constructorCallback;
-
-    this.ready = callCallback(this.loadModel(), this.callback);
   }
 
-  async loadModel() {
+  async load() {
     await tf.setBackend("webgl"); // this line resolves warning : performance is poor on webgpu backend
     await tf.ready();
 
     this.model = await cocoSsd.load(this.config);
-
-    this.modelReady = true;
     return this;
   }
 
   /**
-   * @typedef {Object} ObjectDetectorPrediction
-   * @property {number} x - top left x coordinate of the prediction box in pixels.
-   * @property {number} y - top left y coordinate of the prediction box in pixels.
-   * @property {number} width - width of the prediction box in pixels.
-   * @property {number} height - height of the prediction box in pixels.
-   * @property {string} label - the label given.
-   * @property {number} confidence - the confidence score (0 to 1).
-   * @property {ObjectDetectorPredictionNormalized} normalized - a normalized object of the predicition
+   * Detect objects that are in the image/video/canvas
+   * @param {HTMLVideoElement|HTMLImageElement|HTMLCanvasElement|ImageData} imgToPredict - Subject of the detection.
+   * @returns {Array} Array of detection detections
    */
-
-  /**
-   * @typedef {Object} ObjectDetectorPredictionNormalized
-   * @property {number} x - top left x coordinate of the prediction box (0 to 1).
-   * @property {number} y - top left y coordinate of the prediction box (0 to 1).
-   * @property {number} width - width of the prediction box (0 to 1).
-   * @property {number} height - height of the prediction box (0 to 1).
-   */
-  /**
-   * Detect objects that are in video, returns bounding box, label, and confidence scores
-   * @param {HTMLVideoElement|HTMLImageElement|HTMLCanvasElement|ImageData} subject - Subject of the detection.
-   * @returns {ObjectDetectorPrediction}
-   */
-  async detectInternal(imgToPredict) {
-    // this.isPredicting = true;
-    await this.ready;
-    
+  async detect(imgToPredict) {
     mediaReady(imgToPredict, true);
-
     await tf.nextFrame();
 
-    const predictions = await this.model.detect(imgToPredict);
-    const formattedPredictions = predictions.map(prediction => {
+    const detections = await this.model.detect(imgToPredict);
+    const formattedDetections = detections.map(prediction => {
       return {
         label: prediction.class,
         confidence: prediction.score,
@@ -100,66 +60,12 @@ export class CocoSsdBase {
       };
     });
 
-    this.isPredicting = false;
-    
-    return formattedPredictions;
-  }
-
-  /**
-   * Detect objects that are in video, returns bounding box, label, and confidence scores
-   * @param {HTMLVideoElement|HTMLImageElement|HTMLCanvasElement|ImageData} subject - Subject of the detection.
-   * @param {function} callback - Optional. A callback function that is called once the model has loaded. If no callback is provided, it will return a promise
-   *    that will be resolved once the prediction is done.
-   * @returns {ObjectDetectorPrediction}
-   */
-  async detect(inputOrCallback, cb) {
-    const args = handleArguments(this.video, inputOrCallback, cb);
-    args.require("image", "Detection subject not supported");
-
-    return callCallback(this.detectInternal(args.image), args.callback);
-  }
-
-  async detectStart(inputNumOrCallback, numOrCallback, cb){
-    const { image, number, callback } = handleArguments(
-      inputNumOrCallback,
-      numOrCallback,
-      cb
-    ).require("image", "No input provided.");
-
-    const detectFrame = async () => {
-      await mediaReady(image, true);
-
-      await callCallback(this.detectInternal(image), callback);
-
-      if(!this.signalStop){
-        requestAnimationFrame(detectFrame);
-      } else {
-        this.isPredicting = false;
-      }
-    };
-
-    // start the detection
-    this.signalStop = false;
-    if (!this.isPredicting) {
-      this.isPredicting = true;
-      detectFrame();
-    }
-
-    if (this.prevCall === "start") {
-      console.warn("warning");
-    }
-    this.prevCall = "start";
-  }
-
-  detectStop(){
-    if (this.isPredicting) { this.signalStop = true; }
-    this.prevCall = "stop";
+    return formattedDetections;
   }
 }
 
-export const CocoSsd = (...inputs) => {
-  const { video, options = {}, callback } = handleArguments(...inputs);
-  return new CocoSsdBase(video, options, callback);
-};
-
-export default CocoSsd;
+export async function load(modelConfig = {}) {
+  const cocoSsdInstance = new CocoSsd(modelConfig);
+  await cocoSsdInstance.load();
+  return cocoSsdInstance;
+}

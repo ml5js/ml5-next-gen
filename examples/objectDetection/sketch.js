@@ -21,35 +21,32 @@ function setup() {
   createCanvas(640, 480);
 
   video = createCapture(VIDEO);
-  video.size(640, 480);
+  video.size(width, height);
   video.hide();
 
-  // detector.detect(video, gotDetections);
   detector.detectStart(video, gotDetections);
 }
 
 function gotDetections(results) {
   detections = results;
-  // console.log(results);
-  // detector.detect(video, gotDetections);
 }
 
 function draw() {
   image(video, 0, 0);
 
   for (let i = 0; i < detections.length; i += 1) {
-    const object = detections[i];
+    const detection = detections[i];
 
     // draw bounding box
     stroke(0, 255, 0);
     strokeWeight(4);
     noFill();
-    rect(object.x, object.y, object.width, object.height);
+    rect(detection.x, detection.y, detection.width, detection.height);
 
     // draw label
     noStroke();
     fill(255);
     textSize(24);
-    text(object.label, object.x + 10, object.y + 24);
+    text(detection.label, detection.x + 10, detection.y + 24);
   }
 }
