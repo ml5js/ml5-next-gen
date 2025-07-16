@@ -179,7 +179,7 @@ class DepthEstimation {
           transform: (v) => v.toUpperCase(),
         },
         targetFps: { type: "number", min: 1, default: null },
-        applySegmentationMask: { type: "boolean", default: false },
+        applySegmentationMask: { type: "boolean", default: true },
         segmentationOpacity: { type: "number", min: 0, max: 1, default: 1.0 },
         segmentationMaskBlur: { type: "number", min: 0, default: 0 },
         dilationFactor: { type: "number", min: 0, max: 10, default: 4 }, // How many pixels to dilate the segmentation mask
