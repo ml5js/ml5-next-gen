@@ -91,6 +91,7 @@ const COLORMAPS = {
  * @property {boolean} [applySegmentationMask=false] - If true, applies a body segmentation mask to the input before depth estimation. May improve focus on foreground subjects but adds overhead.
  * @property {number} [segmentationOpacity=1.0] - Opacity of the background mask when `applySegmentationMask` is true.
  * @property {number} [segmentationMaskBlur=0] - Blur radius for the segmentation mask edge when `applySegmentationMask` is true.
+ * @property {number} [dilationFactor=4] - How many pixels to dilate the segmentation mask. 0 to 10, as the greater the number, the more loops necessary, slowing down execution.
  */
 
 /**
@@ -103,6 +104,7 @@ const COLORMAPS = {
  * @property {number} minDepth - The minimum depth value used for normalization in this result (either fixed or dynamically calculated/smoothed).
  * @property {number} maxDepth - The maximum depth value used for normalization in this result (either fixed or dynamically calculated/smoothed).
  * @property {function(number, number): number | null} getDepthAt - Get raw depth at (x, y).
+ * @property {p5.Image | ImageData} mask - The segmentation mask applied to the depth map, including any dilation applied.
  */
 
 /**
@@ -180,6 +182,7 @@ class DepthEstimation {
         applySegmentationMask: { type: "boolean", default: false },
         segmentationOpacity: { type: "number", min: 0, max: 1, default: 1.0 },
         segmentationMaskBlur: { type: "number", min: 0, default: 0 },
+        dilationFactor: { type: "number", min: 0, max: 10, default: 4 }, // How many pixels to dilate the segmentation mask
       },
       "depthEstimation (runtime)"
     );
@@ -292,8 +295,6 @@ class DepthEstimation {
               false // Let estimateDepth handle the flip based on its config
             );
             inputForDepth = maskCanvas; // Use the masked canvas as input
-
-            
           } else {
             console.warn(
               "Segmentation did not find people, using original image for depth."
@@ -410,7 +411,6 @@ class DepthEstimation {
       const height = sourceElement.height;
 
       result.data = depthData;
-      
 
       // Create an ImageData using the determined min/max range
       result.imageData = this.createImageDataFromDepthValues(
@@ -431,19 +431,26 @@ class DepthEstimation {
         }
 
         const vizData = result.imageData.data; //this is a reference to the ImageData data array. Changes to this also change imageData
-        const maskData = binaryMask.data; // Use potentially flipped mask data
+        let maskData = this.dilateMask(
+          binaryMask,
+          currentRuntimeConfig.dilationFactor
+        ); // Use potentially flipped mask data and dilate it.
 
         // Iterate through the imageData pixels and mask with the segmentation result
         for (let i = 0; i < vizData.length; i += 4) {
           // Check the alpha channel of the mask (index i + 3)
-          // If mask alpha is 255, it's a background pixel
-          if (maskData[i + 3] === 255) {
+          // If mask alpha is 0, it's a background pixel (because we inverted the mask, normally 255 is background)
+          if (maskData.data[i + 3] === 0) {
             vizData[i] = 0; // Set Red to 0 (black)
             vizData[i + 1] = 0; // Set Green to 0 (black)
             vizData[i + 2] = 0; // Set Blue to 0 (black)
             // vizData[i + 3] remains 255 (opaque)
           }
         }
+
+        result.mask = this.generateP5Image(maskData); // Create a p5.Image from the mask
+      } else {
+        result.mask = null; // No mask applied, set to null
       }
       // --- End Apply Black Background ---
 
@@ -696,28 +703,73 @@ class DepthEstimation {
       const p5Instance = window._p5Instance || window;
       if (p5Instance.createImage) {
         const img = p5Instance.createImage(imageData.width, imageData.height);
-        // Use img.set() for robustness, letting p5 handle density internally
-        for (let y = 0; y < img.height; y++) {
-          for (let x = 0; x < img.width; x++) {
-            // Calculate index for the source imageData.data array
-            const idx = (y * imageData.width + x) * 4;
-            // Extract RGBA values
-            const r = imageData.data[idx + 0];
-            const g = imageData.data[idx + 1];
-            const b = imageData.data[idx + 2];
-            const a = imageData.data[idx + 3];
-            // Create a p5 color object
-            const c = p5Instance.color(r, g, b, a);
-            // Set the pixel in the p5.Image using logical coordinates
-            img.set(x, y, c);
-          }
-        }
-        // Update pixels is still needed after using set() multiple times
-        img.updatePixels();
+        img.loadPixels(); // Load pixels to prepare for setting
+        img.pixels.set(imageData.data); // Bulk copy pixel data
+        img.updatePixels(); // Update pixels to apply changes
         return img;
       }
     }
     return imageData; // Return original ImageData if p5 or createImage not available
+  }
+
+  /** Dilates a mask by a certain number of edge pixels. It also inverts it, so that the silouette is opaque and the background transparent @private */
+  dilateMask(imageData, dilationFactor) {
+    if (!imageData || !imageData.data) {
+      return imageData; // No dilation if no data
+    }
+
+    const { width, height, data } = imageData;
+    const newData = new Uint8ClampedArray(data.length);
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        let index = (y * width + x) * 4;
+
+        newData[index] = 0; // R
+        newData[index + 1] = 0; // G
+        newData[index + 2] = 0; // B
+        newData[index + 3] = 255 - imageData.data[index + 3]; // Alpha from received mask, inverted
+
+        // If this pixel has alpha = 0 (foreground pixel), check if it should become 255 (background)
+        if (imageData.data[index + 3] === 0) {
+          let dilated = false;
+
+          // Check within the threshold radius
+          for (
+            let dy = -dilationFactor;
+            dy <= dilationFactor && !dilated;
+            dy++
+          ) {
+            for (
+              let dx = -dilationFactor;
+              dx <= dilationFactor && !dilated;
+              dx++
+            ) {
+              let checkX = x + dx;
+              let checkY = y + dy;
+
+              // Make sure we're within bounds
+              if (
+                checkX >= 0 &&
+                checkX < width &&
+                checkY >= 0 &&
+                checkY < height
+              ) {
+                let checkIndex = (checkY * width + checkX) * 4;
+
+                // If we find a neighboring pixel with alpha = 255, grow background into this pixel
+                if (imageData.data[checkIndex + 3] === 255) {
+                  newData[index + 3] = 0; // Set alpha to 0 (background, because we inverted it, normally 255 is background)
+                  dilated = true;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return new ImageData(newData, width, height);
   }
 }
 
