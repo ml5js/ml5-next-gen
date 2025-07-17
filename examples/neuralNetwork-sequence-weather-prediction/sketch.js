@@ -10,7 +10,6 @@
 
 let model;
 let data;
-let sequenceLength = 10;
 let features = [
   "temperature",
   "humidity",
@@ -18,6 +17,7 @@ let features = [
   "pressure",
   "precipitation",
 ];
+let sequenceLength = 10; // NN looks at 10 data points at a time
 
 let state = "training";
 let predictedRain = 0;
