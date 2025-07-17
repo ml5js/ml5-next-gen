@@ -10,6 +10,7 @@
 
 let model;
 let data;
+let sequenceLength = 10;
 let features = [
   "temperature",
   "humidity",
@@ -43,22 +44,16 @@ function setup() {
   // the JSON file has the actual data in a "data" property
   data = data.data;
 
-  // XXX: the following is quite unclear
-  // XXX: - try naming the function with an action word (verb)
-  // XXX: - explain why we do this
-  // XXX: - the second and the third parameter need to be the same - just pass one then?
-  // XXX: - the last parameter is 10, but the result has 14 entries 🤷‍♂️ (data has 24)
-  // XXX: - we use the result for inputs and outputs, how about naming those
-  // XXX:   properties with those words directly (rather than "sequences", "targets")
-
-  // run a sliding window algorithm for time based data
-  let batchData = model.slidingWindow(data, features, features, 10);
-  let inputs = batchData.sequences;
-  let outputs = batchData.targets;
-
-  // add the training data
-  for (let i = 0; i < inputs.length; i++) {
-    model.addData(inputs[i], outputs[i]);
+  // step through the data (in a "sliding window" way) and break it into
+  // sequences of 10 data points, which is what the NN will see at a time
+  for (let i = 0; i <= data.length-sequenceLength; i++) {
+    let inputs = data.slice(i, i+sequenceLength);
+    let outputs = data.slice(i, i+sequenceLength);
+    for (let j=0; j < inputs.length; j++) {
+      delete inputs[j].date;
+    }
+    console.log("Sequence for training", inputs, outputs);
+    model.addData(inputs, outputs);
   }
   model.normalizeData();
 
@@ -97,13 +92,9 @@ function finishedTraining() {
 }
 
 function predictData() {
-  // XXX: the following is similarly unclear
-  // XXX: - try naming the function with an action word (verb)
-  // XXX: - explain why we do this
-  // XXX: - (does this do more than return the last 10 samples from data?)
-
-  // Helper function paired with the slidingWindow to get sample from data
-  let inputs = model.sampleWindow(data);
+  // take the last 10 data points to predict the next
+  let inputs = data.slice(-sequenceLength);
+  console.log("Sequence for prediction", inputs);
   model.predict(inputs, gotResults);
 }
 
