@@ -68,7 +68,7 @@ const COLORMAPS = {
   },
   /** Grayscale colormap: black to white. */
   GRAYSCALE: (value) => {
-    const v = Math.round(value * 255);
+    const v = 255 - Math.round(value * 255);
     return [v, v, v];
   },
 };
