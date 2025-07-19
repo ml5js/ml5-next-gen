@@ -10,6 +10,8 @@ let depthEstimator;
 let webcam;
 let depthMap;
 
+let backdrop;
+
 // Video dimensions
 let videoWidth = 640;
 let videoHeight = 480;
@@ -17,11 +19,14 @@ let videoHeight = 480;
 function preload() {
   // Load and start the depth estimation model
   depthEstimator = ml5.depthEstimation();
+  backdrop = loadImage('starcluster.jpg'); // Load a backdrop image
+  //Image "Bright Center Star Cluster" by NASA
 }
 
 function setup() {
   // Create a canvas the size of the webcam video
   createCanvas(videoWidth, videoHeight);
+  //imageMode(CENTER);
 
   // Create the video capture element
   webcam = createCapture(VIDEO);
@@ -33,11 +38,12 @@ function setup() {
 }
 
 function draw() {
-  clear(); //Clear the canvas, making it transparent
+  //Draw a backdrop image that will be behind the depth map
+  image(backdrop, 0, -height/2, width);
 
   // If depth estimation results are available
   if (depthMap) {
-    // Apply the silhouette mask to the depth map using the p5 mask function
+    // Apply the silhouette mask to the depth map using the p5 mask function. This will make its background transparent.
     depthMap.image.mask(depthMap.mask);
     // Draw the depth map
     image(depthMap.image, 0, 0);
