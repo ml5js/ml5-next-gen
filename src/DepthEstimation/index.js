@@ -258,6 +258,36 @@ class DepthEstimation {
 
     const currentRuntimeConfig = { ...this.runtimeConfig, ...options };
     let inputForDepth = image; // Default to original image
+    let resizedSource = null;
+    let normalizedSource = image; // Default to original media if not resized
+
+    if (image instanceof HTMLElement) {
+      /*
+       * If the input is an HTML element, these models ignore the element's "width" and "height"
+       * attributes, opting instead for the intrinsic dimensions of the video. This causes a mismatch
+       * between what the user expects and what the model returns. Here we turn it to a tensor and resize it
+       * to match the element's .width and .height; the width and height attributes set by the user.
+       *
+       */
+      const { resized, normalized } = tf.tidy(() => {
+        const sourcePixelsTensor = tf.browser.fromPixels(image);
+        const resized = tf.image.resizeBilinear(sourcePixelsTensor, [
+          image.height,
+          image.width,
+        ]);
+        const normalized = resized.clipByValue(0, 255).div(255.0); // Clip and normalize for use in drawMask()
+
+        return {
+          resized: resized.clone(), // Clone to keep outside tidy
+          normalized: normalized.clone(), // Clone to keep outside tidy
+        };
+      });
+
+      resizedSource = resized;
+      normalizedSource = normalized;
+      inputForDepth = resizedSource;
+    }
+
     let backgroundDarkeningMask = null;
 
     // --- Apply Segmentation Mask (if enabled) ---
@@ -265,7 +295,9 @@ class DepthEstimation {
       await this.loadSegmenter(); // Ensure segmenter is loaded
       if (this.segmenter) {
         try {
-          const segmentation = await this.segmenter.segmentPeople(image);
+          const segmentation = await this.segmenter.segmentPeople(
+            inputForDepth
+          );
           if (segmentation && segmentation.length > 0) {
             const foregroundColor = { r: 0, g: 0, b: 0, a: 0 }; // Transparent foreground
             const backgroundColor = { r: 0, g: 0, b: 0, a: 255 }; // Opaque background (will be drawn over)
@@ -288,7 +320,7 @@ class DepthEstimation {
             // Draw the original image, then the mask over it
             await bodySegmentation.drawMask(
               maskCanvas,
-              image,
+              normalizedSource,
               backgroundDarkeningMask,
               currentRuntimeConfig.segmentationOpacity,
               currentRuntimeConfig.segmentationMaskBlur,
@@ -303,7 +335,11 @@ class DepthEstimation {
         } catch (segError) {
           console.error("Error during segmentation pre-processing:", segError);
           // Fallback to original image if segmentation fails
-          inputForDepth = image;
+          if (resizedSource != null) {
+            inputForDepth = resizedSource;
+          } else {
+            inputForDepth = image;
+          }
         }
       } else {
         console.warn(
@@ -346,6 +382,14 @@ class DepthEstimation {
       console.error("Error estimating depth:", error);
       // Cannot dispose depthMapResult here as it's not a tensor.
       // Tensor disposal (if created) is handled within processDepthMap.
+    }
+
+    if (resizedSource != null) {
+      resizedSource.dispose();
+    }
+
+    if (normalizedSource.dispose) {
+      normalizedSource.dispose();
     }
 
     if (callback) callback(result);
@@ -554,12 +598,42 @@ class DepthEstimation {
       // --- End FPS Control ---
 
       let inputForDepth = this.detectMedia;
+      let resizedSource = null;
+      let normalizedSource = this.detectMedia; // Default to original media if not resized
+
+      if (this.detectMedia instanceof HTMLElement) {
+        /*
+         * If the input is an HTML element, these models ignore the element's "width" and "height"
+         * attributes, opting instead for the intrinsic dimensions of the video. This causes a mismatch
+         * between what the user expects and what the model returns. Here we turn it to a tensor and resize it
+         * to match the element's .width and .height; the width and height attributes set by the user.
+         *
+         */
+        const { resized, normalized } = tf.tidy(() => {
+          const sourcePixelsTensor = tf.browser.fromPixels(this.detectMedia);
+          const resized = tf.image.resizeBilinear(sourcePixelsTensor, [
+            this.detectMedia.height,
+            this.detectMedia.width,
+          ]);
+          const normalized = resized.clipByValue(0, 255).div(255.0); // Clip and normalize for use in drawMask()
+
+          return {
+            resized: resized.clone(), // Clone to keep outside tidy
+            normalized: normalized.clone(), // Clone to keep outside tidy
+          };
+        });
+
+        resizedSource = resized;
+        normalizedSource = normalized;
+        inputForDepth = resizedSource;
+      }
+
       let backgroundDarkeningMask = null; // Reset for each frame
       // --- Apply Segmentation Mask (if enabled) ---
       if (this.runtimeConfig.applySegmentationMask && this.segmenter) {
         try {
           const segmentation = await this.segmenter.segmentPeople(
-            this.detectMedia
+            inputForDepth
           );
           if (segmentation && segmentation.length > 0) {
             const foregroundColor = { r: 0, g: 0, b: 0, a: 0 };
@@ -581,7 +655,7 @@ class DepthEstimation {
             );
             await bodySegmentation.drawMask(
               maskCanvas,
-              this.detectMedia,
+              normalizedSource,
               backgroundDarkeningMask,
               this.runtimeConfig.segmentationOpacity,
               this.runtimeConfig.segmentationMaskBlur,
@@ -595,8 +669,12 @@ class DepthEstimation {
             "Error during continuous segmentation pre-processing:",
             segError
           );
-          // Fallback to original media
-          inputForDepth = this.detectMedia;
+          // Fallback to original or resized media
+          if (resizedSource != null) {
+            inputForDepth = resizedSource;
+          } else {
+            inputForDepth = this.detectMedia;
+          }
         }
       }
       // --- End Segmentation Mask ---
@@ -635,6 +713,14 @@ class DepthEstimation {
         // Cannot dispose depthMapResult. Tensor disposal handled in processDepthMap or by user.
         await tf.nextFrame();
         continue;
+      }
+
+      if (resizedSource != null) {
+        resizedSource.dispose();
+      }
+
+      if (normalizedSource.dispose) {
+        normalizedSource.dispose();
       }
 
       if (result) {
