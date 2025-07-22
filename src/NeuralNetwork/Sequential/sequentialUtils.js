@@ -682,8 +682,8 @@ class SequentialUtils {
       );
     }
 
-    const sequences = [];
-    const targets = [];
+    const inputs = [];
+    const outputs = [];
 
     // Start from the first possible complete sequence
     for (
@@ -715,11 +715,11 @@ class SequentialUtils {
         output[key] = target[key];
       });
 
-      sequences.push(seq);
-      targets.push(output);
+      inputs.push(seq);
+      outputs.push(output);
     }
 
-    return { sequences, targets };
+    return { inputs, outputs };
   }
 
   /**
