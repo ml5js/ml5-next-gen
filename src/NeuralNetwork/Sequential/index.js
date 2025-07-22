@@ -181,7 +181,7 @@ class DIYSequential extends DiyNeuralNetwork {
     return seqUtils.padCoordinates(coordinates, targetPointCount, maxEpsilon);
   }
 
-  slidingWindow(data, featureKeys, targetKeys, batchLength = null) {
+  getSlidingWindow(data, featureKeys, targetKeys, batchLength = null) {
     this.featureKeys = featureKeys;
 
     if (batchLength == null) {
@@ -200,7 +200,7 @@ class DIYSequential extends DiyNeuralNetwork {
     );
   }
 
-  sampleWindow(data) {
+  getSampleWindow(data) {
     if (!this.batchLength || !this.featureKeys) {
       throw new Error(
         "Your data must be formated through the slidingWindow method first!"
