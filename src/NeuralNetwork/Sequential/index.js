@@ -90,7 +90,7 @@ class DIYSequential extends DiyNeuralNetwork {
   addDefaultLayers() {
     let layers;
 
-    const tsLayers = createSeqLayers(
+    const seqLayers = createSeqLayers(
       this.neuralNetworkData.meta.seriesShape,
       this.options.hiddenUnits,
       this.numberOfClasses // For output units if needed
@@ -100,24 +100,26 @@ class DIYSequential extends DiyNeuralNetwork {
     let taskConditions = task;
     switch (taskConditions) {
       case "sequenceRegression":
-        layers = tsLayers.regression;
+        layers = seqLayers.regression;
         return this.createNetworkLayers(layers);
 
       case "sequenceClassification":
-        layers = tsLayers.classification;
+        layers = seqLayers.classification;
         return this.createNetworkLayers(layers);
 
       case "sequenceClassificationWithCNN":
-        layers = tsLayers.classificationWithCNN;
+        layers = seqLayers.classificationWithCNN;
         return this.createNetworkLayers(layers);
 
       case "sequenceRegressionWithCNN":
-        layers = tsLayers.regressionWithCNN;
+        layers = seqLayers.regressionWithCNN;
         return this.createNetworkLayers(layers);
 
       default:
-        console.warn("Task is undefined or no inputUnits/outputUnits defined");
-        layers = tsLayers.default;
+        console.error(
+          "Error: Task is unknown. Check documentation for a list of available sequence tasks. Defaulting to sequenceRegression Tasks"
+        );
+        layers = seqLayers.default;
         return this.createNetworkLayers(layers);
     }
   }
