@@ -275,7 +275,7 @@ class SequentialUtils {
   }
 
   // point simplification utilities - Ramer-Douglas-Peucker (RDP) algorithm
-  padCoordinates(allPoints, targetPointCount, maxEpsilon = 50) {
+  setFixedLength(allPoints, targetPointCount, maxEpsilon = 50) {
     if (allPoints.length === 0) return [];
 
     // Check if it's an array of objects with .x and .y properties

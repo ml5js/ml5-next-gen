@@ -108,11 +108,11 @@ class DIYSequential extends DiyNeuralNetwork {
         return this.createNetworkLayers(layers);
 
       case "sequenceClassificationWithCNN":
-        layers = tsLayers.classificationConv;
+        layers = tsLayers.classificationWithCNN;
         return this.createNetworkLayers(layers);
 
       case "sequenceRegressionWithCNN":
-        layers = tsLayers.regressionConv;
+        layers = tsLayers.regressionWithCNN;
         return this.createNetworkLayers(layers);
 
       default:
