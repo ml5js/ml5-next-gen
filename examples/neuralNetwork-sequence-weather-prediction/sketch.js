@@ -46,12 +46,13 @@ function setup() {
 
   // step through the data (in a "sliding window" way) and break it into
   // sequences of 10 data points, which is what the NN will see at a time
-  for (let i = 0; i <= data.length-sequenceLength; i++) {
-    let inputs = data.slice(i, i+sequenceLength);
-    let outputs = data.slice(i, i+sequenceLength);
-    for (let j=0; j < inputs.length; j++) {
+  for (let i = 0; i <= data.length - sequenceLength - 1; i++) {
+    let inputs = data.slice(i, i + sequenceLength);
+    let outputs = data[i + sequenceLength];
+    for (let j = 0; j < inputs.length; j++) {
       delete inputs[j].date;
     }
+    delete outputs.date;
     console.log("Sequence for training", inputs, outputs);
     model.addData(inputs, outputs);
   }
@@ -127,16 +128,18 @@ function drawBarGraph() {
   let barWidth = width / maxBars;
   let maxDataValue = 35;
 
+  let dryColor = color(235, 242, 255);
+  let wetColor = color(0, 80, 255);
+
   for (let i = 0; i < graphValues.length && i < maxBars; i++) {
     let barHeight = map(graphValues[i], 0, maxDataValue, 0, height - 180);
     let x = i * barWidth;
     let y = height - barHeight - 20;
 
-    // XXX: the colors are a bit unintuitive (blue is normally associated
-    // with more rain rather than less) - maybe you could do some research
-    // and use lerpColor() here?
+    // interpolate color based on rainfall amount
+    let lerpAmt = constrain(graphValues[i] / maxDataValue, 0, 1);
+    let barColor = lerpColor(dryColor, wetColor, lerpAmt);
 
-    let barColor = map(graphValues[i], 0, maxDataValue, 0, 255);
     push();
     fill(barColor, 100, 255 - barColor);
     stroke(100);
