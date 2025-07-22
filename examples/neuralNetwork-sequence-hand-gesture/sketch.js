@@ -78,7 +78,7 @@ function draw() {
   } else if (hands.length <= 0 && sequence.length > 0) {
     if (state == "collecting") {
       // Pad the length of the coordinates to targetLength
-      let inputData = model.padCoordinates(sequence, targetLength);
+      let inputData = model.setFixedLength(sequence, targetLength);
       let outputData = { label: currGesture };
 
       // Add data to the model
@@ -90,7 +90,7 @@ function draw() {
 
       // Pad the data and use for prediction if state is prediction
     } else if (state == "prediction") {
-      let predictData = model.padCoordinates(sequence, targetLength);
+      let predictData = model.setFixedLength(sequence, targetLength);
       model.classify(predictData, gotResults);
     }
 

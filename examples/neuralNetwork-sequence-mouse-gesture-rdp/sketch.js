@@ -48,13 +48,13 @@ function mouseReleased() {
     // If state is collecting, add whole sequence as X, and shape as Y
     if (state == "collecting") {
       let target = { label: currShape };
-      let paddedCoordinates = model.padCoordinates(sequence, targetLength);
-      model.addData(paddedCoordinates, target);
+      let fixedCoordinates = model.setFixedLength(sequence, targetLength);
+      model.addData(fixedCoordinates, target);
 
       clearScreen();
     } else if (state == "prediction") {
-      let paddedCoordinates = model.padCoordinates(sequence, targetLength);
-      model.classify(paddedCoordinates, gotResults);
+      let fixedCoordinates = model.setFixedLength(sequence, targetLength);
+      model.classify(fixedCoordinates, gotResults);
       clearScreen();
     }
   }

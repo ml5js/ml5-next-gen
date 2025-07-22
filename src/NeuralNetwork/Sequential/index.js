@@ -176,9 +176,9 @@ class DIYSequential extends DiyNeuralNetwork {
   }
 
   // RDP algorithm
-  padCoordinates(coordinates, targetPointCount) {
+  setFixedLength(coordinates, targetPointCount) {
     const maxEpsilon = int(coordinates.length / 2);
-    return seqUtils.padCoordinates(coordinates, targetPointCount, maxEpsilon);
+    return seqUtils.setFixedLength(coordinates, targetPointCount, maxEpsilon);
   }
 
   getSlidingWindow(data, featureKeys, targetKeys, batchLength = null) {
