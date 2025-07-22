@@ -78,7 +78,7 @@ function draw() {
 
     // Pad the data and use for prediction
   } else if (hands.length <= 0 && sequence.length > 0) {
-    let predictData = model.padCoordinates(sequence, targetLength);
+    let predictData = model.setFixedLength(sequence, targetLength);
     model.classify(predictData, gotResults);
 
     // Reset the sequence
