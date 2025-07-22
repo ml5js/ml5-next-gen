@@ -40,6 +40,7 @@ export class CocoSsd {
    */
   async detect(imgToPredict) {
     mediaReady(imgToPredict, true);
+    
     await tf.nextFrame();
 
     const detections = await this.model.detect(imgToPredict);
