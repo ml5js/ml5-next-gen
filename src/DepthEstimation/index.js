@@ -489,6 +489,12 @@ class DepthEstimation {
             vizData[i + 1] = 0; // Set Green to 0 (black)
             vizData[i + 2] = 0; // Set Blue to 0 (black)
             // vizData[i + 3] remains 255 (opaque)
+
+            //Make sure the mask is also applied to the raw depth data array
+            //and by extension, the getDepthAt() method.
+            let x = (i / 4) % width; // Calculate x coordinate
+            let y = Math.floor((i / 4) / width); // Calculate y coordinate
+            result.data[y][x] = 0; // Set depth value to 0 for this pixel
           }
         }
 
