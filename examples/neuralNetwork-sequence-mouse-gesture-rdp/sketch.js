@@ -3,132 +3,124 @@
  * Learn more about the ml5.js project: https://ml5js.org/
  * ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
  *
- * This example demonstrates How to train your own mouse gesture classifier through ml5.neuralNetwork with sequeceClassification Task.
+ * This example demonstrates how to train your own mouse gesture classifier
+ * through ml5.neuralNetwork with the sequenceClassificationWithCNN task.
  */
 
 let model;
-let currShape = "circle";
-let state = "collecting";
 
+let state = "collecting";
+let curShape = "circle";
 let sequence = [];
 let targetLength = 30;
 
-function preload() {
+function setup() {
+  let canvas = createCanvas(600, 400);
+  canvas.parent("canvasDiv");
+
   let options = {
     inputs: ["x", "y"],
     outputs: ["label"],
     task: "sequenceClassificationWithCNN",
     debug: true,
-    learningRate: 0.005, // Learning rate decreased for better convergence
+    learningRate: 0.005, // smaller learning rate converged better
   };
-
   model = ml5.neuralNetwork(options);
-}
 
-function setup() {
-  let canvas = createCanvas(600, 400);
-  canvas.parent("canvasDiv");
-  background(220);
-  UI();
+  select("#collCirclesBtn").mouseClicked(collectCircles);
+  select("#collSquaresBtn").mouseClicked(collectSquares);
+  select("#trainBtn").mouseClicked(trainModel);
 }
 
 function draw() {
-  // Record data when the mouse is pressed inside the canvas
-  if (mouseIsPressed) {
-    // Draw lines through coordinates
-    line(pmouseX, pmouseY, mouseX, mouseY);
-    let inputs = { x: mouseX, y: mouseY };
-    sequence.push(inputs);
+  background(220);
+
+  for (let i = 0; i < sequence.length - 1; i++) {
+    line(sequence[i].x, sequence[i].y, sequence[i + 1].x, sequence[i + 1].y);
+  }
+
+  // This sketch uses the RDP line simplification algorithm
+  // to make each inputs to the neural network have the same
+  // number of points.
+  // For more information about RDP, see:
+  // https://www.youtube.com/watch?v=ZCXkvwLxBrA
+
+  let rdp = model.setFixedLength(sequence, targetLength);
+  for (let i = 0; i < rdp.length; i++) {
+    fill(255);
+    rect(rdp[i].x - 3, rdp[i].y - 3, 6, 6);
+  }
+
+  // display current state
+  textSize(20);
+  fill(0);
+  if (state == "collecting") {
+    text("Now collecting " + curShape + "s", 50, 50);
+  } else if (state == "training") {
+    text("Training...", 50, 50);
+  } else if (state == "predicting" && curShape == null) {
+    text("Training finished. Draw again to predict.", 50, 50);
+  } else if (state == "predicting") {
+    text("Saw a " + curShape, 50, 50);
   }
 }
 
-// Code to signify drawing can be done again
-function mouseReleased() {
-  if (mouseY < height && mouseX < width) {
-    // If state is collecting, add whole sequence as X, and shape as Y
-    if (state == "collecting") {
-      let target = { label: currShape };
-      let fixedCoordinates = model.setFixedLength(sequence, targetLength);
-      model.addData(fixedCoordinates, target);
-
-      clearScreen();
-    } else if (state == "prediction") {
-      let fixedCoordinates = model.setFixedLength(sequence, targetLength);
-      model.classify(fixedCoordinates, gotResults);
-      clearScreen();
-    }
+function mousePressed() {
+  if (mouseX >= 0 && mouseX < width && mouseY >= 0 && mouseY < height) {
+    sequence.push({ x: mouseX, y: mouseY });
   }
-  // Reset the sequence
+}
+
+function mouseDragged() {
+  if (mouseX >= 0 && mouseX < width && mouseY >= 0 && mouseY < height) {
+    sequence.push({ x: mouseX, y: mouseY });
+  }
+}
+
+function mouseReleased() {
+  if (sequence.length == 0) return;
+
+  if (state == "collecting") {
+    let inputs = model.setFixedLength(sequence, targetLength);
+    let outputs = { label: curShape };
+    model.addData(inputs, outputs);
+  } else if (state == "predicting") {
+    let inputs = model.setFixedLength(sequence, targetLength);
+    model.classify(inputs, gotResults);
+  }
+  // reset the sequence
   sequence = [];
 }
 
 function trainModel() {
-  // Normalize Data first before Training
   model.normalizeData();
 
-  // Set the number of epochs for training
   let options = {
     epochs: 40,
   };
   model.train(options, finishedTraining);
 
-  background(220);
   state = "training";
-  text("Training...", 50, 50);
-
-  recCircle.attribute("disabled", true);
-  recSquare.attribute("disabled", true);
-  trainBut.attribute("disabled", true);
+  select("#collCirclesBtn").attribute("disabled", true);
+  select("#collSquaresBtn").attribute("disabled", true);
+  select("#trainBtn").attribute("disabled", true);
 }
 
 function finishedTraining() {
-  background(220);
-  text("Training Finished, Draw again to predict", 50, 50);
-  state = "prediction";
+  state = "predicting";
+  curShape = null;
 }
 
 function gotResults(results) {
-  let label = results[0].label;
-  currShape = label;
+  curShape = results[0].label;
 }
 
-// UI Elements
-let recCircle, recSquare, trainBut;
-
-function UI() {
-  textSize(20);
-
-  recCircle = select("#recCircle");
-  recSquare = select("#recSquare");
-  trainBut = select("#trainBut");
-
-  recCircle.mouseClicked(recordCircle);
-  recSquare.mouseClicked(recordSquare);
-  trainBut.mouseClicked(trainModel);
-
-  text(state + " : " + currShape, 50, 50);
-
-  function recordCircle() {
-    state = "collecting";
-    currShape = "circle";
-
-    background(220);
-    text(state + " : " + currShape, 50, 50);
-  }
-
-  function recordSquare() {
-    state = "collecting";
-    currShape = "square";
-
-    background(220);
-    text(state + " : " + currShape, 50, 50);
-  }
+function collectCircles() {
+  state = "collecting";
+  curShape = "circle";
 }
 
-// Cleanup screen and removed drawn elements, add helpful text
-function clearScreen() {
-  background(220);
-  textSize(20);
-  fill(0);
-  text(state + " : " + currShape, 50, 50);
+function collectSquares() {
+  state = "collecting";
+  curShape = "square";
 }
