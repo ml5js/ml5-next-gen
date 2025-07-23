@@ -26,6 +26,11 @@ let graphValues = [];
 
 function preload() {
   data = loadJSON("weather_data.json");
+}
+
+function setup() {
+  let canvas = createCanvas(640, 400);
+  canvas.parent("container");
 
   let options = {
     task: "sequenceRegression",
@@ -35,11 +40,6 @@ function preload() {
     outputs: features,
   };
   model = ml5.neuralNetwork(options);
-}
-
-function setup() {
-  let canvas = createCanvas(640, 400);
-  canvas.parent("container");
 
   // the JSON file has the actual data in a "data" property
   data = data.data;
