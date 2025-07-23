@@ -209,7 +209,7 @@ class DepthEstimation {
   /** Loads the body segmentation model if not already loaded. @private */
   async loadSegmenter() {
     if (this.segmenter) return; // Already loaded
-    console.log("Loading body segmentation model for masking...");
+    // Load the body segmentation model for masking
     try {
       const modelType =
         bodySegmentation.SupportedModels.MediaPipeSelfieSegmentation;
@@ -217,7 +217,7 @@ class DepthEstimation {
       this.segmenter = await bodySegmentation.createSegmenter(modelType, {
         runtime: "tfjs",
       });
-      console.log("Body segmentation model loaded.");
+      // Successfully loaded the segmenter
     } catch (error) {
       console.error("Failed to load body segmentation model:", error);
       this.segmenter = null; // Ensure it's null on failure
