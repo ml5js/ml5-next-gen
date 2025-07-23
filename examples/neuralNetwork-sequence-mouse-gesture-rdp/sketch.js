@@ -116,11 +116,9 @@ function gotResults(results) {
 }
 
 function collectCircles() {
-  state = "collecting";
   curShape = "circle";
 }
 
 function collectSquares() {
-  state = "collecting";
   curShape = "square";
 }
