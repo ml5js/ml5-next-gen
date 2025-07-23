@@ -11,18 +11,10 @@ let depthEstimator;
 let img;
 let depthMap;
 
-// Default options for depth estimation (can be adjusted if needed)
-let options = {
-  //normalizeDynamically: true, // Default is false
-  minDepth: 0.21, // Default is 0.0
-  maxDepth: 0.73, // Default is 1.0
-  applySegmentationMask: true, // Default is false
-};
-
 function preload() {
   img = loadImage("face.png");
   // Load the depth estimation model
-  depthEstimator = ml5.depthEstimation(options);
+  depthEstimator = ml5.depthEstimation();
 }
 
 function setup() {
@@ -37,26 +29,16 @@ function draw() {
   background(0); // Clear the background
 
   // Draw the original image on the left half of the canvas
-  if (img) {
-    image(img, 0, 0, img.width, img.height);
-  }
+  image(img, 0, 0);
 
   // Check if depth estimation results are available
-  if (depthMap && depthMap.image) {
+  if (depthMap) {
     // Draw the colormapped depth visualization on the right half of the canvas
-    image(depthMap.image, img.width, 0, img.width, img.height);
-  } else {
-    // If no results yet, display a simple status message on the right half
-    fill(255);
-    noStroke();
-    textAlign(CENTER, CENTER);
-    textSize(16);
-    text("Estimating...", img.width + img.width / 2, img.height / 2);
-    textAlign(LEFT, BASELINE); // Reset text alignment
+    image(depthMap.image, img.width, 0);
   }
 }
 
 // Callback function that receives the depth estimation results
 function gotResults(result) {
-  depthMap = result; // Store the resulr
+  depthMap = result; // Store the result
 }

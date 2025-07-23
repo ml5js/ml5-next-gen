@@ -163,7 +163,7 @@ class DepthEstimation {
       this.config,
       {
         minDepth: { type: "number", min: 0, max: 1, default: 0.2 }, // Default changed from 0
-        maxDepth: { type: "number", min: 0, max: 1, default: 0.9 }, // Default changed from 1
+        maxDepth: { type: "number", min: 0, max: 1, default: 0.75 }, // Default changed from 1
         normalizeDynamically: { type: "boolean", default: false }, // If true, min/maxDepth are ignored and calculated dynamically per frame.
         normalizationSmoothingFactor: {
           type: "number",

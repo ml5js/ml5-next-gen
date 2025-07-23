@@ -15,19 +15,10 @@ let videoWidth = 640;
 let videoHeight = 480;
 
 // Default options for depth estimation (can be adjusted if needed)
-let options = {
-  normalizeDynamically: true, // Default is false
-  // minDepth: 0.25,             // Default is 0.0
-  // maxDepth: 0.75,              // Default is 1.0
-  normalizationSmoothingFactor: 1, // Default is 0.5 (only used if normalizeDynamically is true)
-  applySegmentationMask: true, // Default is false
-  // colormap: 'color', // Default is 'grayscale'
-  flipped: false, // Default is false
-};
 
 function preload() {
   // Initialize the depth estimation model
-  depthEstimator = ml5.depthEstimation(options);
+  depthEstimator = ml5.depthEstimation();
 }
 
 function setup() {
@@ -44,29 +35,15 @@ function setup() {
 }
 
 function draw() {
-  background(0); // Clear the background
+  background(0);
 
   // Draw the original video feed on the left half of the canvas
-  image(video, 0, 0, videoWidth, videoHeight);
+  image(video, 0, 0);
 
   // Check if depth estimation results are available
-  if (depthMap && depthMap.image) {
+  if (depthMap ) {
     // Draw the colormapped depth visualization on the right half of the canvas
-    image(
-      depthMap.image,
-      videoWidth,
-      0,
-      videoWidth,
-      videoHeight
-    );
-  } else {
-    // If no results yet, display a loading message on the right half
-    fill(255);
-    noStroke();
-    textAlign(CENTER, CENTER);
-    textSize(16);
-    text("Estimating depth...", videoWidth + videoWidth / 2, videoHeight / 2);
-    textAlign(LEFT, BASELINE); // Reset text alignment
+    image(depthMap.image, videoWidth, 0, videoWidth, videoHeight);
   }
 }
 
