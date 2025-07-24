@@ -31,7 +31,7 @@ class SequentialUtils {
 
   checkInputStructure(xInputs, options = null) {
     if (!Array.isArray(xInputs)) {
-      throw new error("Syntax Error: Data Should be in an Array");
+      throw new Error("Syntax Error: Data Should be in an Array");
     }
     let isObjects = true;
     let isArrays = true;
@@ -47,7 +47,7 @@ class SequentialUtils {
               Object.keys(xInputs[i]).length ||
             nnUtils.getDataType(xInputs[i - 1]) === "object"
           ) {
-            throw new error("Data format is inconsistent");
+            throw new Error("Data format is inconsistent");
           }
         }
       } else if (Array.isArray(xInputs[i])) {
@@ -58,7 +58,7 @@ class SequentialUtils {
             xInputs[i - 1].length !== xInputs[i].length ||
             !Array.isArray(xInputs[i - 1])
           ) {
-            throw new error("Data format is inconsistent");
+            throw new Error("Data format is inconsistent");
           }
         }
       } else {
@@ -66,7 +66,7 @@ class SequentialUtils {
           isObjects = false;
           isArrays = false;
         } else {
-          throw new error("inputLabels is needed for 1D array inputs");
+          throw new Error("inputLabels is needed for 1D array inputs");
         }
       }
 
@@ -77,7 +77,7 @@ class SequentialUtils {
       } else if (isValues) {
         return "ValueSequence";
       } else {
-        throw new error("Syntax Error: Input Structure is unknown");
+        throw new Error("Syntax Error: Input Structure is unknown");
       }
     }
   }
@@ -91,7 +91,7 @@ class SequentialUtils {
       case "ValueSequence":
         return this.convertValueSequence(xInputs, options);
       default:
-        throw new error("Input Data Structure is unknown");
+        throw new Error("Input Data Structure is unknown");
     }
   }
 
@@ -127,7 +127,7 @@ class SequentialUtils {
   convertValueSequence(xInputs, options = null) {
     const { inputLabels } = options;
     if (xInputs.length % inputLabels.length !== 0) {
-      throw new error(
+      throw new Error(
         "Invalid Input: Number of Labels don't match amount of values"
       );
     }
