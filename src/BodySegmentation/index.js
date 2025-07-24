@@ -259,6 +259,13 @@ class BodySegmentation {
     }
     result.mask = this.generateP5Image(result.maskImageData);
 
+    //dispose segmentation tensors
+    segmentation.map((singleSegmentation) =>
+      singleSegmentation.mask
+        .toTensor()
+        .then((tensor) => tensor.dispose())
+    );
+
     if (callback) callback(result);
     return result;
   }
@@ -360,6 +367,13 @@ class BodySegmentation {
           );
       }
       result.mask = this.generateP5Image(result.maskImageData);
+
+      //dispose segmentation tensors
+      segmentation.map((singleSegmentation) =>
+        singleSegmentation.mask
+          .toTensor()
+          .then((tensor) => tensor.dispose())
+      );
 
       this.detectCallback(result);
       await tf.nextFrame();
