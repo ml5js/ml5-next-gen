@@ -16,6 +16,7 @@ import BODYPIX_PALETTE from "./BODYPIX_PALETTE";
 import { mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
+import { resizeImageAsTensor } from "../utils/imageUtilities";
 
 class BodySegmentation {
   /**
@@ -209,10 +210,25 @@ class BodySegmentation {
 
     await mediaReady(image, false);
 
+    let inputForSegmenter = image;
+
+    //If using SelfieSegmentation, make sure the input is actually the size the user expects
+    if (
+      this.modelName == "SelfieSegmentation" &&
+      (inputForSegmenter instanceof HTMLVideoElement ||
+        inputForSegmenter instanceof HTMLImageElement)
+    ) {
+      inputForSegmenter = resizeImageAsTensor(image, image.width, image.height);
+    }
+
     const segmentation = await this.model.segmentPeople(
-      image,
+      inputForSegmenter,
       this.runtimeConfig
     );
+
+    if (inputForSegmenter.dispose) {
+      inputForSegmenter.dispose();
+    }
 
     const result = {};
 
@@ -261,9 +277,7 @@ class BodySegmentation {
 
     //dispose segmentation tensors
     segmentation.map((singleSegmentation) =>
-      singleSegmentation.mask
-        .toTensor()
-        .then((tensor) => tensor.dispose())
+      singleSegmentation.mask.toTensor().then((tensor) => tensor.dispose())
     );
 
     if (callback) callback(result);
@@ -317,10 +331,29 @@ class BodySegmentation {
   async detectLoop() {
     await mediaReady(this.detectMedia, false);
     while (!this.signalStop) {
+      let inputForSegmenter = this.detectMedia;
+
+      //If using SelfieSegmentation, make sure the input is actually the size the user expects
+      if (
+        this.modelName == "SelfieSegmentation" &&
+        (inputForSegmenter instanceof HTMLVideoElement ||
+          inputForSegmenter instanceof HTMLImageElement)
+      ) {
+        inputForSegmenter = resizeImageAsTensor(
+          this.detectMedia,
+          this.detectMedia.width,
+          this.detectMedia.height
+        );
+      }
+
       const segmentation = await this.model.segmentPeople(
-        this.detectMedia,
+        inputForSegmenter,
         this.runtimeConfig
       );
+
+      if (inputForSegmenter.dispose) {
+        inputForSegmenter.dispose();
+      }
 
       const result = {};
 
@@ -370,9 +403,7 @@ class BodySegmentation {
 
       //dispose segmentation tensors
       segmentation.map((singleSegmentation) =>
-        singleSegmentation.mask
-          .toTensor()
-          .then((tensor) => tensor.dispose())
+        singleSegmentation.mask.toTensor().then((tensor) => tensor.dispose())
       );
 
       this.detectCallback(result);
