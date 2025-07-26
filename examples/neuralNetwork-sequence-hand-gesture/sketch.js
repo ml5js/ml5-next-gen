@@ -3,211 +3,196 @@
  * Learn more about the ml5.js project: https://ml5js.org/
  * ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
  *
- * This example demonstrates training a Hand Gesture classifier through ml5.neuralNetwork with sequeceClassification Task.
+ * This example demonstrates training a hand gesture classifier through
+ * ml5.neuralNetwork with the sequenceClassificationWithCNN task.
  */
 
 let video;
 let handPose;
 let hands = [];
+let model;
 
+let state = "training";
 let sequence = [];
 let targetLength = 30;
 
-let gestures = ["gesture #1", "gesture #2"];
-let counts = { "gesture #1": 0, "gesture #2": 0 };
+let gestures = ["Gesture #1", "Gesture #2"];
+let counts = { "Gesture #1": 0, "Gesture #2": 0 };
+let curGesture = gestures[0];
 
-let state = "collecting";
-let currGesture = gestures[0]; // Set currGesture to gesture 1 by default
-let predGesture = "";
+let gesture1Button;
+let gesture2Button;
+let trainButton;
 
 function preload() {
-  // Load the handPose model
-  // Set options to have data points flipped
+  // load the handPose model
   handPose = ml5.handPose({ flipHorizontal: true });
-
-  // Setup the neural network using sequenceClassification
-  let options = {
-    outputs: ["label"],
-    task: "sequenceClassificationWithCNN",
-    debug: "true",
-    learningRate: 0.001, // The default learning rate of 0.01 didn't converge for this usecase, thus a learning rate of 0.001 is used (make smaller steps of parameters each update)
-  };
-  model = ml5.neuralNetwork(options);
 }
 
 function setup() {
   let canvas = createCanvas(640, 480);
   canvas.parent("canvasDiv");
 
-  // Setup video capture
   video = createCapture(VIDEO, { flipped: true });
   video.size(640, 480);
   video.hide();
-
-  // Setup the UI buttons for training
-  UI();
-
-  // Use handpose model on video
   handPose.detectStart(video, gotHands);
+
+  let options = {
+    outputs: ["label"],
+    task: "sequenceClassificationWithCNN",
+    debug: true,
+    learningRate: 0.001, // the default learning rate of 0.01 didn't converge for this use case (0.001 makes smaller steps each epoch)
+  };
+  model = ml5.neuralNetwork(options);
+
+  // setup the UI buttons for training
+  gesture1Button = createButton("Start recording " + gestures[0]);
+  gesture1Button.mousePressed(recordGesture1);
+  gesture2Button = createButton("Start recording " + gestures[1]);
+  gesture2Button.mousePressed(recordGesture2);
+  trainButton = createButton("Train and Save Model");
+  trainButton.mousePressed(trainModel);
 }
 
 function draw() {
-  // Draw video on frame
   image(video, 0, 0, width, height);
+  drawHands();
 
-  // If hand is detected in the frame, start recording gesture
   if (hands.length > 0) {
-    handpoints = drawPoints();
+    // hands in frame, add to sequence
+    let handpoints = getKeypoints(["Left", "Right"]);
     sequence.push(handpoints);
 
-    // Helpful text to signify recording
-    textSize(20);
-    stroke(255);
-    fill(0);
-    if (state == "collecting") {
-      text(
-        state + " : " + currGesture + ", put hand down once done with gesture",
-        50,
-        50
-      );
-    } else if (state == "prediction") {
-      text("predicting... put hand down once done with gesture", 50, 50);
-    }
+    // This uses the RDP line simplification algorithm to make sure each
+    // input to the neural network has the same number of points.
+    // For more information about RDP, see:
+    // https://www.youtube.com/watch?v=ZCXkvwLxBrA
 
-    // Add collected data to model once the hand is gone and state is collecting
-  } else if (hands.length <= 0 && sequence.length > 0) {
-    if (state == "collecting") {
-      // Pad the length of the coordinates to targetLength
-      let inputData = model.setFixedLength(sequence, targetLength);
-      let outputData = { label: currGesture };
-
-      // Add data to the model
-      model.addData(inputData, outputData);
-
-      // Update the counts for the UI
-      counts[currGesture]++;
-      updateDataCountUI();
-
-      // Pad the data and use for prediction if state is prediction
-    } else if (state == "prediction") {
-      let predictData = model.setFixedLength(sequence, targetLength);
-      model.classify(predictData, gotResults);
-    }
-
-    // Reset the sequence
-    sequence = [];
-
-    // Tell users to put hand up to start recording
-  } else {
-    textSize(20);
-    stroke(255);
-    fill(0);
-    if (state == "collecting") {
-      text(
-        "put hand up in screen to start collecting for: " + currGesture,
-        50,
-        50
-      );
-    } else if (state == "prediction") {
-      if (!predGesture) {
-        text("do one of the trained gestures to predict", 50, 50);
-      } else {
-        text(
-          "prediction: " + predGesture + ", try again with another gesture!",
-          50,
-          50
-        );
+    let rdp = model.setFixedLength(sequence, targetLength);
+    for (let i = 0; i < rdp.length - 1; i++) {
+      for (let j = 0; j < rdp[i].length; j += 2) {
+        stroke(255, 0, 0);
+        line(rdp[i][j], rdp[i][j + 1], rdp[i + 1][j], rdp[i + 1][j + 1]);
       }
+    }
+  } else if (sequence.length > 0) {
+    // hands moved out of the frame, end of sequence
+    let inputs = model.setFixedLength(sequence, targetLength);
+
+    if (state == "training") {
+      let outputs = { label: curGesture };
+      model.addData(inputs, outputs);
+    } else if (state == "predicting") {
+      model.classify(inputs, gotResults);
+    }
+    counts[curGesture]++;
+    // reset the sequence
+    sequence = [];
+  }
+
+  // display current state
+  textSize(16);
+  fill(255);
+  noStroke();
+  if (state == "training" && sequence.length == 0) {
+    text("Move your hand(s) into the frame to record " + curGesture, 50, 50);
+  } else if (state == "training") {
+    text("Move your hand(s) out of the frame to finish " + curGesture, 50, 50);
+  } else if (state == "predicting" && curGesture == null) {
+    text("Try a trained gesture to see the prediction", 50, 50);
+  } else if (state == "predicting" && curGesture) {
+    text("Saw " + curGesture, 50, 50);
+  }
+
+  // show how many times each gesture was recorded
+  if (state == "training") {
+    for (let i = gestures.length - 1; i >= 0; i--) {
+      text(
+        gestures[i] + ": " + counts[gestures[i]],
+        50,
+        height - 50 - (gestures.length - i - 1) * 20
+      );
     }
   }
 }
 
-// Train the data when 'Train abd Save Model' button is pressed
-function train() {
-  // The data should be normalized before training
+function trainModel() {
   model.normalizeData();
-
-  currGesture = "";
-
-  // Train the model
-  let trainingOptions = {
+  let options = {
     epochs: 50,
   };
-  model.train(trainingOptions, finishedTraining);
+  model.train(options, finishedTraining);
+
+  gesture1Button.attribute("disabled", true);
+  gesture2Button.attribute("disabled", true);
+  trainButton.attribute("disabled", true);
 }
 
-// When the model is trained, save the model
 function finishedTraining() {
-  state = "prediction";
+  state = "predicting";
   model.save();
+  curGesture = null;
 }
 
-// Callback for predict
+// callback function for when the classification fininished
 function gotResults(results) {
-  predGesture = results[0].label;
+  curGesture = results[0].label;
 }
 
-// Callback function for when handPose outputs data
+// callback function for when handPose outputs data
 function gotHands(results) {
   hands = results;
 }
 
-// Draw visuals for hand points and flatten values into an array
-function drawPoints() {
-  let handpoints = [];
-  // Iterate through both hands
+function drawHands() {
   for (let i = 0; i < hands.length; i++) {
     let hand = hands[i];
     for (let j = 0; j < hand.keypoints.length; j++) {
-      // Access the keypoints in the hand
       let keypoint = hand.keypoints[j];
-      handpoints.push(keypoint.x, keypoint.y);
-
       fill(0, 255, 0);
       noStroke();
       circle(keypoint.x, keypoint.y, 5);
     }
   }
-
-  // Assign to a different variable before clearing
-  let output = handpoints;
-  handpoints = [];
-
-  return output;
 }
 
-// UI Elements
-function UI() {
-  dataCountsP = createP(
-    "Gesture 1 data: " +
-      counts[gestures[0]] +
-      "<br>Gesture 2 data: " +
-      counts[gestures[0]]
-  );
-  rockButton = createButton("Record Gesture #1");
-  rockButton.mousePressed(addGesture1);
-  paperButton = createButton("Record Gesture #2");
-  paperButton.mousePressed(addGesture2);
-  trainButton = createButton("Train and Save Model");
-  trainButton.mousePressed(train);
+// Return the tracked hand points as flattened array of 84 numbers
+// for use as input to the neural network
+
+function getKeypoints(whichHands = ["Left", "Right"]) {
+  let keypoints = [];
+  // look for the left and right hand
+  for (let handedness of whichHands) {
+    let found = false;
+    for (let i = 0; i < hands.length; i++) {
+      let hand = hands[i];
+      if (hand.handedness == handedness) {
+        // and add the x and y numbers of each tracked keypoint
+        // to the array
+        for (let j = 0; j < hand.keypoints.length; j++) {
+          let keypoint = hand.keypoints[j];
+          keypoints.push(keypoint.x, keypoint.y);
+        }
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      // if we don't find a right or a left hand, add 42 zeros
+      // to the keypoints array instead
+      for (let j = 0; j < 42; j++) {
+        keypoints.push(0);
+      }
+    }
+  }
+  return keypoints;
 }
 
-// Set the current handPose data to the model as "Gesture #1"
-function addGesture1() {
-  currGesture = gestures[0];
+function recordGesture1() {
+  curGesture = gestures[0];
 }
 
-// Set the current handPose data to the model as "Gesture #2"
-function addGesture2() {
-  currGesture = gestures[1];
-}
-
-// Update the HTML UI with the current data counts
-function updateDataCountUI() {
-  dataCountsP.html(
-    "Gesture 1 data: " +
-      counts[gestures[0]] +
-      "<br>Gesture 2 data: " +
-      counts[gestures[1]]
-  );
+function recordGesture2() {
+  curGesture = gestures[1];
 }
