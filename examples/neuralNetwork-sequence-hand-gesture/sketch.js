@@ -106,11 +106,11 @@ function draw() {
 
   // show how many times each gesture was recorded
   if (state == "training") {
-    for (let i = gestures.length - 1; i >= 0; i--) {
+    for (let i = 0; i < gestures.length; i++) {
       text(
         gestures[i] + ": " + counts[gestures[i]],
         50,
-        height - 50 - (gestures.length - i - 1) * 20
+        height - 50 - (gestures.length - i) * 20
       );
     }
   }
