@@ -77,7 +77,7 @@ function draw() {
 
   if (state == "training") {
     text("Training...", width / 2, 160);
-  } else if (state == "prediction") {
+  } else if (state == "predicting") {
     // XXX: let's add the unit here (mm? inches?)
     text("Predicted rain: " + nf(predictedRain, 0, 1) + "", 320, 160);
     push();
@@ -89,7 +89,7 @@ function draw() {
 }
 
 function finishedTraining() {
-  state = "prediction";
+  state = "predicting";
 }
 
 function predictData() {
