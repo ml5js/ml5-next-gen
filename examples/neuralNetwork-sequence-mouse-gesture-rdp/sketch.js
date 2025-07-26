@@ -9,7 +9,7 @@
 
 let model;
 
-let state = "collecting";
+let state = "training";
 let curShape = "circle";
 let sequence = [];
 let targetLength = 30;
@@ -53,10 +53,8 @@ function draw() {
   // display current state
   textSize(20);
   fill(0);
-  if (state == "collecting") {
+  if (state == "training") {
     text("Now collecting " + curShape + "s", 50, 50);
-  } else if (state == "training") {
-    text("Training...", 50, 50);
   } else if (state == "predicting" && curShape == null) {
     text("Training finished. Draw again to predict.", 50, 50);
   } else if (state == "predicting") {
@@ -79,7 +77,7 @@ function mouseDragged() {
 function mouseReleased() {
   if (sequence.length == 0) return;
 
-  if (state == "collecting") {
+  if (state == "training") {
     let inputs = model.setFixedLength(sequence, targetLength);
     let outputs = { label: curShape };
     model.addData(inputs, outputs);
@@ -99,7 +97,6 @@ function trainModel() {
   };
   model.train(options, finishedTraining);
 
-  state = "training";
   select("#collCirclesBtn").attribute("disabled", true);
   select("#collSquaresBtn").attribute("disabled", true);
   select("#trainBtn").attribute("disabled", true);
