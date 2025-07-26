@@ -30,7 +30,7 @@ function preload() {
 
 function setup() {
   let canvas = createCanvas(640, 400);
-  canvas.parent("container");
+  canvas.parent("canvasDiv");
 
   let options = {
     task: "sequenceRegression",
