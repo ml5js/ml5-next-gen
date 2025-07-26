@@ -39,9 +39,8 @@ function draw() {
     line(sequence[i].x, sequence[i].y, sequence[i + 1].x, sequence[i + 1].y);
   }
 
-  // This sketch uses the RDP line simplification algorithm
-  // to make each inputs to the neural network have the same
-  // number of points.
+  // This uses the RDP line simplification algorithm to make sure each
+  // input to the neural network has the same number of points.
   // For more information about RDP, see:
   // https://www.youtube.com/watch?v=ZCXkvwLxBrA
 
