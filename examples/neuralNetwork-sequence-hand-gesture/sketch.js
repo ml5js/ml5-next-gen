@@ -15,7 +15,6 @@ let model;
 let state = "training";
 let sequence = [];
 let targetLength = 30;
-
 let gestures = ["Gesture #1", "Gesture #2"];
 let counts = { "Gesture #1": 0, "Gesture #2": 0 };
 let curGesture = gestures[0];
