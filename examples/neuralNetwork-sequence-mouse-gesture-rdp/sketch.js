@@ -56,9 +56,9 @@ function draw() {
   fill(0);
   if (state == "training") {
     text("Now collecting " + curShape + "s", 50, 50);
-  } else if (state == "predicting" && curShape == null) {
-    text("Training finished. Draw again to predict.", 50, 50);
-  } else if (state == "predicting") {
+  } else if (state == "classifying" && curShape == null) {
+    text("Training finished. Draw again to see the classification in action.", 50, 50);
+  } else if (state == "classifying") {
     text("Saw a " + curShape, 50, 50);
   }
 }
@@ -82,7 +82,7 @@ function mouseReleased() {
     let inputs = model.setFixedLength(sequence, sequenceLength);
     let outputs = { label: curShape };
     model.addData(inputs, outputs);
-  } else if (state == "predicting") {
+  } else if (state == "classifying") {
     let inputs = model.setFixedLength(sequence, sequenceLength);
     model.classify(inputs, gotResults);
   }
@@ -104,7 +104,7 @@ function trainModel() {
 }
 
 function finishedTraining() {
-  state = "predicting";
+  state = "classifying";
   curShape = null;
 }
 
