@@ -3,107 +3,114 @@
  * Learn more about the ml5.js project: https://ml5js.org/
  * ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
  *
- * This example demonstrates loading a Hand Gesture classifier through ml5.neuralNetwork with sequeceClassification Task.
- * This example is trained with the ASL gestures for Hello and Goodbye
+ * This example demonstrates loading a hand gesture classifier through
+ * ml5.neuralNetwork with the sequenceClassificationWithCNN task.
+ * This example has been trained with the ASL gestures for Hello and Goodbye.
  *
  * Reference to sign hello and goodbye in ASL:
- * Hello: https://babysignlanguage.com/dictionary/hello/
- * Goodbye: https://babysignlanguage.com/dictionary/goodbye/
+ * Hello: https://www.signasl.org/sign/hello
+ * Goodbye: https://www.signasl.org/sign/goodbye
  */
 
-let handPose;
 let video;
+let handPose;
 let hands = [];
+let model;
+let isModelLoaded = false;
 
 let sequence = [];
-let targetLength = 50;
-
-let predGesture = "";
+let sequenceLength = 50;
+let curGesture;
 
 function preload() {
-  // Load the handPose model
-  // Set options to have data points flipped
+  // load the handPose model
   handPose = ml5.handPose({ flipHorizontal: true });
-
-  // Setup the neural network using sequenceClassification
-  let options = {
-    task: "sequenceClassificationWithCNN",
-  };
-
-  model = ml5.neuralNetwork(options);
 }
 
 function setup() {
   let canvas = createCanvas(640, 480);
   canvas.parent("canvasDiv");
 
-  // Create video capture
   video = createCapture(VIDEO, { flipped: true });
   video.size(640, 480);
   video.hide();
-
   handPose.detectStart(video, gotHands);
 
-  // Setup the model files to load
+  let options = {
+    task: "sequenceClassificationWithCNN",
+  };
+  model = ml5.neuralNetwork(options);
+
+  // setup the model files to load
   let modelDetails = {
     model: "model/model.json",
     metadata: "model/model_meta.json",
     weights: "model/model.weights.bin",
   };
 
-  // Load the model and call modelLoaded once finished
+  // load the model and call modelLoaded once finished
   model.load(modelDetails, modelLoaded);
 }
 
-// Callback for load model
 function modelLoaded() {
-  console.log("model loaded!");
+  console.log("Model loaded");
+  isModelLoaded = true;
 }
 
 function draw() {
-  // Draw video on the canvas
   image(video, 0, 0, width, height);
+  drawHands();
+  textSize(16);
+  stroke(0);
+  fill(255);
 
-  // If hands are found then start recording
   if (hands.length > 0) {
-    // Get coordinates from hands (21 points)
-    handpoints = drawPoints();
+    // hands in frame, add their keypoints the sequence (input) XXX
+    let handpoints = getKeypoints(["Left", "Right"]);
     sequence.push(handpoints);
+    text(
+      "Move your hand(s) out of the frame after finishing the gesture",
+      50,
+      50
+    );
+  } else if (sequence.length > 0) {
+    // hands moved out of the frame, end of sequence
 
-    // Helpful text to signify recording
-    textSize(20);
-    stroke(255);
-    fill(0);
-    text("predicting... put hand down once done with gesture", 50, 50);
-
-    // Pad the data and use for prediction
-  } else if (hands.length <= 0 && sequence.length > 0) {
-    let predictData = model.setFixedLength(sequence, targetLength);
-    model.classify(predictData, gotResults);
-
-    // Reset the sequence
-    sequence = [];
-
-    // Tell users to put hand up to start recording
-  } else {
-    textSize(20);
-    stroke(255);
-    fill(0);
-    if (!predGesture) {
-      text("do one of the gestures below to predict", 50, 50);
-    } else {
-      text(
-        "prediction: " + predGesture + ", try again with another gesture!",
-        50,
-        50
-      );
+    // sequence will have varying length at this point, depending on
+    // how long the hands were in frame - a line simplification algorithm
+    // (RDP) turns it into the fixed length the NN can work with
+    let inputs = model.setFixedLength(sequence, sequenceLength);
+    // start the classification
+    if (isModelLoaded) {
+      model.classify(inputs, gotResults);
     }
+    // reset the sequence
+    sequence = [];
+    text("Classifying...", 50, 50);
+  } else if (curGesture == null) {
+    // on program start
+    text("Move your hand(s) into the frame to sign a gesture", 50, 50);
+  } else {
+    // after receiving a classification
+    text('Saw "' + curGesture + '"', 50, 50);
   }
 }
 
-// Draw the points on the hands
-function drawPoints() {
-  let handpoints = [];
+// callback function for when the classification fininished
+function gotResults(results, error) {
+  if (error) {
+    console.error(error);
+    return;
+  }
+  curGesture = results[0].label;
+}
+
+// callback function for when handPose outputs data
+function gotHands(results) {
+  hands = results;
+}
+
+function drawHands() {
   for (let i = 0; i < hands.length; i++) {
     let hand = hands[i];
     for (let j = 0; j < hand.keypoints.length; j++) {
@@ -111,22 +118,38 @@ function drawPoints() {
       fill(0, 255, 0);
       noStroke();
       circle(keypoint.x, keypoint.y, 5);
-      handpoints.push(keypoint.x, keypoint.y);
     }
   }
-  let output = handpoints;
-  handpoints = [];
-
-  return output;
 }
 
-// Callback function for when handPose outputs data
-function gotHands(results) {
-  // Save the output to the hands variable
-  hands = results;
-}
+// Return the tracked hand points as flattened array of 84 numbers
+// for use as input to the neural network
 
-// Call back for accessing the results
-function gotResults(results) {
-  predGesture = results[0].label;
+function getKeypoints(whichHands = ["Left", "Right"]) {
+  let keypoints = [];
+  // look for the left and right hand
+  for (let whichHand of whichHands) {
+    let found = false;
+    for (let i = 0; i < hands.length; i++) {
+      let hand = hands[i];
+      if (hand.handedness == whichHand) {
+        // and add the x and y numbers of each tracked keypoint
+        // to the array
+        for (let j = 0; j < hand.keypoints.length; j++) {
+          let keypoint = hand.keypoints[j];
+          keypoints.push(keypoint.x, keypoint.y);
+        }
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      // if we don't find a right or a left hand, add 42 zeros
+      // to the keypoints array instead
+      for (let j = 0; j < 42; j++) {
+        keypoints.push(0);
+      }
+    }
+  }
+  return keypoints;
 }
