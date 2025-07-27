@@ -3,7 +3,9 @@
   Learn more about the ml5.js project: https://ml5js.org/
   ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
  
-  This example demonstrates loading a Sign Language classifier through ml5.neuralNetwork with sequeceClassification Task.
+  This example demonstrates loading a hand gesture classifier through
+  ml5.neuralNetwork with the sequenceClassificationWithCNN task.
+  This example has been trained with the ASL gestures for Hello and Goodbye.
 -->
 
 <html>
@@ -11,7 +13,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ml5.js Time Series Hand Gesture load model</title>
+    <title>ml5.js neuralNetwork Hand Gesture Loading Pre-trained Model Example</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
     <script src="../../dist/ml5.js"></script>
   </head>
@@ -20,15 +22,7 @@
     <script src="sketch.js"></script>
     <div id="canvasDiv"></div>
     <p>
-      How to do gestures for Hello and Goodbye in ASL: <br />
-      Hello:
-      <a href="https://babysignlanguage.com/dictionary/hello/"
-        >https://babysignlanguage.com/dictionary/hello/ </a
-      ><br />
-      Goodbye:
-      <a href="https://babysignlanguage.com/dictionary/goodbye/"
-        >https://babysignlanguage.com/dictionary/goodbye/ </a
-      ><br />
+      How to sign: <a href="https://www.signasl.org/sign/hello">Hello</a> &amp; <a href="https://www.signasl.org/sign/goodbye">Goodbye</a> in ASL.
     </p>
   </body>
 </html>
