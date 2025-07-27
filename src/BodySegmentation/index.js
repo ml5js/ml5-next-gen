@@ -212,7 +212,7 @@ class BodySegmentation {
 
     let inputForSegmenter = image;
 
-    //If using SelfieSegmentation, make sure the input is actually the size the user expects
+    // If using SelfieSegmentation, make sure the input is actually the size the user expects
     if (
       this.modelName == "SelfieSegmentation" &&
       (inputForSegmenter instanceof HTMLVideoElement ||
@@ -275,7 +275,7 @@ class BodySegmentation {
     }
     result.mask = this.generateP5Image(result.maskImageData);
 
-    //dispose segmentation tensors
+    // Dispose segmentation tensors
     segmentation.map((singleSegmentation) =>
       singleSegmentation.mask.toTensor().then((tensor) => tensor.dispose())
     );
@@ -333,7 +333,7 @@ class BodySegmentation {
     while (!this.signalStop) {
       let inputForSegmenter = this.detectMedia;
 
-      //If using SelfieSegmentation, make sure the input is actually the size the user expects
+      // If using SelfieSegmentation, make sure the input is actually the size the user expects
       if (
         this.modelName == "SelfieSegmentation" &&
         (inputForSegmenter instanceof HTMLVideoElement ||
@@ -401,7 +401,7 @@ class BodySegmentation {
       }
       result.mask = this.generateP5Image(result.maskImageData);
 
-      //dispose segmentation tensors
+      // Dispose segmentation tensors
       segmentation.map((singleSegmentation) =>
         singleSegmentation.mask.toTensor().then((tensor) => tensor.dispose())
       );
@@ -453,7 +453,7 @@ class BodySegmentation {
 }
 
 /**
- * Factory function that returns a Facemesh instance
+ * Factory function that returns a bodySegmentation instance
  * @returns {Object} A new bodySegmentation instance
  */
 const bodySegmentation = (...inputs) => {
