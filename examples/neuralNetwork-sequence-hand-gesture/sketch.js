@@ -86,7 +86,7 @@ function draw() {
       let outputs = { label: curGesture };
       model.addData(inputs, outputs);
       counts[curGesture]++;
-    } else if (state == "predicting") {
+    } else if (state == "classifying") {
       model.classify(inputs, gotResults);
     }
     // reset the sequence
@@ -101,9 +101,9 @@ function draw() {
     text("Move your hand(s) into the frame to record " + curGesture, 50, 50);
   } else if (state == "training") {
     text("Move your hand(s) out of the frame to finish " + curGesture, 50, 50);
-  } else if (state == "predicting" && curGesture == null) {
-    text("Try a trained gesture to see the prediction", 50, 50);
-  } else if (state == "predicting" && curGesture) {
+  } else if (state == "classifying" && curGesture == null) {
+    text("Try a trained gesture", 50, 50);
+  } else if (state == "classifying" && curGesture) {
     text("Saw " + curGesture, 50, 50);
   }
 
@@ -132,7 +132,7 @@ function trainModel() {
 }
 
 function finishedTraining() {
-  state = "predicting";
+  state = "classifying";
   model.save();
   curGesture = null;
 }
