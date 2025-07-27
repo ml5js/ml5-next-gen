@@ -14,7 +14,7 @@ let model;
 
 let state = "training";
 let sequence = [];
-let targetLength = 30;
+let sequenceLength = 30;
 let gestures = ["Gesture #1", "Gesture #2"];
 let counts = { "Gesture #1": 0, "Gesture #2": 0 };
 let curGesture = gestures[0];
@@ -68,32 +68,35 @@ function draw() {
     // For more information about RDP, see:
     // https://www.youtube.com/watch?v=ZCXkvwLxBrA
 
-    let rdp = model.setFixedLength(sequence, targetLength);
+    let rdp = model.setFixedLength(sequence, sequenceLength);
     for (let i = 0; i < rdp.length - 1; i++) {
       for (let j = 0; j < rdp[i].length; j += 2) {
         stroke(255, 0, 0);
-        line(rdp[i][j], rdp[i][j + 1], rdp[i + 1][j], rdp[i + 1][j + 1]);
+        // hide lines to 0,0
+        if (rdp[i][j] != 0 && rdp[i + 1][j] != 0) {
+          line(rdp[i][j], rdp[i][j + 1], rdp[i + 1][j], rdp[i + 1][j + 1]);
+        }
       }
     }
   } else if (sequence.length > 0) {
     // hands moved out of the frame, end of sequence
-    let inputs = model.setFixedLength(sequence, targetLength);
+    let inputs = model.setFixedLength(sequence, sequenceLength);
 
     if (state == "training") {
       let outputs = { label: curGesture };
       model.addData(inputs, outputs);
+      counts[curGesture]++;
     } else if (state == "predicting") {
       model.classify(inputs, gotResults);
     }
-    counts[curGesture]++;
     // reset the sequence
     sequence = [];
   }
 
   // display current state
   textSize(16);
+  stroke(0);
   fill(255);
-  noStroke();
   if (state == "training" && sequence.length == 0) {
     text("Move your hand(s) into the frame to record " + curGesture, 50, 50);
   } else if (state == "training") {
@@ -110,7 +113,7 @@ function draw() {
       text(
         gestures[i] + ": " + counts[gestures[i]],
         50,
-        height - 50 - (gestures.length - i) * 20
+        height - 50 - (gestures.length - i - 1) * 20
       );
     }
   }
@@ -162,11 +165,11 @@ function drawHands() {
 function getKeypoints(whichHands = ["Left", "Right"]) {
   let keypoints = [];
   // look for the left and right hand
-  for (let handedness of whichHands) {
+  for (let whichHand of whichHands) {
     let found = false;
     for (let i = 0; i < hands.length; i++) {
       let hand = hands[i];
-      if (hand.handedness == handedness) {
+      if (hand.handedness == whichHand) {
         // and add the x and y numbers of each tracked keypoint
         // to the array
         for (let j = 0; j < hand.keypoints.length; j++) {
