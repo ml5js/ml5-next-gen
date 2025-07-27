@@ -12,7 +12,7 @@ let model;
 let state = "training";
 let curShape = "circle";
 let sequence = [];
-let targetLength = 30;
+let sequenceLength = 30;
 
 function setup() {
   let canvas = createCanvas(600, 400);
@@ -39,20 +39,22 @@ function draw() {
     line(sequence[i].x, sequence[i].y, sequence[i + 1].x, sequence[i + 1].y);
   }
 
-  // This uses the RDP line simplification algorithm to make sure each
-  // input to the neural network has the same number of points.
+  // Sequence will have varying length at this point, depending on
+  // how long the hands were in frame - a line simplification algorithm
+  // (RDP) turns it into the fixed length the NN can work with.
   // For more information about RDP, see:
   // https://www.youtube.com/watch?v=ZCXkvwLxBrA
 
-  let rdp = model.setFixedLength(sequence, targetLength);
+  let rdp = model.setFixedLength(sequence, sequenceLength);
   for (let i = 0; i < rdp.length; i++) {
     fill(255);
     rect(rdp[i].x - 3, rdp[i].y - 3, 6, 6);
   }
 
   // display current state
-  textSize(20);
-  fill(0);
+  textSize(16);
+  stroke(0);
+  fill(255);
   if (state == "training") {
     text("Now collecting " + curShape + "s", 50, 50);
   } else if (state == "predicting" && curShape == null) {
@@ -78,11 +80,11 @@ function mouseReleased() {
   if (sequence.length == 0) return;
 
   if (state == "training") {
-    let inputs = model.setFixedLength(sequence, targetLength);
+    let inputs = model.setFixedLength(sequence, sequenceLength);
     let outputs = { label: curShape };
     model.addData(inputs, outputs);
   } else if (state == "predicting") {
-    let inputs = model.setFixedLength(sequence, targetLength);
+    let inputs = model.setFixedLength(sequence, sequenceLength);
     model.classify(inputs, gotResults);
   }
   // reset the sequence
