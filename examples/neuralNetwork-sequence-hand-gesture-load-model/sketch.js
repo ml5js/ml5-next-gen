@@ -65,7 +65,7 @@ function draw() {
   fill(255);
 
   if (hands.length > 0) {
-    // hands in frame, add their keypoints the sequence (input) XXX
+    // hands in frame, add their keypoints to the sequence (input)
     let handpoints = getKeypoints(["Left", "Right"]);
     sequence.push(handpoints);
     text(
@@ -76,10 +76,13 @@ function draw() {
   } else if (sequence.length > 0) {
     // hands moved out of the frame, end of sequence
 
-    // sequence will have varying length at this point, depending on
+    // Sequence will have varying length at this point, depending on
     // how long the hands were in frame - a line simplification algorithm
-    // (RDP) turns it into the fixed length the NN can work with
+    // (RDP) turns it into the fixed length the NN can work with.
+    // For more information about RDP, see:
+    // https://www.youtube.com/watch?v=ZCXkvwLxBrA
     let inputs = model.setFixedLength(sequence, sequenceLength);
+
     // start the classification
     if (isModelLoaded) {
       model.classify(inputs, gotResults);
