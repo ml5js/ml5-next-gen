@@ -53,8 +53,7 @@ function draw() {
 
   // display current state
   textSize(16);
-  stroke(0);
-  fill(255);
+  fill(0);
   if (state == "training") {
     text("Now collecting " + curShape + "s", 50, 50);
   } else if (state == "predicting" && curShape == null) {
