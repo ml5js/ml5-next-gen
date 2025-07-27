@@ -59,7 +59,7 @@ function draw() {
   drawHands();
 
   if (hands.length > 0) {
-    // hands in frame, add to sequence
+    // hands in frame, add their keypoints to the sequence
     let handpoints = getKeypoints(["Left", "Right"]);
     sequence.push(handpoints);
 
