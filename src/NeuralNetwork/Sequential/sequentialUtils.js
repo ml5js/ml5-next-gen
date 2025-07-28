@@ -21,12 +21,63 @@ class SequentialUtils {
    */
   verifyAndFormatInputs(xInputs, options = null, classOptions) {
     const dataFormat = this.checkInputStructure(xInputs, options);
+
+    // Apply input filtering if we have object sequences and input labels are provided
+    let filteredInputs = xInputs;
+    if (dataFormat === "ObjectSequence") {
+      filteredInputs = this.filterInputsByLabels(
+        xInputs,
+        options,
+        classOptions
+      );
+    }
+
     return this.formatInputsToObjects(
-      xInputs,
+      filteredInputs,
       options,
       classOptions,
       dataFormat
     );
+  }
+
+  /**
+   * filterInputsByLabels
+   * Filters input objects to keep only the keys specified in input labels
+   * @param {Array} xInputs - Array of input objects
+   * @param {Object} options - Options object that may contain inputLabels
+   * @param {Object} classOptions - Class options that may contain inputs
+   * @returns {Array} - Filtered array of objects
+   */
+  filterInputsByLabels(xInputs, options = null, classOptions) {
+    // Get input labels from options or classOptions
+    let inputLabels = null;
+
+    if (options && options.inputLabels && Array.isArray(options.inputLabels)) {
+      inputLabels = options.inputLabels;
+    } else if (
+      classOptions &&
+      classOptions.inputs &&
+      Array.isArray(classOptions.inputs)
+    ) {
+      inputLabels = classOptions.inputs;
+    }
+
+    // If no input labels provided or not an array, return original data
+    if (!inputLabels || !Array.isArray(inputLabels)) {
+      console.log("did nothing");
+      return xInputs;
+    }
+
+    // Filter each object to keep only the specified keys
+    return xInputs.map((obj) => {
+      const filteredObj = {};
+      inputLabels.forEach((key) => {
+        if (obj.hasOwnProperty(key)) {
+          filteredObj[key] = obj[key];
+        }
+      });
+      return filteredObj;
+    });
   }
 
   checkInputStructure(xInputs, options = null) {
@@ -170,7 +221,46 @@ class SequentialUtils {
       throw new Error("outputLabels must be an array");
     }
 
-    return nnUtils.formatDataAsObject(yInputs, outputLabels);
+    // Apply output filtering if we have object outputs and output labels are provided
+    let filteredOutputs = yInputs;
+    if (typeof yInputs === "object" && !Array.isArray(yInputs)) {
+      filteredOutputs = this.filterOutputsByLabels(yInputs, options, classOptions);
+    }
+
+    return nnUtils.formatDataAsObject(filteredOutputs, outputLabels);
+  }
+
+  /**
+   * filterOutputsByLabels
+   * Filters output objects to keep only the keys specified in output labels
+   * @param {Object} yInputs - Output object
+   * @param {Object} options - Options object that may contain outputLabels
+   * @param {Object} classOptions - Class options that may contain outputs
+   * @returns {Object} - Filtered output object
+   */
+  filterOutputsByLabels(yInputs, options = null, classOptions) {
+    // Get output labels from options or classOptions
+    let outputLabels = null;
+    
+    if (options && options.outputLabels && Array.isArray(options.outputLabels)) {
+      outputLabels = options.outputLabels;
+    } else if (classOptions && classOptions.outputs && Array.isArray(classOptions.outputs)) {
+      outputLabels = classOptions.outputs;
+    }
+    
+    // If no output labels provided or not an array, return original data
+    if (!outputLabels || !Array.isArray(outputLabels)) {
+      return yInputs;
+    }
+    
+    // Filter the object to keep only the specified keys
+    const filteredObj = {};
+    outputLabels.forEach(key => {
+      if (yInputs.hasOwnProperty(key)) {
+        filteredObj[key] = yInputs[key];
+      }
+    });
+    return filteredObj;
   }
 
   prepareLabels(xInputs, yInputs, options = null, classOptions) {
