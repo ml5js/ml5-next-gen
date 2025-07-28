@@ -49,10 +49,7 @@ function setup() {
   for (let i = 0; i <= data.length - sequenceLength - 1; i++) {
     let inputs = data.slice(i, i + sequenceLength);
     let outputs = data[i + sequenceLength];
-    for (let j = 0; j < inputs.length; j++) {
-      delete inputs[j].date;
-    }
-    delete outputs.date;
+
     console.log("Sequence for training", inputs, outputs);
     model.addData(inputs, outputs);
   }

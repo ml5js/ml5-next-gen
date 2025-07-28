@@ -210,6 +210,21 @@ class DIYSequential extends DiyNeuralNetwork {
     }
     return seqUtils.getLatestSequence(data, this.batchLength, this.featureKeys);
   }
+
+  /**
+   * getData
+   * Returns the raw data that was added through addData
+   * @returns {Object} - Object with xs, ys, and raw properties
+   */
+  getData() {
+    const rawData = this.neuralNetworkData.data.raw;
+
+    return {
+      xs: rawData.map((item) => item.xs),
+      ys: rawData.map((item) => item.ys),
+      raw: rawData,
+    };
+  }
 }
 
 export default DIYSequential; //export for taskSelection
