@@ -21,12 +21,10 @@ function gotDetections(results) {
 }
 
 function setup() {
-  // Create canvas with initial size - will be resized later
   createCanvas(640, 480);
   
   // Load and loop the video for object detection
-  video = createVideo('test.mov');
-  video.size(width, height);
+  video = createVideo('test.mp4'); // video sized 640 x 480
   video.hide();
   video.loop();
 
@@ -34,19 +32,15 @@ function setup() {
 }
 
 function draw(){
-  image(video, 0, 0, width, height); // draw video frame
-
-  // Scale factors from original video to canvas size
-  let scaleX = width / video.elt.videoWidth;
-  let scaleY = height / video.elt.videoHeight;
+  image(video, 0, 0); // draw video frame
 
   for (let i = 0; i < detections.length; i++) {
     let detection = detections[i];
 
-    let x = detection.x * scaleX;
-    let y = detection.y * scaleY;
-    let w = detection.width * scaleX;
-    let h = detection.height * scaleY;
+    let x = detection.x;
+    let y = detection.y;
+    let w = detection.width;
+    let h = detection.height;
 
     stroke(0, 255, 0);
     strokeWeight(4);
