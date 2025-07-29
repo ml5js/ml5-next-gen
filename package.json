@@ -12,7 +12,8 @@
     "test": "jest --config tests/jest.config.js",
     "upload-examples": "node scripts/uploadExamples.js",
     "update-p5-version": "node scripts/updateP5Version.js",
-    "update-readme": "node scripts/updateReadme.js"
+    "update-readme": "node scripts/updateReadme.js",
+    "update-examples-readme": "node scripts/updateExamplesREADME.js"
   },
   "files": [
     "dist"
