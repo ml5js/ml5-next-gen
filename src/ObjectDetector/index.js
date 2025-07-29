@@ -13,7 +13,7 @@ import handleArguments from "../utils/handleArguments";
 import callCallback from "../utils/callcallback";
 import { mediaReady } from "../utils/imageUtilities";
 
-const MODEL_OPTIONS = ["cocossd", "yolo"]; // Expandable for other models like YOLO
+const MODEL_OPTIONS = ["cocossd"]; // Expandable for other models like YOLO
 
 class ObjectDetector {
   /**
@@ -24,7 +24,7 @@ class ObjectDetector {
    */
   /**
    * Create ObjectDetector model. Works on video and images.
-   * @param {string} modelNameOrUrl - The name or the URL of the model to use. Current model name options are: 'YOLO' and 'CocoSsd'.
+   * @param {string} modelNameOrUrl - The name or the URL of the model to use.
    * @param {Object} options - Optional. A set of options.
    * @param {function} callback - Optional. A callback function that is called once the model has loaded.
    */
@@ -48,9 +48,6 @@ class ObjectDetector {
     switch (this.modelName) {
       case "cocossd":
         this.modelToUse = cocoSsd;
-        break;
-      case "yolo":
-        this.modelToUse = yolo;
         break;
       // more models... currently only cocossd is supported
       default:
