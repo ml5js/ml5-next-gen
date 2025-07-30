@@ -19,7 +19,7 @@ let model;
 let isModelLoaded = false;
 
 let sequence = [];
-let sequenceLength = 50;
+let sequenceLength = 30;
 let curGesture;
 
 function preload() {
