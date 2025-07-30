@@ -213,6 +213,7 @@ class BodySegmentation {
     let inputForSegmenter = image;
 
     // If using SelfieSegmentation, make sure the input is actually the size the user expects
+    // this addresses a sizing bug not present in BodyPix.
     if (
       this.modelName == "SelfieSegmentation" &&
       (inputForSegmenter instanceof HTMLVideoElement ||
@@ -333,7 +334,8 @@ class BodySegmentation {
     while (!this.signalStop) {
       let inputForSegmenter = this.detectMedia;
 
-      // If using SelfieSegmentation, make sure the input is actually the size the user expects
+      // If using SelfieSegmentation, make sure the input is actually the size the user expects.
+      // this addresses a sizing bug not present in BodyPix.
       if (
         this.modelName == "SelfieSegmentation" &&
         (inputForSegmenter instanceof HTMLVideoElement ||
