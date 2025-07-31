@@ -224,7 +224,11 @@ class SequentialUtils {
     // Apply output filtering if we have object outputs and output labels are provided
     let filteredOutputs = yInputs;
     if (typeof yInputs === "object" && !Array.isArray(yInputs)) {
-      filteredOutputs = this.filterOutputsByLabels(yInputs, options, classOptions);
+      filteredOutputs = this.filterOutputsByLabels(
+        yInputs,
+        options,
+        classOptions
+      );
     }
 
     return nnUtils.formatDataAsObject(filteredOutputs, outputLabels);
@@ -241,21 +245,29 @@ class SequentialUtils {
   filterOutputsByLabels(yInputs, options = null, classOptions) {
     // Get output labels from options or classOptions
     let outputLabels = null;
-    
-    if (options && options.outputLabels && Array.isArray(options.outputLabels)) {
+
+    if (
+      options &&
+      options.outputLabels &&
+      Array.isArray(options.outputLabels)
+    ) {
       outputLabels = options.outputLabels;
-    } else if (classOptions && classOptions.outputs && Array.isArray(classOptions.outputs)) {
+    } else if (
+      classOptions &&
+      classOptions.outputs &&
+      Array.isArray(classOptions.outputs)
+    ) {
       outputLabels = classOptions.outputs;
     }
-    
+
     // If no output labels provided or not an array, return original data
     if (!outputLabels || !Array.isArray(outputLabels)) {
       return yInputs;
     }
-    
+
     // Filter the object to keep only the specified keys
     const filteredObj = {};
-    outputLabels.forEach(key => {
+    outputLabels.forEach((key) => {
       if (yInputs.hasOwnProperty(key)) {
         filteredObj[key] = yInputs[key];
       }
@@ -351,8 +363,9 @@ class SequentialUtils {
 
   zipArraySequence(arr1, arr2) {
     if (arr1.length !== arr2.length) {
-      console.error("arrays do not have the same length");
-      return [];
+      throw new Error(
+        `🟪 ml5.js sequence training error: Your sequences have different lengths. Try using model.setFixedLength() to make them all the same size!\n\nExample:\nconst fixedData = model.setFixedLength(yourData, 10); // Makes all sequences 10 steps long\nmodel.addData(fixedData.inputs, fixedData.outputs);`
+      );
     }
 
     return arr1.map((xs, idx) => {
