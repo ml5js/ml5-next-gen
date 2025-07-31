@@ -22,12 +22,12 @@ Before getting started with ml5.js, review our [Code of Conduct](https://github.
 
 <!-- Anchor for automatic version update script, do not remove this comment -->
 
-- You can use the latest version (1.2.1) by adding it to the head section of your HTML document:
+- You can use the latest version (1.2.2) by adding it to the head section of your HTML document:
 
-  **v1.2.1**
+  **v1.2.2**
 
   ```html
-  <script src="https://unpkg.com/ml5@1.2.1/dist/ml5.js"></script>
+  <script src="https://unpkg.com/ml5@1.2.2/dist/ml5.js"></script>
   ```
 
 <!-- Anchor for automatic version update script, do not remove this comment -->
