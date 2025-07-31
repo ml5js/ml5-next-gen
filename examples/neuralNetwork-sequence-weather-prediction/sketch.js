@@ -56,10 +56,10 @@ function setup() {
   model.normalizeData();
 
   // train right away
-  let options = {
+  let trainOptions = {
     epochs: 70,
   };
-  model.train(options, finishedTraining);
+  model.train(trainOptions, finishedTraining);
 
   let predictBtn = select("#predictBtn");
   predictBtn.center();
@@ -75,8 +75,7 @@ function draw() {
   if (state == "training") {
     text("Training...", width / 2, 160);
   } else if (state == "predicting") {
-    // XXX: let's add the unit here (mm? inches?)
-    text("Predicted rain: " + nf(predictedRain, 0, 1) + "", 320, 160);
+    text("Predicted rain: " + nf(predictedRain, 0, 1) + "mm", 320, 160);
     push();
     textSize(predictedRain * 5 + 10);
     text("🌧️", width / 2, 100);
@@ -123,7 +122,7 @@ function addNewData(newValues) {
 
 function drawBarGraph() {
   let barWidth = width / maxBars;
-  let maxDataValue = 35;
+  let maxDataValue = 78;
 
   let dryColor = color(235, 242, 255);
   let wetColor = color(0, 80, 255);
