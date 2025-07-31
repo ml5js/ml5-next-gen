@@ -111,6 +111,47 @@ class SequentialData extends NeuralNetworkData {
         outputArr.push(ys);
       });
 
+      // Validate sequence data structure before creating tensors
+      if (inputArr.length === 0) {
+        throw new Error(
+          "🟪 ml5.js sequence training error: No training data provided. Please add sequence data using model.addData() before training."
+        );
+      }
+
+      // Check if we have proper sequence structure (array of arrays)
+      const firstInput = inputArr[0];
+      if (!Array.isArray(firstInput)) {
+        throw new Error(
+          "🟪 ml5.js sequence training error: Input data must be sequences (arrays of data points). Each training example should be an array of time steps. For example: [[{temp: 20}, {temp: 21}], [{temp: 22}, {temp: 23}]]"
+        );
+      }
+
+      // Validate all sequences have the same length
+      const sequenceLength = firstInput.length;
+      if (sequenceLength === 0) {
+        throw new Error(
+          "🟪 ml5.js sequence training error: Empty sequences provided. Each sequence must contain at least one data point."
+        );
+      }
+
+      const inconsistentSequence = inputArr.find(seq => seq.length !== sequenceLength);
+      if (inconsistentSequence) {
+        throw new Error(
+          `🟪 ml5.js sequence training error: All sequences must have the same length. Found sequences with lengths ${sequenceLength} and ${inconsistentSequence.length}. Please ensure all training sequences have exactly the same number of time steps.`
+        );
+      }
+
+      // Validate we have proper feature structure
+      const firstTimeStep = firstInput[0];
+      const numFeatures = Object.keys(meta.inputs).length;
+      const timeStepFeatures = Object.keys(firstTimeStep || {}).length;
+      
+      if (timeStepFeatures !== numFeatures) {
+        throw new Error(
+          `🟪 ml5.js sequence training error: Feature count mismatch. Expected ${numFeatures} features per time step but found ${timeStepFeatures}. Make sure each time step in your sequences has the same features as defined in your model inputs.`
+        );
+      }
+
       const inputs = tf.tensor(inputArr);
 
       const outputs = tf.tensor(outputArr.flat(), [
