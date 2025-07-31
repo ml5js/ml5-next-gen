@@ -122,7 +122,7 @@ class SequentialData extends NeuralNetworkData {
       const firstInput = inputArr[0];
       if (!Array.isArray(firstInput)) {
         throw new Error(
-          "🟪 ml5.js sequence training error: Input data must be sequences (arrays of data points). Each training example should be an array of time steps. For example: [[{temp: 20}, {temp: 21}], [{temp: 22}, {temp: 23}]]"
+          "🟪 ml5.js sequence training error: Have you run normalizeData() yet? Data must be normalized before training the model."
         );
       }
 
@@ -134,7 +134,9 @@ class SequentialData extends NeuralNetworkData {
         );
       }
 
-      const inconsistentSequence = inputArr.find(seq => seq.length !== sequenceLength);
+      const inconsistentSequence = inputArr.find(
+        (seq) => seq.length !== sequenceLength
+      );
       if (inconsistentSequence) {
         throw new Error(
           `🟪 ml5.js sequence training error: All sequences must have the same length. Found sequences with lengths ${sequenceLength} and ${inconsistentSequence.length}. Please ensure all training sequences have exactly the same number of time steps.`
@@ -145,7 +147,7 @@ class SequentialData extends NeuralNetworkData {
       const firstTimeStep = firstInput[0];
       const numFeatures = Object.keys(meta.inputs).length;
       const timeStepFeatures = Object.keys(firstTimeStep || {}).length;
-      
+
       if (timeStepFeatures !== numFeatures) {
         throw new Error(
           `🟪 ml5.js sequence training error: Feature count mismatch. Expected ${numFeatures} features per time step but found ${timeStepFeatures}. Make sure each time step in your sequences has the same features as defined in your model inputs.`
