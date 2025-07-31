@@ -61,23 +61,30 @@ class DIYSequential extends DiyNeuralNetwork {
     );
 
     // Validate sequence length against trained model
-    if (this.neuralNetwork && this.neuralNetwork.model && formatted_inputs.length > 0) {
+    if (
+      this.neuralNetwork &&
+      this.neuralNetwork.model &&
+      formatted_inputs.length > 0
+    ) {
       const inputSequenceLength = formatted_inputs.length;
       const numFeatures = Object.keys(meta.inputs).length;
-      
+
       try {
         // Get the expected input shape from the model
         const expectedShape = this.neuralNetwork.model.inputs[0].shape;
         const expectedSequenceLength = expectedShape[1]; // [batch, sequence, features]
-        
-        if (expectedSequenceLength !== null && inputSequenceLength !== expectedSequenceLength) {
+
+        if (
+          expectedSequenceLength !== null &&
+          inputSequenceLength !== expectedSequenceLength
+        ) {
           throw new Error(
             `🟪 ml5.js sequence length mismatch: The model was trained with sequences of length ${expectedSequenceLength}, but you provided a sequence of length ${inputSequenceLength}. Please provide exactly ${expectedSequenceLength} data points for prediction.`
           );
         }
       } catch (err) {
         // If we can't get the model shape, provide a more general error
-        if (err.message.includes('sequence length mismatch')) {
+        if (err.message.includes("sequence length mismatch")) {
           throw err;
         }
       }
@@ -95,7 +102,9 @@ class DIYSequential extends DiyNeuralNetwork {
   createMetaData() {
     // check if the data is empty
     if (this.neuralNetworkData.data.raw.length <= 0) {
-      throw new Error("Must add data before training!");
+      throw new Error(
+        "🟪 ml5.js sequence training error: Must add data before training!"
+      );
     }
 
     // this method does not get shape for images but instead for timesteps
