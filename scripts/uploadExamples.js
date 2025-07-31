@@ -138,6 +138,23 @@ deleteSketch = async (file) => {
 };
 
 /**
+ * Get the directory paths of each directory in a given directory.
+ *
+ * @param {string} dir - The directory path.
+ * @returns - An array of directory paths.
+ */
+function getDirectoryPaths(dir) {
+  let directories = [];
+  fs.readdirSync(dir).forEach((file) => {
+    const path = `${dir}/${file}`;
+    if (fs.lstatSync(path).isDirectory()) {
+      directories.push(path);
+    }
+  });
+  return directories;
+}
+
+/**
  * Get the file path of each item in a given directory.
  *
  * @param {string} dir - The directory path.
@@ -146,10 +163,7 @@ deleteSketch = async (file) => {
 function getFilepaths(dir) {
   let files = [];
   fs.readdirSync(dir).forEach((file) => {
-    const path = `${dir}/${file}`;
-    if (fs.lstatSync(path).isDirectory()) {
-      files.push(path);
-    }
+    files.push(`${dir}/${file}`);
   });
   return files;
 }
@@ -319,7 +333,7 @@ async function main() {
     process.exit(1);
   }
   const oldSketches = getSketchesRes.data;
-  const sketchPaths = getFilepaths("examples");
+  const sketchPaths = getDirectoryPaths("examples");
 
   // Update existing sketches and upload new sketches
   console.log("Uploading sketches...");
