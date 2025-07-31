@@ -502,6 +502,18 @@ class NeuralNetworkData {
       };
 
       const uniqueVals = _uniqueValuesArray; // [...new Set(this.data.raw.map(obj => obj.xs[prop]))]
+
+      // Validate that we have at least 2 classes for classification
+      if (uniqueVals.length < 2) {
+        throw new Error(
+          `🟪 ml5.js classification error: Classification requires at least 2 different classes, but only found ${
+            uniqueVals.length
+          } class: "${
+            uniqueVals[0] || "undefined"
+          }". Please add training data with multiple different output values.`
+        );
+      }
+
       // get back values from 0 to the length of the uniqueVals array
       const onehotValues = uniqueVals.map((item, idx) => idx);
       // oneHot encode the values in the 1d tensor
