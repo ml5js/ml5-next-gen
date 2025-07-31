@@ -200,6 +200,22 @@ async function mediaReady(input, nextFrame) {
   }
 }
 
+/**
+ * Useful when models are ignoring the display size of the input HTML element
+ * and instead using the intrinsic dimensions. This function will turn the
+ * input into a tensor with the given dimensions and return it.
+ * @param {HTMLImageElement | HTMLCanvasElement | HTMLVideoElement} input
+ * @param {number} width
+ * @param {number} height
+ * @return {tf.Tensor3D}
+ */
+function resizeImageAsTensor(input, width, height) {
+  return tf.tidy(() => {
+    const sourcePixelsTensor = tf.browser.fromPixels(input);
+    return tf.image.resizeBilinear(sourcePixelsTensor, [height, width]).clipByValue(0, 255);
+  });
+}
+
 export {
   array3DToImage,
   processVideo,
@@ -209,4 +225,5 @@ export {
   flipImage,
   imgToPixelArray,
   mediaReady,
+  resizeImageAsTensor
 };
