@@ -146,7 +146,10 @@ deleteSketch = async (file) => {
 function getFilepaths(dir) {
   let files = [];
   fs.readdirSync(dir).forEach((file) => {
-    files.push(`${dir}/${file}`);
+    const path = `${dir}/${file}`;
+    if (fs.lstatSync(path).isDirectory()) {
+      files.push(path);
+    }
   });
   return files;
 }
@@ -311,7 +314,7 @@ async function main() {
   if (getSketchesRes.status != 200) {
     console.log(
       "🔴 Failed to get existing files. The server returned status code: " +
-        getFilesRes.status
+        getSketchesRes.status
     );
     process.exit(1);
   }
