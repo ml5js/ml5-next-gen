@@ -22,17 +22,17 @@ Before getting started with ml5.js, review our [Code of Conduct](https://github.
 
 <!-- Anchor for automatic version update script, do not remove this comment -->
 
-- You can use the latest version (1.2.2) by adding it to the head section of your HTML document:
-
-  **v1.2.2**
-
-  ```html
-  <script src="https://unpkg.com/ml5@1.2.2/dist/ml5.js"></script>
-  ```
+- You can have the browser fetch the latest 1.x version (currently: 1.2.2) by adding this to the head section of your HTML document:
 
 <!-- Anchor for automatic version update script, do not remove this comment -->
 
-- If you need to use an earlier version for any reason, you can change the version number. The [previous versions of ml5.js can be found here](https://www.npmjs.com/package/ml5?activeTab=versions). You can use those previous versions by replacing `<version>` with the ml5 version of interest:
+  ```html
+  <script src="https://unpkg.com/ml5@1/dist/ml5.js"></script>
+  ```
+
+We will try our best to maintain compatibility with the existing API going forward, switching to a future 2.x if needed.
+
+- If you prefer to use a specific version now and in the future, you can also specify the exact version number. The [previous versions of ml5.js can be found here](https://www.npmjs.com/package/ml5?activeTab=versions). You can do so by replacing `<version>` with the ml5 version of interest:
 
   ```html
   <script src="https://unpkg.com/ml5@<version>/dist/ml5.min.js"></script>
@@ -46,11 +46,6 @@ Before getting started with ml5.js, review our [Code of Conduct](https://github.
 
   **Note:** To access the source code of version `0.12.2` or earlier, please visit the [archived repository](https://github.com/ml5js/ml5-library).
 
-- You can also reference "latest", but we do not recommend this as your code may break as we update ml5.js.
-
-  ```html
-  <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
-  ```
 
 ## Resources
 
