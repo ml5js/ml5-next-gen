@@ -28,7 +28,7 @@ let options = {
 };
 
 function preload() {
-  // Load and start the depth estimation model
+  // Load the depth estimation model
   depthEstimator = ml5.depthEstimation(options);
 }
 

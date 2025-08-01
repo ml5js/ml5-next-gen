@@ -21,11 +21,11 @@ let newDataAvailable = false;
 
 let options = {
   // Default is 4, but since this image is smaller, we change it to 1 so as to not lose too much detail
-  dilationFactor: 1, 
+  dilationFactor: 1,
 };
 
 function preload() {
-  // Load and start the depth estimation model
+  // Load the depth estimation model
   depthEstimator = ml5.depthEstimation(options);
 }
 
@@ -51,18 +51,22 @@ function draw() {
   // If there is new depth data
   if (newDataAvailable) {
     background(0);
-    webcam.loadPixels();
 
-    // Go through each pixel in the webcam video
-    for (let y = 0; y < webcam.height; y++) {
-      for (let x = 0; x < webcam.width; x++) {
+    // Get the frame of webcam video that was used to create the depth map
+    let sourceFrame = depthMap.sourceFrame;
+
+    sourceFrame.loadPixels();
+
+    // Go through each pixel in the frame
+    for (let y = 0; y < sourceFrame.height; y++) {
+      for (let x = 0; x < sourceFrame.width; x++) {
         // Get the depth value from the model (float, 0 - 1) where 0 is closest and 1 is farthest
         let depthAtPixel = depthMap.getDepthAt(x, y);
 
         // If this pixel has a valid depth; is not the background
         if (depthAtPixel > 0) {
-          // Get the index for current pixel in webcam pixels array
-          let index = (x + y * webcam.width) * 4;
+          // Get the index for current pixel in source frame pixels array
+          let index = (x + y * sourceFrame.width) * 4;
 
           push();
 
@@ -80,9 +84,9 @@ function draw() {
 
           // Set the fill color as the color of this pixel
           fill(
-            webcam.pixels[index + 0],
-            webcam.pixels[index + 1],
-            webcam.pixels[index + 2],
+            sourceFrame.pixels[index + 0],
+            sourceFrame.pixels[index + 1],
+            sourceFrame.pixels[index + 2],
             255
           );
 

@@ -19,14 +19,14 @@ let videoHeight = 480;
 function preload() {
   // Load and start the depth estimation model
   depthEstimator = ml5.depthEstimation();
-  backdrop = loadImage('starcluster.jpg'); // Load a backdrop image
-  //Image "Bright Center Star Cluster" by NASA
+
+  // Load the backdrop image. "Bright Center Star Cluster" by NASA
+  backdrop = loadImage('starcluster.jpg');
 }
 
 function setup() {
   // Create a canvas the size of the webcam video
   createCanvas(videoWidth, videoHeight);
-  //imageMode(CENTER);
 
   // Create the video capture element
   webcam = createCapture(VIDEO);
