@@ -1731,6 +1731,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tensorflow-models/coco-ssd@npm:^2.2.3":
+  version: 2.2.3
+  resolution: "@tensorflow-models/coco-ssd@npm:2.2.3"
+  peerDependencies:
+    "@tensorflow/tfjs-converter": ^4.10.0
+    "@tensorflow/tfjs-core": ^4.10.0
+  checksum: 10c0/3d0e54d433e388439a461f9e7b4995bcfab7825d49eaf587818800549c54adc8192dab1b5a82e0ef48d87065ce155261a3ce934000477ac0da65de6939568e2e
+  languageName: node
+  linkType: hard
+
 "@tensorflow-models/face-landmarks-detection@npm:1.0.5":
   version: 1.0.5
   resolution: "@tensorflow-models/face-landmarks-detection@npm:1.0.5"
@@ -6537,6 +6547,7 @@ __metadata:
     "@mediapipe/pose": "npm:^0.5.1675469404"
     "@mediapipe/selfie_segmentation": "npm:~0.1.0"
     "@tensorflow-models/body-segmentation": "npm:^1.0.1"
+    "@tensorflow-models/coco-ssd": "npm:^2.2.3"
     "@tensorflow-models/face-landmarks-detection": "npm:1.0.5"
     "@tensorflow-models/hand-pose-detection": "npm:^2.0.0"
     "@tensorflow-models/mobilenet": "npm:^2.1.0"
