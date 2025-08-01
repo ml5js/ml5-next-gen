@@ -97,7 +97,7 @@ const COLORMAPS = {
 /**
  * @typedef {Object} DepthEstimationResult The result object from a depth estimation.
  * @property {number[][]} data - Raw depth map as a 2D array.
- * @property {p5.Image | ImageData} image - p5.Image (if p5 is running) or ImageData of depth map with chosen colormap.
+ * @property {p5.Image | ImageData} image - p5.Image (if p5 is running, otherwise ImageData) of the depth map with chosen colormap.
  * @property {ImageData} imageData - ImageData visualization (normalized) with chosen colormap.
  * @property {number} width - Width of the depth map.
  * @property {number} height - Height of the depth map.
@@ -105,6 +105,7 @@ const COLORMAPS = {
  * @property {number} maxDepth - The maximum depth value used for normalization in this result (either fixed or dynamically calculated/smoothed).
  * @property {function(number, number): number | null} getDepthAt - Get raw depth at (x, y).
  * @property {p5.Image | ImageData} mask - The segmentation mask applied to the depth map, including any dilation applied.
+ * @property {p5.Image} sourceFrame - The exact frame used for the depth estimation, as a p5.Image.
  */
 
 /**
@@ -138,6 +139,7 @@ class DepthEstimation {
     this.smoothedMaxDepth = null; // For dynamic normalization smoothing
     this.segmenter = null; // Added: To store the body segmenter
     this.segmentationMaskCanvas = null; // Added: Reusable canvas for masking
+    this.sourceFrameCanvas = null; // Store the exact frame used in estimationß
 
     this.ready = callCallback(this.loadModels(), callback); // Renamed loadModel -> loadModels
   }
@@ -244,6 +246,20 @@ class DepthEstimation {
     return this.segmentationMaskCanvas;
   }
 
+  /** Creates or returns the reusable canvas for the source frame. @private */
+  getSourceFrameCanvas(width, height) {
+    if (
+      !this.sourceFrameCanvas ||
+      this.sourceFrameCanvas.width !== width ||
+      this.sourceFrameCanvas.height !== height
+    ) {
+      this.sourceFrameCanvas = document.createElement("canvas");
+      this.sourceFrameCanvas.width = width;
+      this.sourceFrameCanvas.height = height;
+    }
+    return this.sourceFrameCanvas;
+  }
+
   /** Estimates depth from a single input. */
   async estimate(...inputs) {
     const argumentObject = handleArguments(...inputs);
@@ -255,6 +271,13 @@ class DepthEstimation {
 
     await this.ready; // Ensure model is loaded
     await mediaReady(image, false);
+
+    //Save a snapshot of the current frame onto our sourceFrameCanvas
+    const ctx = this.getSourceFrameCanvas(image.width, image.height).getContext(
+      "2d"
+    );
+    ctx.clearRect(0, 0, image.width, image.height);
+    ctx.drawImage(image, 0, 0, image.width, image.height);
 
     const currentRuntimeConfig = { ...this.runtimeConfig, ...options };
     let inputForDepth = image; // Default to original image
@@ -466,6 +489,9 @@ class DepthEstimation {
         currentRuntimeConfig.colormap
       );
 
+      // Create a p5.Image from the exact frame used for the estimation being returned in this result
+      result.sourceFrame = this.generateP5Image(this.getSourceFrameCanvas(width, height));
+
       // --- Apply Black Background using Segmentation Mask (if enabled) ---
       if (currentRuntimeConfig.applySegmentationMask && binaryMask) {
         // If the input was flipped for depth estimation, flip the mask too
@@ -493,7 +519,7 @@ class DepthEstimation {
             //Make sure the mask is also applied to the raw depth data array
             //and by extension, the getDepthAt() method.
             let x = (i / 4) % width; // Calculate x coordinate
-            let y = Math.floor((i / 4) / width); // Calculate y coordinate
+            let y = Math.floor(i / 4 / width); // Calculate y coordinate
             result.data[y][x] = 0; // Set depth value to 0 for this pixel
           }
         }
@@ -606,6 +632,20 @@ class DepthEstimation {
       let inputForDepth = this.detectMedia;
       let resizedSource = null;
       let normalizedSource = this.detectMedia; // Default to original media if not resized
+
+      //Save a snapshot of the current frame onto our sourceFrameCanvas
+      const ctx = this.getSourceFrameCanvas(
+        inputForDepth.width,
+        inputForDepth.height
+      ).getContext("2d");
+      ctx.clearRect(0, 0, inputForDepth.width, inputForDepth.height);
+      ctx.drawImage(
+        inputForDepth,
+        0,
+        0,
+        inputForDepth.width,
+        inputForDepth.height
+      );
 
       if (this.detectMedia instanceof HTMLElement) {
         /*
@@ -788,20 +828,25 @@ class DepthEstimation {
     return new ImageData(newData, width, height);
   }
 
-  /** Converts ImageData to p5.Image if p5 exists. @private */
-  generateP5Image(imageData) {
+  /** Converts ImageData or Canvas to p5.Image if p5 exists. @private */
+  generateP5Image(inputImage) {
     if (window?.p5) {
       // Ensure p5 instance mode compatibility
       const p5Instance = window._p5Instance || window;
       if (p5Instance.createImage) {
-        const img = p5Instance.createImage(imageData.width, imageData.height);
-        img.loadPixels(); // Load pixels to prepare for setting
-        img.pixels.set(imageData.data); // Bulk copy pixel data
-        img.updatePixels(); // Update pixels to apply changes
+        const img = p5Instance.createImage(inputImage.width, inputImage.height);
+        if (inputImage instanceof ImageData) {
+          img.loadPixels(); // Load pixels to prepare for setting
+          img.pixels.set(inputImage.data); // Bulk copy pixel data
+          img.updatePixels(); // Update pixels to apply changes
+        } else if (inputImage instanceof HTMLCanvasElement) {
+          // If inputImage is an HTMLCanvasElement, we can use it directly
+          img.drawingContext.drawImage(inputImage, 0, 0);
+        }
         return img;
       }
     }
-    return imageData; // Return original ImageData if p5 or createImage not available
+    return inputImage; // Return original ImageData/Canvas if p5 or createImage not available
   }
 
   /** Dilates a mask by a certain number of edge pixels. It also inverts it, so that the silouette is opaque and the background transparent @private */
