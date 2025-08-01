@@ -8,12 +8,20 @@ function isP5Constructor(source) {
     source &&
       typeof source === "function" &&
       source.prototype &&
-      source.prototype.registerMethod
+      source.prototype.registerMethod // p5 1.x only
   );
 }
 
 function isP5Extensions(source) {
   return Boolean(source && typeof source.loadImage === "function");
+}
+
+function promisifyModel(model) {
+  return (...args) => {
+    const result = model(...args);
+    if (result.ready) return result.ready.then(() => result);
+    return Promise.resolve(result);
+  };
 }
 
 class P5Util {
@@ -35,7 +43,7 @@ class P5Util {
     this.p5Extensions = undefined;
 
     /**
-     * Keep a reference to the arguments of `shouldPreload()` so that preloads
+     * Keep a reference to the arguments of `setupP5Integration()` so that preloads
      * can be set up after the fact if p5 becomes available.
      */
     this.ml5Library = undefined;
@@ -102,20 +110,39 @@ class P5Util {
    * Store the references in case p5 is added later.
    *
    * @param {*} ml5Library - the `ml5` variable.
-   * @param {Array<string>} methodNames - an array of ml5 functions to preload.
+   * @param {Array<string>} withPreloadMethods - an array of ml5 functions to preload.
+   * @param {Array<string>} withoutAsyncMethods - an array of ml5 functions to not promiseify.
    */
-  shouldPreload(ml5Library, methodNames) {
-    this.methodsToPreload = methodNames;
+  setupP5Integration(ml5Library, withPreloadMethods, withoutAsyncMethods) {
+    this.methodsToPreload = withPreloadMethods;
     this.ml5Library = ml5Library;
+
+    // checkP5 returns true only with p5 1.x, because p5 2.x does not have registerMethod method,
+    // which is checked in isP5Constructor function.
     if (this.checkP5()) {
       this.registerPreloads();
+    } else {
+      this.registerAsyncConstructors(ml5Library, withoutAsyncMethods);
     }
   }
 
   /**
    * @private
-   * Execute the p5 preload setup using the stored references, provided by shouldPreload().
-   * Won't do anything if `shouldPreload()` has not been called or if p5 is not found.
+   * Register the async constructor for the ml5 library.
+   * @param {*} ml5Library - the `ml5` variable.
+   * @param {Array<string>} withoutAsyncMethods - an array of ml5 functions to not promiseify.
+   */
+  registerAsyncConstructors(ml5Library, withoutAsyncMethods) {
+    this.methodsToPreload.forEach((method) => {
+      if (withoutAsyncMethods.includes(method)) return;
+      ml5Library[method] = promisifyModel(ml5Library[method]);
+    });
+  }
+
+  /**
+   * @private
+   * Execute the p5 preload setup using the stored references, provided by setupP5Integration().
+   * Won't do anything if `setupP5Integration()` has not been called or if p5 is not found.
    */
   registerPreloads() {
     if (this.didSetupPreload) return;

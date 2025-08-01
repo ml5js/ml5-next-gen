@@ -6,6 +6,8 @@
 
 Jump right into experimenting with ml5.js — no local setup needed. Browse and run these example sketches directly in the p5.js Web Editor:
 
+### p5.js 1.0 Examples
+
 * [bodyPose-blazePose-keypoints](https://editor.p5js.org/ml5/sketches/OukJYAJAb)
 * [bodyPose-blazePose-skeleton](https://editor.p5js.org/ml5/sketches/KWgsAbgkk)
 * [bodyPose-keypoints](https://editor.p5js.org/ml5/sketches/c8sl_hGmN)
@@ -41,3 +43,41 @@ Jump right into experimenting with ml5.js — no local setup needed. Browse and 
 * [sentiment](https://editor.p5js.org/ml5/sketches/hopIvsCGL)
 * [soundClassifier-speech-command](https://editor.p5js.org/ml5/sketches/HUm7NYMW3)
 * [soundClassifier-teachable-machine](https://editor.p5js.org/ml5/sketches/mXeiNXSTU)
+
+### p5.js 2.0 Examples
+
+* [bodyPose-blazePose-keypoints-p5-2.0](https://editor.p5js.org/ml5/sketches/sP85k-fKm)
+* [bodyPose-blazePose-skeleton-p5-2.0](https://editor.p5js.org/ml5/sketches/zsaF9ba79)
+* [bodyPose-keypoints-p5-2.0](https://editor.p5js.org/ml5/sketches/HNDZ0x9Cw)
+* [bodyPose-skeletal-connections-p5-2.0](https://editor.p5js.org/ml5/sketches/WwsTweT9b)
+* [bodySegmentation-mask-background-p5-2.0](https://editor.p5js.org/ml5/sketches/bnvFIh130)
+* [bodySegmentation-mask-body-parts-p5-2.0](https://editor.p5js.org/ml5/sketches/6XXIEgOIh)
+* [bodySegmentation-mask-person-p5-2.0](https://editor.p5js.org/ml5/sketches/rnVuKC28TE)
+* [bodySegmentation-select-body-parts-p5-2.0](https://editor.p5js.org/ml5/sketches/itiZfISJS)
+* [faceMesh-bounding-box-p5-2.0](https://editor.p5js.org/ml5/sketches/tA2Jv8Kul8)
+* [faceMesh-keypoints-from-parts-p5-2.0](https://editor.p5js.org/ml5/sketches/jLIgWoLmI)
+* [faceMesh-keypoints-p5-2.0](https://editor.p5js.org/ml5/sketches/9dSws-V0P-)
+* [faceMesh-parts-bounding-box-p5-2.0](https://editor.p5js.org/ml5/sketches/WoStCyRfx)
+* [faceMesh-parts-p5-2.0](https://editor.p5js.org/ml5/sketches/W40lqiNBU)
+* [faceMesh-shapes-from-parts-p5-2.0](https://editor.p5js.org/ml5/sketches/4wHQug7WA)
+* [faceMesh-single-image-p5-2.0](https://editor.p5js.org/ml5/sketches/4VixwHmTqZ)
+* [faceMesh-triangle-mesh-p5-2.0](https://editor.p5js.org/ml5/sketches/pefAwOB-te)
+* [faceMesh-uv-map-p5-2.0](https://editor.p5js.org/ml5/sketches/c2NG1BIeu7)
+* [handPose-detect-start-stop-p5-2.0](https://editor.p5js.org/ml5/sketches/0ZPVgZheGw)
+* [handPose-keypoints-p5-2.0](https://editor.p5js.org/ml5/sketches/6j1OirU5r2)
+* [handPose-parts-p5-2.0](https://editor.p5js.org/ml5/sketches/OwVzitG2F)
+* [handPose-single-image-p5-2.0](https://editor.p5js.org/ml5/sketches/uicBxArcu)
+* [handPose-skeletal-connections-p5-2.0](https://editor.p5js.org/ml5/sketches/prrYA10Vl)
+* [imageClassifier-single-image-p5-2.0](https://editor.p5js.org/ml5/sketches/MqHsXgwlO)
+* [imageClassifier-teachable-machine-p5-2.0](https://editor.p5js.org/ml5/sketches/opcgWuKcEt)
+* [imageClassifier-webcam-p5-2.0](https://editor.p5js.org/ml5/sketches/B359dux1dM)
+* [neuralNetwork-color-classifier-p5-2.0](https://editor.p5js.org/ml5/sketches/cdVSCdG-wh)
+* [neuralNetwork-load-model-p5-2.0](https://editor.p5js.org/ml5/sketches/EDDJt4EzI9)
+* [neuralNetwork-mouse-gesture-p5-2.0](https://editor.p5js.org/ml5/sketches/xKdqszmaH)
+* [neuralNetwork-train-and-save-p5-2.0](https://editor.p5js.org/ml5/sketches/jvB3w61n1a)
+* [neuroEvolution-flappy-bird-p5-2.0](https://editor.p5js.org/ml5/sketches/f-IjWYLFy)
+* [neuroEvolution-sensors-p5-2.0](https://editor.p5js.org/ml5/sketches/e7C57OOfJ)
+* [neuroEvolution-steering-p5-2.0](https://editor.p5js.org/ml5/sketches/VLuEO4I_T)
+* [sentiment-p5-2.0](https://editor.p5js.org/ml5/sketches/NbCoKPg48)
+* [soundClassifier-speech-command-p5-2.0](https://editor.p5js.org/ml5/sketches/_4V2kw3FN)
+* [soundClassifier-teachable-machine-p5-2.0](https://editor.p5js.org/ml5/sketches/gZayua1l0s)
