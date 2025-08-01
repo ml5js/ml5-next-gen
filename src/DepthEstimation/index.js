@@ -16,6 +16,7 @@ import handleArguments from "../utils/handleArguments";
 import { mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
+import { resizeImageAsTensor } from "../utils/imageUtilities";
 
 /**
  * @typedef {'COLOR' | 'GRAYSCALE'} ColormapName
@@ -286,28 +287,13 @@ class DepthEstimation {
 
     if (image instanceof HTMLElement) {
       /*
-       * If the input is an HTML element, these models ignore the element's "width" and "height"
-       * attributes, opting instead for the intrinsic dimensions of the video. This causes a mismatch
-       * between what the user expects and what the model returns. Here we turn it to a tensor and resize it
-       * to match the element's .width and .height; the width and height attributes set by the user.
-       *
+       * If the input is an HTML element, turn it to a tensor and resize it to make sure it matches
+       * the element's .width and .height: the size set by the user in p5.js.
        */
-      const { resized, normalized } = tf.tidy(() => {
-        const sourcePixelsTensor = tf.browser.fromPixels(image);
-        const resized = tf.image.resizeBilinear(sourcePixelsTensor, [
-          image.height,
-          image.width,
-        ]);
-        const normalized = resized.clipByValue(0, 255).div(255.0); // Clip and normalize for use in drawMask()
-
-        return {
-          resized: resized.clone(), // Clone to keep outside tidy
-          normalized: normalized.clone(), // Clone to keep outside tidy
-        };
+      resizedSource = resizeImageAsTensor(image, image.width, image.height);
+      normalizedSource = tf.tidy(() => {
+        return resizedSource.div(255.0);
       });
-
-      resizedSource = resized;
-      normalizedSource = normalized;
       inputForDepth = resizedSource;
     }
 
@@ -649,28 +635,17 @@ class DepthEstimation {
 
       if (this.detectMedia instanceof HTMLElement) {
         /*
-         * If the input is an HTML element, these models ignore the element's "width" and "height"
-         * attributes, opting instead for the intrinsic dimensions of the video. This causes a mismatch
-         * between what the user expects and what the model returns. Here we turn it to a tensor and resize it
-         * to match the element's .width and .height; the width and height attributes set by the user.
-         *
+         * If the input is an HTML element, turn it to a tensor and resize it to make sure it matches
+         * the element's .width and .height: the size set by the user in p5.js.
          */
-        const { resized, normalized } = tf.tidy(() => {
-          const sourcePixelsTensor = tf.browser.fromPixels(this.detectMedia);
-          const resized = tf.image.resizeBilinear(sourcePixelsTensor, [
-            this.detectMedia.height,
-            this.detectMedia.width,
-          ]);
-          const normalized = resized.clipByValue(0, 255).div(255.0); // Clip and normalize for use in drawMask()
-
-          return {
-            resized: resized.clone(), // Clone to keep outside tidy
-            normalized: normalized.clone(), // Clone to keep outside tidy
-          };
+        resizedSource = resizeImageAsTensor(
+          this.detectMedia,
+          this.detectMedia.width,
+          this.detectMedia.height
+        );
+        normalizedSource = tf.tidy(() => {
+          return resizedSource.div(255.0);
         });
-
-        resizedSource = resized;
-        normalizedSource = normalized;
         inputForDepth = resizedSource;
       }
 
