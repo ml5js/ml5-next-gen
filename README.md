@@ -30,7 +30,7 @@ Before getting started with ml5.js, review our [Code of Conduct](https://github.
   <script src="https://unpkg.com/ml5@1/dist/ml5.js"></script>
   ```
 
-We will try our best to maintain compatibility with the existing API going forward, switching to a future 2.x if needed.
+  We will try our best to maintain compatibility with the existing API going forward, switching to a future 2.x if needed.
 
 - If you prefer to use a specific version now and in the future, you can also specify the exact version number. The [previous versions of ml5.js can be found here](https://www.npmjs.com/package/ml5?activeTab=versions). You can do so by replacing `<version>` with the ml5 version of interest:
 

@@ -16,7 +16,7 @@ const readmePath = "README.md";
 function makeNewVersionString(newVersionNumber) {
   const newVersionString = `<!-- Anchor for automatic version update script, do not remove this comment -->
 
-- You can have the browser fetch the latest 1.x version (currently: (${newVersionNumber})) by adding this to the head section of your HTML document:
+- You can have the browser fetch the latest 1.x version (currently: ${newVersionNumber}) by adding this to the head section of your HTML document:
 
 <!-- Anchor for automatic version update script, do not remove this comment -->`;
 
