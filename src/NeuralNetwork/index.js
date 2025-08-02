@@ -1249,23 +1249,5 @@ class DiyNeuralNetwork {
   }
 }
 
-const neuralNetwork = (inputsOrOptions, outputsOrCallback, callback) => {
-  let options;
-  let cb;
-
-  if (inputsOrOptions instanceof Object) {
-    options = inputsOrOptions;
-    cb = outputsOrCallback;
-  } else {
-    options = {
-      inputs: inputsOrOptions,
-      outputs: outputsOrCallback,
-    };
-    cb = callback;
-  }
-
-  const instance = new DiyNeuralNetwork(options, cb);
-  return instance;
-};
-
-export default neuralNetwork;
+export { DiyNeuralNetwork }; // Named export for extending for Sequential Neural Network
+export default DiyNeuralNetwork; //export for taskSelection.js
