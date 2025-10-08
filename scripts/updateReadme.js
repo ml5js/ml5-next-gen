@@ -16,13 +16,7 @@ const readmePath = "README.md";
 function makeNewVersionString(newVersionNumber) {
   const newVersionString = `<!-- Anchor for automatic version update script, do not remove this comment -->
 
-- You can use the latest version (${newVersionNumber}) by adding it to the head section of your HTML document:
-
-  **v${newVersionNumber}**
-
-  \`\`\`html
-  <script src="https://unpkg.com/ml5@${newVersionNumber}/dist/ml5.js"></script>
-  \`\`\`
+- You can have the browser fetch the latest 1.x version (currently: ${newVersionNumber}) by adding this to the head section of your HTML document:
 
 <!-- Anchor for automatic version update script, do not remove this comment -->`;
 

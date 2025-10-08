@@ -8,6 +8,7 @@ import soundClassifier from "./SoundClassifier";
 import objectDetector from "./ObjectDetector";
 import setBackend from "./utils/setBackend";
 import bodySegmentation from "./BodySegmentation";
+import depthEstimation from "./DepthEstimation";
 import communityStatement from "./utils/communityStatement";
 import * as tf from "@tensorflow/tfjs";
 import * as tfvis from "@tensorflow/tfjs-vis";
@@ -17,6 +18,7 @@ import packageInfo from "../package.json";
 const withPreload = {
   bodyPose,
   bodySegmentation,
+  depthEstimation,
   faceMesh,
   handPose,
   imageClassifier,
@@ -24,6 +26,10 @@ const withPreload = {
   sentiment,
   soundClassifier,
   objectDetector
+};
+
+const withoutAsync = {
+  neuralNetwork,
 };
 
 const ml5 = Object.assign({ p5Utils }, withPreload, {
@@ -34,7 +40,7 @@ const ml5 = Object.assign({ p5Utils }, withPreload, {
   setP5: p5Utils.setP5.bind(p5Utils),
 });
 
-p5Utils.shouldPreload(ml5, Object.keys(withPreload));
+p5Utils.setupP5Integration(ml5, Object.keys(withPreload), Object.keys(withoutAsync));
 
 communityStatement();
 

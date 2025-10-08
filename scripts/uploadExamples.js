@@ -138,6 +138,23 @@ deleteSketch = async (file) => {
 };
 
 /**
+ * Get the directory paths of each directory in a given directory.
+ *
+ * @param {string} dir - The directory path.
+ * @returns - An array of directory paths.
+ */
+function getDirectoryPaths(dir) {
+  let directories = [];
+  fs.readdirSync(dir).forEach((file) => {
+    const path = `${dir}/${file}`;
+    if (fs.lstatSync(path).isDirectory()) {
+      directories.push(path);
+    }
+  });
+  return directories;
+}
+
+/**
  * Get the file path of each item in a given directory.
  *
  * @param {string} dir - The directory path.
@@ -311,12 +328,12 @@ async function main() {
   if (getSketchesRes.status != 200) {
     console.log(
       "🔴 Failed to get existing files. The server returned status code: " +
-        getFilesRes.status
+        getSketchesRes.status
     );
     process.exit(1);
   }
   const oldSketches = getSketchesRes.data;
-  const sketchPaths = getFilepaths("examples");
+  const sketchPaths = getDirectoryPaths("examples");
 
   // Update existing sketches and upload new sketches
   console.log("Uploading sketches...");

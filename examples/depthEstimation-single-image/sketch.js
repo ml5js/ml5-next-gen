@@ -1,0 +1,44 @@
+/*
+ * 👋 Hello! This is an ml5.js example made and shared with ❤️.
+ * Learn more about the ml5.js project: https://ml5js.org/
+ * ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
+ *
+ * This example demonstrates depth estimation on a single image using ml5.depthEstimation.
+ */
+
+// Global variables
+let depthEstimator;
+let img;
+let depthMap;
+
+function preload() {
+  img = loadImage("face.png");
+  // Load the depth estimation model
+  depthEstimator = ml5.depthEstimation();
+}
+
+function setup() {
+  // Create a canvas twice the width of the image
+  createCanvas(img.width * 2, img.height);
+
+  // Estimate depth from the loaded image
+  depthEstimator.estimate(img, gotResults);
+}
+
+function draw() {
+  background(0); // Clear the background
+
+  // Draw the original image on the left half of the canvas
+  image(img, 0, 0);
+
+  // Check if depth estimation results are available
+  if (depthMap) {
+    // Draw the colormapped depth visualization on the right half of the canvas
+    image(depthMap.image, img.width, 0);
+  }
+}
+
+// Callback function that receives the depth estimation results
+function gotResults(result) {
+  depthMap = result; // Store the result
+}
