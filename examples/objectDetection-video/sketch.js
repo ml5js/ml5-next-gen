@@ -24,7 +24,7 @@ function setup() {
   createCanvas(640, 480);
   
   // Load and loop the video for object detection
-  video = createVideo('test.mp4'); // video sized 640 x 480
+  video = createVideo('ball_lifting.mp4'); // video sized 640 x 480
   video.hide();
   video.loop();
 
