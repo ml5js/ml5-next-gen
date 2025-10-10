@@ -16,12 +16,7 @@ import { mediaReady } from "../utils/imageUtilities";
 const MODEL_OPTIONS = ["cocossd"]; // Expandable for other models like YOLO
 
 class ObjectDetector {
-  /**
-   * @typedef {Object} options
-   * @property {number} filterBoxesThreshold - Optional. default 0.01
-   * @property {number} IOUThreshold - Optional. default 0.4
-   * @property {number} classProbThreshold - Optional. default 0.4
-   */
+  
   /**
    * Create ObjectDetector model. Works on video and images.
    * @param {string} modelNameOrUrl - The name or the URL of the model to use.
@@ -68,26 +63,7 @@ class ObjectDetector {
 
     return this;
   }
-
-  /**
-   * @typedef {Object} ObjectDetectorPrediction
-   * @property {number} x - top left x coordinate of the prediction box in pixels.
-   * @property {number} y - top left y coordinate of the prediction box in pixels.
-   * @property {number} width - width of the prediction box in pixels.
-   * @property {number} height - height of the prediction box in pixels.
-   * @property {string} label - the label given.
-   * @property {number} confidence - the confidence score (0 to 1).
-   * @property {ObjectDetectorPredictionNormalized} normalized - a normalized object of the predicition
-   */
-
-  /**
-   * @typedef {Object} ObjectDetectorPredictionNormalized
-   * @property {number} x - top left x coordinate of the prediction box (0 to 1).
-   * @property {number} y - top left y coordinate of the prediction box (0 to 1).
-   * @property {number} width - width of the prediction box (0 to 1).
-   * @property {number} height - height of the prediction box (0 to 1).
-   */
-
+  
   /**
    * Detect objects once from the input image/video/canvas.
    * @param {HTMLVideoElement|HTMLImageElement|HTMLCanvasElement|ImageData} input - Target element.
