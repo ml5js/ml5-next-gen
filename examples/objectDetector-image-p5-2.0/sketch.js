@@ -3,21 +3,20 @@
  * Learn more about the ml5.js project: https://ml5js.org/
  * ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
  *
- * This example demonstrates detecting objects in a live video through ml5.imageClassifier.
+ * This example demonstrates detecting objects in a live video through ml5.objectDetector.
  */
 
 let img;
 let detector;
 let detections = [];
 
-function preload(){
-  detector = ml5.objectDetector("cocossd");
-  img = loadImage('dog_cat.jpg');
-}
+async function setup() {
+  img = await loadImage('dog_cat.jpg');
+  detector = await ml5.objectDetector("cocossd");
 
-function setup() {
   createCanvas(640, 480);
   image(img, 0, 0);
+
   detector.detectStart(img, gotDetections);
 }
 

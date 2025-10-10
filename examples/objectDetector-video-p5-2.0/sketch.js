@@ -10,17 +10,15 @@ let video;
 let detector;
 let detections = [];
 
-function preload(){
-  detector = ml5.objectDetector("cocossd");
-}
-
 // Callback function is called each time the object detector finishes processing a frame.
 function gotDetections(results) {
   // Update detections array with the new results
   detections = results;  
 }
 
-function setup() {
+async function setup() {
+  detector = await ml5.objectDetector("cocossd");
+  
   createCanvas(640, 480);
   
   // Load and loop the video for object detection
