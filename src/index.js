@@ -1,4 +1,4 @@
-import neuralNetwork from "./NeuralNetwork";
+import neuralNetwork from "./NeuralNetwork/taskSelection";
 import handPose from "./HandPose";
 import sentiment from "./Sentiment";
 import faceMesh from "./FaceMesh";
