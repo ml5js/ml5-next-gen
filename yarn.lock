@@ -1741,6 +1741,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tensorflow-models/depth-estimation@npm:^0.0.4":
+  version: 0.0.4
+  resolution: "@tensorflow-models/depth-estimation@npm:0.0.4"
+  dependencies:
+    rimraf: "npm:^3.0.2"
+  peerDependencies:
+    "@tensorflow-models/body-segmentation": ^1.0.1
+    "@tensorflow/tfjs-backend-webgl": ^4.10.0
+    "@tensorflow/tfjs-converter": ^4.10.0
+    "@tensorflow/tfjs-core": ^4.10.0
+  checksum: 10c0/8f43b43363459e94283e848495e7a4f1d764a3f700c35c588f389ec1c836a592e20c2be040f3cef19ee0e1db72bca3e401da57fda36fc1d1c8f904e40a053fde
+  languageName: node
+  linkType: hard
+
 "@tensorflow-models/face-landmarks-detection@npm:1.0.5":
   version: 1.0.5
   resolution: "@tensorflow-models/face-landmarks-detection@npm:1.0.5"
@@ -6548,6 +6562,7 @@ __metadata:
     "@mediapipe/selfie_segmentation": "npm:~0.1.0"
     "@tensorflow-models/body-segmentation": "npm:^1.0.1"
     "@tensorflow-models/coco-ssd": "npm:^2.2.3"
+    "@tensorflow-models/depth-estimation": "npm:^0.0.4"
     "@tensorflow-models/face-landmarks-detection": "npm:1.0.5"
     "@tensorflow-models/hand-pose-detection": "npm:^2.0.0"
     "@tensorflow-models/mobilenet": "npm:^2.1.0"
