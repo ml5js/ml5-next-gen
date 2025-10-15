@@ -5,7 +5,7 @@ import faceMesh from "./FaceMesh";
 import bodyPose from "./BodyPose";
 import imageClassifier from "./ImageClassifier";
 import soundClassifier from "./SoundClassifier";
-import objectDetector from "./ObjectDetector";
+import objectDetection from "./ObjectDetection";
 import setBackend from "./utils/setBackend";
 import bodySegmentation from "./BodySegmentation";
 import depthEstimation from "./DepthEstimation";
@@ -25,7 +25,7 @@ const withPreload = {
   neuralNetwork,
   sentiment,
   soundClassifier,
-  objectDetector
+  objectDetection
 };
 
 const withoutAsync = {

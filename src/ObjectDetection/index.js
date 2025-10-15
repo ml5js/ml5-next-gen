@@ -15,10 +15,10 @@ import { mediaReady } from "../utils/imageUtilities";
 
 const MODEL_OPTIONS = ["cocossd"]; // Expandable for other models like YOLO
 
-class ObjectDetector {
+class ObjectDetection {
   
   /**
-   * Create ObjectDetector model. Works on video and images.
+   * Create ObjectDetection model. Works on video and images.
    * @param {string} modelNameOrUrl - The name or the URL of the model to use.
    * @param {Object} options - Optional. A set of options.
    * @param {function} callback - Optional. A callback function that is called once the model has loaded.
@@ -37,7 +37,7 @@ class ObjectDetector {
       modelNameOrUrl,
       MODEL_OPTIONS,
       "cocossd",
-      "objectDetector"
+      "objectDetection"
     );
 
     switch (this.modelName) {
@@ -68,7 +68,7 @@ class ObjectDetector {
    * Detect objects once from the input image/video/canvas.
    * @param {HTMLVideoElement|HTMLImageElement|HTMLCanvasElement|ImageData} input - Target element.
    * @param {function} cb - Optional callback.
-   * @returns {ObjectDetectorPrediction}
+   * @returns {ObjectDetectionPrediction}
    */
   async detect(input, cb) {
     const args = handleArguments(input, cb).require("image", "No valid image input.");
@@ -118,10 +118,10 @@ class ObjectDetector {
   }
 }
 
-const objectDetector = (modelNameOrUrl, optionsOrCallback, cb) => {
+const objectDetection = (modelNameOrUrl, optionsOrCallback, cb) => {
   const { string, options = {}, callback } = handleArguments(modelNameOrUrl, optionsOrCallback, cb);
-  const instance = new ObjectDetector(string, options, callback);
+  const instance = new ObjectDetection(string, options, callback);
   return instance;
 };
 
-export default objectDetector;
+export default objectDetection;
