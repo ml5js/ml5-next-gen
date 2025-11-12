@@ -260,15 +260,16 @@ class ImageClassifier {
    * @return {function} a promise or the results of a given callback, cb.
    */
   async classifyStart(inputNumOrCallback, numOrCallback, cb) {
-    const { image, number, callback } = handleArguments(
-      inputNumOrCallback,
-      numOrCallback,
-      cb
-    ).require("image", "No input provided.");
-
     // Function to classify a single frame
     const classifyFrame = async () => {
+      const { image, number, callback } = handleArguments(
+        inputNumOrCallback,
+        numOrCallback,
+        cb
+      ).require("image", "No input provided.");
+
       await mediaReady(image, true);
+
       // call the callback function
       await callCallback(this.classifyInternal(image, number || this.topk), callback);
       
