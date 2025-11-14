@@ -1145,6 +1145,13 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/40701844?v=4",
       "profile": "https://github.com/yiyujin",
       "contributions": ["blog", "code"]
+    },
+    {
+      "login": "c-dacanay",
+      "name": "Christina Dacanay",
+      "avatar_url": "https://avatars.githubusercontent.com/u/54914834?v=4",
+      "profile": "https://cdacanay.com/",
+      "contributions": ["blog", "communityManagement", "license", "design", "content"]
     }
   ],
   "contributorsPerLine": 7,
