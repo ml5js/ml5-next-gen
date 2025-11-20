@@ -22,7 +22,7 @@ Before getting started with ml5.js, review our [Code of Conduct](https://github.
 
 <!-- Anchor for automatic version update script, do not remove this comment -->
 
-- You can have the browser fetch the latest 1.x version (currently: 1.2.2) by adding this to the head section of your HTML document:
+- You can have the browser fetch the latest 1.x version (currently: 1.3.0) by adding this to the head section of your HTML document:
 
 <!-- Anchor for automatic version update script, do not remove this comment -->
 
@@ -284,6 +284,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://bairui.dev/"><img src="https://avatars.githubusercontent.com/u/49330279?v=4?s=100" width="100px;" alt="Bairui Su"/><br /><sub><b>Bairui Su</b></sub></a><br /><a href="#blog-pearmini" title="Blogposts">📝</a> <a href="https://github.com/ml5js/ml5-next-gen/commits?author=pearmini" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://www.notion.so/Hi-I-m-Mathew-Ponon-198846f56a4680d98accd30cb666ab31"><img src="https://avatars.githubusercontent.com/u/119025056?v=4?s=100" width="100px;" alt="Mathew Ponon"/><br /><sub><b>Mathew Ponon</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=mop9047" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/yiyujin"><img src="https://avatars.githubusercontent.com/u/40701844?v=4?s=100" width="100px;" alt="Jin"/><br /><sub><b>Jin</b></sub></a><br /><a href="#blog-yiyujin" title="Blogposts">📝</a> <a href="https://github.com/ml5js/ml5-next-gen/commits?author=yiyujin" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://cdacanay.com/"><img src="https://avatars.githubusercontent.com/u/54914834?v=4?s=100" width="100px;" alt="Christina Dacanay"/><br /><sub><b>Christina Dacanay</b></sub></a><br /><a href="#blog-c-dacanay" title="Blogposts">📝</a> <a href="#communityManagement-c-dacanay" title="Community Management">👥</a> <a href="https://github.com/ml5js/Code-of-Conduct/blob/main/LICENSE.md" title="Software License">📃</a> <a href="#design-c-dacanay" title="Design">🎨</a> <a href="#content-c-dacanay" title="Content">🖋</a></td>
     </tr>
   </tbody>
 </table>
