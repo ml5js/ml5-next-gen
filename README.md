@@ -22,7 +22,7 @@ Before getting started with ml5.js, review our [Code of Conduct](https://github.
 
 <!-- Anchor for automatic version update script, do not remove this comment -->
 
-- You can have the browser fetch the latest 1.x version (currently: 1.3.0) by adding this to the head section of your HTML document:
+- You can have the browser fetch the latest 1.x version (currently: 1.3.1) by adding this to the head section of your HTML document:
 
 <!-- Anchor for automatic version update script, do not remove this comment -->
 
