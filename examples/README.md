@@ -36,6 +36,7 @@ Jump right into experimenting with ml5.js — no local setup needed. Browse and 
 * [handPose-parts](https://editor.p5js.org/ml5/sketches/DNbSiIYKB)
 * [handPose-single-image](https://editor.p5js.org/ml5/sketches/8VK_l3XwE)
 * [handPose-skeletal-connections](https://editor.p5js.org/ml5/sketches/fnboooD-K)
+* [handPose-fingers-detection](https://editor.p5js.org/carban/sketches/Woyb6Lozf)
 * [imageClassifier-single-image](https://editor.p5js.org/ml5/sketches/pjPr6XmPY)
 * [imageClassifier-teachable-machine](https://editor.p5js.org/ml5/sketches/VvGXajA36)
 * [imageClassifier-webcam](https://editor.p5js.org/ml5/sketches/K0sjaEO19)
