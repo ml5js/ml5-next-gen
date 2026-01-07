@@ -17,7 +17,7 @@ let options = {
 async function setup() {
   createCanvas(640, 480);
 
-  bodySegmentation = await ml5.bodySegmentation("SelfieSegmentation", options);
+  bodySegmentation = await ml5.bodySegmentation("BodyPix", options);
 
   // Create the video
   video = createCapture(VIDEO);
