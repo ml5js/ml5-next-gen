@@ -111,17 +111,11 @@ const COLORMAPS = {
 class TensorflowDepthEstimation {
   /**
    * Initializes the DepthEstimation class.
-   * @param {string} [modelName="ARPortraitDepth"] - Model name ("ARPortraitDepth").
    * @param {DepthEstimationOptions & DepthEstimationRuntimeOptions} [options] - Model loading and runtime options.
    * @param {function} [callback] - Callback when model is loaded.
    */
-  constructor(modelName, options, callback) {
-    this.modelName = handleModelName(
-      modelName,
-      ["ARPortraitDepth"],
-      "ARPortraitDepth",
-      "depthEstimation"
-    );
+  constructor(options, callback) {
+    this.modelName = "ARPortraitDepth";
     this.model = null;
     this.config = options; // Store original options
     this.runtimeConfig = {};
