@@ -10,73 +10,20 @@ import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import { mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
-import { handleModelName } from "../utils/handleOptions";
 import { resizeImageAsTensor } from "../utils/imageUtilities";
+import {  
+  createImageDataFromDepthValues,
+  generateP5Image,
+} from "./utils/imageDataUtils";
 
 /**
- * @typedef {'COLOR' | 'GRAYSCALE'} ColormapName
- */
-
-/**
- * @typedef {function(number): [number, number, number]} ColormapFunction
- * A function that takes a normalized value (0-1) and returns an [R, G, B] array (0-255).
- */
-
-/**
- * @type {Object.<ColormapName, ColormapFunction>}
- * A collection of colormap functions for visualizing depth data.
- */
-const COLORMAPS = {
-  /** Color colormap: yellow (close) -> green -> cyan -> blue -> purple (far). */
-  COLOR: (value) => {
-    let r = 0,
-      g = 0,
-      b = 0;
-    const v = Math.max(0, Math.min(1, value)); // Clamp value to [0, 1]
-
-    if (v < 0.25) {
-      // Yellow (1,1,0) -> Green (0,1,0)
-      const t = v * 4; // t goes from 0 to 1
-      r = 1 - t;
-      g = 1;
-      b = 0;
-    } else if (v < 0.5) {
-      // Green (0,1,0) -> Cyan (0,1,1)
-      const t = (v - 0.25) * 4; // t goes from 0 to 1
-      r = 0;
-      g = 1;
-      b = t;
-    } else if (v < 0.75) {
-      // Cyan (0,1,1) -> Blue (0,0,1)
-      const t = (v - 0.5) * 4; // t goes from 0 to 1
-      r = 0;
-      g = 1 - t;
-      b = 1;
-    } else {
-      // Blue (0,0,1) -> Purple (0.5, 0, 1)
-      const t = (v - 0.75) * 4; // t goes from 0 to 1
-      r = t * 0.5; // Increase red towards purple
-      g = 0;
-      b = 1;
-    }
-    // Scale to 0-255
-    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-  },
-  /** Grayscale colormap: black to white. */
-  GRAYSCALE: (value) => {
-    const v = 255 - Math.round(value * 255);
-    return [v, v, v];
-  },
-};
-
-/**
- * @typedef {Object} DepthEstimationOptions Model loading options.
+ * @typedef {Object} TensorflowDepthEstimationOptions Model loading options.
  * @property {string} [segmentationModelUrl] - Optional URL to a custom segmentation model. Alias: `modelUrl`.
  * @property {string} [depthModelUrl] - Optional URL to a custom depth estimation model.
  */
 
 /**
- * @typedef {Object} DepthEstimationRuntimeOptions Estimation runtime options.
+ * @typedef {Object} TensorflowDepthEstimationRuntimeOptions Estimation runtime options.
  * @property {number} [minDepth=0] - The minimum depth value (0-1) used for fixed normalization. Ignored if `normalizeDynamically` is true.
  * @property {number} [maxDepth=1] - The maximum depth value (0-1) used for fixed normalization. Ignored if `normalizeDynamically` is true.
  * @property {boolean} [normalizeDynamically=false] - If true, calculate min/max depth from each frame for normalization, overriding `minDepth` and `maxDepth`.
@@ -91,7 +38,7 @@ const COLORMAPS = {
  */
 
 /**
- * @typedef {Object} DepthEstimationResult The result object from a depth estimation.
+ * @typedef {Object} TensorflowDepthEstimationResult The result object from a depth estimation.
  * @property {number[][]} data - Raw depth map as a 2D array.
  * @property {p5.Image | ImageData} image - p5.Image (if p5 is running, otherwise ImageData) of the depth map with chosen colormap.
  * @property {ImageData} imageData - ImageData visualization (normalized) with chosen colormap.
@@ -110,8 +57,8 @@ const COLORMAPS = {
  */
 class TensorflowDepthEstimation {
   /**
-   * Initializes the DepthEstimation class.
-   * @param {DepthEstimationOptions & DepthEstimationRuntimeOptions} [options] - Model loading and runtime options.
+   * Initializes the TensorflowDepthEstimation class.
+   * @param {TensorflowDepthEstimationOptions & TensorflowDepthEstimationRuntimeOptions} [options] - Model loading and runtime options.
    * @param {function} [callback] - Callback when model is loaded.
    */
   constructor(options, callback) {
@@ -455,7 +402,7 @@ class TensorflowDepthEstimation {
       result.data = depthData;
 
       // Create an ImageData using the determined min/max range
-      result.imageData = this.createImageDataFromDepthValues(
+      result.imageData = createImageDataFromDepthValues(
         depthData,
         width,
         height,
@@ -465,14 +412,14 @@ class TensorflowDepthEstimation {
       );
 
       // Create a p5.Image from the exact frame used for the estimation being returned in this result
-      result.sourceFrame = this.generateP5Image(this.getSourceFrameCanvas(width, height));
+      result.sourceFrame = generateP5Image(this.getSourceFrameCanvas(width, height));
 
       // --- Apply Black Background using Segmentation Mask (if enabled) ---
       if (currentRuntimeConfig.applySegmentationMask && binaryMask) {
         // If the input was flipped for depth estimation, flip the mask too
         // so it aligns with the visualization derived from the (potentially flipped) depth map.
         if (currentRuntimeConfig.flipHorizontal) {
-          binaryMask = this._flipImageDataHorizontally(binaryMask);
+          binaryMask = this.flipImageDataHorizontally(binaryMask);
         }
 
         const vizData = result.imageData.data; //this is a reference to the ImageData data array. Changes to this also change imageData
@@ -499,14 +446,14 @@ class TensorflowDepthEstimation {
           }
         }
 
-        result.mask = this.generateP5Image(maskData); // Create a p5.Image from the mask
+        result.mask = generateP5Image(maskData); // Create a p5.Image from the mask
       } else {
         result.mask = null; // No mask applied, set to null
       }
       // --- End Apply Black Background ---
 
       //Make the p5.Image version of the depth image
-      result.image = this.generateP5Image(result.imageData);
+      result.image = generateP5Image(result.imageData);
 
       result.width = width;
       result.height = height;
@@ -743,40 +690,8 @@ class TensorflowDepthEstimation {
     this.signalStop = false;
   }
 
-  /** Creates ImageData from depth values. @private */
-  createImageDataFromDepthValues(
-    depthValues,
-    width,
-    height,
-    minDepth,
-    maxDepth,
-    colormap = "GRAYSCALE"
-  ) {
-    const imageData = new ImageData(width, height);
-    const range = maxDepth - minDepth;
-    const colormapKey = colormap.toUpperCase();
-    const colormapFn = COLORMAPS[colormapKey] || COLORMAPS.GRAYSCALE;
-
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const depthValue = depthValues[y][x];
-        const normalizedValue =
-          range === 0
-            ? 0
-            : Math.max(0, Math.min(1, (depthValue - minDepth) / range));
-        const pixelIndex = (y * width + x) * 4;
-        const [r, g, b] = colormapFn(normalizedValue);
-        imageData.data[pixelIndex] = r;
-        imageData.data[pixelIndex + 1] = g;
-        imageData.data[pixelIndex + 2] = b;
-        imageData.data[pixelIndex + 3] = 255; // Alpha
-      }
-    }
-    return imageData;
-  }
-
   /** Flips ImageData horizontally. @private */
-  _flipImageDataHorizontally(imageData) {
+  flipImageDataHorizontally(imageData) {
     const { width, height, data } = imageData;
     const newData = new Uint8ClampedArray(data.length);
     for (let y = 0; y < height; y++) {
@@ -790,27 +705,6 @@ class TensorflowDepthEstimation {
       }
     }
     return new ImageData(newData, width, height);
-  }
-
-  /** Converts ImageData or Canvas to p5.Image if p5 exists. @private */
-  generateP5Image(inputImage) {
-    if (window?.p5) {
-      // Ensure p5 instance mode compatibility
-      const p5Instance = window._p5Instance || window;
-      if (p5Instance.createImage) {
-        const img = p5Instance.createImage(inputImage.width, inputImage.height);
-        if (inputImage instanceof ImageData) {
-          img.loadPixels(); // Load pixels to prepare for setting
-          img.pixels.set(inputImage.data); // Bulk copy pixel data
-          img.updatePixels(); // Update pixels to apply changes
-        } else if (inputImage instanceof HTMLCanvasElement) {
-          // If inputImage is an HTMLCanvasElement, we can use it directly
-          img.drawingContext.drawImage(inputImage, 0, 0);
-        }
-        return img;
-      }
-    }
-    return inputImage; // Return original ImageData/Canvas if p5 or createImage not available
   }
 
   /** Dilates a mask by a certain number of edge pixels. It also inverts it, so that the silouette is opaque and the background transparent @private */
