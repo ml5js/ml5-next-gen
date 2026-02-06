@@ -32,6 +32,9 @@ function setup() {
   let canvas = createCanvas(640, 400);
   canvas.parent("canvasDiv");
 
+  // XXX: work around Error: Backend 'undefined' has not yet been initialized. Make sure to await tf.ready() or await tf.setBackend() before calling other methods
+  ml5.setBackend("webgl");
+
   let options = {
     task: "sequenceRegression",
     debug: true,
