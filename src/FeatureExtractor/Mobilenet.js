@@ -4,10 +4,8 @@
  */
 
 import * as tf from "@tensorflow/tfjs";
-import axios from "axios";
 import handleOptions from "../utils/handleOptions";
 import { mediaReady } from "../utils/imageUtilities";
-import { saveBlob } from "../utils/io";
 import callCallback from "../utils/callcallback";
 import { getImageElement } from "../utils/handleArguments";
 
@@ -29,7 +27,6 @@ const MOBILENET_FEATURE_VECTOR_URL = {
 };
 
 const DEFAULTS = {
-  task: "classification",
   version: 1,
   alpha: 1.0,
   learningRate: 0.0001,
@@ -38,6 +35,7 @@ const DEFAULTS = {
   batchSize: 0.4,
 };
 
+// Validate that the provided version and alpha combination is valid
 function validateVersionAlphaCombination(version, alpha) {
   const validVersion = MOBILENET_FEATURE_VECTOR_URL[version];
 
@@ -64,11 +62,6 @@ class Mobilenet {
     this.config = handleOptions(
       options,
       {
-        task: {
-          type: "enum",
-          enums: ["classification", "regression"],
-          default: DEFAULTS.task,
-        },
         version: {
           type: "enum",
           enums: [1, 2],
@@ -123,6 +116,11 @@ class Mobilenet {
     this.labelIndex = [];
     this.trainingData = [];
     this.isTrained = false;
+    this.modelLoaded = false;
+    this.hasAnyTrainedClass = false;
+    this.usageType = null; // set by classification() or regression()
+    this.isPredicting = false;
+    this.video = null;
 
     this.ready = callCallback(this.loadModel(), callback);
   }
@@ -130,7 +128,6 @@ class Mobilenet {
   async loadModel() {
     await tf.ready();
 
-    // TODO: For Debug, remove this console log before release
     console.log(
       "Loading MobileNet Feature Vector model from URL:",
       this.featureVectorURL
@@ -140,14 +137,71 @@ class Mobilenet {
       fromTFHub: true,
     });
 
-    // TODO: For Debug, remove this console log before release
     console.log("MobileNet Feature Vector model loaded.");
 
     this.normalizationOffset = tf.scalar(127.5);
+    this.modelLoaded = true;
 
     return this;
   }
 
+  /**
+   * Create a classifier using the feature extractor.
+   * @param {HTMLVideoElement|Object} [video] - A video element to use as input.
+   * @param {Function} [callback] - Callback when video is ready.
+   * @returns {this}
+   */
+  classification(video, callback) {
+    this.usageType = "classifier";
+
+    if (typeof video === "function") {
+      callback = video;
+      video = null;
+    }
+
+    if (video) {
+      this.video = video;
+      if (callback) {
+        const checkVideo = async () => {
+          await mediaReady(video, true);
+          return this;
+        };
+        callCallback(checkVideo(), callback);
+      }
+    }
+
+    return this;
+  }
+
+  /**
+   * Create a regressor using the feature extractor.
+   * @param {HTMLVideoElement|Object} [video] - A video element to use as input.
+   * @param {Function} [callback] - Callback when video is ready.
+   * @returns {this}
+   */
+  regression(video, callback) {
+    this.usageType = "regressor";
+
+    if (typeof video === "function") {
+      callback = video;
+      video = null;
+    }
+
+    if (video) {
+      this.video = video;
+      if (callback) {
+        const checkVideo = async () => {
+          await mediaReady(video, true);
+          return this;
+        };
+        callCallback(checkVideo(), callback);
+      }
+    }
+
+    return this;
+  }
+
+  // Preprocess the input image: convert to tensor, normalize, resize, and add batch dimension
   normalizeAndResize(input) {
     return tf.tidy(() => {
       let img = input;
@@ -187,21 +241,43 @@ class Mobilenet {
     return features;
   }
 
-  addImage(image, label, callback) {
+  /**
+   * Add an image to the training data.
+   * If no input is provided and a video was set via classification()/regression(), the video frame is used.
+   * @param {*} inputOrLabel - An image element, or a label if using video.
+   * @param {string|number} [labelOrCallback] - The label, or callback if label is first arg.
+   * @param {Function} [callback] - Optional callback.
+   */
+  addImage(inputOrLabel, labelOrCallback, callback) {
+    let image;
+    let label;
+    let cb;
+
+    // Determine if first arg is a label (string/number) or an image element
+    if (typeof inputOrLabel === "string" || typeof inputOrLabel === "number") {
+      // addImage(label, callback) — use video as input
+      image = this.video;
+      label = inputOrLabel;
+      cb = typeof labelOrCallback === "function" ? labelOrCallback : callback;
+    } else {
+      // addImage(input, label, callback)
+      image = inputOrLabel;
+      label = labelOrCallback;
+      cb = callback;
+    }
+
     const addImageInternal = async () => {
       if (image === undefined || image === null) {
         throw new Error(
-          "FeatureExtractor error: addImage() requires an image as the first argument."
+          "FeatureExtractor error: addImage() requires an image or a video set via classification()/regression()."
         );
       }
 
       if (label === undefined || label === null) {
-        throw new Error(
-          "FeatureExtractor error: addImage() requires a label as the second argument."
-        );
+        throw new Error("FeatureExtractor error: addImage() requires a label.");
       }
 
-      if (this.config.task === "regression" && typeof label !== "number") {
+      if (this.usageType === "regressor" && typeof label !== "number") {
         throw new Error(
           "FeatureExtractor error: For regression, the label must be a number."
         );
@@ -211,7 +287,7 @@ class Mobilenet {
       const features = await featureTensor.data();
       featureTensor.dispose();
 
-      if (this.config.task === "classification") {
+      if (this.usageType === "classifier" || this.usageType === null) {
         if (!this.labelIndex.includes(label)) {
           this.labelIndex.push(label);
         }
@@ -226,10 +302,11 @@ class Mobilenet {
         });
       }
 
+      this.hasAnyTrainedClass = true;
       return { label, featuresLength: features.length };
     };
 
-    return callCallback(addImageInternal(), callback);
+    return callCallback(addImageInternal(), cb);
   }
 
   train(whileTrainingCb, finishedCb) {
@@ -241,7 +318,7 @@ class Mobilenet {
         whileCb = whileTrainingCb;
         doneCb = finishedCb;
       } else {
-        doneCb = whileTrainingCb;
+        whileCb = whileTrainingCb;
       }
     }
 
@@ -252,7 +329,9 @@ class Mobilenet {
         );
       }
 
-      if (this.config.task === "classification" && this.labelIndex.length < 2) {
+      const isClassification = this.usageType !== "regressor";
+
+      if (isClassification && this.labelIndex.length < 2) {
         throw new Error(
           "FeatureExtractor error: Classification requires at least 2 different labels."
         );
@@ -265,9 +344,8 @@ class Mobilenet {
       }
 
       const featureSize = this.trainingData[0].features.length;
-      const isClassification = this.config.task === "classification";
       const numOutputs = isClassification ? this.labelIndex.length : 1;
-      
+
       // Initialize a new MLP model
       this.MLP = tf.sequential();
       this.MLP.add(
@@ -290,7 +368,6 @@ class Mobilenet {
         optimizer,
         loss: isClassification ? "categoricalCrossentropy" : "meanSquaredError",
       });
-
 
       // Prepare training data and label tensors
       const xsData = this.trainingData.map((d) => Array.from(d.features));
@@ -317,8 +394,12 @@ class Mobilenet {
         batchSize,
         callbacks: {
           onEpochEnd: (epoch, logs) => {
+            const currentEpoch = epoch + 1;
+            console.log(
+              `Epoch ${currentEpoch}/${this.config.epochs} - loss: ${logs.loss}`
+            );
             if (whileCb) {
-              whileCb(epoch, logs);
+              whileCb(logs.loss);
             }
           },
         },
@@ -328,31 +409,50 @@ class Mobilenet {
       ys.dispose();
 
       this.isTrained = true;
+      console.log("Training complete!");
       return { epochs: this.config.epochs, loss: "training complete" };
     };
 
     return callCallback(trainInternal(), doneCb);
   }
 
-  classify(image, callback) {
+  /**
+   * Classify an image. If no input is provided, uses the video set via classification().
+   * @param {*} [inputOrCallback] - An image element, or callback if using video.
+   * @param {Function} [callback]
+   */
+  classify(inputOrCallback, callback) {
+    let image;
+    let cb;
+
+    if (typeof inputOrCallback === "function") {
+      image = this.video;
+      cb = inputOrCallback;
+    } else {
+      image = inputOrCallback || this.video;
+      cb = callback;
+    }
+
     const classifyInternal = async () => {
-      if (this.config.task !== "classification") {
+      if (this.usageType === "regressor") {
         throw new Error(
-          "FeatureExtractor error: classify() is for classification task. For regression task, use predict() instead."
+          "FeatureExtractor error: classify() is for classification. For regression, use predict() instead."
         );
       }
 
       if (!this.MLP) {
         throw new Error(
-          "FeatureExtractor error: No trained model. Train the model (train()) or load a weight (load()) before classify()."
+          "FeatureExtractor error: No trained model. Train the model (train()) or load weights (load()) before classify()."
         );
       }
 
       if (image === undefined || image === null) {
         throw new Error(
-          "FeatureExtractor error: classify() requires an image as the first argument."
+          "FeatureExtractor error: classify() requires an image or a video set via classification()."
         );
       }
+
+      this.isPredicting = true;
 
       const featureTensor = await this.extractFeatures(image);
       const prediction = this.MLP.predict(featureTensor);
@@ -367,17 +467,35 @@ class Mobilenet {
       }));
 
       results.sort((a, b) => b.confidence - a.confidence);
+
+      this.isPredicting = false;
       return results;
     };
 
-    return callCallback(classifyInternal(), callback);
+    return callCallback(classifyInternal(), cb);
   }
 
-  predict(image, callback) {
+  /**
+   * Predict a value for an image (regression). If no input is provided, uses the video.
+   * @param {*} [inputOrCallback] - An image element, or callback if using video.
+   * @param {Function} [callback]
+   */
+  predict(inputOrCallback, callback) {
+    let image;
+    let cb;
+
+    if (typeof inputOrCallback === "function") {
+      image = this.video;
+      cb = inputOrCallback;
+    } else {
+      image = inputOrCallback || this.video;
+      cb = callback;
+    }
+
     const predictInternal = async () => {
-      if (this.config.task !== "regression") {
+      if (this.usageType === "classifier") {
         throw new Error(
-          "FeatureExtractor error: predict() is for regression task. Use classify() instead."
+          "FeatureExtractor error: predict() is for regression. Use classify() instead."
         );
       }
 
@@ -389,9 +507,11 @@ class Mobilenet {
 
       if (image === undefined || image === null) {
         throw new Error(
-          "FeatureExtractor error: predict() requires an image as the first argument."
+          "FeatureExtractor error: predict() requires an image or a video set via regression()."
         );
       }
+
+      this.isPredicting = true;
 
       const featureTensor = await this.extractFeatures(image);
       const prediction = this.MLP.predict(featureTensor);
@@ -400,122 +520,59 @@ class Mobilenet {
       featureTensor.dispose();
       prediction.dispose();
 
+      this.isPredicting = false;
       return [{ value: values[0] }];
     };
 
-    return callCallback(predictInternal(), callback);
+    return callCallback(predictInternal(), cb);
   }
 
-  load(filesOrPath, callback) {
-    const loadInternal = async () => {
-      let modelPath;
-      let metadataPath;
-
-      if (typeof filesOrPath === "string") {
-        modelPath = filesOrPath;
-        metadataPath = filesOrPath.replace("model.json", "model_meta.json");
-
-        this.MLP = await tf.loadLayersModel(modelPath);
-
-        try {
-          const response = await axios.get(metadataPath);
-          const metadata = response.data;
-          this.labelIndex = metadata.labelIndex || [];
-          if (metadata.task) {
-            this.config.task = metadata.task;
-          }
-        } catch (e) {
-          console.warn(
-            "🟪 FeatureExtractor warning: Could not load metadata. Using defaults."
-          );
-        }
-      } else if (
-        filesOrPath instanceof FileList ||
-        Array.isArray(filesOrPath)
-      ) {
-        const files = Array.from(filesOrPath);
-        const modelFile = files.find(
-          (f) => f.name === "model.json" || f.name.endsWith("model.json")
-        );
-        const weightsFile = files.find(
-          (f) => f.name.endsWith(".bin") || f.name.includes("weights")
-        );
-        const metaFile = files.find(
-          (f) => f.name.includes("_meta.json") || f.name === "metadata.json"
-        );
-
-        if (!modelFile) {
-          throw new Error(
-            "🟪 FeatureExtractor error: model.json file not found in provided files."
-          );
-        }
-
-        this.MLP = await tf.loadLayersModel(
-          tf.io.browserFiles([modelFile, weightsFile].filter(Boolean))
-        );
-
-        if (metaFile) {
-          const metaText = await metaFile.text();
-          const metadata = JSON.parse(metaText);
-          this.labelIndex = metadata.labelIndex || [];
-          if (metadata.task) {
-            this.config.task = metadata.task;
-          }
-        }
-      }
-
-      this.isTrained = true;
-      this.trainingData = [];
-
-      return { loaded: true };
-    };
-
-    return callCallback(loadInternal(), callback);
-  }
-
-  save(callbackOrName, name) {
-    let callback;
-    let modelName = "featureExtractor-model";
-
-    if (typeof callbackOrName === "function") {
-      callback = callbackOrName;
-      if (typeof name === "string") {
-        modelName = name;
-      }
-    } else if (typeof callbackOrName === "string") {
-      modelName = callbackOrName;
-      if (typeof name === "function") {
-        callback = name;
-      }
-    }
-
+  /**
+   * Save the trained model weights.
+   * @param {Function} [callback] - Optional callback.
+   * @param {string} [name='model'] - Name for the saved files.
+   */
+  save(callback, name = "model") {
     const saveInternal = async () => {
       if (!this.MLP) {
-        throw new Error(
-          "🟪 FeatureExtractor error: No trained model to save. Please train the model first."
-        );
+        throw new Error("FeatureExtractor error: No trained model to save.");
       }
-
-      await this.MLP.save(`downloads://${modelName}`);
-
-      const metadata = {
-        task: this.config.task,
-        labelIndex: this.labelIndex,
-        version: 1,
-        config: {
-          hiddenUnits: this.config.hiddenUnits,
-        },
-      };
-
-      const metadataBlob = new Blob([JSON.stringify(metadata, null, 2)], {
-        type: "application/json",
-      });
-      saveBlob(metadataBlob, `${modelName}_meta.json`);
-
-      return { modelName };
+      await this.MLP.save(`downloads://${name}`);
+      return this;
     };
 
     return callCallback(saveInternal(), callback);
+  }
+
+  /**
+   * Load model weights from a URL or file input.
+   * @param {string|FileList} filesOrPath - A URL to model.json or a FileList from an input element.
+   * @param {Function} [callback] - Optional callback.
+   */
+  load(filesOrPath, callback) {
+    const loadInternal = async () => {
+      if (!filesOrPath) {
+        throw new Error(
+          "FeatureExtractor error: load() requires a path or files."
+        );
+      }
+
+      let loadedModel;
+      if (typeof filesOrPath === "string") {
+        loadedModel = await tf.loadLayersModel(filesOrPath);
+      } else {
+        // Assume FileList from file input
+        loadedModel = await tf.loadLayersModel(
+          tf.io.browserFiles(Array.from(filesOrPath))
+        );
+      }
+
+      this.MLP = loadedModel;
+      this.isTrained = true;
+      return this;
+    };
+
+    return callCallback(loadInternal(), callback);
   }
 }
 

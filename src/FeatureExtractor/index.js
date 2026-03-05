@@ -1,9 +1,7 @@
-import handleArguments from "../utils/handleArguments";
 import Mobilenet from "./Mobilenet";
 
 /**
  * @typedef {Object} FeatureExtractorOptions
- * @property {'classification'|'regression'} [task='classification'] - The task type
  * @property {1|2} [version=1] - MobileNet version
  * @property {number} [alpha=1.0] - Width multiplier. v1: 0.25, 0.5, 0.75, 1.0. v2: 0.5, 0.75, 1.0
  * @property {number} [hiddenUnits=100] - Hidden layer units in the MLP head
@@ -15,30 +13,25 @@ import Mobilenet from "./Mobilenet";
 /**
  * Create a featureExtractor for transfer learning with MobileNet.
  *
- * The task type (classification or regression) is specified in the options.
+ * @example
+ * const fe = ml5.featureExtractor(modelLoaded);
  *
  * @example
- * // Classification
- * const fe = ml5.featureExtractor('MobileNet', { task: 'classification' }, modelReady);
+ * const fe = ml5.featureExtractor({ epochs: 30 }, modelLoaded);
  *
- * @example
- * // Regression
- * const fe = ml5.featureExtractor('MobileNet', { task: 'regression' }, modelReady);
- *
- * @param {string} model - The model name. Currently only 'MobileNet' is supported (case-insensitive).
  * @param {FeatureExtractorOptions|Function} [optionsOrCallback] - Options object or callback function.
  * @param {Function} [cb] - Callback function called when the model is loaded.
  * @returns {Mobilenet} A FeatureExtractor instance.
  */
-const featureExtractor = (model, optionsOrCallback, cb) => {
-  const {
-    string: modelName,
-    options = {},
-    callback,
-  } = handleArguments(model, optionsOrCallback, cb);
+const featureExtractor = (optionsOrCallback, cb) => {
+  let options = {};
+  let callback;
 
-  if (modelName && modelName.toLowerCase() !== "mobilenet") {
-    throw new Error(`${modelName} is not a valid model.`);
+  if (typeof optionsOrCallback === "function") {
+    callback = optionsOrCallback;
+  } else if (typeof optionsOrCallback === "object") {
+    options = optionsOrCallback;
+    callback = cb;
   }
 
   return new Mobilenet(options, callback);
