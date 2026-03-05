@@ -52,6 +52,7 @@
   },
   "homepage": "https://github.com/ml5js/ml5-next-gen#readme",
   "dependencies": {
+    "@huggingface/transformers": "^3.7.6",
     "@mediapipe/face_mesh": "^0.4.1633559619",
     "@mediapipe/hands": "^0.4.1675469240",
     "@mediapipe/pose": "^0.5.1675469404",
