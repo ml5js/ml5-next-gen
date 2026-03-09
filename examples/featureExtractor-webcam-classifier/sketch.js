@@ -1,5 +1,4 @@
-let featureExtractor;
-let classifier;
+let feClassifier;
 let video;
 let label = "";
 let penButton;
@@ -12,12 +11,8 @@ function modelReady() {
   console.log("Model is ready!");
 }
 
-function videoReady() {
-  console.log("The video is ready!");
-}
-
 function classifyVideo() {
-  classifier.classify(gotResults);
+  feClassifier.classify(gotResults);
 }
 
 function gotResults(results) {
@@ -25,33 +20,35 @@ function gotResults(results) {
   classifyVideo();
 }
 
+function preload() {
+  feClassifier = ml5.featureExtractor({ task: 'classification' }, modelReady);
+}
+
 function setup() {
   createCanvas(640, 540);
   video = createCapture(VIDEO);
   video.hide();
   background(0);
-  // Initialize the feature extractor
-  featureExtractor = ml5.featureExtractor({ epochs: 100 }, modelReady);
-  // Create a new classifier using those features and with a video element
-  classifier = featureExtractor.classification(video, videoReady);
+  // Set the video as the input for the Classifier
+  feClassifier.video = video;
 
   penButton = createButton("pen");
   penButton.mousePressed(function () {
-    classifier.addImage("pen");
+    feClassifier.addImage("pen");
     penCount++;
     console.log("Pen samples: " + penCount);
   });
 
   phoneButton = createButton("phone");
   phoneButton.mousePressed(function () {
-    classifier.addImage("phone");
+    feClassifier.addImage("phone");
     cupCount++;
     console.log("Phone samples: " + cupCount);
   });
 
   trainButton = createButton("train");
   trainButton.mousePressed(function () {
-    classifier.train().then(function () {
+    feClassifier.train({ epochs: 100, debug: true }, function () {
       console.log("Starting classification...");
       classifyVideo();
     });

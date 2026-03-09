@@ -1,5 +1,4 @@
-let featureExtractor;
-let regressor;
+let feRegressor;
 let video;
 let slider;
 let addButton;
@@ -11,12 +10,8 @@ function modelReady() {
   console.log("Model is ready!");
 }
 
-function videoReady() {
-  console.log("The video is ready!");
-}
-
 function regressVideo() {
-  regressor.predict(gotResults);
+  feRegressor.predict(gotResults);
 }
 
 function gotResults(results) {
@@ -24,16 +19,18 @@ function gotResults(results) {
   regressVideo();
 }
 
+function preload() {
+  // Initialize the feature extractor for regression
+  feRegressor = ml5.featureExtractor({ task: 'regression', version: 2 }, modelReady);
+}
+
 function setup() {
   createCanvas(640, 540);
   video = createCapture(VIDEO);
   video.hide();
   background(0);
-
-  // Initialize the feature extractor
-  featureExtractor = ml5.featureExtractor({ epochs: 200}, modelReady);
-  // Create a regressor using those features and with a video element
-  regressor = featureExtractor.regression(video, videoReady);
+  // Set the video as the input for the Regressor
+  feRegressor.video = video;
 
   // Slider: 0 = far from camera, 1 = close to camera
   slider = createSlider(0, 1, 0.5, 0.01);
@@ -42,7 +39,7 @@ function setup() {
   // Add a sample with the current slider value
   addButton = createButton("Add Sample");
   addButton.mousePressed(function () {
-    regressor.addImage(slider.value());
+    feRegressor.addImage(slider.value());
     sampleCount++;
     console.log("Sample " + sampleCount + " added with value: " + slider.value());
   });
@@ -50,7 +47,7 @@ function setup() {
   // Train and start predicting
   trainButton = createButton("Train");
   trainButton.mousePressed(function () {
-    regressor.train().then(function () {
+    feRegressor.train({ epochs: 500, learningRate: 0.0001, debug: true }, function () {
       console.log("Starting regression...");
       regressVideo();
     });
@@ -68,7 +65,7 @@ function draw() {
   pop();
 
   // Use predicted value if trained, otherwise follow the slider
-  let currentValue = regressor.isTrained ? predictedValue : slider.value();
+  let currentValue = feRegressor.isTrained ? predictedValue : slider.value();
   // Clamp to 0-1 range
   currentValue = constrain(currentValue, 0, 1);
 
