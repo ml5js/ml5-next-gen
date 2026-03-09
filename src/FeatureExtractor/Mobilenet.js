@@ -4,6 +4,7 @@
  */
 
 import * as tf from "@tensorflow/tfjs";
+import * as tfvis from "@tensorflow/tfjs-vis";
 import handleOptions from "../utils/handleOptions";
 import { mediaReady } from "../utils/imageUtilities";
 import callCallback from "../utils/callcallback";
@@ -29,10 +30,15 @@ const MOBILENET_FEATURE_VECTOR_URL = {
 const DEFAULTS = {
   version: 1,
   alpha: 1.0,
-  learningRate: 0.0001,
-  hiddenUnits: 100,
+  task: "classification",
+};
+
+const TRAINING_DEFAULTS = {
   epochs: 20,
+  hiddenUnits: 100,
+  learningRate: 0.0001,
   batchSize: 0.4,
+  debug: false,
 };
 
 // Validate that the provided version and alpha combination is valid
@@ -77,28 +83,10 @@ class Mobilenet {
           },
           default: DEFAULTS.alpha,
         },
-        epochs: {
-          type: "number",
-          min: 1,
-          integer: true,
-          default: DEFAULTS.epochs,
-        },
-        hiddenUnits: {
-          type: "number",
-          min: 1,
-          integer: true,
-          default: DEFAULTS.hiddenUnits,
-        },
-        learningRate: {
-          type: "number",
-          min: 0,
-          default: DEFAULTS.learningRate,
-        },
-        batchSize: {
-          type: "number",
-          min: 0,
-          max: 1,
-          default: DEFAULTS.batchSize,
+        task: {
+          type: "enum",
+          enums: ["classification", "regression"],
+          default: DEFAULTS.task,
         },
       },
       "featureExtractor"
@@ -118,7 +106,6 @@ class Mobilenet {
     this.isTrained = false;
     this.modelLoaded = false;
     this.hasAnyTrainedClass = false;
-    this.usageType = null; // set by classification() or regression()
     this.isPredicting = false;
     this.video = null;
 
@@ -137,66 +124,8 @@ class Mobilenet {
       fromTFHub: true,
     });
 
-    console.log("MobileNet Feature Vector model loaded.");
-
     this.normalizationOffset = tf.scalar(127.5);
     this.modelLoaded = true;
-
-    return this;
-  }
-
-  /**
-   * Create a classifier using the feature extractor.
-   * @param {HTMLVideoElement|Object} [video] - A video element to use as input.
-   * @param {Function} [callback] - Callback when video is ready.
-   * @returns {this}
-   */
-  classification(video, callback) {
-    this.usageType = "classifier";
-
-    if (typeof video === "function") {
-      callback = video;
-      video = null;
-    }
-
-    if (video) {
-      this.video = video;
-      if (callback) {
-        const checkVideo = async () => {
-          await mediaReady(video, true);
-          return this;
-        };
-        callCallback(checkVideo(), callback);
-      }
-    }
-
-    return this;
-  }
-
-  /**
-   * Create a regressor using the feature extractor.
-   * @param {HTMLVideoElement|Object} [video] - A video element to use as input.
-   * @param {Function} [callback] - Callback when video is ready.
-   * @returns {this}
-   */
-  regression(video, callback) {
-    this.usageType = "regressor";
-
-    if (typeof video === "function") {
-      callback = video;
-      video = null;
-    }
-
-    if (video) {
-      this.video = video;
-      if (callback) {
-        const checkVideo = async () => {
-          await mediaReady(video, true);
-          return this;
-        };
-        callCallback(checkVideo(), callback);
-      }
-    }
 
     return this;
   }
@@ -243,7 +172,7 @@ class Mobilenet {
 
   /**
    * Add an image to the training data.
-   * If no input is provided and a video was set via classification()/regression(), the video frame is used.
+   * If no input is provided and a video was set via setVideo(), the video frame is used.
    * @param {*} inputOrLabel - An image element, or a label if using video.
    * @param {string|number} [labelOrCallback] - The label, or callback if label is first arg.
    * @param {Function} [callback] - Optional callback.
@@ -269,7 +198,7 @@ class Mobilenet {
     const addImageInternal = async () => {
       if (image === undefined || image === null) {
         throw new Error(
-          "FeatureExtractor error: addImage() requires an image or a video set via classification()/regression()."
+          "FeatureExtractor error: addImage() requires an image or a video set via setVideo()."
         );
       }
 
@@ -277,7 +206,7 @@ class Mobilenet {
         throw new Error("FeatureExtractor error: addImage() requires a label.");
       }
 
-      if (this.usageType === "regressor" && typeof label !== "number") {
+      if (this.config.task === "regression" && typeof label !== "number") {
         throw new Error(
           "FeatureExtractor error: For regression, the label must be a number."
         );
@@ -287,7 +216,7 @@ class Mobilenet {
       const features = await featureTensor.data();
       featureTensor.dispose();
 
-      if (this.usageType === "classifier" || this.usageType === null) {
+      if (this.config.task === "classification") {
         if (!this.labelIndex.includes(label)) {
           this.labelIndex.push(label);
         }
@@ -309,18 +238,34 @@ class Mobilenet {
     return callCallback(addImageInternal(), cb);
   }
 
-  train(whileTrainingCb, finishedCb) {
-    let whileCb = null;
+  /**
+   * Train the MLP head on the collected training data.
+   * @param {Object|Function} [optionsOrCallback] - Training options or callback.
+   * @param {number} [optionsOrCallback.epochs=20] - Number of training epochs.
+   * @param {number} [optionsOrCallback.hiddenUnits=100] - Hidden layer units.
+   * @param {number} [optionsOrCallback.learningRate=0.0001] - Learning rate.
+   * @param {number} [optionsOrCallback.batchSize=0.4] - Batch size as a fraction of total data.
+   * @param {boolean} [optionsOrCallback.debug=false] - Show training visualization via tfjs-vis.
+   * @param {Function} [callback] - Called when training is complete.
+   */
+  train(optionsOrCallback, callback) {
+    let trainOpts = {};
     let doneCb = null;
 
-    if (typeof whileTrainingCb === "function") {
-      if (typeof finishedCb === "function") {
-        whileCb = whileTrainingCb;
-        doneCb = finishedCb;
-      } else {
-        whileCb = whileTrainingCb;
-      }
+    if (typeof optionsOrCallback === "function") {
+      // train(callback)
+      doneCb = optionsOrCallback;
+    } else if (typeof optionsOrCallback === "object") {
+      // train(options, callback)
+      trainOpts = optionsOrCallback;
+      doneCb = typeof callback === "function" ? callback : null;
     }
+
+    const epochs = trainOpts.epochs || TRAINING_DEFAULTS.epochs;
+    const hiddenUnits = trainOpts.hiddenUnits || TRAINING_DEFAULTS.hiddenUnits;
+    const learningRate = trainOpts.learningRate || TRAINING_DEFAULTS.learningRate;
+    const batchSizeFraction = trainOpts.batchSize || TRAINING_DEFAULTS.batchSize;
+    const debug = trainOpts.debug === true || trainOpts.debug === "true";
 
     const trainInternal = async () => {
       if (this.trainingData.length === 0) {
@@ -329,7 +274,7 @@ class Mobilenet {
         );
       }
 
-      const isClassification = this.usageType !== "regressor";
+      const isClassification = this.config.task === "classification";
 
       if (isClassification && this.labelIndex.length < 2) {
         throw new Error(
@@ -351,7 +296,7 @@ class Mobilenet {
       this.MLP.add(
         tf.layers.dense({
           inputShape: [featureSize],
-          units: this.config.hiddenUnits,
+          units: hiddenUnits,
           activation: "relu",
         })
       );
@@ -362,7 +307,7 @@ class Mobilenet {
         })
       );
 
-      const optimizer = tf.train.adam(this.config.learningRate);
+      const optimizer = tf.train.adam(learningRate);
 
       this.MLP.compile({
         optimizer,
@@ -386,23 +331,34 @@ class Mobilenet {
 
       const batchSize = Math.max(
         1,
-        Math.floor(this.trainingData.length * this.config.batchSize)
+        Math.floor(this.trainingData.length * batchSizeFraction)
       );
 
-      await this.MLP.fit(xs, ys, {
-        epochs: this.config.epochs,
-        batchSize,
-        callbacks: {
-          onEpochEnd: (epoch, logs) => {
-            const currentEpoch = epoch + 1;
-            console.log(
-              `Epoch ${currentEpoch}/${this.config.epochs} - loss: ${logs.loss}`
-            );
-            if (whileCb) {
-              whileCb(logs.loss);
-            }
-          },
+      // Build callbacks
+      const callbacks = [];
+
+      if (debug) {
+        const fitCallbacks = tfvis.show.fitCallbacks(
+          { name: "Training Performance" },
+          ["loss"],
+          { height: 300, callbacks: ["onEpochEnd"] }
+        );
+        callbacks.push(fitCallbacks);
+      }
+
+      callbacks.push({
+        onEpochEnd: (epoch, logs) => {
+          const currentEpoch = epoch + 1;
+          console.log(
+            `Epoch ${currentEpoch}/${epochs} - loss: ${logs.loss}`
+          );
         },
+      });
+
+      await this.MLP.fit(xs, ys, {
+        epochs,
+        batchSize,
+        callbacks,
       });
 
       xs.dispose();
@@ -410,7 +366,7 @@ class Mobilenet {
 
       this.isTrained = true;
       console.log("Training complete!");
-      return { epochs: this.config.epochs, loss: "training complete" };
+      return { epochs, loss: "training complete" };
     };
 
     return callCallback(trainInternal(), doneCb);
@@ -434,7 +390,7 @@ class Mobilenet {
     }
 
     const classifyInternal = async () => {
-      if (this.usageType === "regressor") {
+      if (this.config.task === "regression") {
         throw new Error(
           "FeatureExtractor error: classify() is for classification. For regression, use predict() instead."
         );
@@ -493,7 +449,7 @@ class Mobilenet {
     }
 
     const predictInternal = async () => {
-      if (this.usageType === "classifier") {
+      if (this.config.task === "classification") {
         throw new Error(
           "FeatureExtractor error: predict() is for regression. Use classify() instead."
         );
