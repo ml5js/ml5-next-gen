@@ -1,11 +1,11 @@
 let feClassifier;
 let video;
 let label = "";
-let penButton;
-let phoneButton;
+let input1, input2;
+let addButton1, addButton2;
 let trainButton;
-let penCount = 0;
-let cupCount = 0;
+let count1 = 0;
+let count2 = 0;
 
 function modelReady() {
   console.log("Model is ready!");
@@ -27,18 +27,26 @@ function setup() {
   // Set the video as the input for the Classifier
   feClassifier.video = video;
 
-  penButton = createButton("pen");
-  penButton.mousePressed(function () {
-    feClassifier.addImage("pen");
-    penCount++;
-    console.log("Pen samples: " + penCount);
+
+  // Create inputs and buttons for adding samples for two classes
+  input1 = createInput("", "text");
+  input1.attribute("placeholder", "Class 1");
+  addButton1 = createButton("Add Sample");
+  addButton1.mousePressed(function () {
+    let className = input1.value() || "Class 1";
+    feClassifier.addImage(className);
+    count1++;
+    console.log(className + " samples: " + count1);
   });
 
-  phoneButton = createButton("phone");
-  phoneButton.mousePressed(function () {
-    feClassifier.addImage("phone");
-    cupCount++;
-    console.log("Phone samples: " + cupCount);
+  input2 = createInput("", "text");
+  input2.attribute("placeholder", "Class 2");
+  addButton2 = createButton("Add Sample");
+  addButton2.mousePressed(function () {
+    let className = input2.value() || "Class 2";
+    feClassifier.addImage(className);
+    count2++;
+    console.log(className + " samples: " + count2);
   });
 
   trainButton = createButton("train");
