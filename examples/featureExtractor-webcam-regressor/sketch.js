@@ -25,7 +25,7 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(640, 540);
+  createCanvas(640, 480);
   video = createCapture(VIDEO);
   video.hide();
   background(0);
@@ -61,7 +61,7 @@ function draw() {
   push();
   translate(640, 0);
   scale(-1, 1);
-  image(video, 0, 0, 640, 500);
+  image(video, 0, 0, 640, 450);
   pop();
 
   // Use predicted value if trained, otherwise follow the slider

@@ -25,7 +25,7 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(640, 540);
+  createCanvas(640, 480);
   video = createCapture(VIDEO);
   video.hide();
   background(0);
@@ -57,8 +57,14 @@ function setup() {
 
 function draw() {
   background(0);
-  // Draw the video
-  image(video, 0, 0, 640, 500);
+
+  // Draw the video (flipped horizontally)
+  push();
+  translate(640, 0);
+  scale(-1, 1);
+  image(video, 0, 0, 640, 450);
+  pop();
+
   // Draw the label
   fill(255);
   textSize(16);
