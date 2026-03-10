@@ -108,6 +108,9 @@ class Mobilenet {
     this.hasAnyTrainedClass = false;
     this.isPredicting = false;
     this.video = null;
+    this.signalStop = false;
+    this.isClassifying = false;
+    this.prevCall = null;
 
     this.ready = callCallback(this.loadModel(), callback);
   }
@@ -432,6 +435,44 @@ class Mobilenet {
   }
 
   /**
+   * Continuously classifies each frame of the video.
+   * @param {Function} callback - Called with results for each frame.
+   */
+  classifyStart(callback) {
+    const classifyFrame = async () => {
+      await callCallback(this.classify(this.video), callback);
+
+      if (!this.signalStop) {
+        requestAnimationFrame(classifyFrame);
+      } else {
+        this.isClassifying = false;
+      }
+    };
+
+    this.signalStop = false;
+    if (!this.isClassifying) {
+      this.isClassifying = true;
+      classifyFrame();
+    }
+    if (this.prevCall === "start") {
+      console.warn(
+        "classifyStart() was called more than once without calling classifyStop(). Only the latest classifyStart() call will take effect."
+      );
+    }
+    this.prevCall = "start";
+  }
+
+  /**
+   * Stops the continuous classification started by classifyStart().
+   */
+  classifyStop() {
+    if (this.isClassifying) {
+      this.signalStop = true;
+    }
+    this.prevCall = "stop";
+  }
+
+  /**
    * Predict a value for an image (regression). If no input is provided, uses the video.
    * @param {*} [inputOrCallback] - An image element, or callback if using video.
    * @param {Function} [callback]
@@ -481,6 +522,44 @@ class Mobilenet {
     };
 
     return callCallback(predictInternal(), cb);
+  }
+
+  /**
+   * Continuously predicts a value for each frame of the video (regression).
+   * @param {Function} callback - Called with results for each frame.
+   */
+  predictStart(callback) {
+    const predictFrame = async () => {
+      await callCallback(this.predict(this.video), callback);
+
+      if (!this.signalStop) {
+        requestAnimationFrame(predictFrame);
+      } else {
+        this.isClassifying = false;
+      }
+    };
+
+    this.signalStop = false;
+    if (!this.isClassifying) {
+      this.isClassifying = true;
+      predictFrame();
+    }
+    if (this.prevCall === "start") {
+      console.warn(
+        "predictStart() was called more than once without calling predictStop(). Only the latest predictStart() call will take effect."
+      );
+    }
+    this.prevCall = "start";
+  }
+
+  /**
+   * Stops the continuous prediction started by predictStart().
+   */
+  predictStop() {
+    if (this.isClassifying) {
+      this.signalStop = true;
+    }
+    this.prevCall = "stop";
   }
 
   /**

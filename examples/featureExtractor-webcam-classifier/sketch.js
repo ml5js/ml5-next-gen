@@ -11,13 +11,8 @@ function modelReady() {
   console.log("Model is ready!");
 }
 
-function classifyVideo() {
-  feClassifier.classify(gotResults);
-}
-
 function gotResults(results) {
   label = results[0].label + " (" + nf(results[0].confidence, 0, 2) + ")";
-  classifyVideo();
 }
 
 function preload() {
@@ -50,7 +45,7 @@ function setup() {
   trainButton.mousePressed(function () {
     feClassifier.train({ epochs: 100, debug: true }, function () {
       console.log("Starting classification...");
-      classifyVideo();
+      feClassifier.classifyStart(gotResults);
     });
   });
 }

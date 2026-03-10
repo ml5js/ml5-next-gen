@@ -10,13 +10,8 @@ function modelReady() {
   console.log("Model is ready!");
 }
 
-function regressVideo() {
-  feRegressor.predict(gotResults);
-}
-
 function gotResults(results) {
   predictedValue = results[0].value;
-  regressVideo();
 }
 
 function preload() {
@@ -49,7 +44,7 @@ function setup() {
   trainButton.mousePressed(function () {
     feRegressor.train({ epochs: 500, learningRate: 0.0001, debug: true }, function () {
       console.log("Starting regression...");
-      regressVideo();
+      feRegressor.predictStart(gotResults);
     });
   });
 }
