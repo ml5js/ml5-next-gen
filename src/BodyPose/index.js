@@ -27,6 +27,13 @@ import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
 import objectRenameKey from "../utils/objectRenameKey";
 import { isVideo } from "../utils/handleArguments";
+import { CachingIOHandler } from "../utils/modelCache";
+import {
+  getBodyPoseMoveNetUrl,
+  getBodyPoseMoveNetCacheKey,
+  getBodyPoseBlazePoseUrls,
+  getBodyPoseBlazePoseCacheKeys,
+} from "../utils/modelRegistry";
 
 /**
  * User provided options object for BodyPose with MoveNet model.
@@ -44,6 +51,9 @@ import { isVideo } from "../utils/handleArguments";
  * @property {string} [trackerType]           - The type of tracker to use.
  * @property {object} [trackerConfig]         - Advanced tracker configurations.
  * @property {string} [modelUrl]              - The file path or URL to the MoveNet model.
+ * @property {boolean} [cache]               - Whether to cache the model in IndexedDB for offline
+ *                                             use. On first load the model is downloaded and saved;
+ *                                             on subsequent loads it is served from the local cache.
  */
 
 /**
@@ -64,6 +74,9 @@ import { isVideo } from "../utils/handleArguments";
  *                                              model. Only for `tfjs` runtime.
  * @property {string} [landmarkModelUrl]      - The file path or URL to the BlazePose landmark
  *                                              model. Only for `tfjs` runtime.
+ * @property {boolean} [cache]               - Whether to cache the model in IndexedDB for offline
+ *                                             use. On first load the model is downloaded and saved;
+ *                                             on subsequent loads it is served from the local cache.
  */
 
 /**
@@ -227,6 +240,23 @@ class BodyPose {
         blazePoseConfigSchema,
         "bodyPose"
       );
+
+      // If cache: true is requested and runtime is tfjs, wrap the model URLs
+      // with CachingIOHandler for transparent IndexedDB caching.
+      if (this.userOptions?.cache === true && modelConfig.runtime === "tfjs") {
+        const defaults = getBodyPoseBlazePoseUrls(modelConfig);
+        const keys = getBodyPoseBlazePoseCacheKeys(modelConfig);
+        const detectorUrl = modelConfig.detectorModelUrl ?? defaults.detector;
+        const landmarkUrl = modelConfig.landmarkModelUrl ?? defaults.landmark;
+        modelConfig.detectorModelUrl = new CachingIOHandler(
+          detectorUrl,
+          keys.detector
+        );
+        modelConfig.landmarkModelUrl = new CachingIOHandler(
+          landmarkUrl,
+          keys.landmark
+        );
+      }
     } else {
       pipeline = poseDetection.SupportedModels.MoveNet;
       modelConfig = handleOptions(
@@ -234,6 +264,19 @@ class BodyPose {
         MoveNetConfigSchema,
         "bodyPose"
       );
+
+      // If cache: true is requested and no custom modelUrl is provided, wrap
+      // the default URL with CachingIOHandler for transparent IndexedDB caching.
+      // We read modelType as a string here, before the switch below replaces it
+      // with the poseDetection enum value.
+      if (this.userOptions?.cache === true && !modelConfig.modelUrl) {
+        const url = getBodyPoseMoveNetUrl({ modelType: modelConfig.modelType });
+        const key = getBodyPoseMoveNetCacheKey({
+          modelType: modelConfig.modelType,
+        });
+        modelConfig.modelUrl = new CachingIOHandler(url, key);
+      }
+
       // Map the modelType string to the `movenet.modelType` enum
       switch (modelConfig.modelType) {
         case "SINGLEPOSE_LIGHTNING":
@@ -277,6 +320,7 @@ class BodyPose {
     );
     const { image, callback } = argumentObject;
     // Run the detection
+    await this.ready;
     await mediaReady(image, false);
     const predictions = await this.model.estimatePoses(image);
     let result = predictions;
@@ -342,6 +386,7 @@ class BodyPose {
    * @private
    */
   async detectLoop() {
+    await this.ready;
     await mediaReady(this.detectMedia, false);
     while (!this.signalStop) {
       const predictions = await this.model.estimatePoses(this.detectMedia);
