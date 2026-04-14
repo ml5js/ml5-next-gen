@@ -28,7 +28,7 @@ const MOBILENET_FEATURE_VECTOR_URL = {
 };
 
 const DEFAULTS = {
-  version: 1,
+  version: 2,
   alpha: 1.0,
   task: "classification",
 };

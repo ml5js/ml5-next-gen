@@ -2,7 +2,7 @@ import Mobilenet from "./Mobilenet";
 
 /**
  * @typedef {Object} FeatureExtractorOptions
- * @property {1|2} [version=1] - MobileNet version
+ * @property {1|2} [version=2] - MobileNet version
  * @property {number} [alpha=1.0] - Width multiplier. v1: 0.25, 0.5, 0.75, 1.0. v2: 0.5, 0.75, 1.0
  * @property {'classification'|'regression'} [task='classification'] - The task type
  */
