@@ -572,6 +572,10 @@ class Mobilenet {
       if (!this.MLP) {
         throw new Error("FeatureExtractor error: No trained model to save.");
       }
+      this.MLP.setUserDefinedMetadata({
+        task: this.config.task,
+        labelIndex: this.labelIndex,
+      });
       await this.MLP.save(`downloads://${name}`);
       return this;
     };
@@ -604,6 +608,17 @@ class Mobilenet {
 
       this.MLP = loadedModel;
       this.isTrained = true;
+
+      const metadata = loadedModel.getUserDefinedMetadata();
+      if (metadata) {
+        if (metadata.task) {
+          this.config.task = metadata.task;
+        }
+        if (Array.isArray(metadata.labelIndex)) {
+          this.labelIndex = metadata.labelIndex;
+        }
+      }
+
       return this;
     };
 
