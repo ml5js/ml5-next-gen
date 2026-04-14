@@ -16,7 +16,7 @@ function gotResults(results) {
 
 function preload() {
   // Initialize the feature extractor for regression
-  feRegressor = ml5.featureExtractor({ task: 'regression', version: 2 }, modelReady);
+  feRegressor = ml5.featureExtractor({ task: 'regression' }, modelReady);
 }
 
 function setup() {
