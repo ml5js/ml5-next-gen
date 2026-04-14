@@ -7,14 +7,6 @@ let trainButton;
 let count1 = 0;
 let count2 = 0;
 
-function modelReady() {
-  console.log("Model is ready!");
-}
-
-function gotResults(results) {
-  label = results[0].label + " (" + nf(results[0].confidence, 0, 2) + ")";
-}
-
 function preload() {
   feClassifier = ml5.featureExtractor({ task: 'classification' }, modelReady);
 }
@@ -72,4 +64,12 @@ function draw() {
   fill(255);
   textSize(16);
   text(label, 10, height - 10);
+}
+
+function modelReady() {
+  console.log("Model is ready!");
+}
+
+function gotResults(results) {
+  label = results[0].label + " (" + nf(results[0].confidence, 0, 2) + ")";
 }

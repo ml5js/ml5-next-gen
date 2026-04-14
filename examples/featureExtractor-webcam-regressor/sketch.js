@@ -6,14 +6,6 @@ let trainButton;
 let sampleCount = 0;
 let predictedValue = 0;
 
-function modelReady() {
-  console.log("Model is ready!");
-}
-
-function gotResults(results) {
-  predictedValue = results[0].value;
-}
-
 function preload() {
   // Initialize the feature extractor for regression
   feRegressor = ml5.featureExtractor({ task: 'regression' }, modelReady);
@@ -78,4 +70,12 @@ function draw() {
   fill(255);
   textSize(16);
   text("Value: " + nf(currentValue, 1, 4), 10, height - 10);
+}
+
+function modelReady() {
+  console.log("Model is ready!");
+}
+
+function gotResults(results) {
+  predictedValue = results[0].value;
 }
