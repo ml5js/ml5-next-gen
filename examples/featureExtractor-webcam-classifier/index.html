@@ -9,6 +9,33 @@
     <script src="../../dist/ml5.js"></script>
   </head>
   <body>
+    <div id="canvasContainer"></div>
+    <div id="nameControls" style="display: none;">
+      <button id="nameButton1" contenteditable="true">Click to edit Class #1</button>
+      <button id="nameButton2" contenteditable="true">Click to edit Class #2</button>
+      <button id="doneButton">Done</button>
+    </div>
+    <script>
+      // Make a contenteditable <button> behave like a placeholder input:
+      // click keeps the caret in the button, placeholder clears on focus
+      // and returns on blur if the user didn't type anything.
+      function setupEditableField(id) {
+        const field = document.getElementById(id);
+        const placeholder = field.textContent;
+        field.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          field.focus();
+        });
+        field.addEventListener("focus", () => {
+          if (field.textContent === placeholder) field.textContent = "";
+        });
+        field.addEventListener("blur", () => {
+          if (field.textContent.trim() === "") field.textContent = placeholder;
+        });
+      }
+      setupEditableField("nameButton1");
+      setupEditableField("nameButton2");
+    </script>
     <script src="sketch.js"></script>
   </body>
 </html>
