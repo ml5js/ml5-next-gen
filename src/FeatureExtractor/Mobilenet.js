@@ -175,28 +175,13 @@ class Mobilenet {
 
   /**
    * Add an image to the training data.
-   * If no input is provided and a video was set via setVideo(), the video frame is used.
-   * @param {*} inputOrLabel - An image element, or a label if using video.
-   * @param {string|number} [labelOrCallback] - The label, or callback if label is first arg.
+   * @param {*} input - An image or video element.
+   * @param {string|number} label - The label for this image.
    * @param {Function} [callback] - Optional callback.
    */
-  addImage(inputOrLabel, labelOrCallback, callback) {
-    let image;
-    let label;
-    let cb;
-
-    // Determine if first arg is a label (string/number) or an image element
-    if (typeof inputOrLabel === "string" || typeof inputOrLabel === "number") {
-      // addImage(label, callback) — use video as input
-      image = this.video;
-      label = inputOrLabel;
-      cb = typeof labelOrCallback === "function" ? labelOrCallback : callback;
-    } else {
-      // addImage(input, label, callback)
-      image = inputOrLabel;
-      label = labelOrCallback;
-      cb = callback;
-    }
+  addImage(input, label, callback) {
+    const image = input;
+    const cb = callback;
 
     const addImageInternal = async () => {
       if (image === undefined || image === null) {
@@ -436,11 +421,12 @@ class Mobilenet {
 
   /**
    * Continuously classifies each frame of the video.
+   * @param {*} video - A video element to classify frames from.
    * @param {Function} callback - Called with results for each frame.
    */
-  classifyStart(callback) {
+  classifyStart(video, callback) {
     const classifyFrame = async () => {
-      await callCallback(this.classify(this.video), callback);
+      await callCallback(this.classify(video), callback);
 
       if (!this.signalStop) {
         requestAnimationFrame(classifyFrame);
@@ -526,11 +512,12 @@ class Mobilenet {
 
   /**
    * Continuously predicts a value for each frame of the video (regression).
+   * @param {*} video - A video element to predict frames from.
    * @param {Function} callback - Called with results for each frame.
    */
-  predictStart(callback) {
+  predictStart(video, callback) {
     const predictFrame = async () => {
-      await callCallback(this.predict(this.video), callback);
+      await callCallback(this.predict(video), callback);
 
       if (!this.signalStop) {
         requestAnimationFrame(predictFrame);
