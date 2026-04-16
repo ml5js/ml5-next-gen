@@ -1,4 +1,4 @@
-let feRegressor;
+let predictor;
 let video;
 let slider;
 let addButton;
@@ -8,7 +8,7 @@ let predictedValue = 0;
 
 function preload() {
   // Initialize the feature extractor for regression
-  feRegressor = ml5.featureExtractor({ task: 'regression' }, modelReady);
+  predictor = ml5.featureExtractor({ task: 'regression' }, modelReady);
 }
 
 function setup() {
@@ -16,8 +16,6 @@ function setup() {
   video = createCapture(VIDEO);
   video.hide();
   background(0);
-  // Set the video as the input for the Regressor
-  feRegressor.video = video;
 
   // Slider: 0 = far from camera, 1 = close to camera
   slider = createSlider(0, 1, 0.5, 0.01);
@@ -26,7 +24,7 @@ function setup() {
   // Add a sample with the current slider value
   addButton = createButton("Add Sample");
   addButton.mousePressed(function () {
-    feRegressor.addImage(slider.value());
+    predictor.addImage(video, slider.value());
     sampleCount++;
     console.log("Sample " + sampleCount + " added with value: " + slider.value());
   });
@@ -34,9 +32,9 @@ function setup() {
   // Train and start predicting
   trainButton = createButton("Train");
   trainButton.mousePressed(function () {
-    feRegressor.train({ epochs: 500, learningRate: 0.0001, debug: true }, function () {
+    predictor.train({ epochs: 500, learningRate: 0.0001, debug: true }, function () {
       console.log("Starting regression...");
-      feRegressor.predictStart(gotResults);
+      predictor.predictStart(video, gotResults);
     });
   });
 }
@@ -52,7 +50,10 @@ function draw() {
   pop();
 
   // Use predicted value if trained, otherwise follow the slider
-  let currentValue = feRegressor.isTrained ? predictedValue : slider.value();
+  let currentValue = slider.value();
+  if (predictor.isTrained) {
+    currentValue = predictedValue;
+  }
   // Clamp to 0-1 range
   currentValue = constrain(currentValue, 0, 1);
 

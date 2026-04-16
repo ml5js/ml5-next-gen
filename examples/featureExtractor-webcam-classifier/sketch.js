@@ -1,4 +1,4 @@
-let feClassifier;
+let classifier;
 let video;
 let label = "";
 let nameButton1, nameButton2;
@@ -10,7 +10,7 @@ let count1 = 0;
 let count2 = 0;
 
 function preload() {
-  feClassifier = ml5.featureExtractor({ task: 'classification' }, modelReady);
+  classifier = ml5.featureExtractor({ task: 'classification' }, modelReady);
 }
 
 function setup() {
@@ -21,7 +21,6 @@ function setup() {
   video = createCapture(VIDEO);
   video.hide();
   background(0);
-  feClassifier.video = video;
 
   // Grab the editable name buttons + Done button defined in index.html
   nameButton1 = select("#nameButton1");
@@ -42,14 +41,14 @@ function setup() {
     // Add buttons to add samples for each class
     addButton1 = createButton("Add " + class1);
     addButton1.mousePressed(function () {
-      feClassifier.addImage(class1);
+      classifier.addImage(video, class1);
       count1++;
       console.log(class1 + " samples: " + count1);
     });
 
     addButton2 = createButton("Add " + class2);
     addButton2.mousePressed(function () {
-      feClassifier.addImage(class2);
+      classifier.addImage(video, class2);
       count2++;
       console.log(class2 + " samples: " + count2);
     });
@@ -57,9 +56,9 @@ function setup() {
     // Train and start classifying
     trainButton = createButton("Train");
     trainButton.mousePressed(function () {
-      feClassifier.train({ epochs: 100, debug: true }, function () {
+      classifier.train({ epochs: 100, debug: true }, function () {
         console.log("Starting classification...");
-        feClassifier.classifyStart(gotResults);
+        classifier.classifyStart(video, gotResults);
       });
     });
   });
