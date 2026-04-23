@@ -2,31 +2,223 @@
   👋 Hello! This is an ml5.js example made and shared with ❤️.
   Learn more about the ml5.js project: https://ml5js.org/
   ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
- 
-  This example demonstrates loading JSON data and training a Weather Predictor
-  through ml5.neuralNetwork with the sequenceRegression task.
+
+  Sequential next-hour weather forecast using ml5.neuralNetwork (sequenceRegression task).
+  Select a city, train the LSTM model in-browser, then predict hour by hour.
 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ml5.js — Weather Forecast</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+  <script src="../../dist/ml5.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ml5.js neuralNetwork Weather Prediction Example</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
-    <script src="../../dist/ml5.js"></script>
-  </head>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f0f2f5;
+    }
 
-  <body>
-    <div id="canvasDiv" style="width: fit-content;">
-      <button id="predictBtn">Predict Next Hour</button>
-      <div style="margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap;">
-        <button id="metricPrecip" type="button">Precip</button>
-        <button id="metricTemp" type="button">Temp</button>
-        <button id="metricHumidity" type="button">Humidity</button>
-        <button id="metricWind" type="button">Wind</button>
-      </div>
+    /* ── City picker overlay ────────────────────────────── */
+    #cityOverlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 55%, #0f3460 100%);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 36px;
+    }
+
+    #cityOverlay h1 {
+      color: #e8eaf6;
+      font-size: 24px;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+    }
+
+    #cityCards {
+      display: flex; gap: 18px; flex-wrap: wrap; justify-content: center;
+    }
+
+    .city-card {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 18px;
+      padding: 30px 38px;
+      text-align: center;
+      cursor: pointer;
+      color: #e8eaf6;
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+      min-width: 148px;
+      user-select: none;
+    }
+
+    .city-card:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateY(-5px);
+    }
+
+    .city-card .city-emoji { font-size: 42px; display: block; margin-bottom: 12px; }
+    .city-card .city-name  { font-size: 15px; font-weight: 500; }
+
+    /* ── Main app ───────────────────────────────────────── */
+    #app {
+      display: none;
+      padding: 14px 16px 0;
+    }
+
+    /* ── Controls bar ───────────────────────────────────── */
+    #controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    #controls select {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      font-size: 13px;
+      cursor: pointer;
+      background: #fff;
+      color: #374151;
+    }
+
+    #controls button {
+      padding: 6px 16px;
+      border-radius: 8px;
+      border: none;
+      font-size: 13px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    #controls button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    #predictBtn {
+      background: #2563eb;
+      color: #fff;
+    }
+
+    #predictBtn:hover:not(:disabled) { background: #1d4ed8; }
+
+    .btn-secondary {
+      background: #fff;
+      color: #374151;
+      border: 1px solid #d1d5db !important;
+      border: none;
+    }
+
+    .btn-secondary:hover:not(:disabled) { background: #f3f4f6; }
+
+    /* ── Metric toggle buttons ──────────────────────────── */
+    #metricBtns {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    #metricBtns button {
+      padding: 4px 14px;
+      border-radius: 20px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      font-size: 12px;
+      cursor: pointer;
+      color: #374151;
+      transition: background 0.12s, border-color 0.12s;
+    }
+
+    #metricBtns button:hover {
+      background: #eff6ff;
+      border-color: #93c5fd;
+    }
+
+    /* ── Canvas wrapper ─────────────────────────────────── */
+    #canvasDiv canvas {
+      display: block;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── City picker overlay ───────────────────────────────── -->
+<div id="cityOverlay">
+  <h1>Choose a city to forecast</h1>
+  <div id="cityCards">
+    <div class="city-card" onclick="selectCity('new_york')">
+      <span class="city-emoji">🗽</span>
+      <span class="city-name">New York</span>
     </div>
-    <script src="sketch.js"></script>
-  </body>
+    <div class="city-card" onclick="selectCity('abu_dhabi')">
+      <span class="city-emoji">🕌</span>
+      <span class="city-name">Abu Dhabi</span>
+    </div>
+    <div class="city-card" onclick="selectCity('shanghai')">
+      <span class="city-emoji">🏙️</span>
+      <span class="city-name">Shanghai</span>
+    </div>
+    <div class="city-card" onclick="selectCity('london')">
+      <span class="city-emoji">🎡</span>
+      <span class="city-name">London</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main app (shown after city selection) ─────────────── -->
+<div id="app">
+
+  <div id="controls">
+    <select id="citySelect">
+      <option value="">Switch city…</option>
+      <option value="new_york">🗽 New York</option>
+      <option value="abu_dhabi">🕌 Abu Dhabi</option>
+      <option value="shanghai">🏙️ Shanghai</option>
+      <option value="london">🎡 London</option>
+    </select>
+
+    <button id="predictBtn" disabled>Predict Next Hour</button>
+    <button id="saveBtn"    class="btn-secondary" style="display:none">💾 Save Model</button>
+    <button id="loadBtn"    class="btn-secondary">📂 Load Saved Model</button>
+    <button id="retrainBtn" class="btn-secondary" style="display:none">🔄 Retrain</button>
+
+    <!-- Hidden file input — triggered by Load Saved Model button -->
+    <input type="file" id="loadInput" multiple accept=".json,.bin" style="display:none">
+  </div>
+
+  <div id="metricBtns">
+    <button id="metricPrecip">🌧 Precip</button>
+    <button id="metricTemp">🌡 Temp</button>
+    <button id="metricHumidity">💧 Humidity</button>
+    <button id="metricWind">💨 Wind</button>
+  </div>
+
+  <div id="canvasDiv"></div>
+
+</div>
+
+<!-- Bridge: city chosen before p5 is ready → stored in window._pendingCity -->
+<script>
+  function selectCity(cityKey) {
+    document.getElementById("cityOverlay").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    if (typeof init === "function") {
+      init(cityKey);
+    } else {
+      window._pendingCity = cityKey;
+    }
+  }
+</script>
+
+<script src="sketch.js"></script>
+</body>
 </html>

@@ -1,4 +1,5 @@
 import neuralNetwork from "./NeuralNetwork/taskSelection";
+import { createSeqLayers } from "./NeuralNetwork/Sequential/seqLayers";
 import handPose from "./HandPose";
 import sentiment from "./Sentiment";
 import faceMesh from "./FaceMesh";
@@ -36,6 +37,7 @@ const ml5 = Object.assign({ p5Utils }, withPreload, {
   tf,
   tfvis,
   setBackend,
+  createSeqLayers,
   version: packageInfo.version,
   setP5: p5Utils.setP5.bind(p5Utils),
 });

@@ -148,5 +148,48 @@ export const createSeqLayers = (
         activation: "sigmoid",
       },
     ],
+
+    // Ready-to-use preset for multi-step weather regression.
+    // Stacked LSTM (32 → 16) with tanh activation and light dropout.
+    // Output uses linear activation because ml5 normalises targets before
+    // training and denormalises them on predict — no squashing needed.
+    weatherForecast: [
+      {
+        type: "lstm",
+        units: 48,
+        activation: "tanh",
+        kernelInitializer: "glorotUniform",
+        recurrentInitializer: "glorotUniform",
+        inputShape: seriesShape,
+        returnSequences: true,
+        dropout: 0.1,
+        recurrentDropout: 0.05,
+      },
+      {
+        type: "lstm",
+        units: 24,
+        activation: "tanh",
+        kernelInitializer: "glorotUniform",
+        recurrentInitializer: "glorotUniform",
+        returnSequences: false,
+        dropout: 0.1,
+        recurrentDropout: 0.05,
+      },
+      // Non-linear mixing stage: lets the model compose the LSTM's temporal
+      // summary into sharper per-feature patterns (e.g. diurnal temperature shape)
+      // before the final linear projection.
+      {
+        type: "dense",
+        units: 32,
+        activation: "relu",
+        kernelInitializer: "glorotUniform",
+      },
+      {
+        type: "dense",
+        units: outputUnits,
+        activation: "linear",
+        kernelInitializer: "glorotUniform",
+      },
+    ],
   };
 };
