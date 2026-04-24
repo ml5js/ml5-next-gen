@@ -1,4 +1,5 @@
 import Mobilenet from "./Mobilenet";
+import { handleModelName } from "../utils/handleOptions";
 
 /**
  * @typedef {Object} FeatureExtractorOptions
@@ -7,26 +8,25 @@ import Mobilenet from "./Mobilenet";
  * @property {'classification'|'regression'} [task='classification'] - The task type
  */
 
+const MODEL_OPTIONS = ["MobileNet"];
+
 /**
- * Create a featureExtractor for transfer learning with MobileNet.
+ * Create a featureExtractor for transfer learning.
  *
- * @example
- * const fe = ml5.featureExtractor(modelLoaded);
- *
- * @example
- * const fe = ml5.featureExtractor({ task: 'classification' }, modelLoaded);
- *
+ * @param {string} [modelName='MobileNet'] - Underlying model name. Currently supported: 'MobileNet'.
  * @param {FeatureExtractorOptions|Function} [optionsOrCallback] - Options object or callback function.
  * @param {Function} [cb] - Callback function called when the model is loaded.
  * @returns {Mobilenet} A FeatureExtractor instance.
  */
-const featureExtractor = (optionsOrCallback, cb) => {
+const featureExtractor = (modelName, optionsOrCallback, cb) => {
+  handleModelName(modelName, MODEL_OPTIONS, "MobileNet", "featureExtractor");
+
   let options = {};
   let callback;
 
   if (typeof optionsOrCallback === "function") {
     callback = optionsOrCallback;
-  } else if (typeof optionsOrCallback === "object") {
+  } else if (typeof optionsOrCallback === "object" && optionsOrCallback !== null) {
     options = optionsOrCallback;
     callback = cb;
   }

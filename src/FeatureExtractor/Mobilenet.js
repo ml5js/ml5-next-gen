@@ -228,25 +228,50 @@ class Mobilenet {
 
   /**
    * Train the MLP head on the collected training data.
-   * @param {Object|Function} [optionsOrCallback] - Training options or callback.
+   * @param {Object|Function} [optionsOrCallback] - Training options, whileTraining, or finishedTraining callback.
    * @param {number} [optionsOrCallback.epochs=20] - Number of training epochs.
    * @param {number} [optionsOrCallback.hiddenUnits=100] - Hidden layer units.
    * @param {number} [optionsOrCallback.learningRate=0.0001] - Learning rate.
    * @param {number} [optionsOrCallback.batchSize=0.4] - Batch size as a fraction of total data.
    * @param {boolean} [optionsOrCallback.debug=false] - Show training visualization via tfjs-vis.
-   * @param {Function} [callback] - Called when training is complete.
+   * @param {Function} [optionsOrWhileTraining] - whileTraining callback `(epoch, logs)` fired after each epoch,
+   *   or finishedTraining callback if only two args are provided.
+   * @param {Function} [callback] - finishedTraining callback, called once when training completes.
    */
-  train(optionsOrCallback, callback) {
+  train(optionsOrCallback, optionsOrWhileTraining, callback) {
     let trainOpts = {};
-    let doneCb = null;
+    let whileTrainingCb = null;
+    let finishedTrainingCb = null;
 
-    if (typeof optionsOrCallback === "function") {
-      // train(callback)
-      doneCb = optionsOrCallback;
-    } else if (typeof optionsOrCallback === "object") {
-      // train(options, callback)
+    if (
+      typeof optionsOrCallback === "object" &&
+      typeof optionsOrWhileTraining === "function" &&
+      typeof callback === "function"
+    ) {
+      // train(options, whileTraining, finishedTraining)
       trainOpts = optionsOrCallback;
-      doneCb = typeof callback === "function" ? callback : null;
+      whileTrainingCb = optionsOrWhileTraining;
+      finishedTrainingCb = callback;
+    } else if (
+      typeof optionsOrCallback === "object" &&
+      typeof optionsOrWhileTraining === "function"
+    ) {
+      // train(options, finishedTraining)
+      trainOpts = optionsOrCallback;
+      finishedTrainingCb = optionsOrWhileTraining;
+    } else if (
+      typeof optionsOrCallback === "function" &&
+      typeof optionsOrWhileTraining === "function"
+    ) {
+      // train(whileTraining, finishedTraining)
+      whileTrainingCb = optionsOrCallback;
+      finishedTrainingCb = optionsOrWhileTraining;
+    } else if (typeof optionsOrCallback === "function") {
+      // train(finishedTraining)
+      finishedTrainingCb = optionsOrCallback;
+    } else if (typeof optionsOrCallback === "object") {
+      // train(options)
+      trainOpts = optionsOrCallback;
     }
 
     const epochs = trainOpts.epochs || TRAINING_DEFAULTS.epochs;
@@ -334,14 +359,11 @@ class Mobilenet {
         callbacks.push(fitCallbacks);
       }
 
-      callbacks.push({
-        onEpochEnd: (epoch, logs) => {
-          const currentEpoch = epoch + 1;
-          console.log(
-            `Epoch ${currentEpoch}/${epochs} - loss: ${logs.loss}`
-          );
-        },
-      });
+      if (whileTrainingCb) {
+        callbacks.push({
+          onEpochEnd: (epoch, logs) => whileTrainingCb(epoch, logs),
+        });
+      }
 
       await this.MLP.fit(xs, ys, {
         epochs,
@@ -354,10 +376,11 @@ class Mobilenet {
 
       this.isTrained = true;
       console.log("Training complete!");
-      return { epochs, loss: "training complete" };
+
+      return { epochs };
     };
 
-    return callCallback(trainInternal(), doneCb);
+    return callCallback(trainInternal(), finishedTrainingCb);
   }
 
   /**

@@ -8,12 +8,12 @@ let predictedValue = 0;
 
 function preload() {
   // Initialize the feature extractor for regression
-  predictor = ml5.featureExtractor({ task: 'regression' }, modelReady);
+  predictor = ml5.featureExtractor('MobileNet', { task: 'regression' });
 }
 
 function setup() {
   createCanvas(640, 480);
-  video = createCapture(VIDEO);
+  video = createCapture(VIDEO, { flipped: true });
   video.hide();
   background(0);
 
@@ -31,23 +31,27 @@ function setup() {
 
   // Train and start predicting
   trainButton = createButton("Train");
-  trainButton.mousePressed(function () {
-    predictor.train({ epochs: 500, learningRate: 0.0001, debug: true }, function () {
-      console.log("Starting regression...");
-      predictor.predictStart(video, gotResults);
-    });
-  });
+  trainButton.mousePressed(startTraining);
+}
+
+function startTraining() {
+  predictor.train({ epochs: 500, learningRate: 0.0001, debug: true }, whileTraining, finishedTraining);
+}
+
+function whileTraining(epoch, logs) {
+  console.log("Epoch " + epoch + ": loss = " + logs.loss);
+}
+
+function finishedTraining() {
+  console.log("Starting prediction...");
+  predictor.predictStart(video, gotResults);
 }
 
 function draw() {
   background(0);
 
-  // Draw the video (flipped horizontally)
-  push();
-  translate(640, 0);
-  scale(-1, 1);
+  // Draw the video
   image(video, 0, 0, 640, 450);
-  pop();
 
   // Use predicted value if trained, otherwise follow the slider
   let currentValue = slider.value();
@@ -71,10 +75,6 @@ function draw() {
   fill(255);
   textSize(16);
   text("Value: " + nf(currentValue, 1, 4), 10, height - 10);
-}
-
-function modelReady() {
-  console.log("Model is ready!");
 }
 
 function gotResults(results) {

@@ -1,7 +1,7 @@
 let classifier;
 let video;
 let label = "";
-let nameButton1, nameButton2;
+let nameInput1, nameInput2;
 let doneButton;
 let addButton1, addButton2, trainButton;
 let class1 = "Class #1";
@@ -10,32 +10,27 @@ let count1 = 0;
 let count2 = 0;
 
 function preload() {
-  classifier = ml5.featureExtractor({ task: 'classification' }, modelReady);
+  classifier = ml5.featureExtractor('ResNet', { task: 'classification' });
 }
 
 function setup() {
-  let cnv = createCanvas(640, 480);
-  cnv.parent("canvasContainer");
-  // Show the name controls now that the canvas exists
-  document.getElementById("nameControls").style.display = "";
-  video = createCapture(VIDEO);
+  createCanvas(640, 480);
+  video = createCapture(VIDEO, { flipped: true });
   video.hide();
   background(0);
 
-  // Grab the editable name buttons + Done button defined in index.html
-  nameButton1 = select("#nameButton1");
-  nameButton2 = select("#nameButton2");
-  doneButton = select("#doneButton");
+  // Inputs for naming the two classes (pre-filled with defaults)
+  nameInput1 = createInput(class1);
+  nameInput2 = createInput(class2);
+  doneButton = createButton("Done");
 
   doneButton.mousePressed(function () {
-    // Get class names from the editable buttons, or use defaults if unchanged
-    let text1 = nameButton1.elt.textContent.trim();
-    let text2 = nameButton2.elt.textContent.trim();
-    class1 = (text1 && text1 !== "Click to edit Class #1") ? text1 : "Class #1";
-    class2 = (text2 && text2 !== "Click to edit Class #2") ? text2 : "Class #2";
+    // Fall back to defaults if the user cleared the input
+    class1 = nameInput1.value().trim() || "Class #1";
+    class2 = nameInput2.value().trim() || "Class #2";
 
-    nameButton1.remove();
-    nameButton2.remove();
+    nameInput1.remove();
+    nameInput2.remove();
     doneButton.remove();
 
     // Add buttons to add samples for each class
@@ -55,33 +50,33 @@ function setup() {
 
     // Train and start classifying
     trainButton = createButton("Train");
-    trainButton.mousePressed(function () {
-      classifier.train({ epochs: 100, debug: true }, function () {
-        console.log("Starting classification...");
-        classifier.classifyStart(video, gotResults);
-      });
-    });
+    trainButton.mousePressed(startTraining);
   });
+}
+
+function startTraining() {
+  classifier.train({ epochs: 100, debug: true }, whileTraining, finishedTraining);
+}
+
+function whileTraining(epoch, logs) {
+  console.log("Epoch " + epoch + ": loss = " + logs.loss);
+}
+
+function finishedTraining() {
+  console.log("Starting classification...");
+  classifier.classifyStart(video, gotResults);
 }
 
 function draw() {
   background(0);
 
-  // Draw the video (flipped horizontally)
-  push();
-  translate(640, 0);
-  scale(-1, 1);
+  // Draw the video
   image(video, 0, 0, 640, 450);
-  pop();
 
   // Draw the label
   fill(255);
   textSize(16);
   text(label, 10, height - 10);
-}
-
-function modelReady() {
-  console.log("Model is ready!");
 }
 
 function gotResults(results) {
