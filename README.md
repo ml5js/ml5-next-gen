@@ -46,6 +46,20 @@ Before getting started with ml5.js, review our [Code of Conduct](https://github.
 
   **Note:** To access the source code of version `0.12.2` or earlier, please visit the [archived repository](https://github.com/ml5js/ml5-library).
 
+## Offline mode
+
+For local installations, exhibitions, and classrooms without reliable internet, ml5 can load model files from a normal folder served by your local web server:
+
+```bash
+npx ml5 cache prefetch handpose
+```
+
+```js
+let handPose = ml5.handPose({ modelPath: "./ml5-models/handpose" });
+```
+
+See [docs/offline-mode.md](docs/offline-mode.md) for the full guide.
+
 
 ## Resources
 
