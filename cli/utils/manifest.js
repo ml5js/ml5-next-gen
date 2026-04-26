@@ -1,3 +1,11 @@
+/**
+ * cli/utils/manifest.js
+ *
+ * Read, write, and verify <out>/<model>/manifest.json files. The manifest
+ * schema string is currently `ml5-models-manifest-v1`; bump that value in
+ * prefetch.js if the on-disk contract changes in a future release.
+ */
+
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { sha256File } = require("./sha");
@@ -17,6 +25,8 @@ async function writeManifest(root, manifest) {
 }
 
 async function verifyManifest(root, manifest) {
+  // Return per-file results instead of throwing so callers can print every
+  // mismatch before choosing the final process exit code.
   const results = [];
   for (const runtime of Object.keys(manifest.runtimes || {})) {
     for (const file of manifest.runtimes[runtime].files || []) {

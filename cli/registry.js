@@ -1,3 +1,21 @@
+/**
+ * cli/registry.js
+ *
+ * CLI-side registry for the cache commands: model directory names, MediaPipe
+ * package/file lists, and TFJS source URLs.
+ *
+ * IMPORTANT: `src/utils/modelRegistry.js` is the browser/runtime canonical
+ * source. This CommonJS file mirrors the same information because the CLI runs
+ * directly in Node without a build step. Keep changes in sync with the runtime
+ * registry until a generator/shared format replaces this mirror.
+ *
+ * Note the key names intentionally differ from the browser registry:
+ *   - CLI:     model | detector | landmark
+ *   - Runtime: modelUrl | detectorModelUrl | landmarkModelUrl
+ * The CLI names describe local cache subdirectories; the runtime names match
+ * TensorFlow.js model config fields.
+ */
+
 const path = require("node:path");
 
 const modelDirs = {
@@ -7,6 +25,8 @@ const modelDirs = {
 };
 
 const mediapipePackages = {
+  // MediaPipe solution filenames are hardcoded because package layouts are
+  // stable within these packages; actual versions are read dynamically below.
   handpose: {
     pkg: "@mediapipe/hands",
     defaultVariant: "full",
@@ -37,6 +57,8 @@ const tfjsModels = {
     landmark: "https://tfhub.dev/mediapipe/tfjs-model/face_landmarks_detection/face_mesh/1",
   },
   bodypose: {
+    // BodyPose stages both MoveNet (`model`) and BlazePose (`detector` +
+    // `landmark`) so users can choose either model from one cached folder.
     model: "https://tfhub.dev/google/tfjs-model/movenet/multipose/lightning/1",
     detector: "https://tfhub.dev/mediapipe/tfjs-model/blazepose_3d/detector/1",
     landmark: "https://tfhub.dev/mediapipe/tfjs-model/blazepose_3d/landmark/full/2",

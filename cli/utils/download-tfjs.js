@@ -1,3 +1,10 @@
+/**
+ * cli/utils/download-tfjs.js
+ *
+ * Downloads a TFJS model.json file and every weight shard listed in its
+ * weightsManifest. This lets the CLI avoid hardcoding shard filenames.
+ */
+
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { pipeline } = require("node:stream/promises");
@@ -10,18 +17,24 @@ function toModelJsonUrl(url) {
 }
 
 function dirnameUrl(url) {
+  // Strip `/model.json` and any query string so shard paths resolve beside the
+  // fetched model file.
   return url.replace(/\/model\.json(?:\?.*)?$/, "").replace(/\/+$/, "");
 }
 
 function toShardUrl(base, shard) {
   if (/^https?:\/\//i.test(shard)) return shard;
   const url = `${base}/${shard}`;
+  // tfhub.dev requires the same file-format query for shards as model.json;
+  // omitting it can return an HTML redirect/403 instead of binary weights.
   return base.includes("tfhub.dev") ? `${url}?tfjs-format=file` : url;
 }
 
 async function download(url, filePath, force) {
   if (!force) {
     try {
+      // Reuse existing shards unless --force is set; manifest hashing later
+      // verifies the local file rather than trusting this shortcut blindly.
       await fs.access(filePath);
       return;
     } catch (error) {}

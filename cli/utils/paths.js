@@ -1,3 +1,11 @@
+/**
+ * cli/utils/paths.js
+ *
+ * Centralizes cache path construction. `--out` is resolved relative to the
+ * user's current working directory, and each model then gets runtime-specific
+ * subfolders under <out>/<model>/.
+ */
+
 const path = require("node:path");
 
 function resolveOutDir(outDir) {

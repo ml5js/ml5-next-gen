@@ -1,3 +1,10 @@
+/**
+ * cli/models.js
+ *
+ * Implements `ml5 cache models`, a small discovery command that prints every
+ * cacheable model plus the MediaPipe variants known to the CLI registry.
+ */
+
 const { mediapipePackages, tfjsModels } = require("./registry");
 
 async function models() {

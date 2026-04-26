@@ -1,3 +1,11 @@
+/**
+ * cli/index.js
+ *
+ * Top-level dispatcher for the `ml5` executable. Today the CLI exposes the
+ * `cache` command group only, but this file keeps the group check explicit so
+ * future non-cache commands can be added without rewriting each subcommand.
+ */
+
 const { prefetch } = require("./prefetch");
 const { list } = require("./list");
 const { clear } = require("./clear");
@@ -17,6 +25,7 @@ Commands:
 }
 
 module.exports = async function cli(args) {
+  // Global help/version flags short-circuit before subcommand routing.
   if (args.length === 0 || args.includes("--help") || args.includes("-h")) return help();
   if (args.includes("--version")) return console.log(require("../package.json").version);
   const [group, command, ...rest] = args;
