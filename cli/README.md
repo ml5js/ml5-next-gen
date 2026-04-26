@@ -44,6 +44,33 @@ non-cache CLI commands without changing the subcommand modules.
 - TFJS shard filenames are not hardcoded. They are discovered from each
   downloaded `model.json` file's `weightsManifest`.
 
+## Registry duplication
+
+`cli/registry.js` is a CommonJS mirror of `src/utils/modelRegistry.js` (ESM).
+They must be kept in sync by hand for v1.
+
+**Why duplicated:** the CLI is invoked via `bin/ml5.js` as plain Node CommonJS
+with no build step. Importing the ESM runtime registry directly would require
+either an ESM CLI entry point, which raises the floor for contributors, or a
+build step that runs before `bin/ml5.js` is usable from a checkout, which breaks
+`node bin/ml5.js` ergonomics.
+
+**How to keep them in sync:**
+
+1. When you add or change a model URL or file list in
+   `src/utils/modelRegistry.js`, mirror the change in `cli/registry.js` in the
+   same commit.
+2. Run `node bin/ml5.js cache prefetch <model>` followed by
+   `node bin/ml5.js cache verify <model>` to confirm the CLI side resolves
+   correctly.
+
+**Planned follow-up (not in this PR):**
+
+- Add a registry-drift unit test that diffs the two registries and fails CI on
+  mismatch.
+- Either generate `cli/registry.js` at build time from the runtime registry, or
+  extract the shared data into a plain `.json` file consumed by both.
+
 ## Known follow-ups
 
 - `clear.js` and `verify.js` use lightweight positional parsing. Replace them

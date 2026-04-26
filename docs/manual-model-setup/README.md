@@ -2,6 +2,9 @@
 
 Normally, ml5 downloads model files from the internet when your sketch starts. These guides show how to download those files yourself, put them next to your sketch, and use `modelPath` so your project can keep working without WiFi.
 
+> **💡 If you can run Node, prefer the CLI.**
+> `npx ml5 cache prefetch <model>` (today: `node bin/ml5.js cache prefetch <model>`) does all of this for you and produces a verifiable manifest. These manual instructions exist as a fallback for environments where Node is not available — see [`../offline-mode.md`](../offline-mode.md) for the recommended path.
+
 This is the slower, more hands-on path. If you are comfortable using a terminal, the CLI guide in [`../offline-mode.md`](../offline-mode.md) is usually easier.
 
 ## Which guide should I use?
