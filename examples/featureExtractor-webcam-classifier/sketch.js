@@ -17,7 +17,6 @@ function setup() {
   createCanvas(640, 480);
   video = createCapture(VIDEO, { flipped: true });
   video.hide();
-  background(0);
 
   // Inputs for naming the two classes (pre-filled with defaults)
   nameInput1 = createInput(class1);

@@ -15,7 +15,6 @@ function setup() {
   createCanvas(640, 480);
   video = createCapture(VIDEO, { flipped: true });
   video.hide();
-  background(0);
 
   // Slider: 0 = far from camera, 1 = close to camera
   slider = createSlider(0, 1, 0.5, 0.01);
