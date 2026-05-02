@@ -1158,6 +1158,13 @@
         "design",
         "content"
       ]
+    },
+    {
+      "login": "JunhaoZhu0220",
+      "name": "Junhao Zhu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/129193941?v=4",
+      "profile": "https://github.com/JunhaoZhu0220",
+      "contributions": ["code", "doc", "example"]
     }
   ],
   "contributorsPerLine": 7,
