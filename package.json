@@ -3,6 +3,9 @@
   "version": "1.3.1",
   "description": "A friendly machine learning library for the web.",
   "main": "dist/ml5.min.js",
+  "bin": {
+    "ml5": "./bin/ml5.js"
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "webpack --config webpack.config.js --mode production",
@@ -16,7 +19,11 @@
     "update-examples-readme": "node scripts/updateExamplesREADME.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "bin",
+    "cli",
+    "src/utils/modelRegistry.js",
+    "src/utils/modelResolver.js"
   ],
   "keywords": [
     "ML5"

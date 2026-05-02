@@ -27,6 +27,7 @@ import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
 import { mediaReady } from "../utils/imageUtilities";
 import objectRenameKey from "../utils/objectRenameKey";
+import { resolveModelUrls } from "../utils/modelResolver";
 
 /**
  * User provided options object for HandPose. See config schema below for default and available values.
@@ -35,6 +36,8 @@ import objectRenameKey from "../utils/objectRenameKey";
  * @property {string} [modelType]          - The type of model to use.
  * @property {boolean} [flipHorizontal]    - Whether to mirror the landmark results.
  * @property {string} [runtime]            - The runtime of the model.
+ * @property {string|boolean} [modelPath]  - A local model folder, a direct model folder, 'auto',
+ *                                           or false to skip local model auto-detection.
  * @property {string} [solutionPath]       - The file path or URL to mediaPipe solution. Only for
  *                                           `mediapipe` runtime.
  * @property {string} [detectorModelUrl]   - The file path or URL to the hand detector model. Only
@@ -152,6 +155,11 @@ class HandPose {
 
     // Load the Tensorflow.js detector instance
     await tf.ready();
+    await resolveModelUrls({
+      modelName: "handpose",
+      modelConfig,
+      userOptions: this.userOptions,
+    });
     this.model = await handPoseDetection.createDetector(pipeline, modelConfig);
     return this;
   }
