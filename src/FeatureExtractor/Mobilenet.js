@@ -8,7 +8,7 @@ import * as tfvis from "@tensorflow/tfjs-vis";
 import handleOptions from "../utils/handleOptions";
 import { mediaReady } from "../utils/imageUtilities";
 import callCallback from "../utils/callcallback";
-import { getImageElement } from "../utils/handleArguments";
+import handleArguments, { getImageElement } from "../utils/handleArguments";
 
 const IMAGE_SIZE = 224;
 const IMAGE_RESIZE_DIMENSIONS = [IMAGE_SIZE, IMAGE_SIZE];
@@ -104,10 +104,7 @@ class Mobilenet {
     this.labelIndex = [];
     this.trainingData = [];
     this.isTrained = false;
-    this.modelLoaded = false;
-    this.hasAnyTrainedClass = false;
     this.isPredicting = false;
-    this.video = null;
     this.signalStop = false;
     this.isClassifying = false;
     this.prevCall = null;
@@ -128,7 +125,6 @@ class Mobilenet {
     });
 
     this.normalizationOffset = tf.scalar(127.5);
-    this.modelLoaded = true;
 
     return this;
   }
@@ -163,6 +159,12 @@ class Mobilenet {
   }
 
   async extractFeatures(input) {
+    if (!this.featureVector) {
+      throw new Error(
+        "FeatureExtractor error: this instance has been disposed; create a new featureExtractor."
+      );
+    }
+
     const imgElement = getImageElement(input);
     await mediaReady(imgElement, false);
 
@@ -174,32 +176,32 @@ class Mobilenet {
   }
 
   /**
-   * Add an image to the training data.
-   * @param {*} input - An image or video element.
-   * @param {string|number} label - The label for this image.
+   * Add an image (or video frame) to the training data.
+   * @param {HTMLImageElement|HTMLVideoElement|HTMLCanvasElement|object} input - An image, video, or canvas element (or p5 image/video).
+   * @param {string|number} label - The label for this sample. String or number for classification; number for regression.
    * @param {Function} [callback] - Optional callback.
    */
   addImage(input, label, callback) {
-    const image = input;
-    const cb = callback;
-
     const addImageInternal = async () => {
-      if (image === undefined || image === null) {
-        throw new Error(
-          "FeatureExtractor error: addImage() requires an image or a video set via setVideo()."
-        );
-      }
+      const { image } = handleArguments(input).require(
+        "image",
+        "FeatureExtractor error: addImage() requires an image or video element."
+      );
 
       if (label === undefined || label === null) {
         throw new Error("FeatureExtractor error: addImage() requires a label.");
       }
 
-      if (this.config.task === "regression" && typeof label !== "number") {
+      if (
+        this.config.task === "regression" &&
+        (typeof label !== "number" || Number.isNaN(label))
+      ) {
         throw new Error(
-          "FeatureExtractor error: For regression, the label must be a number."
+          "FeatureExtractor error: For regression, the label must be a valid number."
         );
       }
 
+      await this.ready;
       const featureTensor = await this.extractFeatures(image);
       const features = await featureTensor.data();
       featureTensor.dispose();
@@ -218,12 +220,9 @@ class Mobilenet {
           value: Number(label),
         });
       }
-
-      this.hasAnyTrainedClass = true;
-      return { label, featuresLength: features.length };
     };
 
-    return callCallback(addImageInternal(), cb);
+    return callCallback(addImageInternal(), callback);
   }
 
   /**
@@ -276,8 +275,10 @@ class Mobilenet {
 
     const epochs = trainOpts.epochs || TRAINING_DEFAULTS.epochs;
     const hiddenUnits = trainOpts.hiddenUnits || TRAINING_DEFAULTS.hiddenUnits;
-    const learningRate = trainOpts.learningRate || TRAINING_DEFAULTS.learningRate;
-    const batchSizeFraction = trainOpts.batchSize || TRAINING_DEFAULTS.batchSize;
+    const learningRate =
+      trainOpts.learningRate || TRAINING_DEFAULTS.learningRate;
+    const batchSizeFraction =
+      trainOpts.batchSize || TRAINING_DEFAULTS.batchSize;
     const debug = trainOpts.debug === true || trainOpts.debug === "true";
 
     const trainInternal = async () => {
@@ -359,102 +360,120 @@ class Mobilenet {
         callbacks.push(fitCallbacks);
       }
 
+      // Call the user's whileTraining handler after each epoch, passing (epoch, logs)
       if (whileTrainingCb) {
-        callbacks.push({
-          onEpochEnd: (epoch, logs) => whileTrainingCb(epoch, logs),
-        });
+        callbacks.push({ onEpochEnd: whileTrainingCb });
       }
 
-      await this.MLP.fit(xs, ys, {
-        epochs,
-        batchSize,
-        callbacks,
-      });
-
-      xs.dispose();
-      ys.dispose();
+      try {
+        await this.MLP.fit(xs, ys, {
+          epochs,
+          batchSize,
+          callbacks,
+        });
+      } finally {
+        xs.dispose();
+        ys.dispose();
+        optimizer.dispose();
+      }
 
       this.isTrained = true;
       console.log("Training complete!");
-
-      return { epochs };
     };
 
     return callCallback(trainInternal(), finishedTrainingCb);
   }
 
   /**
-   * Classify an image. If no input is provided, uses the video set via classification().
-   * @param {*} [inputOrCallback] - An image element, or callback if using video.
+   * Classify a single image (classification task). Requires an input image.
+   * For continuous video classification, use classifyStart().
+   * @param {HTMLImageElement|HTMLVideoElement|HTMLCanvasElement|object} inputOrCallback - An image, video, or canvas element (or p5 image/video).
    * @param {Function} [callback]
    */
-  classify(inputOrCallback, callback) {
-    let image;
-    let cb;
+  async classify(inputOrCallback, callback) {
+    const { image, callback: cb } = handleArguments(
+      inputOrCallback,
+      callback
+    ).require(
+      "image",
+      "FeatureExtractor error: classify() requires an input image. To classify a video, use classifyStart()."
+    );
 
-    if (typeof inputOrCallback === "function") {
-      image = this.video;
-      cb = inputOrCallback;
-    } else {
-      image = inputOrCallback || this.video;
-      cb = callback;
+    return callCallback(this.classifyInternal(image), cb);
+  }
+
+  // Run a single classification on an already-resolved image element.
+  async classifyInternal(image) {
+    await this.ready;
+
+    if (this.config.task === "regression") {
+      throw new Error(
+        "FeatureExtractor error: classify() is for classification. For regression, use predict() instead."
+      );
     }
 
-    const classifyInternal = async () => {
-      if (this.config.task === "regression") {
-        throw new Error(
-          "FeatureExtractor error: classify() is for classification. For regression, use predict() instead."
-        );
-      }
+    if (!this.MLP) {
+      throw new Error(
+        "FeatureExtractor error: No trained model. Train the model (train()) or load weights (load()) before classify()."
+      );
+    }
 
-      if (!this.MLP) {
-        throw new Error(
-          "FeatureExtractor error: No trained model. Train the model (train()) or load weights (load()) before classify()."
-        );
-      }
+    const featureTensor = await this.extractFeatures(image);
+    const prediction = this.MLP.predict(featureTensor);
+    const probabilities = await prediction.data();
 
-      if (image === undefined || image === null) {
-        throw new Error(
-          "FeatureExtractor error: classify() requires an image or a video set via classification()."
-        );
-      }
+    featureTensor.dispose();
+    prediction.dispose();
 
-      this.isPredicting = true;
+    const results = this.labelIndex.map((label, i) => ({
+      label,
+      confidence: probabilities[i],
+    }));
 
-      const featureTensor = await this.extractFeatures(image);
-      const prediction = this.MLP.predict(featureTensor);
-      const probabilities = await prediction.data();
+    results.sort((a, b) => b.confidence - a.confidence);
 
-      featureTensor.dispose();
-      prediction.dispose();
-
-      const results = this.labelIndex.map((label, i) => ({
-        label,
-        confidence: probabilities[i],
-      }));
-
-      results.sort((a, b) => b.confidence - a.confidence);
-
-      this.isPredicting = false;
-      return results;
-    };
-
-    return callCallback(classifyInternal(), cb);
+    return results;
   }
 
   /**
-   * Continuously classifies each frame of the video.
-   * @param {*} video - A video element to classify frames from.
-   * @param {Function} callback - Called with results for each frame.
+   * Continuously classify each frame of a video (classification task).
+   * @param {HTMLVideoElement|object} inputOrCallback - A video element to classify frames from (or p5 video).
+   * @param {Function} [callback] - Called with the results for each frame.
    */
-  classifyStart(video, callback) {
-    const classifyFrame = async () => {
-      await callCallback(this.classify(video), callback);
+  classifyStart(inputOrCallback, callback) {
+    // Store the latest input/callback on the instance so a repeated
+    // classifyStart() (e.g. to switch video source) actually takes effect:
+    // the running loop reads these fields every frame.
+    this.classifyInput = inputOrCallback;
+    this.classifyCallback = callback;
 
-      if (!this.signalStop) {
-        requestAnimationFrame(classifyFrame);
-      } else {
+    const classifyFrame = async () => {
+      try {
+        if (this.signalStop) {
+          this.isClassifying = false;
+          return;
+        }
+
+        const { image, callback: cb } = handleArguments(
+          this.classifyInput,
+          this.classifyCallback
+        ).require(
+          "image",
+          "FeatureExtractor error: classifyStart() requires a video element."
+        );
+
+        await callCallback(this.classifyInternal(image), cb);
+
+        if (this.signalStop) {
+          this.isClassifying = false;
+        } else {
+          requestAnimationFrame(classifyFrame);
+        }
+      } catch (error) {
+        // Reset the flag so a later classifyStart() can recover instead of
+        // being permanently blocked by a stuck isClassifying === true.
         this.isClassifying = false;
+        throw error;
       }
     };
 
@@ -482,76 +501,94 @@ class Mobilenet {
   }
 
   /**
-   * Predict a value for an image (regression). If no input is provided, uses the video.
-   * @param {*} [inputOrCallback] - An image element, or callback if using video.
+   * Predict a continuous value for a single image (regression task). Requires an input image.
+   * For continuous video prediction, use predictStart().
+   * @param {HTMLImageElement|HTMLVideoElement|HTMLCanvasElement|object} inputOrCallback - An image, video, or canvas element (or p5 image/video).
    * @param {Function} [callback]
    */
-  predict(inputOrCallback, callback) {
-    let image;
-    let cb;
+  async predict(inputOrCallback, callback) {
+    const { image, callback: cb } = handleArguments(
+      inputOrCallback,
+      callback
+    ).require(
+      "image",
+      "FeatureExtractor error: predict() requires an input image. To run on a video, use predictStart()."
+    );
 
-    if (typeof inputOrCallback === "function") {
-      image = this.video;
-      cb = inputOrCallback;
-    } else {
-      image = inputOrCallback || this.video;
-      cb = callback;
+    return callCallback(this.predictInternal(image), cb);
+  }
+
+  // Run a single regression prediction on an already-resolved image element.
+  async predictInternal(image) {
+    await this.ready;
+
+    if (this.config.task === "classification") {
+      throw new Error(
+        "FeatureExtractor error: predict() is for regression. Use classify() instead."
+      );
     }
 
-    const predictInternal = async () => {
-      if (this.config.task === "classification") {
-        throw new Error(
-          "FeatureExtractor error: predict() is for regression. Use classify() instead."
-        );
-      }
+    if (!this.MLP) {
+      throw new Error(
+        "FeatureExtractor error: No trained model. Call train() before predict()."
+      );
+    }
 
-      if (!this.MLP) {
-        throw new Error(
-          "FeatureExtractor error: No trained model. Call train() before predict()."
-        );
-      }
+    const featureTensor = await this.extractFeatures(image);
+    const prediction = this.MLP.predict(featureTensor);
+    const values = await prediction.data();
 
-      if (image === undefined || image === null) {
-        throw new Error(
-          "FeatureExtractor error: predict() requires an image or a video set via regression()."
-        );
-      }
+    featureTensor.dispose();
+    prediction.dispose();
 
-      this.isPredicting = true;
-
-      const featureTensor = await this.extractFeatures(image);
-      const prediction = this.MLP.predict(featureTensor);
-      const values = await prediction.data();
-
-      featureTensor.dispose();
-      prediction.dispose();
-
-      this.isPredicting = false;
-      return [{ value: values[0] }];
-    };
-
-    return callCallback(predictInternal(), cb);
+    return [{ value: values[0] }];
   }
 
   /**
-   * Continuously predicts a value for each frame of the video (regression).
-   * @param {*} video - A video element to predict frames from.
-   * @param {Function} callback - Called with results for each frame.
+   * Continuously predict a value for each frame of a video (regression task).
+   * @param {HTMLVideoElement|object} inputOrCallback - A video element to predict frames from (or p5 video).
+   * @param {Function} [callback] - Called with the result for each frame.
    */
-  predictStart(video, callback) {
-    const predictFrame = async () => {
-      await callCallback(this.predict(video), callback);
+  predictStart(inputOrCallback, callback) {
+    // Store the latest input/callback on the instance so a repeated
+    // predictStart() (e.g. to switch video source) actually takes effect:
+    // the running loop reads these fields every frame.
+    this.predictInput = inputOrCallback;
+    this.predictCallback = callback;
 
-      if (!this.signalStop) {
-        requestAnimationFrame(predictFrame);
-      } else {
-        this.isClassifying = false;
+    const predictFrame = async () => {
+      try {
+        if (this.signalStop) {
+          this.isPredicting = false;
+          return;
+        }
+
+        const { image, callback: cb } = handleArguments(
+          this.predictInput,
+          this.predictCallback
+        ).require(
+          "image",
+          "FeatureExtractor error: predictStart() requires a video element."
+        );
+
+        await callCallback(this.predictInternal(image), cb);
+
+        if (this.signalStop) {
+          this.isPredicting = false;
+        } else {
+          requestAnimationFrame(predictFrame);
+        }
+      } catch (error) {
+        // Reset the flag so a later predictStart() can recover instead of
+        // being permanently blocked by a stuck isPredicting === true.
+        this.isPredicting = false;
+        throw error;
       }
     };
 
     this.signalStop = false;
-    if (!this.isClassifying) {
-      this.isClassifying = true;
+    if (!this.isPredicting) {
+      this.isPredicting = true;
       predictFrame();
     }
     if (this.prevCall === "start") {
@@ -566,7 +603,7 @@ class Mobilenet {
    * Stops the continuous prediction started by predictStart().
    */
   predictStop() {
-    if (this.isClassifying) {
+    if (this.isPredicting) {
       this.signalStop = true;
     }
     this.prevCall = "stop";
@@ -574,10 +611,13 @@ class Mobilenet {
 
   /**
    * Save the trained model weights.
-   * @param {Function} [callback] - Optional callback.
    * @param {string} [name='model'] - Name for the saved files.
+   * @param {Function} [callback] - Optional callback.
    */
-  save(callback, name = "model") {
+  save(name, callback) {
+    const args = handleArguments(name, callback);
+    const modelName = args.string || "model";
+
     const saveInternal = async () => {
       if (!this.MLP) {
         throw new Error("FeatureExtractor error: No trained model to save.");
@@ -586,11 +626,11 @@ class Mobilenet {
         task: this.config.task,
         labelIndex: this.labelIndex,
       });
-      await this.MLP.save(`downloads://${name}`);
+      await this.MLP.save(`downloads://${modelName}`);
       return this;
     };
 
-    return callCallback(saveInternal(), callback);
+    return callCallback(saveInternal(), args.callback);
   }
 
   /**
@@ -633,6 +673,33 @@ class Mobilenet {
     };
 
     return callCallback(loadInternal(), callback);
+  }
+
+  /**
+   * Free the GPU/memory resources held by this instance: the MobileNet
+   * feature model, the trained MLP, and the normalization scalar.
+   * Call this when the FeatureExtractor is no longer needed.
+   */
+  dispose() {
+    // Stop any running classify/predict loop first so a frame already
+    // scheduled via requestAnimationFrame bails out instead of running
+    // against disposed tensors.
+    this.signalStop = true;
+    this.isClassifying = false;
+    this.isPredicting = false;
+
+    if (this.featureVector) {
+      this.featureVector.dispose();
+      this.featureVector = null;
+    }
+    if (this.MLP) {
+      this.MLP.dispose();
+      this.MLP = null;
+    }
+    if (this.normalizationOffset) {
+      this.normalizationOffset.dispose();
+      this.normalizationOffset = null;
+    }
   }
 }
 
