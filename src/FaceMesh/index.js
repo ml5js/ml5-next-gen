@@ -26,6 +26,8 @@ import { mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
 import { UV_COORDS } from "./uv_coords";
+import { CachingIOHandler } from "../utils/modelCache";
+import { getFaceMeshUrls, getFaceMeshCacheKeys } from "../utils/modelRegistry";
 
 /**
  * User provided options object for FaceMesh. See config schema below for default and available values.
@@ -40,6 +42,9 @@ import { UV_COORDS } from "./uv_coords";
  *                                           `tfjs` runtime.
  * @property {string} [landmarkModelUrl]   - The file path or URL to the landmark model. Only for
  *                                           `tfjs` runtime.
+ * @property {boolean} [cache]             - Whether to cache the model in IndexedDB for offline use.
+ *                                           On first load the model is downloaded and saved; on
+ *                                           subsequent loads it is served from the local cache.
  */
 
 /**
@@ -146,6 +151,26 @@ class FaceMesh {
 
     // Load the model once tfjs is ready
     await tf.ready();
+
+    // If cache: true is requested and runtime is tfjs, wrap the model URLs with
+    // CachingIOHandler so they are transparently loaded from IndexedDB (or
+    // downloaded and stored there on first use).
+    if (this.userOptions?.cache === true && modelConfig.runtime === "tfjs") {
+      const defaults = getFaceMeshUrls(modelConfig);
+      const keys = getFaceMeshCacheKeys(modelConfig);
+      // Use the user-provided URL if given, otherwise fall back to the default.
+      const detectorUrl = modelConfig.detectorModelUrl ?? defaults.detector;
+      const landmarkUrl = modelConfig.landmarkModelUrl ?? defaults.landmark;
+      modelConfig.detectorModelUrl = new CachingIOHandler(
+        detectorUrl,
+        keys.detector
+      );
+      modelConfig.landmarkModelUrl = new CachingIOHandler(
+        landmarkUrl,
+        keys.landmark
+      );
+    }
+
     this.model = await faceLandmarksDetection.createDetector(
       pipeline,
       modelConfig
@@ -170,6 +195,7 @@ class FaceMesh {
     );
     const { image, callback } = argumentObject;
     // Run the prediction
+    await this.ready;
     await mediaReady(image, false);
     const predictions = await this.model.estimateFaces(
       image,
@@ -230,6 +256,7 @@ class FaceMesh {
    * @private
    */
   async detectLoop() {
+    await this.ready;
     await mediaReady(this.detectMedia, false);
     while (!this.signalStop) {
       const predictions = await this.model.estimateFaces(

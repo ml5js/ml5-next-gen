@@ -208,6 +208,7 @@ class BodySegmentation {
     );
     const { image, callback } = argumentObject;
 
+    await this.ready;
     await mediaReady(image, false);
 
     let inputForSegmenter = image;
@@ -330,6 +331,7 @@ class BodySegmentation {
    * @private
    */
   async detectLoop() {
+    await this.ready;
     await mediaReady(this.detectMedia, false);
     while (!this.signalStop) {
       let inputForSegmenter = this.detectMedia;

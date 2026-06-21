@@ -1,0 +1,50 @@
+<!--
+  👋 Hello! This is an ml5.js example made and shared with ❤️.
+  Learn more about the ml5.js project: https://ml5js.org/
+  ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
+
+  This example demonstrates offline-capable hand tracking using ml5.handPose
+  with the { cache: true } option. On first load the model is downloaded from
+  the network and saved to IndexedDB. On every subsequent load the model is
+  served from the local cache — no internet connection required.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ml5.js handPose Offline Example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.10/p5.min.js"></script>
+    <script src="../../dist/ml5.js"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+      }
+      button {
+        margin: 5px;
+        padding: 5px 10px;
+      }
+      #status-bar {
+        margin: 10px 0;
+        padding: 10px;
+        background: #f0f0f0;
+        border-radius: 4px;
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="controls">
+      <button id="btn-cache">Pre-Download Model</button>
+      <button id="btn-start">Start HandPose</button>
+      <button id="btn-clear">Clear Cache</button>
+    </div>
+
+    <div id="status-bar">Checking cache…</div>
+
+    <!-- p5.js appends the canvas here -->
+    <script src="sketch.js"></script>
+  </body>
+</html>

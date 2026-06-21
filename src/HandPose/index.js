@@ -27,6 +27,8 @@ import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
 import { mediaReady } from "../utils/imageUtilities";
 import objectRenameKey from "../utils/objectRenameKey";
+import { ensureCached } from "../utils/modelCache";
+import { getHandPoseUrls, getHandPoseCacheKeys } from "../utils/modelRegistry";
 
 /**
  * User provided options object for HandPose. See config schema below for default and available values.
@@ -41,6 +43,9 @@ import objectRenameKey from "../utils/objectRenameKey";
  *                                           for `tfjs` runtime.
  * @property {string} [landmarkModelUrl]   - The file path or URL to the hand landmark model. Only
  *                                           for `tfjs` runtime.
+ * @property {boolean} [cache]             - Whether to cache the model in IndexedDB for offline use.
+ *                                           On first load the model is downloaded and saved; on
+ *                                           subsequent loads it is served from the local cache.
  */
 
 /**
@@ -152,6 +157,25 @@ class HandPose {
 
     // Load the Tensorflow.js detector instance
     await tf.ready();
+
+    // If cache: true is requested and runtime is tfjs, pre-cache the models in
+    // IndexedDB and replace the URL strings with `indexeddb://` paths.
+    // Note: @tensorflow-models/hand-pose-detection only accepts string URLs,
+    // so we cannot inject an IOHandler object — instead we pre-cache the models
+    // and pass back the indexeddb:// string URLs.
+    if (this.userOptions?.cache === true && modelConfig.runtime === "tfjs") {
+      const defaults = getHandPoseUrls(modelConfig);
+      const keys = getHandPoseCacheKeys(modelConfig);
+      const detectorUrl = modelConfig.detectorModelUrl ?? defaults.detector;
+      const landmarkUrl = modelConfig.landmarkModelUrl ?? defaults.landmark;
+      const [cachedDetectorUrl, cachedLandmarkUrl] = await Promise.all([
+        ensureCached(detectorUrl, keys.detector),
+        ensureCached(landmarkUrl, keys.landmark),
+      ]);
+      modelConfig.detectorModelUrl = cachedDetectorUrl;
+      modelConfig.landmarkModelUrl = cachedLandmarkUrl;
+    }
+
     this.model = await handPoseDetection.createDetector(pipeline, modelConfig);
     return this;
   }
@@ -179,6 +203,7 @@ class HandPose {
     );
     const { image, callback } = argumentObject;
     // Run the detection
+    await this.ready;
     await mediaReady(image, false);
     const predictions = await this.model.estimateHands(
       image,
@@ -242,6 +267,7 @@ class HandPose {
    * @private
    */
   async detectLoop() {
+    await this.ready;
     await mediaReady(this.detectMedia, false);
     while (!this.signalStop) {
       const predictions = await this.model.estimateHands(
