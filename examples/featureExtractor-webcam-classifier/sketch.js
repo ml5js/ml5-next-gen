@@ -10,7 +10,7 @@ let count1 = 0;
 let count2 = 0;
 
 async function setup() {
-  classifier = await ml5.featureExtractor('ResNet', { task: 'classification' });
+  classifier = await ml5.featureExtractor('MobileNet', { task: 'classification' });
 
   createCanvas(640, 480);
   video = createCapture(VIDEO, { flipped: true });
