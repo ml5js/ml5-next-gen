@@ -13,12 +13,9 @@ let hands = [];
 // A variable to track a pinch between thumb and index
 let pinch = 0;
 
-function preload() {
-  // Load the handPose model
-  handPose = ml5.handPose();
-}
-
-function setup() {
+async function setup() {
+  handPose = await ml5.handPose();
+  
   createCanvas(640, 480);
   // Create the webcam video and hide it
   video = createCapture(VIDEO);

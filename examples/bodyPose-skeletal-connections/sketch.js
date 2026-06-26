@@ -11,13 +11,10 @@ let bodyPose;
 let poses = [];
 let connections;
 
-function preload() {
-  // Load the bodyPose model
-  bodyPose = ml5.bodyPose();
-}
-
-function setup() {
+async function setup() {
   createCanvas(640, 480);
+
+  bodyPose = await ml5.bodyPose();
 
   // Create the video and hide it
   video = createCapture(VIDEO);

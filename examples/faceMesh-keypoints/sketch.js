@@ -11,17 +11,17 @@ let video;
 let faces = [];
 let options = { maxFaces: 1, refineLandmarks: false, flipHorizontal: false };
 
-function preload() {
-  // Load the faceMesh model
-  faceMesh = ml5.faceMesh(options);
-}
-
-function setup() {
+async function setup() {
   createCanvas(640, 480);
+  
+  // Load the faceMesh model asynchronously
+  faceMesh = await ml5.faceMesh(options);
+  
   // Create the webcam video and hide it
   video = createCapture(VIDEO);
   video.size(640, 480);
   video.hide();
+  
   // Start detecting faces from the webcam video
   faceMesh.detectStart(video, gotFaces);
 }

@@ -13,12 +13,9 @@ let hands = [];
 let classification = "";
 let isModelLoaded = false;
 
-function preload() {
-  // Load the handPose model
-  handPose = ml5.handPose();
-}
+async function setup() {
+  handPose = await ml5.handPose();
 
-function setup() {
   createCanvas(640, 480);
 
   // Create the webcam video and hide it
