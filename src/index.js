@@ -6,6 +6,7 @@ import bodyPose from "./BodyPose";
 import imageClassifier from "./ImageClassifier";
 import soundClassifier from "./SoundClassifier";
 import objectDetection from "./ObjectDetection";
+import featureExtractor from "./FeatureExtractor";
 import setBackend from "./utils/setBackend";
 import bodySegmentation from "./BodySegmentation";
 import depthEstimation from "./DepthEstimation";
@@ -26,6 +27,7 @@ const withPreload = {
   bodySegmentation,
   depthEstimation,
   faceMesh,
+  featureExtractor,
   handPose,
   imageClassifier,
   neuralNetwork,
