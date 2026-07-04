@@ -15,6 +15,9 @@ const WEBGPU_VIDEO_TEXTURE_FLAG = "WEBGPU_IMPORT_EXTERNAL_TEXTURE";
  * The flag is set globally and unconditionally (it only affects the WebGPU
  * backend, so it is harmless when WebGL is active). Safe to call more than once.
  *
+ * Reported upstream as https://github.com/tensorflow/tfjs/issues/8733 — the
+ * workaround can be removed once tf.js (or WebKit) fixes the import path.
+ *
  * @return {void}
  */
 export default function configureBackend() {
@@ -26,12 +29,19 @@ export default function configureBackend() {
     return;
   }
 
-  // Only surface the notice when WebGPU is actually available in the browser,
-  // i.e. when this change can affect the selected backend.
+  // Only surface the notice on iOS / iPadOS with WebGPU available — the
+  // platforms where the misalignment occurs. Elsewhere the flag change is
+  // invisible, and logging it for every WebGPU-capable browser is just noise.
+  // (iPadOS reports itself as "MacIntel", hence the maxTouchPoints check.)
   if (typeof navigator !== "undefined" && navigator.gpu) {
-    console.info(
-      "ml5.js: disabled WebGPU importExternalTexture so video keypoints stay aligned. " +
-        "See https://github.com/ml5js/ml5-next-gen/issues/302"
-    );
+    const isAppleTouchDevice =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    if (isAppleTouchDevice) {
+      console.info(
+        "ml5.js: disabled WebGPU importExternalTexture so video keypoints stay aligned. " +
+          "See https://github.com/ml5js/ml5-next-gen/issues/302"
+      );
+    }
   }
 }
