@@ -104,10 +104,7 @@ export class ImageClassifierTransformer {
     const next = () => {
       if (this.needToStop) return;
       this.classify(inputNumOrCallback, numOrCallback, cb).then(() => {
-        // WebGPU is very fast, so we can call the next frame immediately
-        if (this.device === "webgpu") next();
-        // Wasm is slower, so we wait for 1 second before calling the next frame
-        else setTimeout(next, 1000);
+        requestAnimationFrame(next);
       });
     };
 
