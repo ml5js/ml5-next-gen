@@ -17,7 +17,7 @@ let label = "";
 let confidence = "";
 
 function preload() {
-  classifier = ml5.imageClassifier("VisionTransformer", { topK: 2 });
+  classifier = ml5.imageClassifier("VisionTransformer", { topk: 2 });
   img = loadImage("images/bird.jpg");
 }
 

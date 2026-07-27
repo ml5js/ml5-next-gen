@@ -21,7 +21,7 @@ export class ImageClassifierTransformer {
   /**
    * Creates an instance of ImageClassifierTransformer.
    * @param {Object} options - An options object for the model.
-   * @param {number} [options.topK] - The number of top predictions to return. Default is 3.
+   * @param {number} [options.topk] - The number of top predictions to return. Default is 3.
    * @param {string} [options.device] - The device to run inference on. Will be auto-detected if not specified.
    * @param {string} [options.dtype] - The data type to use for the model. Default is "fp32".
    * @param {*} [options.*] - Additional options supported by transformers.js pipeline.
@@ -33,7 +33,7 @@ export class ImageClassifierTransformer {
     this.classifier = null; // The underlying transformers.js classifier instance.
     this.needToStop = false; // A flag to signal stop to the classification loop.
     this.isClassifying = false; // A flag to track if classification is currently in progress.
-    this.topK = options.topK || 3; // The number of top predictions to return.
+    this.topk = options.topk || 3; // The number of top predictions to return.
     this.device = options.device || chooseDevice(); // The device to run inference on (webgpu or wasm).
     this.ready = pipeline(
       "image-classification",
@@ -70,9 +70,9 @@ export class ImageClassifierTransformer {
     // Transformers.js doesn't support HTMLVideoElement directly, so convert to canvas
     const input = isVideo(image) ? drawToCanvas(image) : image;
 
-    // Convert topK to top_k for transformers.js and get the results
-    const topK = number !== undefined ? number : this.topK;
-    const results = await this.classifier(input, { top_k: topK });
+    // Convert topk to top_k for transformers.js and get the results
+    const topk = number !== undefined ? number : this.topk;
+    const results = await this.classifier(input, { top_k: topk });
 
     // Normalize the results to match the format from tensorflowjs
     const normalized = results.map((result) => ({
