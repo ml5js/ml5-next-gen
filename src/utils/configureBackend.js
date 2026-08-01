@@ -12,8 +12,9 @@ const WEBGPU_VIDEO_TEXTURE_FLAG = "WEBGPU_IMPORT_EXTERNAL_TEXTURE";
  * WebGPU backend copy video frames instead, which keeps keypoints aligned while
  * preserving the WebGPU backend everywhere else.
  *
- * The flag is set globally and unconditionally (it only affects the WebGPU
- * backend, so it is harmless when WebGL is active). Safe to call more than once.
+ * The flag is only set on detected iOS / iPadOS devices, so every other
+ * platform keeps WebGPU's zero-copy `importExternalTexture` path and avoids
+ * the per-frame copy cost. Safe to call more than once.
  *
  * Reported upstream as https://github.com/tensorflow/tfjs/issues/8733 — the
  * workaround can be removed once tf.js (or WebKit) fixes the import path.
@@ -21,6 +22,14 @@ const WEBGPU_VIDEO_TEXTURE_FLAG = "WEBGPU_IMPORT_EXTERNAL_TEXTURE";
  * @return {void}
  */
 export default function configureBackend() {
+  // iPadOS reports itself as "MacIntel", hence the maxTouchPoints check.
+  const isAppleTouchDevice =
+    typeof navigator !== "undefined" &&
+    (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
+
+  if (!isAppleTouchDevice) return;
+
   try {
     tf.env().set(WEBGPU_VIDEO_TEXTURE_FLAG, false);
   } catch (e) {
@@ -29,19 +38,12 @@ export default function configureBackend() {
     return;
   }
 
-  // Only surface the notice on iOS / iPadOS with WebGPU available — the
-  // platforms where the misalignment occurs. Elsewhere the flag change is
-  // invisible, and logging it for every WebGPU-capable browser is just noise.
-  // (iPadOS reports itself as "MacIntel", hence the maxTouchPoints check.)
-  if (typeof navigator !== "undefined" && navigator.gpu) {
-    const isAppleTouchDevice =
-      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    if (isAppleTouchDevice) {
-      console.info(
-        "ml5.js: disabled WebGPU importExternalTexture so video keypoints stay aligned. " +
-          "See https://github.com/ml5js/ml5-next-gen/issues/302"
-      );
-    }
+  // Only log where WebGPU can actually be active — elsewhere the flag change is
+  // invisible and the notice is just noise.
+  if (navigator.gpu) {
+    console.info(
+      "ml5.js: disabled WebGPU importExternalTexture so video keypoints stay aligned. " +
+        "See https://github.com/ml5js/ml5-next-gen/issues/302"
+    );
   }
 }
