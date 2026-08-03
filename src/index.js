@@ -8,6 +8,7 @@ import soundClassifier from "./SoundClassifier";
 import objectDetection from "./ObjectDetection";
 import featureExtractor from "./FeatureExtractor";
 import setBackend from "./utils/setBackend";
+import configureBackend from "./utils/configureBackend";
 import bodySegmentation from "./BodySegmentation";
 import depthEstimation from "./DepthEstimation";
 import communityStatement from "./utils/communityStatement";
@@ -47,6 +48,9 @@ p5Utils.setupP5Integration(
   Object.keys(withPreload),
   Object.keys(withoutAsync)
 );
+
+// Apply ml5's default TensorFlow.js backend configuration (see issue #302).
+configureBackend();
 
 communityStatement();
 
