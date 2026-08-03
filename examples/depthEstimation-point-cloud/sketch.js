@@ -21,15 +21,13 @@ let newDataAvailable = false;
 
 let options = {
   // Default is 4, but since this image is smaller, we change it to 1 so as to not lose too much detail
-  dilationFactor: 1,
+  dilationFactor: 1, 
 };
 
-function preload() {
+async function setup() {
   // Load the depth estimation model
-  depthEstimator = ml5.depthEstimation(options);
-}
+  depthEstimator = await ml5.depthEstimation(options);
 
-function setup() {
   // Create a canvas larger than the video and turn on WEBGL mode for 3D
   createCanvas(videoWidth * 2, videoHeight * 2, WEBGL);
 

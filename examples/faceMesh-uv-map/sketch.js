@@ -16,14 +16,12 @@ let uvMapImage;
 let triangulation;
 let uvCoords;
 
-function preload() {
-  // Load the faceMesh model
-  faceMesh = ml5.faceMesh(options);
-  uvMapImage = loadImage("clouds.jpg");
-}
+async function setup() {
+  faceMesh = await ml5.faceMesh(options);
+  uvMapImage = await loadImage("clouds.jpg");
 
-function setup() {
   createCanvas(640, 480, WEBGL);
+
   // Create the webcam video and hide it
   video = createCapture(VIDEO);
   video.size(640, 480);

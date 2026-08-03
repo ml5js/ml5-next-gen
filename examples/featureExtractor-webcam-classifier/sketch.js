@@ -9,11 +9,9 @@ let class2 = "Class #2";
 let count1 = 0;
 let count2 = 0;
 
-function preload() {
-  classifier = ml5.featureExtractor('ResNet', { task: 'classification' });
-}
+async function setup() {
+  classifier = await ml5.featureExtractor('MobileNet', { task: 'classification' });
 
-function setup() {
   createCanvas(640, 480);
   video = createCapture(VIDEO, { flipped: true });
   video.hide();

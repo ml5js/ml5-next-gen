@@ -20,7 +20,7 @@ async function main() {
   console.log("Fetching p5.js versions from npm registry...");
   const versions = await getP5VersionsFromNpm();
 
-  console.log(`Latest p5.js v1.x (r1): ${versions.r1}`);
+  //console.log(`Latest p5.js v1.x (r1): ${versions.r1}`);
   console.log(`Latest p5.js v2.x (latest): ${versions.latest}`);
 
   const sketches = await fs.readdir(examplesPath);
@@ -40,18 +40,12 @@ async function main() {
 
         let updatedContent = fileContent;
 
-        // Check if this is a p5 2.0 example (has -p5-2.0 suffix)
-        if (sketch.endsWith("-p5-2.0")) {
+        // All examples are expected to be p5 2.0 examples presently
+        if (true) {
           // Update p5 2.x CDN links (cdn.jsdelivr.net)
           updatedContent = fileContent.replace(
             /https:\/\/cdn\.jsdelivr\.net\/npm\/p5@\d+\.\d+\.\d+\/lib\/p5\.js/,
             `https://cdn.jsdelivr.net/npm/p5@${versions.latest}/lib/p5.js`
-          );
-        } else {
-          // Update p5 1.x CDN links (cdnjs.cloudflare.com)
-          updatedContent = fileContent.replace(
-            /https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/p5\.js\/\d+\.\d+\.\d+\/p5(\.min)?\.js/,
-            `https://cdnjs.cloudflare.com/ajax/libs/p5.js/${versions.r1}/p5.min.js`
           );
         }
 
