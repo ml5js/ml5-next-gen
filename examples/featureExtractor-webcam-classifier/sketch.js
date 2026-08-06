@@ -1,7 +1,7 @@
 let classifier;
 let video;
 
-let classButtons = [];
+let classElems = [];
 let doneButton;
 let result = "";
 
@@ -15,9 +15,9 @@ async function setup() {
   video.hide();
 
   for (let i = 0; i < 2; i++) {
-    let button = createButton("Class #" + (i + 1) + " (click to rename)");
-    button.attribute("contenteditable", "true");
-    classButtons.push(button);
+    let input = createInput("");
+    input.attribute("placeholder", "Class #" + (i + 1) + " label");
+    classElems.push(input);
   }
 
   doneButton = createButton("Start collecting samples");
@@ -35,18 +35,19 @@ function draw() {
 }
 
 function startSampling() {
-  for (let i = 0; i < classButtons.length; i++) {
-    let label = classButtons[i].html();
-    if (label.endsWith(" (click to rename)")) {
-      label = label.slice(0, -18);
+  for (let i = 0; i < classElems.length; i++) {
+    let label = classElems[i].value();
+    if (label.trim().length == 0) {
+      label = "Class #" + (i + 1);
     }
     // we're storing the label and the number of samples seen as
     // custom properties in the p5.Element
-    classButtons[i].label = label;
-    classButtons[i].count = 0;
-    classButtons[i].attribute("contenteditable", "false");
-    classButtons[i].html("Add " + label);
-    classButtons[i].mousePressed(addSample);
+    classElems[i].label = label;
+    classElems[i].count = 0;
+    // turn it into a button
+    classElems[i].attribute("type", "button");
+    classElems[i].value("Add " + label);
+    classElems[i].mousePressed(addSample);
   }
 
   doneButton.html("Start training");
@@ -59,8 +60,8 @@ function addSample() {
   this.count++;
 
   result = "";
-  for (let i = 0; i < classButtons.length; i++) {
-    result += classButtons[i].label + ": " + classButtons[i].count + ", ";
+  for (let i = 0; i < classElems.length; i++) {
+    result += classElems[i].label + ": " + classElems[i].count + ", ";
   }
   result = result.slice(0, -2);
 }
@@ -70,8 +71,8 @@ function startTraining() {
 }
 
 function finishedTraining() {
-  for (let i = 0; i < classButtons.length; i++) {
-    classButtons[i].hide();
+  for (let i = 0; i < classElems.length; i++) {
+    classElems[i].hide();
   }
   doneButton.hide();
 
