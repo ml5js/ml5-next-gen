@@ -40,7 +40,7 @@ function startSampling() {
     if (label.endsWith(" (click to rename)")) {
       label = label.slice(0, -18);
     }
-    // we're storing the label and the nuber of samples seen as
+    // we're storing the label and the number of samples seen as
     // custom properties in the p5.Element
     classButtons[i].label = label;
     classButtons[i].count = 0;
