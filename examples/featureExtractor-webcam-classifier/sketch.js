@@ -1,81 +1,83 @@
 let classifier;
 let video;
-let label = "";
-let nameInput1, nameInput2;
+
+let classButtons = [];
 let doneButton;
-let addButton1, addButton2, trainButton;
-let class1 = "Class #1";
-let class2 = "Class #2";
-let count1 = 0;
-let count2 = 0;
+let result = "";
 
 async function setup() {
-  classifier = await ml5.featureExtractor('MobileNet', { task: 'classification' });
+  classifier = await ml5.featureExtractor("MobileNet", {
+    task: "classification",
+  });
 
   createCanvas(640, 480);
   video = createCapture(VIDEO, { flipped: true });
   video.hide();
 
-  // Inputs for naming the two classes (pre-filled with defaults)
-  nameInput1 = createInput(class1);
-  nameInput2 = createInput(class2);
-  doneButton = createButton("Done");
+  for (let i = 0; i < 2; i++) {
+    let button = createButton("Class #" + (i + 1) + " (click to rename)");
+    button.attribute("contenteditable", "true");
+    classButtons.push(button);
+  }
 
-  doneButton.mousePressed(function () {
-    // Fall back to defaults if the user cleared the input
-    class1 = nameInput1.value().trim() || "Class #1";
-    class2 = nameInput2.value().trim() || "Class #2";
-
-    nameInput1.remove();
-    nameInput2.remove();
-    doneButton.remove();
-
-    // Add buttons to add samples for each class
-    addButton1 = createButton("Add " + class1);
-    addButton1.mousePressed(function () {
-      classifier.addImage(video, class1);
-      count1++;
-      console.log(class1 + " samples: " + count1);
-    });
-
-    addButton2 = createButton("Add " + class2);
-    addButton2.mousePressed(function () {
-      classifier.addImage(video, class2);
-      count2++;
-      console.log(class2 + " samples: " + count2);
-    });
-
-    // Train and start classifying
-    trainButton = createButton("Train");
-    trainButton.mousePressed(startTraining);
-  });
-}
-
-function startTraining() {
-  classifier.train({ epochs: 100, debug: true }, whileTraining, finishedTraining);
-}
-
-function whileTraining(epoch, logs) {
-  console.log("Epoch " + epoch + ": loss = " + logs.loss);
-}
-
-function finishedTraining() {
-  console.log("Starting classification...");
-  classifier.classifyStart(video, gotResults);
+  doneButton = createButton("Start collecting samples");
+  doneButton.mousePressed(startSampling);
 }
 
 function draw() {
   background(0);
 
-  // Draw the video
   image(video, 0, 0, 640, 450);
 
-  // Draw the label
   fill(255);
   textSize(16);
-  text(label, 10, height - 10);
+  text(result, 10, height - 10);
 }
 
-function gotResults(results) {
-  label = results[0].label + " (" + nf(results[0].confidence, 0, 2) + ")";
+function startSampling() {
+  for (let i = 0; i < classButtons.length; i++) {
+    let label = classButtons[i].html();
+    if (label.endsWith(" (click to rename)")) {
+      label = label.slice(0, -18);
+    }
+    // we're storing the label and the nuber of samples seen as
+    // custom properties in the p5.Element
+    classButtons[i].label = label;
+    classButtons[i].count = 0;
+    classButtons[i].attribute("contenteditable", "false");
+    classButtons[i].html("Add " + label);
+    classButtons[i].mousePressed(addSample);
+  }
+
+  doneButton.html("Start training");
+  doneButton.mousePressed(startTraining);
+}
+
+function addSample() {
+  // "this" is the button that was pressed
+  classifier.addImage(video, this.label);
+  this.count++;
+
+  result = "";
+  for (let i = 0; i < classButtons.length; i++) {
+    result += classButtons[i].label + ": " + classButtons[i].count + ", ";
+  }
+  result = result.slice(0, -2);
+}
+
+function startTraining() {
+  classifier.train({ epochs: 100, debug: true }, finishedTraining);
+}
+
+function finishedTraining() {
+  for (let i = 0; i < classButtons.length; i++) {
+    classButtons[i].hide();
+  }
+  doneButton.hide();
+
+  classifier.classifyStart(video, gotResult);
+}
+
+function gotResult(results) {
+  result = results[0].label + " (" + nf(results[0].confidence, 0, 2) + ")";
 }
