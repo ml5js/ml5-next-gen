@@ -14,14 +14,12 @@ let depthMap;
 let videoWidth = 640;
 let videoHeight = 480;
 
-function preload() {
-  // Initialize the depth estimation model
-  depthEstimator = ml5.depthEstimation();
-}
-
-function setup() {
+async function setup() {
   // Create a canvas the size of the video
   createCanvas(videoWidth, videoHeight);
+
+  // Load the depth estimation model
+  depthEstimator = await ml5.depthEstimation();
 
   // Create the video
   video = createVideo("presenter.mp4"); // Excerpt from "Your name here", a 1960's spoof video in the public domain

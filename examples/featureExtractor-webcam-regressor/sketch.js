@@ -6,12 +6,9 @@ let trainButton;
 let sampleCount = 0;
 let predictedValue = 0;
 
-function preload() {
-  // Initialize the feature extractor for regression
-  predictor = ml5.featureExtractor('MobileNet', { task: 'regression' });
-}
+async function setup() {
+  predictor = await ml5.featureExtractor('MobileNet', { task: 'regression' });
 
-function setup() {
   createCanvas(640, 480);
   video = createCapture(VIDEO, { flipped: true });
   video.hide();
