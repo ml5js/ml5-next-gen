@@ -1,5 +1,6 @@
 let predictor;
 let video;
+
 let slider;
 let addButton;
 let trainButton;
@@ -7,72 +8,64 @@ let sampleCount = 0;
 let predictedValue = 0;
 
 async function setup() {
-  predictor = await ml5.featureExtractor('MobileNet', { task: 'regression' });
+  predictor = await ml5.featureExtractor("MobileNet", { task: "regression" });
 
   createCanvas(640, 480);
   video = createCapture(VIDEO, { flipped: true });
   video.hide();
 
-  // Slider: 0 = far from camera, 1 = close to camera
+  // slider: 0 = far from camera, 1 = close to camera
   slider = createSlider(0, 1, 0.5, 0.01);
   slider.style("width", "640px");
 
-  // Add a sample with the current slider value
-  addButton = createButton("Add Sample");
-  addButton.mousePressed(function () {
-    predictor.addImage(video, slider.value());
-    sampleCount++;
-    console.log("Sample " + sampleCount + " added with value: " + slider.value());
-  });
+  addButton = createButton("Add sample");
+  addButton.mousePressed(addSample);
 
-  // Train and start predicting
-  trainButton = createButton("Train");
+  trainButton = createButton("Start training");
   trainButton.mousePressed(startTraining);
 }
 
-function startTraining() {
-  predictor.train({ epochs: 500, learningRate: 0.0001, debug: true }, whileTraining, finishedTraining);
+function addSample() {
+  predictor.addImage(video, slider.value());
+  sampleCount++;
+  console.log("Sample " + sampleCount + " added with value: " + slider.value());
 }
 
-function whileTraining(epoch, logs) {
-  console.log("Epoch " + epoch + ": loss = " + logs.loss);
+function startTraining() {
+  predictor.train(
+    { epochs: 500, learningRate: 0.0001, debug: true },
+    finishedTraining
+  );
 }
 
 function finishedTraining() {
-  console.log("Starting prediction...");
-  predictor.predictStart(video, gotResults);
+  predictor.predictStart(video, gotResult);
 }
 
 function draw() {
   background(0);
 
-  // Draw the video
   image(video, 0, 0, 640, 450);
 
-  // Use predicted value if trained, otherwise follow the slider
+  // use predicted value if trained, otherwise follow the slider
   let currentValue = slider.value();
   if (predictor.isTrained) {
     currentValue = predictedValue;
   }
-  // Clamp to 0-1 range
+
+  // make sure predicted value stays within 0-1
   currentValue = constrain(currentValue, 0, 1);
 
-  // Map value to circle size: 0 = small (80), 1 = large (300)
   let circleSize = map(currentValue, 0, 1, 80, 300);
-
-  // Draw the circle in the center of the video area
-  noFill();
-  stroke(255, 255, 0);
-  strokeWeight(3);
+  fill(255, 255, 0, 100);
   ellipse(320, 250, circleSize, circleSize);
 
-  // Draw the label
   noStroke();
   fill(255);
   textSize(16);
   text("Value: " + nf(currentValue, 1, 4), 10, height - 10);
 }
 
-function gotResults(results) {
+function gotResult(results) {
   predictedValue = results[0].value;
 }
