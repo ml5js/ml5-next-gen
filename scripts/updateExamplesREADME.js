@@ -75,7 +75,7 @@ function getExampleDirectories() {
  * @returns {string|null} The URL of the sketch or null if not found
  */
 function findSketchURL(exampleName, sketches) {
-  const sketch = sketches.find(
+  const sketch = sketches.projects.find(
     (sketch) => sketch.name.toLowerCase() === exampleName.toLowerCase()
   );
   return sketch ? `https://editor.p5js.org/ml5/sketches/${sketch.id}` : null;
