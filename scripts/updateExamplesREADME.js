@@ -69,28 +69,6 @@ function getExampleDirectories() {
 }
 
 /**
- * Categorize examples into p5.js 1.0 and 2.0 versions
- * @param {Array} examples - Array of example directory names
- * @returns {Object} Object with p5_1_0 and p5_2_0 arrays
- */
-function categorizeExamples(examples) {
-  const p5_1_0 = [];
-  const p5_2_0 = [];
-
-  examples.forEach((example) => {
-    if (example.endsWith("-p5-2.0")) {
-      // This is a p5.js 2.0 example
-      p5_2_0.push(example);
-    } else {
-      // This is a p5.js 1.0 example
-      p5_1_0.push(example);
-    }
-  });
-
-  return { p5_1_0, p5_2_0 };
-}
-
-/**
  * Find the URL for an example in the p5.js editor
  * @param {string} exampleName - The name of the example
  * @param {Array} sketches - Array of sketches from p5.js editor
@@ -105,11 +83,11 @@ function findSketchURL(exampleName, sketches) {
 
 /**
  * Generate the README content
- * @param {Object} categorizedExamples - Object with p5_1_0 and p5_2_0 arrays
+ * @param {Array} examples - Array of example directory names
  * @param {Array} sketches - Array of sketches from p5.js editor
  * @returns {string} The README content
  */
-function generateREADME(categorizedExamples, sketches) {
+function generateREADME(examples, sketches) {
   let content = `![ml5](https://user-images.githubusercontent.com/10605821/41332516-2ee26714-6eac-11e8-83e4-a40b8761e764.png)
 
 ## ml5.js Examples
@@ -118,27 +96,12 @@ function generateREADME(categorizedExamples, sketches) {
 
 Jump right into experimenting with ml5.js — no local setup needed. Browse and run these example sketches directly in the p5.js Web Editor:
 
-### p5.js 1.0 Examples
-
-`;
-
-  // Add p5.js 1.0 examples
-  categorizedExamples.p5_1_0.forEach((example) => {
-    const url = findSketchURL(example, sketches);
-    if (url) {
-      content += `* [${example}](${url})\n`;
-    } else {
-      content += `* ${example} *(not uploaded yet)*\n`;
-    }
-  });
-
-  content += `
 ### p5.js 2.0 Examples
 
 `;
 
   // Add p5.js 2.0 examples
-  categorizedExamples.p5_2_0.forEach((example) => {
+  examples.forEach((example) => {
     const url = findSketchURL(example, sketches);
     if (url) {
       content += `* [${example}](${url})\n`;
@@ -182,14 +145,8 @@ async function main() {
   const exampleDirs = getExampleDirectories();
   console.log(`📁 Found ${exampleDirs.length} example directories`);
 
-  // Categorize examples
-  const categorizedExamples = categorizeExamples(exampleDirs);
-  console.log(
-    `📊 Categorized: ${categorizedExamples.p5_1_0.length} p5.js 1.0, ${categorizedExamples.p5_2_0.length} p5.js 2.0`
-  );
-
   // Generate README content
-  const readmeContent = generateREADME(categorizedExamples, sketchesRes.data);
+  const readmeContent = generateREADME(exampleDirs, sketchesRes.data);
 
   // Write to file
   const readmePath = path.join(__dirname, "../examples/README.md");
@@ -198,8 +155,7 @@ async function main() {
 
   // Print summary
   console.log("\n📋 Summary:");
-  console.log(`- p5.js 1.0 examples: ${categorizedExamples.p5_1_0.length}`);
-  console.log(`- p5.js 2.0 examples: ${categorizedExamples.p5_2_0.length}`);
+  console.log(`- p5.js 2.0 examples: ${exampleDirs.length}`);
   console.log(
     `- Total sketches found on p5.js editor: ${sketchesRes.data.length}`
   );

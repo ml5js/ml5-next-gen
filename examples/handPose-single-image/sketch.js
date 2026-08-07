@@ -10,15 +10,14 @@ let handPose;
 let video;
 let hands = [];
 
-function preload() {
-  // Load the image to be detected
-  img = loadImage("hand.jpg");
-  // Load the handPose model
-  handPose = ml5.handPose();
-}
+async function setup() {
+  handPose = await ml5.handPose();
+  img = await loadImage("hand.jpg");
 
-function setup() {
   createCanvas(640, 480);
+
+
+
   // Draw the image
   image(img, 0, 0);
   // Detect hands in an image

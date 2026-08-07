@@ -15,11 +15,9 @@ let video;
 // Variable for displaying the results on the canvas
 let label = "Model loading...";
 
-function preload() {
-  classifier = ml5.imageClassifier("MobileNet");
-}
-
-function setup() {
+async function setup() {
+  classifier = await ml5.imageClassifier("MobileNet");
+  
   createCanvas(640, 480);
   background(255);
 

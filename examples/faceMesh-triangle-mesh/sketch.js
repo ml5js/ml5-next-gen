@@ -12,13 +12,11 @@ let faces = [];
 let options = { maxFaces: 1, refineLandmarks: false, flipHorizontal: false };
 let triangles;
 
-function preload() {
-  // Load the faceMesh model
-  faceMesh = ml5.faceMesh(options);
-}
-
-function setup() {
+async function setup() {
   createCanvas(640, 480);
+
+  faceMesh = await ml5.faceMesh(options);
+
   // Create the webcam video and hide it
   video = createCapture(VIDEO);
   video.size(640, 480);

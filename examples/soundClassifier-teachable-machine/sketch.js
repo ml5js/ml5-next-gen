@@ -16,12 +16,9 @@ let predictedSound = "";
 // Link to custom Teachable Machine model
 let modelJson = "https://teachablemachine.withgoogle.com/models/FvsFiSwHW/";
 
-function preload() {
-  // Load Teachable Machine model
-  classifier = ml5.soundClassifier(modelJson);
-}
+async function setup() {
+  classifier = await ml5.soundClassifier(modelJson);
 
-function setup() {
   createCanvas(650, 450);
   textAlign(CENTER, CENTER);
   textSize(32);
