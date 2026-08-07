@@ -16,12 +16,10 @@ let img;
 let label = "";
 let confidence = "";
 
-function preload() {
-  classifier = ml5.imageClassifier("VisionTransformer");
-  img = loadImage("images/bird.jpg");
-}
+async function setup() {
+  classifier = await ml5.imageClassifier("VisionTransformer");
+  img = await loadImage("images/bird.jpg");
 
-function setup() {
   createCanvas(400, 400);
   classifier.classify(img, gotResult);
   image(img, 0, 0, width, height);

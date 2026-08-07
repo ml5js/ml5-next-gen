@@ -17,11 +17,9 @@ let label = "Model loading...";
 
 let isClassifying = false;
 
-function preload() {
-  classifier = ml5.imageClassifier("VisionTransformer");
-}
+async function setup() {
+  classifier = await ml5.imageClassifier("VisionTransformer");
 
-function setup() {
   createCanvas(640, 480);
   background(255);
 
