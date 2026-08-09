@@ -157,7 +157,7 @@ async function main() {
   console.log("\n📋 Summary:");
   console.log(`- p5.js 2.0 examples: ${exampleDirs.length}`);
   console.log(
-    `- Total sketches found on p5.js editor: ${sketchesRes.data.length}`
+    `- Total sketches found on p5.js editor: ${sketchesRes.data.projects.length}`
   );
 }
 
