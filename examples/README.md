@@ -31,6 +31,8 @@ Jump right into experimenting with ml5.js — no local setup needed. Browse and 
 * [faceMesh-single-image](https://editor.p5js.org/ml5/sketches/lqQZrDJHF)
 * [faceMesh-triangle-mesh](https://editor.p5js.org/ml5/sketches/8mT3aRjUe)
 * [faceMesh-uv-map](https://editor.p5js.org/ml5/sketches/-H7dLfUqC)
+* [featureExtractor-webcam-classifier](https://editor.p5js.org/ml5/sketches/XSzNdRjCm)
+* [featureExtractor-webcam-regressor](https://editor.p5js.org/ml5/sketches/kZkob6YQP)
 * [handPose-detect-start-stop](https://editor.p5js.org/ml5/sketches/W9vFFT5RM)
 * [handPose-keypoints](https://editor.p5js.org/ml5/sketches/QGH3dwJ1A)
 * [handPose-parts](https://editor.p5js.org/ml5/sketches/DNbSiIYKB)

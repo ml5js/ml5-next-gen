@@ -75,7 +75,7 @@ function getExampleDirectories() {
  * @returns {string|null} The URL of the sketch or null if not found
  */
 function findSketchURL(exampleName, sketches) {
-  const sketch = sketches.find(
+  const sketch = sketches.projects.find(
     (sketch) => sketch.name.toLowerCase() === exampleName.toLowerCase()
   );
   return sketch ? `https://editor.p5js.org/ml5/sketches/${sketch.id}` : null;
@@ -157,7 +157,7 @@ async function main() {
   console.log("\n📋 Summary:");
   console.log(`- p5.js 2.0 examples: ${exampleDirs.length}`);
   console.log(
-    `- Total sketches found on p5.js editor: ${sketchesRes.data.length}`
+    `- Total sketches found on p5.js editor: ${sketchesRes.data.projects.length}`
   );
 }
 
