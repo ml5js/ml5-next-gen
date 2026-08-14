@@ -4,7 +4,7 @@
  * ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
  *
  * This example demonstrates detecting objects in a live video through ml5.imageClassifier.
- * Try this example with one of the transformer models as well! "ViTBase" and "SwinFood101"
+ * Try this example with the transformer model, "ViTBase", it's trained on the same 1000 images as MobileNet
  */
 
 // A variable to initialize the Image Classifier
@@ -17,6 +17,7 @@ let video;
 let label = "Model loading...";
 
 async function setup() {
+  // Try with a transformer model Replace "MobileNet" -> "ViTBase"
   classifier = await ml5.imageClassifier("MobileNet");
 
   createCanvas(640, 480);
