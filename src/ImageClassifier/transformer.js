@@ -5,6 +5,7 @@ import { drawToCanvas } from "../utils/imageUtilities";
 /**
  * Maps ml5-friendly model names to their Hugging Face model ids.
  * Add new transformer-based classifiers here.
+ * For reference, the list of foods identifiable by this api: https://github.com/alpapado/food-101/blob/master/data/meta/classes.txt
  */
 const TRANSFORMER_MODELS = {
   VisionTransformer: "Xenova/vit-base-patch16-224",
