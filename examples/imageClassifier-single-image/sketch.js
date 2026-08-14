@@ -4,6 +4,7 @@
  * ml5.js license and Code of Conduct: https://github.com/ml5js/ml5-next-gen/blob/main/LICENSE.md
  *
  * This example demonstrates detecting objects in an image through ml5.imageClassifier.
+ * Try this example with one of the transformer models as well! "ViTBase" and "SwinFood101"
  */
 
 // Initialize the Image Classifier method with MobileNet. A callback needs to be passed.
@@ -21,11 +22,11 @@ async function setup() {
   img = await loadImage("images/bird.jpg");
 
   createCanvas(400, 400);
-  
+
   // Initialize the classifier and load the image asynchronously
   classifier = await ml5.imageClassifier("MobileNet");
   img = await loadImage("images/bird.jpg");
-  
+
   // Classify the image and display it
   classifier.classify(img, gotResult);
   image(img, 0, 0, width, height);
