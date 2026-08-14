@@ -22,7 +22,7 @@ import { ImageClassifierTransformer } from "./transformer";
 
 const IMAGE_SIZE = 224;
 const MODEL_OPTIONS = ["mobilenet", "darknet", "darknet-tiny", "doodlenet"];
-const TRANSFORMER_MODEL_NAMES = ["VisionTransformer", "FoodClassifier"];
+const TRANSFORMER_MODEL_NAMES = ["ViTBase", "SwinFood101"];
 
 /**
  * Check if a string is a valid http url

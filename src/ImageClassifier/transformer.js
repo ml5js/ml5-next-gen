@@ -73,6 +73,7 @@ export class ImageClassifierTransformer {
    * @public
    */
   async classify(inputNumOrCallback, numOrCallback, cb) {
+    await this.ready;
     if (this.isClassifying || !this.classifier) return;
     this.isClassifying = true;
     // Parse the input parameters

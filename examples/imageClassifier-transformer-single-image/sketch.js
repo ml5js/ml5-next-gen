@@ -15,7 +15,6 @@ let img;
 // Variables for displaying the results on the canvas
 let label = "";
 let confidence = "";
-g;
 
 async function setup() {
   classifier = await ml5.imageClassifier("SwinFood101");
