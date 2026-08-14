@@ -8,8 +8,8 @@ import { drawToCanvas } from "../utils/imageUtilities";
  * For reference, the list of foods identifiable by this api: https://github.com/alpapado/food-101/blob/master/data/meta/classes.txt
  */
 const TRANSFORMER_MODELS = {
-  VisionTransformer: "Xenova/vit-base-patch16-224",
-  FoodClassifier: "onnx-community/swin-finetuned-food101-ONNX",
+  ViTBase: "Xenova/vit-base-patch16-224",
+  SwinFood101: "onnx-community/swin-finetuned-food101-ONNX",
 };
 
 /**
@@ -29,7 +29,7 @@ function chooseDevice() {
  */
 export class ImageClassifierTransformer {
   /**
-   * @param {string} modelName - Key into TRANSFORMER_MODELS (e.g. "VisionTransformer", "FoodClassifier")
+   * @param {string} modelName - Key into TRANSFORMER_MODELS (e.g. "ViTBase", "SwinFood101")
    * @param {Object} options
    * @param {function} callback
    */
@@ -48,6 +48,11 @@ export class ImageClassifierTransformer {
         ).join(", ")}`
       );
     }
+
+    // Print which underlying HF model is being loaded
+    console.log(
+      `ml5.imageClassifier: loading "${modelName}" → Hugging Face model "${hfModelId}"`
+    );
 
     this.ready = pipeline("image-classification", hfModelId, {
       device: this.device,

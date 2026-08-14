@@ -15,10 +15,11 @@ let img;
 // Variables for displaying the results on the canvas
 let label = "";
 let confidence = "";
+g;
 
 async function setup() {
-  classifier = await ml5.imageClassifier("VisionTransformer");
-  img = await loadImage("images/bird.jpg");
+  classifier = await ml5.imageClassifier("SwinFood101");
+  img = await loadImage("images/pizza.jpg");
 
   createCanvas(400, 400);
   classifier.classify(img, gotResult);
@@ -29,6 +30,7 @@ async function setup() {
 function gotResult(results) {
   // The results are in an array ordered by score/confidence
   // Hugging Face transformers use 'score' instead of 'confidence'
+
   console.log("The default results length is 3");
   console.log(results);
 

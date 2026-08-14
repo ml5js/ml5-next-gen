@@ -18,7 +18,7 @@ let label = "Model loading...";
 let isClassifying = false;
 
 async function setup() {
-  classifier = await ml5.imageClassifier("VisionTransformer");
+  classifier = await ml5.imageClassifier("ViTBase");
 
   createCanvas(640, 480);
   background(255);
