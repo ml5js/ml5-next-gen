@@ -3,6 +3,15 @@ import handleArguments, { isVideo } from "../utils/handleArguments";
 import { drawToCanvas } from "../utils/imageUtilities";
 
 /**
+ * Maps ml5-friendly model names to their Hugging Face model ids.
+ * Add new transformer-based classifiers here.
+ */
+const TRANSFORMER_MODELS = {
+  VisionTransformer: "Xenova/vit-base-patch16-224",
+  FoodClassifier: "onnx-community/swin-finetuned-food101-ONNX",
+};
+
+/**
  * Chooses the best available device for running the model.
  * Prefers WebGPU for better performance, falls back to WASM.
  * @returns {string} The device to use ("webgpu" or "wasm").
@@ -19,27 +28,30 @@ function chooseDevice() {
  */
 export class ImageClassifierTransformer {
   /**
-   * Creates an instance of ImageClassifierTransformer.
-   * @param {Object} options - An options object for the model.
-   * @param {number} [options.topk] - The number of top predictions to return. Default is 3.
-   * @param {string} [options.device] - The device to run inference on. Will be auto-detected if not specified.
-   * @param {string} [options.dtype] - The data type to use for the model. Default is "fp32".
-   * @param {*} [options.*] - Additional options supported by transformers.js pipeline.
-   *                          See: https://huggingface.co/docs/transformers.js/en/api/pipelines#module_pipelines.pipeline
-   * @param {function} callback - A callback function that is called once the model has been loaded.
-   * @returns {ImageClassifierTransformer} The created ImageClassifierTransformer instance.
+   * @param {string} modelName - Key into TRANSFORMER_MODELS (e.g. "VisionTransformer", "FoodClassifier")
+   * @param {Object} options
+   * @param {function} callback
    */
-  constructor(options, callback) {
-    this.classifier = null; // The underlying transformers.js classifier instance.
-    this.needToStop = false; // A flag to signal stop to the classification loop.
-    this.isClassifying = false; // A flag to track if classification is currently in progress.
-    this.topk = options.topk || 3; // The number of top predictions to return.
-    this.device = options.device || chooseDevice(); // The device to run inference on (webgpu or wasm).
-    this.ready = pipeline(
-      "image-classification",
-      "Xenova/vit-base-patch16-224",
-      { device: this.device, ...options }
-    ).then((classifier) => {
+  constructor(modelName, options, callback) {
+    this.classifier = null;
+    this.needToStop = false;
+    this.isClassifying = false;
+    this.topk = options.topk || 3;
+    this.device = options.device || chooseDevice();
+
+    const hfModelId = TRANSFORMER_MODELS[modelName];
+    if (!hfModelId) {
+      throw new Error(
+        `Unknown transformer model "${modelName}". Options: ${Object.keys(
+          TRANSFORMER_MODELS
+        ).join(", ")}`
+      );
+    }
+
+    this.ready = pipeline("image-classification", hfModelId, {
+      device: this.device,
+      ...options,
+    }).then((classifier) => {
       this.classifier = classifier;
       callback?.(this);
       return this;

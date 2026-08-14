@@ -22,6 +22,7 @@ import { ImageClassifierTransformer } from "./transformer";
 
 const IMAGE_SIZE = 224;
 const MODEL_OPTIONS = ["mobilenet", "darknet", "darknet-tiny", "doodlenet"];
+const TRANSFORMER_MODEL_NAMES = ["VisionTransformer", "FoodClassifier"];
 
 /**
  * Check if a string is a valid http url
@@ -316,10 +317,9 @@ class ImageClassifier {
 const imageClassifier = (modelName, optionsOrCallback, cb) => {
   const args = handleArguments(modelName, optionsOrCallback, cb);
   const { string, options = {}, callback } = args;
-  const instance =
-    string === "VisionTransformer"
-      ? new ImageClassifierTransformer(options, callback)
-      : new ImageClassifier(string, options, callback);
+  const instance = TRANSFORMER_MODEL_NAMES.includes(string)
+    ? new ImageClassifierTransformer(string, options, callback)
+    : new ImageClassifier(string, options, callback);
   return instance;
 };
 
