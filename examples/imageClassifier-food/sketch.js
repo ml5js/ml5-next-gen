@@ -29,8 +29,7 @@ async function setup() {
 
 // Callback function for when classification has finished
 function gotResult(results) {
-  // The results are in an array ordered by score/confidence
-  // Hugging Face transformers use 'score' instead of 'confidence'
+  // The results are in an array ordered by confidence
 
   console.log("The default results length is 3");
   console.log(results);
