@@ -17,8 +17,8 @@ let label = "";
 let confidence = "";
 
 async function setup() {
-  // SwinFood101 is a hugging face, image classification model
-  // Trained on a  custom dataset of 101 classes of food https://huggingface.co/datasets/ethz/food101
+  // SwinFood101 is an image classification model based on the Swin architecture.
+  // It was fine-tuned on a custom dataset to recognize 101 categories of food. https://huggingface.co/datasets/ethz/food101
   classifier = await ml5.imageClassifier("SwinFood101");
   img = await loadImage("images/pizza.jpg");
 
