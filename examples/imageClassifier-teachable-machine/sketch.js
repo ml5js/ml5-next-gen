@@ -18,7 +18,7 @@ let label = "Model loading...";
 let imageModelURL = "https://teachablemachine.withgoogle.com/models/bXy2kDNi/";
 
 async function setup() {
-  classifier = await ml5.imageClassifier("MobileNet");
+  classifier = await ml5.imageClassifier(imageModelURL + "model.json");
   
   createCanvas(640, 480);
 
