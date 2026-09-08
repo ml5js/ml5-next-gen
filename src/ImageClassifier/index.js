@@ -18,9 +18,11 @@ import callCallback from "../utils/callcallback";
 import { imgToTensor, mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
+import { ImageClassifierTransformer } from "./transformer";
 
 const IMAGE_SIZE = 224;
 const MODEL_OPTIONS = ["mobilenet", "darknet", "darknet-tiny", "doodlenet"];
+const TRANSFORMER_MODEL_NAMES = ["ViTBase", "SwinFood101"];
 
 /**
  * Check if a string is a valid http url
@@ -248,7 +250,10 @@ class ImageClassifier {
       "image",
       "No input image provided. If you want to classify a video, use classifyStart."
     );
-    return callCallback(this.classifyInternal(image, number || this.topk), callback);
+    return callCallback(
+      this.classifyInternal(image, number || this.topk),
+      callback
+    );
   }
 
   /**
@@ -271,8 +276,11 @@ class ImageClassifier {
       await mediaReady(image, true);
 
       // call the callback function
-      await callCallback(this.classifyInternal(image, number || this.topk), callback);
-      
+      await callCallback(
+        this.classifyInternal(image, number || this.topk),
+        callback
+      );
+
       // call recursively for continuous classification
       if (!this.signalStop) {
         requestAnimationFrame(classifyFrame);
@@ -308,10 +316,10 @@ class ImageClassifier {
 
 const imageClassifier = (modelName, optionsOrCallback, cb) => {
   const args = handleArguments(modelName, optionsOrCallback, cb);
-
   const { string, options = {}, callback } = args;
-
-  const instance = new ImageClassifier(string, options, callback);
+  const instance = TRANSFORMER_MODEL_NAMES.includes(string)
+    ? new ImageClassifierTransformer(string, options, callback)
+    : new ImageClassifier(string, options, callback);
   return instance;
 };
 
