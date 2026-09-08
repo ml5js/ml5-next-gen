@@ -18,15 +18,12 @@ let label = "";
 let confidence = "";
 
 async function setup() {
-  classifier = await ml5.imageClassifier("MobileNet");
-  img = await loadImage("images/bird.jpg");
-
-  createCanvas(400, 400);
-
   // Initialize the classifier and load the image asynchronously
   // Try with a transformer model Replace "MobileNet" -> "ViTBase"
   classifier = await ml5.imageClassifier("MobileNet");
   img = await loadImage("images/bird.jpg");
+
+  createCanvas(400, 400);
 
   // Classify the image and display it
   classifier.classify(img, gotResult);

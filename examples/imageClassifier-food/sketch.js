@@ -17,14 +17,24 @@ let label = "";
 let confidence = "";
 
 async function setup() {
-  // SwinFood101 is an image classification model based on the Swin architecture.
-  // It was fine-tuned on a custom dataset to recognize 101 categories of food. https://huggingface.co/datasets/ethz/food101
+  // SwinFood101 is a hugging face, image classification model
+  // Trained on a custom dataset of 101 classes of food https://huggingface.co/datasets/ethz/food101
   classifier = await ml5.imageClassifier("SwinFood101");
   img = await loadImage("images/pizza.jpg");
 
   createCanvas(400, 400);
   classifier.classify(img, gotResult);
+}
+
+function draw() {
   image(img, 0, 0, width, height);
+
+  // Display the results on the canvas
+  fill(255);
+  stroke(0);
+  textSize(18);
+  text(label, 10, 360);
+  text(confidence, 10, 380);
 }
 
 // Callback function for when classification has finished
@@ -34,12 +44,6 @@ function gotResult(results) {
   console.log("The default results length is 3");
   console.log(results);
 
-  // Display the results on the canvas
-  fill(255);
-  stroke(0);
-  textSize(18);
   label = "Label: " + results[0].label;
   confidence = "Confidence: " + nf(results[0].confidence, 0, 2);
-  text(label, 10, 360);
-  text(confidence, 10, 380);
 }
