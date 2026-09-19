@@ -287,6 +287,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://cdacanay.com/"><img src="https://avatars.githubusercontent.com/u/54914834?v=4?s=100" width="100px;" alt="Christina Dacanay"/><br /><sub><b>Christina Dacanay</b></sub></a><br /><a href="#blog-c-dacanay" title="Blogposts">📝</a> <a href="#communityManagement-c-dacanay" title="Community Management">👥</a> <a href="https://github.com/ml5js/Code-of-Conduct/blob/main/LICENSE.md" title="Software License">📃</a> <a href="#design-c-dacanay" title="Design">🎨</a> <a href="#content-c-dacanay" title="Content">🖋</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/JunhaoZhu0220"><img src="https://avatars.githubusercontent.com/u/129193941?v=4?s=100" width="100px;" alt="Junhao Zhu"/><br /><sub><b>Junhao Zhu</b></sub></a><br /><a href="https://github.com/ml5js/ml5-next-gen/commits?author=JunhaoZhu0220" title="Code">💻</a> <a href="https://github.com/ml5js/ml5-next-gen/commits?author=JunhaoZhu0220" title="Documentation">📖</a> <a href="#example-JunhaoZhu0220" title="Examples">💡</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/colemanliyah"><img src="https://avatars.githubusercontent.com/u/47500854?v=4?s=100" width="100px;" alt="colemanliyah"/><br /><sub><b>colemanliyah</b></sub></a><br /><a href="#blog-colemanliyah" title="Blogposts">📝</a> <a href="https://github.com/ml5js/ml5-next-gen/commits?author=colemanliyah" title="Code">💻</a> <a href="https://github.com/ml5js/ml5-next-gen/commits?author=colemanliyah" title="Documentation">📖</a> <a href="#example-colemanliyah" title="Examples">💡</a> <a href="#research-colemanliyah" title="Research">🔬</a> <a href="https://github.com/ml5js/ml5-next-gen/pulls?q=is%3Apr+reviewed-by%3Acolemanliyah" title="Reviewed Pull Requests">👀</a></td>
+    </tr>
   </tbody>
 </table>
 
