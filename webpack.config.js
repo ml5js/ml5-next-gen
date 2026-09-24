@@ -15,6 +15,14 @@ const commonConfig = {
       export: "default",
     },
   },
+  ignoreWarnings: [
+    // Suppress warning about import.meta in @huggingface/transformers
+    // This is a known issue with webpack and ESM modules
+    {
+      module: /node_modules\/@huggingface\/transformers/,
+      message: /Critical dependency: Accessing import\.meta directly/,
+    },
+  ],
 };
 
 const developmentConfig = {
