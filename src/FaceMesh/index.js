@@ -26,6 +26,7 @@ import { mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
 import { UV_COORDS } from "./uv_coords";
+import { resolveModelUrls } from "../utils/modelResolver";
 
 /**
  * User provided options object for FaceMesh. See config schema below for default and available values.
@@ -34,6 +35,8 @@ import { UV_COORDS } from "./uv_coords";
  * @property {boolean} [refineLandmarks]   - Whether to refine the landmarks.
  * @property {boolean} [flipHorizontal]    - Whether to mirror the results.
  * @property {string} [runtime]            - The runtime to use.
+ * @property {string|boolean} [modelPath]  - A local model folder, a direct model folder, 'auto',
+ *                                           or false to skip local model auto-detection.
  * @property {string} [solutionPath]       - The file path or URL to the MediaPipe solution. Only
  *                                           for `mediapipe` runtime.
  * @property {string} [detectorModelUrl]   - The file path or URL to the detector model. Only for
@@ -146,6 +149,11 @@ class FaceMesh {
 
     // Load the model once tfjs is ready
     await tf.ready();
+    await resolveModelUrls({
+      modelName: "facemesh",
+      modelConfig,
+      userOptions: this.userOptions,
+    });
     this.model = await faceLandmarksDetection.createDetector(
       pipeline,
       modelConfig
