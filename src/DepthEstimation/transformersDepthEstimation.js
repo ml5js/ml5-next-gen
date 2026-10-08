@@ -1,8 +1,8 @@
+import { pipeline } from "@huggingface/transformers";
 import callCallback from "../utils/callcallback";
 import handleArguments from "../utils/handleArguments";
 import { mediaReady } from "../utils/imageUtilities";
 import handleOptions from "../utils/handleOptions";
-import { loadTransformersFromCDN } from "../utils/transformersLoader";
 import {
   createImageDataFromDepthValues,
   generateP5Image,
@@ -50,12 +50,11 @@ class TransformersDepthEstimation {
     this.lastFrameTime = 0; // For FPS control
     this.sourceFrameCanvas = null; // Store the exact frame used in estimation
 
-    this.ready = callCallback(this.loadModels(), callback); // Renamed loadModel -> loadModels
+    this.ready = callCallback(this.loadModel(), callback);
   }
 
-  /** Loads and set up the model pipeline and our internal configurations (Depth and optionally Segmentation). @private */
-  async loadModels() {
-    let pipeline;
+  /** Loads and sets up the depth model pipeline and our internal configurations. @private */
+  async loadModel() {
     this.runtimeConfig = handleOptions(
       this.config,
       {
@@ -81,11 +80,7 @@ class TransformersDepthEstimation {
       "depthEstimation (runtime)"
     );
 
-    // Ensure transformers loader is available
-    await loadTransformersFromCDN();
-
     // Call the global loadTransformers function
-    pipeline = await window.loadTransformers();
     this.model = await pipeline(
       "depth-estimation", // Model task
       "onnx-community/depth-anything-v2-small",
