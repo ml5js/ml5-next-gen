@@ -12,6 +12,7 @@ import configureBackend from "./utils/configureBackend";
 import bodySegmentation from "./BodySegmentation";
 import depthEstimation from "./DepthEstimation";
 import communityStatement from "./utils/communityStatement";
+import speechToText from "./SpeechToText/transformer";
 import * as tf from "@tensorflow/tfjs";
 import * as tfvis from "@tensorflow/tfjs-vis";
 import p5Utils from "./utils/p5Utils";
@@ -29,6 +30,7 @@ const withPreload = {
   sentiment,
   soundClassifier,
   objectDetection,
+  speechToText,
 };
 
 const withoutAsync = {
