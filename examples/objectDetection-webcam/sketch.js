@@ -8,11 +8,9 @@ let video;
 let detector;
 let detections = [];
 
-function preload(){
-  detector = ml5.objectDetection("cocossd");
-}
+async function setup() {
+  detector = await ml5.objectDetection("cocossd");
 
-function setup() {
   createCanvas(640, 480);
 
   // Using webcam feed as video input, hiding html element to avoid duplicate with canvas

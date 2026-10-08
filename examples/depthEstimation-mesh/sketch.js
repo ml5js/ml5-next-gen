@@ -27,12 +27,10 @@ let options = {
   dilationFactor: 2,
 };
 
-function preload() {
+async function setup() {
   // Load the depth estimation model
-  depthEstimator = ml5.depthEstimation(options);
-}
+  depthEstimator = await ml5.depthEstimation(options);
 
-function setup() {
   // Create a canvas larger than the video and turn on WEBGL mode for 3D
   createCanvas(videoWidth * 2, videoHeight * 2, WEBGL);
 

@@ -34,14 +34,12 @@ let words = [
 // Variable for displaying the results on the canvas
 let predictedWord = "";
 
-function preload() {
+async function setup() {
   // Options for the SpeechCommands18w model, the default probabilityThreshold is 0
   let options = { probabilityThreshold: 0.7 };
   // Load SpeechCommands18w sound classifier model
-  classifier = ml5.soundClassifier("SpeechCommands18w", options);
-}
+  classifier = await ml5.soundClassifier("SpeechCommands18w", options);
 
-function setup() {
   createCanvas(650, 450);
   // Classify the sound from microphone in real time
   classifier.classifyStart(gotResult);

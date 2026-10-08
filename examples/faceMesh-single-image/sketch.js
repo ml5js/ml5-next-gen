@@ -11,15 +11,12 @@ let img;
 let faces = [];
 let options = { maxFaces: 1, refineLandmarks: false, flipHorizontal: false };
 
-function preload() {
-  // Load the image to be detected
-  img = loadImage("face.png");
-  // Load the faceMesh model
-  faceMesh = ml5.faceMesh(options);
-}
-
-function setup() {
+async function setup() {
   createCanvas(640, 480);
+
+  faceMesh = await ml5.faceMesh(options);
+  img = await loadImage("face.png");
+
   // Draw the image
   image(img, 0, 0);
   // Detect faces in an image

@@ -220,6 +220,7 @@ export {
   array3DToImage,
   processVideo,
   cropImage,
+  drawToCanvas,
   imgToTensor,
   isInstanceOfSupportedElement,
   flipImage,

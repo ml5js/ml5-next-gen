@@ -10,17 +10,17 @@ let handPose;
 let video;
 let hands = [];
 
-function preload() {
-  // Load the handPose model
-  handPose = ml5.handPose();
-}
-
-function setup() {
+async function setup() {
   createCanvas(640, 480);
+  
+  // Load the handPose model asynchronously
+  handPose = await ml5.handPose();
+  
   // Create the webcam video and hide it
   video = createCapture(VIDEO);
   video.size(640, 480);
   video.hide();
+  
   // start detecting hands from the webcam video
   handPose.detectStart(video, gotHands);
 }

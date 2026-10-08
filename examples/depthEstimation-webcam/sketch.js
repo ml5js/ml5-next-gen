@@ -14,14 +14,12 @@ let depthMap;
 let videoWidth = 640;
 let videoHeight = 480;
 
-function preload() {
-  // Load and start the depth estimation model
-  depthEstimator = ml5.depthEstimation();
-}
-
-function setup() {
+async function setup() {
   // Create a canvas the size of the webcam video
   createCanvas(videoWidth, videoHeight);
+
+  // Load the depth estimation model
+  depthEstimator = await ml5.depthEstimation();
 
   // Create the video capture element
   webcam = createCapture(VIDEO);

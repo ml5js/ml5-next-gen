@@ -14,12 +14,11 @@ let options = {
   maskType: "parts",
 };
 
-function preload() {
-  bodySegmentation = ml5.bodySegmentation("BodyPix", options);
-}
-
-function setup() {
+async function setup() {
   createCanvas(640, 480);
+
+  bodySegmentation = await ml5.bodySegmentation("BodyPix", options);
+
   // Create the video
   video = createCapture(VIDEO);
   video.size(640, 480);

@@ -338,7 +338,7 @@ async function main() {
   // Update existing sketches and upload new sketches
   console.log("Uploading sketches...");
   for (const sketchPath of sketchPaths) {
-    const oldSketch = oldSketches.find(
+    const oldSketch = oldSketches.projects.find(
       (sketch) =>
         sketch.name.toLowerCase() === sketchPath.split("/").pop().toLowerCase()
     );

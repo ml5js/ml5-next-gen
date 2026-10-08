@@ -8,14 +8,13 @@ let img;
 let detector;
 let detections = [];
 
-function preload(){
-  detector = ml5.objectDetection("cocossd");
-  img = loadImage('dog_cat.jpg');
-}
+async function setup() {
+  img = await loadImage('dog_cat.jpg');
+  detector = await ml5.objectDetection("cocossd");
 
-function setup() {
   createCanvas(640, 480);
   image(img, 0, 0);
+
   detector.detectStart(img, gotDetections);
 }
 

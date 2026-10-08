@@ -11,13 +11,12 @@ let depthEstimator;
 let img;
 let depthMap;
 
-function preload() {
-  img = loadImage("face.png");
-  // Load the depth estimation model
-  depthEstimator = ml5.depthEstimation();
-}
+async function setup() {
+  img = await loadImage("face.png");
 
-function setup() {
+  // Load the depth estimation model
+  depthEstimator = await ml5.depthEstimation();
+
   // Create a canvas twice the width of the image
   createCanvas(img.width * 2, img.height);
 

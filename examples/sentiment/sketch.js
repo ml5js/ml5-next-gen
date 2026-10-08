@@ -11,13 +11,10 @@ let submitBtn;
 let inputBox;
 let sentimentResult;
 
-function preload() {
-  // Initialize the sentiment analysis model
-  sentiment = ml5.sentiment("MovieReviews");
-}
-
-function setup() {
+async function setup() {
   noCanvas();
+
+  sentiment = await ml5.sentiment("MovieReviews");
 
   // Setup the DOM elements
   inputBox = createInput("Today is the happiest day and is full of rainbows!");

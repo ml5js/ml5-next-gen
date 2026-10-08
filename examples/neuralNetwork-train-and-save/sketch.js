@@ -24,12 +24,10 @@ let paperButton;
 let scissorsButton;
 let trainButton;
 
-function preload() {
-  // Load the handPose model, we will use the keypoints form handPose to train the neural network
-  handPose = ml5.handPose();
-}
+async function setup() {
+  // Load the handPose model asynchronously
+  handPose = await ml5.handPose();
 
-function setup() {
   createCanvas(640, 480);
 
   // Create the webcam video and hide it

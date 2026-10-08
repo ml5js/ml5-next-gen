@@ -11,12 +11,10 @@ let video;
 let faces = [];
 let options = { maxFaces: 1, refineLandmarks: false, flipHorizontal: false };
 
-function preload() {
-  faceMesh = ml5.faceMesh(options);
-}
-
-function setup() {
+async function setup() {
   createCanvas(640, 480);
+
+  faceMesh = await ml5.faceMesh();
 
   video = createCapture(VIDEO);
   video.size(640, 480);
