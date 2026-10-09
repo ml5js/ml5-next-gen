@@ -25,6 +25,7 @@ import {
  * @property {number} width - Width of the depth map.
  * @property {number} height - Height of the depth map.
  * @property {function(number, number): number | null} getDepthAt - Get raw depth at (x, y).
+ * @property {p5.Image} sourceFrame - The exact frame used for the depth estimation, as a p5.Image.
  */
 
 /**
@@ -49,6 +50,8 @@ class TransformersDepthEstimation {
     this.prevCall = null;
     this.lastFrameTime = 0; // For FPS control
     this.sourceFrameCanvas = null; // Store the exact frame used in estimation
+
+    this.maskWarned = false; // only used for the temporary warning message
 
     this.ready = callCallback(this.loadModel(), callback);
   }
@@ -254,8 +257,34 @@ class TransformersDepthEstimation {
     // Create p5.Image versions
     result.image = generateP5Image(result.imageData);
     result.sourceFrame = generateP5Image(
-      this.getSourceFrameCanvas(depth.width, depth.height) // Fix here too
+      this.getSourceFrameCanvas(depth.width, depth.height)
     );
+
+    // Error message
+    /* 
+     * This is a placeholder for a more robust way to handle these friendly error messages.
+     *
+     * Ideally, we should have a utility that creates a Proxy with a get trap that checks 
+     * what the user tried to get from an object and, if it is an undefined property, log
+     * a message explaining this. The utility could then be reused across all models.
+     * 
+     * When removing, don't forget to get rid of the "maskWarned" property in the constructor
+     */
+    Object.defineProperty(result, "mask", {
+      get: () => {
+        if(!this.maskWarned) {
+          this.maskWarned = true;
+        }else {
+          return undefined;
+        }
+        console.warn(
+          "🟪ml5.js warns: The 'mask' property is not available for the depth-anything-v2-small model. Masks in depth estimation are only available in the ARPortraitDepth model."
+        );
+        return undefined;
+      },
+      enumerable: false,
+    });
+
 
     return result;
   }

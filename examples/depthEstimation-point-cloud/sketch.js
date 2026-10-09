@@ -21,12 +21,14 @@ let newDataAvailable = false;
 
 let options = {
   // Default is 4, but since this image is smaller, we change it to 1 so as to not lose too much detail
+  // this is only important when using the ARPortraitDepth model. 
   dilationFactor: 1, 
 };
 
 async function setup() {
   // Load the depth estimation model
-  depthEstimator = await ml5.depthEstimation(options);
+  depthEstimator = await ml5.depthEstimation('ARPortraitDepth', options);
+  // Try with a transformer model. Replace 'ARPortraitDepth' -> 'depth-anything-v2-small'
 
   // Create a canvas larger than the video and turn on WEBGL mode for 3D
   createCanvas(videoWidth * 2, videoHeight * 2, WEBGL);
