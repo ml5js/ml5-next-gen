@@ -19,7 +19,8 @@ async function setup() {
   createCanvas(videoWidth, videoHeight);
 
   // Load the depth estimation model
-  depthEstimator = await ml5.depthEstimation();
+  depthEstimator = await ml5.depthEstimation('ARPortraitDepth');
+  // Try with a transformer model. Replace 'ARPortraitDepth' -> 'depth-anything-v2-small'
 
   // Create the video
   video = createVideo("presenter.mp4"); // Excerpt from "Your name here", a 1960's spoof video in the public domain
