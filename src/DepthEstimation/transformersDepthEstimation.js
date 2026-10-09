@@ -7,6 +7,7 @@ import {
   createImageDataFromDepthValues,
   generateP5Image,
 } from "./utils/imageDataUtils";
+import { chooseDevice, chooseDtype } from "../utils/transformersUtilities";
 
 /**
  * @typedef {Object} TransformersDepthEstimationRuntimeOptions Estimation runtime options.
@@ -40,6 +41,7 @@ class TransformersDepthEstimation {
    */
   constructor(options, callback) {
     this.modelName = "depth-anything-v2-small";
+    this.hfModelId = "onnx-community/depth-anything-v2-small";
     this.model = null;
     this.config = options; // Store original options
     this.runtimeConfig = {};
@@ -72,21 +74,26 @@ class TransformersDepthEstimation {
         device: {
           type: "enum",
           enums: ["webgpu", "webgl", "cpu", "wasm"],
-          default: "webgpu",
+          default: chooseDevice,
         },
         dtype: {
           type: "enum",
           enums: ["fp32", "fp16", "q8", "q4"],
-          default: "fp16",
+          default: chooseDtype,
         },
       },
       "depthEstimation (runtime)"
     );
 
+    // Notify which model is being loaded and the selected device and dtype.
+    console.log(
+      `ml5.depthEstimation: loading "${this.modelName}" → Hugging Face model "${this.hfModelId}, with device "${this.runtimeConfig.device}" and dtype "${this.runtimeConfig.dtype}"`
+    );
+
     // Call the global loadTransformers function
     this.model = await pipeline(
       "depth-estimation", // Model task
-      "onnx-community/depth-anything-v2-small",
+      this.hfModelId, // Model ID
       {
         device: this.runtimeConfig.device,
         dtype: this.runtimeConfig.dtype,
