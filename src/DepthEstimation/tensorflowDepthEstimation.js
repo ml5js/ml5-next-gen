@@ -133,6 +133,10 @@ class TensorflowDepthEstimation {
     }
 
     await tf.ready();
+    // Notify which model is being loaded
+    console.log(
+      `ml5.depthEstimation: loading "${this.modelName}" Tensorflow model.`
+    );
     this.model = await tfDepthEstimation.createEstimator(pipeline, modelConfig);
 
     // --- Conditionally Load Segmentation Model ---
@@ -153,6 +157,11 @@ class TensorflowDepthEstimation {
       const modelType =
         bodySegmentation.SupportedModels.MediaPipeSelfieSegmentation;
       // Use 'tfjs' runtime for broader compatibility
+
+      // Notify which model is being loaded
+      console.log(
+        `ml5.depthEstimation: loading "MediaPipeSelfieSegmentation" Tensorflow model, used together with "ARPortraitDepth".`
+      );
       this.segmenter = await bodySegmentation.createSegmenter(modelType, {
         runtime: "tfjs",
       });
