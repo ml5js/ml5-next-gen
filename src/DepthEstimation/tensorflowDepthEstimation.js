@@ -24,8 +24,8 @@ import {
 
 /**
  * @typedef {Object} TensorflowDepthEstimationRuntimeOptions Estimation runtime options.
- * @property {number} [minDepth=0] - The minimum depth value (0-1) used for fixed normalization. Ignored if `normalizeDynamically` is true.
- * @property {number} [maxDepth=1] - The maximum depth value (0-1) used for fixed normalization. Ignored if `normalizeDynamically` is true.
+ * @property {number} [minDepth=0.2] - The minimum depth value (0-1) used for fixed normalization. Ignored if `normalizeDynamically` is true.
+ * @property {number} [maxDepth=0.75] - The maximum depth value (0-1) used for fixed normalization. Ignored if `normalizeDynamically` is true.
  * @property {boolean} [normalizeDynamically=false] - If true, calculate min/max depth from each frame for normalization, overriding `minDepth` and `maxDepth`.
  * @property {number} [normalizationSmoothingFactor=0.5] - Smoothing factor (0-1) for dynamic normalization range. Higher values react faster to changes. Only used if `normalizeDynamically` is true.
  * @property {boolean} [flipHorizontal=false] - Whether to flip the input image horizontally. Alias: `flipped`.
@@ -39,14 +39,14 @@ import {
 
 /**
  * @typedef {Object} TensorflowDepthEstimationResult The result object from a depth estimation.
- * @property {number[][]} data - Raw depth map as a 2D array.
+ * @property {number[][]} data - Depth map as a 2D array after being normalized (either with minDepth/maxDepth or normalizeDynamically).
  * @property {p5.Image | ImageData} image - p5.Image (if p5 is running, otherwise ImageData) of the depth map with chosen colormap.
  * @property {ImageData} imageData - ImageData visualization (normalized) with chosen colormap.
  * @property {number} width - Width of the depth map.
  * @property {number} height - Height of the depth map.
  * @property {number} minDepth - The minimum depth value used for normalization in this result (either fixed or dynamically calculated/smoothed).
  * @property {number} maxDepth - The maximum depth value used for normalization in this result (either fixed or dynamically calculated/smoothed).
- * @property {function(number, number): number | null} getDepthAt - Get raw depth at (x, y).
+ * @property {function(number, number): number | null} getDepthAt - Get depth value at (x, y), from the normalized depth map.
  * @property {p5.Image | ImageData} mask - The segmentation mask applied to the depth map, including any dilation applied.
  * @property {p5.Image} sourceFrame - The exact frame used for the depth estimation, as a p5.Image.
  */
@@ -125,6 +125,18 @@ class TensorflowDepthEstimation {
       },
       "depthEstimation (runtime)"
     );
+
+    // Warn if the fixed normalization range is inverted
+    if (
+      !this.runtimeConfig.normalizeDynamically &&
+      this.runtimeConfig.minDepth >= this.runtimeConfig.maxDepth
+    ) {
+      console.warn(
+        `🟪ml5.js warns: The "minDepth" option for depthEstimation (received ${this.runtimeConfig.minDepth}) should be smaller than "maxDepth" (received ${this.runtimeConfig.maxDepth}). ml5.js is using the default values of 0.2 and 0.75 instead.`
+      );
+      this.runtimeConfig.minDepth = 0.2;
+      this.runtimeConfig.maxDepth = 0.75;
+    }
 
     // Initialize smoothed values based on initial config if dynamic normalization is off
     if (!this.runtimeConfig.normalizeDynamically) {
@@ -302,13 +314,10 @@ class TensorflowDepthEstimation {
     }
     // --- End Segmentation Mask ---
 
+    // Hard-coded 0 and 1 range, actual normalization is done in processDepthMap()
     const estimationConfig = {
-      minDepth: this.runtimeConfig.normalizeDynamically
-        ? 0
-        : this.runtimeConfig.minDepth,
-      maxDepth: this.runtimeConfig.normalizeDynamically
-        ? 1
-        : this.runtimeConfig.maxDepth,
+      minDepth: 0,
+      maxDepth: 1,
       flipHorizontal: this.runtimeConfig.flipHorizontal, // Apply flip here
     };
 
@@ -358,12 +367,13 @@ class TensorflowDepthEstimation {
     const result = {};
     let minDepthActual, maxDepthActual;
     let actualTensor; // To hold the actual tensor
+    let remappedTensor; // To hold the tensor with normalized min/max depth values
 
     try {
       // Get the actual tensor from the DepthMap object
       actualTensor = await depthMapResult.toTensor();
 
-      // --- Dynamic Normalization ---
+      // Dynamic Normalization: calculating the dynamic min/max
       if (this.runtimeConfig.normalizeDynamically) {
         const [minTensor, maxTensor] = tf.tidy(() => [
           actualTensor.min(), // Use actualTensor here
@@ -396,11 +406,28 @@ class TensorflowDepthEstimation {
         result.minDepth = this.runtimeConfig.minDepth;
         result.maxDepth = this.runtimeConfig.maxDepth;
       }
-      // --- End Dynamic Normalization ---
 
-      // Get depth values as 2D array from the actual tensor
-      const depthData = await actualTensor.array(); // Use actualTensor here
-      actualTensor.dispose(); // Dispose the tensor
+      // Normalization step, with the defined min/max
+      const range = result.maxDepth - result.minDepth;
+
+      // tf.tidy() disposes every tensor created inside it automatically,
+      // except the one that gets returned.
+      remappedTensor = tf.tidy(() => {
+        if (range <= 0) {
+          // Min and max are equal, so there is no range to map to
+          return tf.zerosLike(actualTensor);
+        }
+        const shifted = actualTensor.sub(result.minDepth); // minDepth moves to 0
+        const scaled = shifted.div(range); // maxDepth moves to 1
+        return scaled.clipByValue(0, 1); // Clip anything outside the window
+      });
+
+      // Get the remapped depth values as a 2D array, then dispose the tensor
+      const depthData = await remappedTensor.array();
+
+      // Dispose the tensors used in this step
+      actualTensor.dispose();
+      remappedTensor.dispose();
 
       const width = sourceElement.width;
       const height = sourceElement.height;
@@ -412,8 +439,8 @@ class TensorflowDepthEstimation {
         depthData,
         width,
         height,
-        result.minDepth,
-        result.maxDepth,
+        0, // hard-coded 0, normalization was done with tensors above
+        1, // hard-coded 1, normalization was done with tensors above
         this.runtimeConfig.colormap
       );
 
@@ -477,6 +504,7 @@ class TensorflowDepthEstimation {
     } catch (error) {
       console.error("Error processing depth map:", error);
       if (actualTensor) actualTensor.dispose(); // Dispose tensor if created before error
+      if (remappedTensor) remappedTensor.dispose(); // Dispose remapped tensor if created before error
       throw error; // Re-throw error to be caught by estimate/detectLoop
     }
   }
@@ -640,13 +668,10 @@ class TensorflowDepthEstimation {
       }
       // --- End Segmentation Mask ---
 
+      // Hard-coded 0 and 1 range, actual normalization is done in processDepthMap()
       const estimationConfig = {
-        minDepth: this.runtimeConfig.normalizeDynamically
-          ? 0
-          : this.runtimeConfig.minDepth,
-        maxDepth: this.runtimeConfig.normalizeDynamically
-          ? 1
-          : this.runtimeConfig.maxDepth,
+        minDepth: 0,
+        maxDepth: 1,
         flipHorizontal: this.runtimeConfig.flipHorizontal,
       };
       let depthMapResult;
