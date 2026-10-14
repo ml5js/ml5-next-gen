@@ -30,6 +30,15 @@ import { chooseDevice, chooseDtype } from "../utils/transformersUtilities";
  */
 
 /**
+ * Maps ml5-friendly model names to their Hugging Face model ids.
+ * Add new transformer-based depth estimation models here.
+ */
+const SUPPORTED_MODELS = {
+  DepthAnything: "onnx-community/depth-anything-v2-small",
+  DepthAnythingV2Small: "onnx-community/depth-anything-v2-small",
+};
+
+/**
  * @class
  * TransformersDepthEstimation class using the transformers.js depth-anything-v2-small model.
  */
@@ -39,9 +48,16 @@ class TransformersDepthEstimation {
    * @param {TransformersDepthEstimationRuntimeOptions} [options] - Model loading and runtime options.
    * @param {function} [callback] - Callback when model is loaded.
    */
-  constructor(options, callback) {
-    this.modelName = "depth-anything-v2-small";
-    this.hfModelId = "onnx-community/depth-anything-v2-small";
+  constructor(modelName, options, callback) {
+    this.modelName = modelName;
+    this.hfModelId = SUPPORTED_MODELS[modelName];
+    if (!this.hfModelId) {
+      throw new Error(
+        `Unknown transformer model "${modelName}". Options: ${Object.keys(
+          SUPPORTED_MODELS
+        ).join(", ")}`
+      );
+    }
     this.model = null;
     this.config = options; // Store original options
     this.runtimeConfig = {};
@@ -294,7 +310,7 @@ class TransformersDepthEstimation {
           return undefined;
         }
         console.warn(
-          "🟪ml5.js warns: The 'mask' property is not available for the depth-anything-v2-small model. Masks in depth estimation are only available in the ARPortraitDepth model."
+          "🟪ml5.js warns: The 'mask' property is not available for transformers depth estimation models. Masks in depth estimation are only available in the ARPortraitDepth model."
         );
         return undefined;
       },

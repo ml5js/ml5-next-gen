@@ -31,7 +31,7 @@ let options = {
 async function setup() {
   // Load the depth estimation model
   depthEstimator = await ml5.depthEstimation('ARPortraitDepth', options);
-  // Try with a transformer model. Replace 'ARPortraitDepth' -> 'depth-anything-v2-small'
+  // Try with a transformer model. Replace 'ARPortraitDepth' -> 'DepthAnything'
 
   // Create a canvas larger than the video and turn on WEBGL mode for 3D
   createCanvas(videoWidth * 2, videoHeight * 2, WEBGL);

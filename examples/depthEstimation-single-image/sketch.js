@@ -16,7 +16,7 @@ async function setup() {
 
   // Load the depth estimation model
   depthEstimator = await ml5.depthEstimation('ARPortraitDepth');
-  // Try with a transformer model. Replace 'ARPortraitDepth' -> 'depth-anything-v2-small'
+  // Try with a transformer model. Replace 'ARPortraitDepth' -> 'DepthAnything'
 
   // Create a canvas twice the width of the image
   createCanvas(img.width * 2, img.height);

@@ -20,18 +20,19 @@ const depthEstimation = (...inputs) => {
   // Validate and normalize the model name
   const modelName = handleModelName(
     string,
-    ["ARPortraitDepth", "depth-anything-v2-small"],
+    ["ARPortraitDepth", "DepthAnything", "DepthAnythingV2Small"],
     "ARPortraitDepth",
     "depthEstimation"
   );
 
-  // Route to the appropriate implementation based on model
-  if (modelName === "depth-anything-v2-small") {
-    return new TransformersDepthEstimation(options, callback);
+  // Route to the appropriate implementation based on modelName
+  if (modelName === "ARPortraitDepth") {
+    return new TensorflowDepthEstimation(options, callback);
   }
-
-  // Default to TensorFlow implementation (ARPortraitDepth)
-  return new TensorflowDepthEstimation(options, callback);
+  
+  // We assume the name is a transformers.js model if it is not ARPortraitDepth.
+  // If it isn't, an error is thrown in the constructor of TransformersDepthEstimation
+  return new TransformersDepthEstimation(modelName, options, callback);
 };
 
 export default depthEstimation;
