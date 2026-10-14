@@ -147,7 +147,7 @@ class TransformersDepthEstimation {
       "image",
       "Input image/video/canvas required for estimate()."
     );
-    const { image, options = {}, callback } = argumentObject;
+    const { image, callback } = argumentObject;
 
     await this.ready;
     await mediaReady(image, false);
@@ -169,12 +169,10 @@ class TransformersDepthEstimation {
       "callback",
       "Callback function required for estimateStart()."
     );
-    const { image, options = {}, callback } = argumentObject; // Allow runtime options override
+    const { image, callback } = argumentObject;
 
     this.detectMedia = image;
     this.detectCallback = callback;
-    // Merge runtime options if provided for the continuous loop
-    this.runtimeConfig = { ...this.runtimeConfig, ...options };
 
     this.signalStop = false;
     if (!this.detecting) {

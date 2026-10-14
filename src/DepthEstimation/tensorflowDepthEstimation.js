@@ -213,7 +213,7 @@ class TensorflowDepthEstimation {
       "image",
       "Input image/video/canvas required for estimate()."
     );
-    const { image, options = {}, callback } = argumentObject;
+    const { image, callback } = argumentObject;
 
     await this.ready; // Ensure model is loaded
     await mediaReady(image, false);
@@ -225,7 +225,6 @@ class TensorflowDepthEstimation {
     ctx.clearRect(0, 0, image.width, image.height);
     ctx.drawImage(image, 0, 0, image.width, image.height);
 
-    const currentRuntimeConfig = { ...this.runtimeConfig, ...options };
     let inputForDepth = image; // Default to original image
     let resizedSource = null;
     let normalizedSource = image; // Default to original media if not resized
@@ -245,7 +244,7 @@ class TensorflowDepthEstimation {
     let backgroundDarkeningMask = null;
 
     // --- Apply Segmentation Mask (if enabled) ---
-    if (currentRuntimeConfig.applySegmentationMask) {
+    if (this.runtimeConfig.applySegmentationMask) {
       await this.loadSegmenter(); // Ensure segmenter is loaded
       if (this.segmenter) {
         try {
@@ -276,8 +275,8 @@ class TensorflowDepthEstimation {
               maskCanvas,
               normalizedSource,
               backgroundDarkeningMask,
-              currentRuntimeConfig.segmentationOpacity,
-              currentRuntimeConfig.segmentationMaskBlur,
+              this.runtimeConfig.segmentationOpacity,
+              this.runtimeConfig.segmentationMaskBlur,
               false // Let estimateDepth handle the flip based on its config
             );
             inputForDepth = maskCanvas; // Use the masked canvas as input
@@ -304,13 +303,13 @@ class TensorflowDepthEstimation {
     // --- End Segmentation Mask ---
 
     const estimationConfig = {
-      minDepth: currentRuntimeConfig.normalizeDynamically
+      minDepth: this.runtimeConfig.normalizeDynamically
         ? 0
-        : currentRuntimeConfig.minDepth,
-      maxDepth: currentRuntimeConfig.normalizeDynamically
+        : this.runtimeConfig.minDepth,
+      maxDepth: this.runtimeConfig.normalizeDynamically
         ? 1
-        : currentRuntimeConfig.maxDepth,
-      flipHorizontal: currentRuntimeConfig.flipHorizontal, // Apply flip here
+        : this.runtimeConfig.maxDepth,
+      flipHorizontal: this.runtimeConfig.flipHorizontal, // Apply flip here
     };
 
     let depthMapResult;
@@ -326,7 +325,6 @@ class TensorflowDepthEstimation {
         result = await this.processDepthMap(
           depthMapResult,
           image,
-          currentRuntimeConfig,
           backgroundDarkeningMask
         );
       } else {
@@ -354,10 +352,9 @@ class TensorflowDepthEstimation {
   async processDepthMap(
     depthMapResult,
     sourceElement,
-    currentRuntimeConfig,
     binaryMask = null
   ) {
-    // Renamed parameter
+ 
     const result = {};
     let minDepthActual, maxDepthActual;
     let actualTensor; // To hold the actual tensor
@@ -367,7 +364,7 @@ class TensorflowDepthEstimation {
       actualTensor = await depthMapResult.toTensor();
 
       // --- Dynamic Normalization ---
-      if (currentRuntimeConfig.normalizeDynamically) {
+      if (this.runtimeConfig.normalizeDynamically) {
         const [minTensor, maxTensor] = tf.tidy(() => [
           actualTensor.min(), // Use actualTensor here
           actualTensor.max(), // Use actualTensor here
@@ -382,7 +379,7 @@ class TensorflowDepthEstimation {
         maxDepthActual = maxDepthActual[0]; // Extract scalar value
 
         // Initialize or smooth the min/max values
-        const factor = currentRuntimeConfig.normalizationSmoothingFactor;
+        const factor = this.runtimeConfig.normalizationSmoothingFactor;
         if (this.smoothedMinDepth === null || this.smoothedMaxDepth === null) {
           this.smoothedMinDepth = minDepthActual;
           this.smoothedMaxDepth = maxDepthActual;
@@ -396,8 +393,8 @@ class TensorflowDepthEstimation {
         result.maxDepth = this.smoothedMaxDepth;
       } else {
         // Use fixed config values
-        result.minDepth = currentRuntimeConfig.minDepth;
-        result.maxDepth = currentRuntimeConfig.maxDepth;
+        result.minDepth = this.runtimeConfig.minDepth;
+        result.maxDepth = this.runtimeConfig.maxDepth;
       }
       // --- End Dynamic Normalization ---
 
@@ -417,24 +414,24 @@ class TensorflowDepthEstimation {
         height,
         result.minDepth,
         result.maxDepth,
-        currentRuntimeConfig.colormap
+        this.runtimeConfig.colormap
       );
 
       // Create a p5.Image from the exact frame used for the estimation being returned in this result
       result.sourceFrame = generateP5Image(this.getSourceFrameCanvas(width, height));
 
       // --- Apply Black Background using Segmentation Mask (if enabled) ---
-      if (currentRuntimeConfig.applySegmentationMask && binaryMask) {
+      if (this.runtimeConfig.applySegmentationMask && binaryMask) {
         // If the input was flipped for depth estimation, flip the mask too
         // so it aligns with the visualization derived from the (potentially flipped) depth map.
-        if (currentRuntimeConfig.flipHorizontal) {
+        if (this.runtimeConfig.flipHorizontal) {
           binaryMask = this.flipImageDataHorizontally(binaryMask);
         }
 
         const vizData = result.imageData.data; //this is a reference to the ImageData data array. Changes to this also change imageData
         let maskData = this.dilateMask(
           binaryMask,
-          currentRuntimeConfig.dilationFactor
+          this.runtimeConfig.dilationFactor
         ); // Use potentially flipped mask data and dilate it.
 
         // Iterate through the imageData pixels and mask with the segmentation result
@@ -495,12 +492,10 @@ class TensorflowDepthEstimation {
       "callback",
       "Callback function required for estimateStart()."
     );
-    const { image, options = {}, callback } = argumentObject; // Allow runtime options override
+    const { image, callback } = argumentObject;
 
     this.detectMedia = image;
     this.detectCallback = callback;
-    // Merge runtime options if provided for the continuous loop
-    this.runtimeConfig = { ...this.runtimeConfig, ...options };
 
     // Reset smoothing if dynamic normalization is enabled and we restart
     if (this.runtimeConfig.normalizeDynamically) {
@@ -666,7 +661,6 @@ class TensorflowDepthEstimation {
           result = await this.processDepthMap(
             depthMapResult,
             this.detectMedia,
-            this.runtimeConfig,
             backgroundDarkeningMask
           );
         } else {
