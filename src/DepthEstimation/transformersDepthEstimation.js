@@ -14,8 +14,8 @@ import { chooseDevice, chooseDtype } from "../utils/transformersUtilities";
  * @property {boolean} [flipHorizontal=false] - Whether to flip the input image horizontally. Alias: `flipped`.
  * @property {ColormapName | string} [colormap='GRAYSCALE'] - The colormap for `result.image` output. Options: 'color', 'grayscale'.
  * @property {number | null} [targetFps=null] - Target FPS for continuous estimation (`estimateStart`). If set, skips frames to approximate the target. `null` runs as fast as possible.
- * @property {DeviceName | string} [device='webgpu'] - The backend device to run the model on. Options: 'webgpu', 'webgl', 'cpu', 'wasm'. Gets passed to transformers.js.
- * @property {string} [dtype='fp16'] - The data type for the model. Options: 'fp32' (default for webgpu), 'fp16', 'q8' (default for wasm) and 'q4'. Gets passed to transformers.js.
+ * @property {DeviceName | string} [device='webgpu'] - The backend device to run the model on. Options: 'webgpu' or 'wasm'. Gets passed to transformers.js.
+ * @property {string} [dtype] - The data type for the model. Options: 'fp32', 'fp16', 'q8' and 'q4'. Defaults to 'fp16' on webgpu and 'q8' on wasm. Gets passed to transformers.js.
  */
 
 /**
@@ -31,7 +31,7 @@ import { chooseDevice, chooseDtype } from "../utils/transformersUtilities";
 
 /**
  * @class
- * TransformersDepthEstimation class using the TensorFlow.js ARPortraitDepth model.
+ * TransformersDepthEstimation class using the transformers.js depth-anything-v2-small model.
  */
 class TransformersDepthEstimation {
   /**
@@ -73,7 +73,7 @@ class TransformersDepthEstimation {
         targetFps: { type: "number", min: 1, default: null },
         device: {
           type: "enum",
-          enums: ["webgpu", "webgl", "cpu", "wasm"],
+          enums: ["webgpu", "wasm"],
           default: chooseDevice,
         },
         dtype: {
@@ -87,10 +87,10 @@ class TransformersDepthEstimation {
 
     // Notify which model is being loaded and the selected device and dtype.
     console.log(
-      `ml5.depthEstimation: loading "${this.modelName}" → Hugging Face model "${this.hfModelId}, with device "${this.runtimeConfig.device}" and dtype "${this.runtimeConfig.dtype}"`
+      `ml5.depthEstimation: loading "${this.modelName}" → Hugging Face model "${this.hfModelId}", with device "${this.runtimeConfig.device}" and dtype "${this.runtimeConfig.dtype}"`
     );
 
-    // Call the global loadTransformers function
+    // Load the model
     this.model = await pipeline(
       "depth-estimation", // Model task
       this.hfModelId, // Model ID
@@ -113,6 +113,12 @@ class TransformersDepthEstimation {
       this.sourceFrameCanvas = document.createElement("canvas");
       this.sourceFrameCanvas.width = width;
       this.sourceFrameCanvas.height = height;
+
+      // We need to make the first call to this canvas's context sets willReadFrequently to true
+      // This yields better performance when reading pixel data from the canvas frequently,
+      // since it keeps the canvas in CPU instead of GPU.
+      // More information here: https://stackoverflow.com/questions/74101155/chrome-warning-willreadfrequently-attribute-set-to-true
+      this.sourceFrameCanvas.getContext("2d", { willReadFrequently: true });
     }
     return this.sourceFrameCanvas;
   }
@@ -126,6 +132,7 @@ class TransformersDepthEstimation {
     );
     const { image, options = {}, callback } = argumentObject;
 
+    await this.ready;
     await mediaReady(image, false);
 
     const result = await this.getDepthResult(image);
@@ -174,6 +181,7 @@ class TransformersDepthEstimation {
 
   /** Internal loop for continuous estimation. @private */
   async detectLoop() {
+    await this.ready;
     await mediaReady(this.detectMedia, false);
 
     while (!this.signalStop) {
@@ -226,7 +234,7 @@ class TransformersDepthEstimation {
       ctx.drawImage(image, 0, 0, image.width, image.height);
     }
 
-    let depthResult = await this.model(ctx.canvas.toDataURL());
+    let depthResult = await this.model(ctx.canvas);
     let { depth } = depthResult;
     const depth2D = [];
 
