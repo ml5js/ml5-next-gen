@@ -95,6 +95,7 @@ class TransformersDepthEstimation {
       "depth-estimation", // Model task
       this.hfModelId, // Model ID
       {
+        ...this.config, // Pass thru any other options set for transformers.js
         device: this.runtimeConfig.device,
         dtype: this.runtimeConfig.dtype,
       }
