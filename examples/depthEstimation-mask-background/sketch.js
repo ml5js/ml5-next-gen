@@ -17,7 +17,8 @@ let videoHeight = 480;
 
 async function setup() {
   // Load the model
-  depthEstimator = await ml5.depthEstimation();
+  // ARPortraitDepth is the only depth estimation model that has a mask output
+  depthEstimator = await ml5.depthEstimation('ARPortraitDepth');
 
   // Load a backdrop image. "Bright Center Star Cluster" by NASA
   backdrop = await loadImage('starcluster.jpg'); 
