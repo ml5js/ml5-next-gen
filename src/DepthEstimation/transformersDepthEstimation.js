@@ -11,6 +11,10 @@ import { chooseDevice, chooseDtype } from "../utils/transformersUtilities";
 
 /**
  * @typedef {Object} TransformersDepthEstimationRuntimeOptions Estimation runtime options.
+ * @property {number} [minDepth=0] - The minimum depth value (0-1) used for fixed normalization. Ignored if `normalizeDynamically` is true.
+ * @property {number} [maxDepth=1] - The maximum depth value (0-1) used for fixed normalization. Ignored if `normalizeDynamically` is true.
+ * @property {boolean} [normalizeDynamically=false] - If true, calculate min/max depth from each frame for normalization, overriding `minDepth` and `maxDepth`.
+ * @property {number} [normalizationSmoothingFactor=0.5] - Smoothing factor (0-1) for dynamic normalization range. Higher values react faster to changes. Only used if `normalizeDynamically` is true.
  * @property {boolean} [flipHorizontal=false] - Whether to flip the input image horizontally. Alias: `flipped`.
  * @property {ColormapName | string} [colormap='GRAYSCALE'] - The colormap for `result.image` output. Options: 'color', 'grayscale'.
  * @property {number | null} [targetFps=null] - Target FPS for continuous estimation (`estimateStart`). If set, skips frames to approximate the target. `null` runs as fast as possible.
@@ -20,12 +24,12 @@ import { chooseDevice, chooseDtype } from "../utils/transformersUtilities";
 
 /**
  * @typedef {Object} TransformersDepthEstimationResult The result object from a depth estimation.
- * @property {number[][]} data - Raw depth map as a 2D array.
+ * @property {number[][]} data - Normalized depth map (0-1, 0 is closest) as a 2D array.
  * @property {p5.Image | ImageData} image - p5.Image (if p5 is running, otherwise ImageData) of the depth map with chosen colormap.
  * @property {ImageData} imageData - ImageData visualization (normalized) with chosen colormap.
  * @property {number} width - Width of the depth map.
  * @property {number} height - Height of the depth map.
- * @property {function(number, number): number | null} getDepthAt - Get raw depth at (x, y).
+ * @property {function(number, number): number | null} getDepthAt - Get normalized depth (0-1) at (x, y).
  * @property {p5.Image} sourceFrame - The exact frame used for the depth estimation, as a p5.Image.
  */
 
@@ -68,6 +72,8 @@ class TransformersDepthEstimation {
     this.prevCall = null;
     this.lastFrameTime = 0; // For FPS control
     this.sourceFrameCanvas = null; // Store the exact frame used in estimation
+    this.smoothedMinDepth = null; // For dynamic normalization smoothing
+    this.smoothedMaxDepth = null; // For dynamic normalization smoothing
 
     this.maskWarned = false; // only used for the temporary warning message
 
@@ -79,6 +85,15 @@ class TransformersDepthEstimation {
     this.runtimeConfig = handleOptions(
       this.config,
       {
+        minDepth: { type: "number", min: 0, max: 1, default: 0 },
+        maxDepth: { type: "number", min: 0, max: 1, default: 1 },
+        normalizeDynamically: { type: "boolean", default: false }, // If true, min/maxDepth are ignored and calculated dynamically per frame.
+        normalizationSmoothingFactor: {
+          type: "number",
+          min: 0,
+          max: 1,
+          default: 0.5,
+        }, // Smoothing for dynamic normalization.
         flipHorizontal: { type: "boolean", alias: "flipped", default: false }, // Flips the input horizontally before estimation.
         colormap: {
           type: "enum",
@@ -105,6 +120,18 @@ class TransformersDepthEstimation {
     console.log(
       `ml5.depthEstimation: loading "${this.modelName}" → Hugging Face model "${this.hfModelId}", with device "${this.runtimeConfig.device}" and dtype "${this.runtimeConfig.dtype}"`
     );
+
+    // Warn if the fixed normalization range is inverted
+    if (
+      !this.runtimeConfig.normalizeDynamically &&
+      this.runtimeConfig.minDepth >= this.runtimeConfig.maxDepth
+    ) {
+      console.warn(
+        `🟪ml5.js warns: The "minDepth" option for depthEstimation (received ${this.runtimeConfig.minDepth}) should be smaller than "maxDepth" (received ${this.runtimeConfig.maxDepth}). ml5.js is using the default values of 0 and 1 instead.`
+      );
+      this.runtimeConfig.minDepth = 0;
+      this.runtimeConfig.maxDepth = 1;
+    }
 
     // Load the model
     this.model = await pipeline(
@@ -173,6 +200,12 @@ class TransformersDepthEstimation {
 
     this.detectMedia = image;
     this.detectCallback = callback;
+
+    // Reset smoothing if dynamic normalization is enabled and we restart
+    if (this.runtimeConfig.normalizeDynamically) {
+      this.smoothedMinDepth = null;
+      this.smoothedMaxDepth = null;
+    }
 
     this.signalStop = false;
     if (!this.detecting) {
@@ -249,25 +282,89 @@ class TransformersDepthEstimation {
       ctx.drawImage(image, 0, 0, image.width, image.height);
     }
 
+    // Run the model on the canvas
     let depthResult = await this.model(ctx.canvas);
-    let { depth } = depthResult;
-    const depth2D = [];
 
-    for (let y = 0; y < depth.height; y++) {
-      // Get the row slice and normalize each element
-      const row = depth.data.slice(y * depth.width, (y + 1) * depth.width);
-      const normalizedRow = Array.from(row).map((value) => (255 - value) / 255);
-      depth2D.push(normalizedRow);
+    // Raw float depth values from the model (larger values are closer to the camera)
+    const { predicted_depth } = depthResult; // This is the raw data output from the model, before transformers does its own normalization which results in the 'depth' property.
+    const [height, width] = predicted_depth.dims; // Dimensions of the depth map, which match the input image dimensions
+    const rawData = predicted_depth.data; // Float32Array of raw depth values, one per pixel, greater or equal to 0.
+
+    // Find this frame's raw min and max
+    let frameMin = Infinity;
+    let frameMax = -Infinity;
+    for (let i = 0; i < rawData.length; i++) {
+      if (rawData[i] < frameMin) frameMin = rawData[i];
+      if (rawData[i] > frameMax) frameMax = rawData[i];
+    }
+
+    // By default, stretch using this frame's own min and max
+    let stretchMin = frameMin;
+    let stretchMax = frameMax;
+
+    // Dynamic Normalization: smooth the min/max across frames
+    if (this.runtimeConfig.normalizeDynamically) {
+      const factor = this.runtimeConfig.normalizationSmoothingFactor;
+      if (this.smoothedMinDepth === null || this.smoothedMaxDepth === null) {
+        this.smoothedMinDepth = frameMin;
+        this.smoothedMaxDepth = frameMax;
+      } else {
+        this.smoothedMinDepth =
+          frameMin * factor + this.smoothedMinDepth * (1 - factor);
+        this.smoothedMaxDepth =
+          frameMax * factor + this.smoothedMaxDepth * (1 - factor);
+      }
+      stretchMin = this.smoothedMinDepth;
+      stretchMax = this.smoothedMaxDepth;
+    }
+
+    // The crop to apply after stretching (only for fixed mode, this uses the minDepth and maxDepth set in options)
+    let cropMin = 0;
+    let cropMax = 1;
+    if (!this.runtimeConfig.normalizeDynamically) {
+      cropMin = this.runtimeConfig.minDepth;
+      cropMax = this.runtimeConfig.maxDepth;
+    }
+
+    const stretchRange = stretchMax - stretchMin;
+    const cropRange = cropMax - cropMin;
+
+    // Normalization step: build the 2D depth array
+    const depth2D = [];
+    for (let y = 0; y < height; y++) {
+      const row = [];
+      for (let x = 0; x < width; x++) {
+        const rawValue = rawData[y * width + x];
+        let value = 0;
+
+        // Map raw values by stretchMin and stretchMax to 0-1, inverted so 0 is closest and 1 is farthest
+        if (stretchRange > 0) {
+          value = (stretchMax - rawValue) / stretchRange;
+        }
+
+        // Apply the crop: cropMin moves to 0, cropMax moves to 1
+        if (cropRange > 0) {
+          value = (value - cropMin) / cropRange;
+        } else {
+          value = 0;
+        }
+
+        // Clip anything outside the 0-1 range
+        value = Math.min(1, Math.max(0, value));
+
+        row.push(value);
+      }
+      depth2D.push(row);
     }
 
     let result = {
       data: depth2D,
-      width: depth.width,
-      height: depth.height,
+      width: width,
+      height: height,
       getDepthAt: (x, y) => {
         const xi = Math.floor(x);
         const yi = Math.floor(y);
-        if (xi >= 0 && xi < depth.width && yi >= 0 && yi < depth.height) {
+        if (xi >= 0 && xi < width && yi >= 0 && yi < height) {
           return depth2D[yi][xi];
         }
         return null;
@@ -277,8 +374,8 @@ class TransformersDepthEstimation {
     // Create ImageData visualization
     result.imageData = createImageDataFromDepthValues(
       depth2D,
-      depth.width,
-      depth.height,
+      width,
+      height,
       0,
       1,
       this.runtimeConfig.colormap
@@ -287,7 +384,7 @@ class TransformersDepthEstimation {
     // Create p5.Image versions
     result.image = generateP5Image(result.imageData);
     result.sourceFrame = generateP5Image(
-      this.getSourceFrameCanvas(depth.width, depth.height)
+      this.getSourceFrameCanvas(width, height)
     );
 
     // Error message
