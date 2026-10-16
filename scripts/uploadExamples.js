@@ -251,6 +251,11 @@ async function recursiveAddFiles(currentPath, fileArray, childrenArray) {
       fileArray.push(folder);
       childrenArray.push(fileID);
       recursiveAddFiles(filePath, fileArray, folder.children);
+      // Skip empty folders
+      if (folder.children.length === 0) {
+        fileArray.splice(fileArray.indexOf(folder), 1);
+        childrenArray.splice(childrenArray.indexOf(fileID), 1);
+      }
     } else {
       const fileObject = createFileObject(fileID, filePath);
       if (fileObject) {
@@ -338,16 +343,21 @@ async function main() {
   // Update existing sketches and upload new sketches
   console.log("Uploading sketches...");
   for (const sketchPath of sketchPaths) {
+    const sketch = createSketchObject(sketchPath);
+    // Skip directories with no uploadable text files.
+    if (sketch.files[0].children.length === 0) {
+      console.log("🟡 Skipped empty sketch: " + sketchPath);
+      manualUploadList.splice(0, manualUploadList.length);
+      manualUploadFlag = false;
+      continue;
+    }
     const oldSketch = oldSketches.projects.find(
       (sketch) =>
         sketch.name.toLowerCase() === sketchPath.split("/").pop().toLowerCase()
     );
     // If the sketch name already exists on the web editor, update the sketch.
     if (oldSketch) {
-      const status = await updateSketch(
-        oldSketch,
-        createSketchObject(sketchPath)
-      );
+      const status = await updateSketch(oldSketch, sketch);
       if (status != 200) {
         console.log("🔴 Failed to update sketch: " + oldSketch.name);
         console.log("The server returned status code: " + status);
@@ -366,7 +376,7 @@ async function main() {
     }
     // If the sketch name does not exist on the web editor, upload the sketch.
     else {
-      const status = await uploadSketch(createSketchObject(sketchPath));
+      const status = await uploadSketch(sketch);
       if (status != 200) {
         console.log("🔴 Failed to create new sketch: " + sketchPath);
         console.log("    - The server returned status code: " + status);
