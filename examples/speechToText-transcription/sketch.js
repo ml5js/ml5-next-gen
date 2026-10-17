@@ -4,24 +4,17 @@ let transcriptionText = "Transcription: ";
 let loadProgress = 0;
 let modelReady = false;
 
-function setup() {
+async function setup() {
   createCanvas(400, 400);
 
-  speechToTextModel = ml5.speechToText(
-    "WhisperTiny",
+  speechToTextModel = await ml5.speechToText(
+    "Whisper",
     {
       // Called by Transformers.js while model files download
-      progress_callback: (info) => {
-        if (info.status === "progress_total") loadProgress = info.progress;
-      },
-    },
-    modelLoaded
+      progress_callback: logProgress,
+    }
   );
-}
 
-// Called once the model has finished loading
-function modelLoaded(model) {
-  speechToTextModel = model;
   modelReady = true;
 
   let startButton = createButton("start");
@@ -50,6 +43,13 @@ function draw() {
   }
 
   text(transcriptionText, 20, 20, width - 40, height - 40);
+}
+
+function logProgress(info) {
+  if(info.status === "progress_total") {
+    console.log("Loading model: " + round(info.progress) + "%");
+  }
+  console.log("Model Loaded!")
 }
 
 function startListening() {
