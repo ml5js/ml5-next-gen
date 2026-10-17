@@ -69,7 +69,7 @@ export class SpeechToTextTransformer {
    * @returns {Promise<Object>} An object containing the transcribed text.
    * @public
    */
-  async transcribe(url) {
+  async transcribe(url, options = {}) {
     await this.ready;
     // Give the browser a moment to update before the heavy work begins
     await new Promise((r) => setTimeout(r, 10));
