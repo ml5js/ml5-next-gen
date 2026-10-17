@@ -99,23 +99,27 @@ export class SpeechToTextTransformer {
    * @returns {Promise<Object>} An object containing the transcribed text.
    * @public
    */
-  async stopListening(callback) {
+  async stopListening(optionsOrCallback, cb) {
+    const { options = {}, callback } = handleArguments(optionsOrCallback, cb);
     if (!this.mediaRecorder) return;
+    // Keep a reference to the recorder
+    const recorder = this.mediaRecorder;
+    this.mediaRecorder = null;
     return new Promise((resolve) => {
-      this.mediaRecorder.onstop = async () => {
+      recorder.onstop = async () => {
         // Release the microphone so the browser's recording indicator turns off
-        this.mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+        recorder.stream.getTracks().forEach((track) => track.stop());
 
-        const audioBlob = new Blob(this.audioChunks, { type: "audio/webm" });
+        const audioBlob = new Blob(this.audioChunks, { type: recorder.mimeType });
         const audioUrl = URL.createObjectURL(audioBlob);
-        const result = await this.transcribe(audioUrl);
+        const result = await this.transcribe(audioUrl, options);
         URL.revokeObjectURL(audioUrl);
 
         // Output the result via callback and/or promise
         if (callback) callback(result);
         resolve(result);
       };
-      this.mediaRecorder.stop();
+      recorder.stop();
     });
   }
 }
