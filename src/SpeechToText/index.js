@@ -73,7 +73,11 @@ export class SpeechToTextTransformer {
     await this.ready;
     // Give the browser a moment to update before the heavy work begins
     await new Promise((r) => setTimeout(r, 10));
-    return await this.transcriber(url);
+    return await this.transcriber(url, {
+      chunk_length_s: 30,
+      stride_length_s: 5,
+      ...options,
+    });
   }
 
   /**
