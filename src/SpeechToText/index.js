@@ -6,7 +6,9 @@ import handleArguments from "../utils/handleArguments";
  * Add new transformer-based speech recognizers here.
  */
 const TRANSFORMER_MODELS = {
+  Whisper: "Xenova/whisper-tiny",
   WhisperTiny: "Xenova/whisper-tiny",
+  WhisperSmall: "Xenova/whisper-small"
 };
 
 /**
@@ -55,7 +57,6 @@ export class SpeechToTextTransformer {
       device: this.device,
     }).then((transcriber) => {
       this.transcriber = transcriber;
-      console.log("Model Loaded!");
       callback?.(this);
       return this;
     });
@@ -69,7 +70,6 @@ export class SpeechToTextTransformer {
    */
   async transcribe(url) {
     await this.ready;
-    console.log("Transcribing...");
     // Give the browser a moment to update before the heavy work begins
     await new Promise((r) => setTimeout(r, 10));
     return await this.transcriber(url);
@@ -86,7 +86,6 @@ export class SpeechToTextTransformer {
     this.audioChunks = [];
     this.mediaRecorder.ondataavailable = (e) => this.audioChunks.push(e.data);
     this.mediaRecorder.start();
-    console.log("Recording...");
   }
 
   /**
