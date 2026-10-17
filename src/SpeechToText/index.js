@@ -8,7 +8,8 @@ import handleArguments from "../utils/handleArguments";
 const TRANSFORMER_MODELS = {
   Whisper: "Xenova/whisper-tiny",
   WhisperTiny: "Xenova/whisper-tiny",
-  WhisperSmall: "Xenova/whisper-small"
+  WhisperBase: "Xenova/whisper-base",
+  WhisperSmall: "Xenova/whisper-small",
 };
 
 /**
@@ -32,7 +33,7 @@ export class SpeechToTextTransformer {
    * @param {Object} options
    * @param {function} callback
    */
-  constructor(modelName = "WhisperTiny", options = {}, callback) {
+  constructor(modelName = "Whisper", options = {}, callback) {
     this.transcriber = null;
     this.mediaRecorder = null;
     this.audioChunks = [];
