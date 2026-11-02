@@ -29,18 +29,6 @@ function draw() {
   noStroke();
   textAlign(LEFT, TOP);
 
-  if (!modelReady) {
-    // Progress bar shown while the model downloads
-    text("Loading model...", 20, 20);
-    noFill();
-    stroke(0);
-    rect(20, 50, width - 40, 20);
-    noStroke();
-    fill(0);
-    rect(20, 50, (width - 40) * (loadProgress / 100), 20);
-    text(nf(loadProgress, 0, 0) + "%", 20, 80);
-    return;
-  }
 
   text(transcriptionText, 20, 20, width - 40, height - 40);
 }
