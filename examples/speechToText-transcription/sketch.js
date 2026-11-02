@@ -1,8 +1,6 @@
 // sketch.js
 let speechToTextModel;
 let transcriptionText = "Transcription: ";
-let loadProgress = 0;
-let modelReady = false;
 
 async function setup() {
   createCanvas(400, 400);
