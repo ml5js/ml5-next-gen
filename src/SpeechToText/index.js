@@ -6,10 +6,10 @@ import handleArguments from "../utils/handleArguments";
  * Add new transformer-based speech recognizers here.
  */
 const TRANSFORMER_MODELS = {
-  Whisper: "Xenova/whisper-tiny",
-  WhisperTiny: "Xenova/whisper-tiny",
-  WhisperBase: "Xenova/whisper-base",
-  WhisperSmall: "Xenova/whisper-small",
+  Whisper: { id: "Xenova/whisper-base", dtype: "fp16" },
+  WhisperTiny: { id: "Xenova/whisper-tiny" },
+  WhisperBase: { id: "Xenova/whisper-base", dtype: "fp16" },
+  WhisperSmall: { id: "Xenova/whisper-small", dtype: "fp16" },
 };
 
 /**
@@ -40,14 +40,13 @@ export class SpeechToTextTransformer {
     this.device = options.device || chooseDevice();
     this.isListening = false;
 
-    const hfModelId = TRANSFORMER_MODELS[modelName];
-    if (!hfModelId) {
-      throw new Error(
-        `Unknown transformer model "${modelName}". Options: ${Object.keys(
+    const model = TRANSFORMER_MODELS[modelName];
+    if (!model) {
+      throw new Error(`Unknown transformer model "${modelName}". Options: ${Object.keys(
           TRANSFORMER_MODELS
-        ).join(", ")}`
-      );
+        ).join(", ")}`);
     }
+    const hfModelId = model.id;
 
     // Print which underlying HF model is being loaded
     console.log(
@@ -55,6 +54,7 @@ export class SpeechToTextTransformer {
     );
 
     this.ready = pipeline("automatic-speech-recognition", hfModelId, {
+      ...(model.dtype && this.device === "webgpu" && { dtype: model.dtype }),
       ...options,
       device: this.device,
     }).then((transcriber) => {
