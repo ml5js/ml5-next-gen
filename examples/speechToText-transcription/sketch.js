@@ -49,7 +49,6 @@ function logProgress(info) {
   if(info.status === "progress_total") {
     console.log("Loading model: " + round(info.progress) + "%");
   }
-  console.log("Model Loaded!")
 }
 
 function startListening() {
