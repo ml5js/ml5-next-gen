@@ -38,6 +38,7 @@ export class SpeechToTextTransformer {
     this.mediaRecorder = null;
     this.audioChunks = [];
     this.device = options.device || chooseDevice();
+    this.isListening = false;
 
     const hfModelId = TRANSFORMER_MODELS[modelName];
     if (!hfModelId) {
@@ -86,11 +87,26 @@ export class SpeechToTextTransformer {
    */
   async startListening() {
     await this.ready;
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    this.mediaRecorder = new MediaRecorder(stream);
-    this.audioChunks = [];
-    this.mediaRecorder.ondataavailable = (e) => this.audioChunks.push(e.data);
-    this.mediaRecorder.start();
+
+    if (this.isListening) {
+      console.warn(
+        "ml5.speechToText: already listening. Call stopListening() before starting again."
+      );
+      return;
+    }
+
+    this.isListening = true;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      this.mediaRecorder = new MediaRecorder(stream);
+      this.audioChunks = [];
+      this.mediaRecorder.ondataavailable = (e) => this.audioChunks.push(e.data);
+      this.mediaRecorder.start();
+    } catch (err) {
+      this.isListening = false;
+      throw err;
+    }
+
   }
 
   /**
@@ -105,6 +121,7 @@ export class SpeechToTextTransformer {
     // Keep a reference to the recorder
     const recorder = this.mediaRecorder;
     this.mediaRecorder = null;
+    this.isListening = false;
     return new Promise((resolve) => {
       recorder.onstop = async () => {
         // Release the microphone so the browser's recording indicator turns off
