@@ -54,7 +54,7 @@ export class SpeechToTextTransformer {
     );
 
     this.ready = pipeline("automatic-speech-recognition", hfModelId, {
-      ...(model.dtype && this.device === "webgpu" && { dtype: model.dtype }),
+      ...(model.dtype && { dtype: model.dtype }),
       ...options,
       device: this.device,
     }).then((transcriber) => {
