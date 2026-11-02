@@ -16,9 +16,9 @@ async function setup() {
   console.log("Model loaded!");
 
   let startButton = createButton("start");
-  startButton.mousePressed(startListening);
+  startButton.mousePressed(transcribeStart);
   let stopButton = createButton("stop");
-  stopButton.mousePressed(stopListening);
+  stopButton.mousePressed(transcribeStop);
 }
 
 function draw() {
@@ -26,7 +26,6 @@ function draw() {
   fill(0);
   noStroke();
   textAlign(LEFT, TOP);
-
 
   text(transcriptionText, 20, 20, width - 40, height - 40);
 }
@@ -37,14 +36,14 @@ function logProgress(info) {
   }
 }
 
-function startListening() {
+function transcribeStart() {
   console.log("Listening...");
-  speechToTextModel.startListening();
+  speechToTextModel.transcribeStart();
 }
 
-function stopListening() {
+function transcribeStop() {
   console.log("Stopped Listening...");
-  speechToTextModel.stopListening(gotResults);
+  speechToTextModel.transcribeStop(gotResults);
 }
 
 function gotResults(results) {

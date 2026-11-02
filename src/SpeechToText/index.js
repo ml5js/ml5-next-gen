@@ -85,7 +85,7 @@ export class SpeechToTextTransformer {
    * Starts recording audio from the microphone.
    * @public
    */
-  async startListening() {
+  async transcribeStart() {
     await this.ready;
 
     if (this.isListening) {
@@ -115,7 +115,7 @@ export class SpeechToTextTransformer {
    * @returns {Promise<Object>} An object containing the transcribed text.
    * @public
    */
-  async stopListening(optionsOrCallback, cb) {
+  async transcribeStop(optionsOrCallback, cb) {
     const { options = {}, callback } = handleArguments(optionsOrCallback, cb);
     if (!this.mediaRecorder) return;
     // Keep a reference to the recorder
