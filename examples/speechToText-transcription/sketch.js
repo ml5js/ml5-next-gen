@@ -15,7 +15,7 @@ async function setup() {
     }
   );
 
-  modelReady = true;
+  console.log("Model loaded!");
 
   let startButton = createButton("start");
   startButton.mousePressed(startListening);
