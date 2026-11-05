@@ -11,10 +11,10 @@ import { chooseDevice, chooseDtype } from "../utils/transformersUtilities";
 
 /**
  * @typedef {Object} TransformersDepthEstimationRuntimeOptions Estimation runtime options.
- * @property {number} [minDepth=0] - The minimum depth value (0-1) used for fixed normalization. Ignored if `normalizeDynamically` is true.
- * @property {number} [maxDepth=1] - The maximum depth value (0-1) used for fixed normalization. Ignored if `normalizeDynamically` is true.
- * @property {boolean} [normalizeDynamically=false] - If true, calculate min/max depth from each frame for normalization, overriding `minDepth` and `maxDepth`.
- * @property {number} [normalizationSmoothingFactor=0.5] - Smoothing factor (0-1) for dynamic normalization range. Higher values react faster to changes. Only used if `normalizeDynamically` is true.
+ * @property {number} [minDepth=0] - The minimum depth value (0-1) used for fixed normalization. Ignored if `enableSmoothing` is true.
+ * @property {number} [maxDepth=1] - The maximum depth value (0-1) used for fixed normalization. Ignored if `enableSmoothing` is true.
+ * @property {boolean} [enableSmoothing=false] - If true, calculate min/max depth from each frame for normalization, overriding `minDepth` and `maxDepth`. Alias: `normalizeDynamically`.
+ * @property {number} [smoothingFactor=0.5] - Smoothing factor (0-1) for dynamic normalization range. Higher values react faster to changes. Only used if `enableSmoothing` is true. Alias: `normalizationSmoothingFactor`.
  * @property {boolean} [flipHorizontal=false] - Whether to flip the input image horizontally. Alias: `flipped`.
  * @property {ColormapName | string} [colormap='GRAYSCALE'] - The colormap for `result.image` output. Options: 'color', 'grayscale'.
  * @property {number | null} [targetFps=null] - Target FPS for continuous estimation (`estimateStart`). If set, skips frames to approximate the target. `null` runs as fast as possible.
@@ -87,12 +87,13 @@ class TransformersDepthEstimation {
       {
         minDepth: { type: "number", min: 0, max: 1, default: 0 },
         maxDepth: { type: "number", min: 0, max: 1, default: 1 },
-        normalizeDynamically: { type: "boolean", default: false }, // If true, min/maxDepth are ignored and calculated dynamically per frame.
-        normalizationSmoothingFactor: {
+        enableSmoothing: { type: "boolean", default: false, alias: "normalizeDynamically" }, // If true, min/maxDepth are ignored and calculated dynamically per frame.
+        smoothingFactor: {
           type: "number",
           min: 0,
           max: 1,
           default: 0.5,
+          alias: "normalizationSmoothingFactor",
         }, // Smoothing for dynamic normalization.
         flipHorizontal: { type: "boolean", alias: "flipped", default: false }, // Flips the input horizontally before estimation.
         colormap: {
@@ -123,7 +124,7 @@ class TransformersDepthEstimation {
 
     // Warn if the fixed normalization range is inverted
     if (
-      !this.runtimeConfig.normalizeDynamically &&
+      !this.runtimeConfig.enableSmoothing &&
       this.runtimeConfig.minDepth >= this.runtimeConfig.maxDepth
     ) {
       console.warn(
@@ -202,7 +203,7 @@ class TransformersDepthEstimation {
     this.detectCallback = callback;
 
     // Reset smoothing if dynamic normalization is enabled and we restart
-    if (this.runtimeConfig.normalizeDynamically) {
+    if (this.runtimeConfig.enableSmoothing) {
       this.smoothedMinDepth = null;
       this.smoothedMaxDepth = null;
     }
@@ -303,8 +304,8 @@ class TransformersDepthEstimation {
     let stretchMax = frameMax;
 
     // Dynamic Normalization: smooth the min/max across frames
-    if (this.runtimeConfig.normalizeDynamically) {
-      const factor = this.runtimeConfig.normalizationSmoothingFactor;
+    if (this.runtimeConfig.enableSmoothing) {
+      const factor = this.runtimeConfig.smoothingFactor;
       if (this.smoothedMinDepth === null || this.smoothedMaxDepth === null) {
         this.smoothedMinDepth = frameMin;
         this.smoothedMaxDepth = frameMax;
@@ -321,7 +322,7 @@ class TransformersDepthEstimation {
     // The crop to apply after stretching (only for fixed mode, this uses the minDepth and maxDepth set in options)
     let cropMin = 0;
     let cropMax = 1;
-    if (!this.runtimeConfig.normalizeDynamically) {
+    if (!this.runtimeConfig.enableSmoothing) {
       cropMin = this.runtimeConfig.minDepth;
       cropMax = this.runtimeConfig.maxDepth;
     }

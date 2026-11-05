@@ -24,10 +24,10 @@ import {
 
 /**
  * @typedef {Object} TensorflowDepthEstimationRuntimeOptions Estimation runtime options.
- * @property {number} [minDepth=0.2] - The minimum depth value (0-1) used for fixed normalization. Ignored if `normalizeDynamically` is true.
- * @property {number} [maxDepth=0.75] - The maximum depth value (0-1) used for fixed normalization. Ignored if `normalizeDynamically` is true.
- * @property {boolean} [normalizeDynamically=false] - If true, calculate min/max depth from each frame for normalization, overriding `minDepth` and `maxDepth`.
- * @property {number} [normalizationSmoothingFactor=0.5] - Smoothing factor (0-1) for dynamic normalization range. Higher values react faster to changes. Only used if `normalizeDynamically` is true.
+ * @property {number} [minDepth=0.2] - The minimum depth value (0-1) used for fixed normalization. Ignored if `enableSmoothing` is true.
+ * @property {number} [maxDepth=0.75] - The maximum depth value (0-1) used for fixed normalization. Ignored if `enableSmoothing` is true.
+ * @property {boolean} [enableSmoothing=false] - If true, calculate min/max depth from each frame for normalization, overriding `minDepth` and `maxDepth`. Alias: `normalizeDynamically`.
+ * @property {number} [smoothingFactor=0.5] - Smoothing factor (0-1) for dynamic normalization range. Higher values react faster to changes. Only used if `enableSmoothing` is true. Alias: `normalizationSmoothingFactor`.
  * @property {boolean} [flipHorizontal=false] - Whether to flip the input image horizontally. Alias: `flipped`.
  * @property {ColormapName | string} [colormap='GRAYSCALE'] - The colormap for `result.image` output. Options: 'color', 'grayscale'.
  * @property {number | null} [targetFps=null] - Target FPS for continuous estimation (`estimateStart`). If set, skips frames to approximate the target. `null` runs as fast as possible.
@@ -39,7 +39,7 @@ import {
 
 /**
  * @typedef {Object} TensorflowDepthEstimationResult The result object from a depth estimation.
- * @property {number[][]} data - Depth map as a 2D array after being normalized (either with minDepth/maxDepth or normalizeDynamically).
+ * @property {number[][]} data - Depth map as a 2D array after being normalized (either with minDepth/maxDepth or enableSmoothing).
  * @property {p5.Image | ImageData} image - p5.Image (if p5 is running, otherwise ImageData) of the depth map with chosen colormap.
  * @property {ImageData} imageData - ImageData visualization (normalized) with chosen colormap.
  * @property {number} width - Width of the depth map.
@@ -103,12 +103,13 @@ class TensorflowDepthEstimation {
       {
         minDepth: { type: "number", min: 0, max: 1, default: 0.2 }, // Default changed from 0
         maxDepth: { type: "number", min: 0, max: 1, default: 0.75 }, // Default changed from 1
-        normalizeDynamically: { type: "boolean", default: false }, // If true, min/maxDepth are ignored and calculated dynamically per frame.
-        normalizationSmoothingFactor: {
+        enableSmoothing: { type: "boolean", default: false, alias: "normalizeDynamically" }, // If true, min/maxDepth are ignored and calculated dynamically per frame.
+        smoothingFactor: {
           type: "number",
           min: 0,
           max: 1,
           default: 0.5,
+          alias: "normalizationSmoothingFactor",
         }, // Smoothing for dynamic normalization.
         flipHorizontal: { type: "boolean", alias: "flipped", default: false }, // Flips the input horizontally before estimation.
         colormap: {
@@ -128,7 +129,7 @@ class TensorflowDepthEstimation {
 
     // Warn if the fixed normalization range is inverted
     if (
-      !this.runtimeConfig.normalizeDynamically &&
+      !this.runtimeConfig.enableSmoothing &&
       this.runtimeConfig.minDepth >= this.runtimeConfig.maxDepth
     ) {
       console.warn(
@@ -139,7 +140,7 @@ class TensorflowDepthEstimation {
     }
 
     // Initialize smoothed values based on initial config if dynamic normalization is off
-    if (!this.runtimeConfig.normalizeDynamically) {
+    if (!this.runtimeConfig.enableSmoothing) {
       this.smoothedMinDepth = this.runtimeConfig.minDepth;
       this.smoothedMaxDepth = this.runtimeConfig.maxDepth;
     }
@@ -374,7 +375,7 @@ class TensorflowDepthEstimation {
       actualTensor = await depthMapResult.toTensor();
 
       // Dynamic Normalization: calculating the dynamic min/max
-      if (this.runtimeConfig.normalizeDynamically) {
+      if (this.runtimeConfig.enableSmoothing) {
         const [minTensor, maxTensor] = tf.tidy(() => [
           actualTensor.min(), // Use actualTensor here
           actualTensor.max(), // Use actualTensor here
@@ -389,7 +390,7 @@ class TensorflowDepthEstimation {
         maxDepthActual = maxDepthActual[0]; // Extract scalar value
 
         // Initialize or smooth the min/max values
-        const factor = this.runtimeConfig.normalizationSmoothingFactor;
+        const factor = this.runtimeConfig.smoothingFactor;
         if (this.smoothedMinDepth === null || this.smoothedMaxDepth === null) {
           this.smoothedMinDepth = minDepthActual;
           this.smoothedMaxDepth = maxDepthActual;
@@ -526,7 +527,7 @@ class TensorflowDepthEstimation {
     this.detectCallback = callback;
 
     // Reset smoothing if dynamic normalization is enabled and we restart
-    if (this.runtimeConfig.normalizeDynamically) {
+    if (this.runtimeConfig.enableSmoothing) {
       this.smoothedMinDepth = null;
       this.smoothedMaxDepth = null;
     }
