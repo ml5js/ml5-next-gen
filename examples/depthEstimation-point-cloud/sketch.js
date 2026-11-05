@@ -90,8 +90,8 @@ function draw() {
             255
           );
 
-          // Draw a small sphere at this pixel's position with this pixel's color
-          sphere(0.3);
+          // Draw a small low-detail sphere at this pixel's position with this pixel's color
+          sphere(0.3, 3, 3);
 
           pop();
         }
