@@ -10,7 +10,7 @@ import { handleModelName } from "../utils/handleOptions";
 
 /**
  * Creates a new DepthEstimation instance.
- * @param {string} [modelName="ARPortraitDepth"] - Model name.
+ * @param {string} [modelName="DepthAnything"] - Model name.
  * @param {TensorflowDepthEstimationOptions & TensorflowDepthEstimationRuntimeOptions | TransformersDepthEstimationRuntimeOptions} [options] - Options.
  * @param {function(): void} [callback] - Callback when loaded.
  * @returns {TensorflowDepthEstimation | TransformersDepthEstimation} A new depthEstimation instance.
@@ -21,7 +21,7 @@ const depthEstimation = (...inputs) => {
   const modelName = handleModelName(
     string,
     ["ARPortraitDepth", "DepthAnything", "DepthAnythingV2Small"],
-    "ARPortraitDepth",
+    "DepthAnything",
     "depthEstimation"
   );
 

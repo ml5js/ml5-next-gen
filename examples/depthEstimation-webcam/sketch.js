@@ -19,8 +19,7 @@ async function setup() {
   createCanvas(videoWidth, videoHeight);
 
   // Load the depth estimation model
-  depthEstimator = await ml5.depthEstimation('ARPortraitDepth');
-  // Try with a transformer model. Replace 'ARPortraitDepth' -> 'DepthAnything'
+  depthEstimator = await ml5.depthEstimation();
 
   // Create the video capture element
   webcam = createCapture(VIDEO);

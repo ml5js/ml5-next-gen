@@ -22,16 +22,9 @@ let videoHeight = 240;
 // Whether the data in the depthMap is new
 let newDataAvailable = false;
 
-let options = {
-  // Default is 4, but since this image is smaller, we change it to 2 so as to not lose too much detail
-  // this is only important when using the ARPortraitDepth model.
-  dilationFactor: 2,
-};
-
 async function setup() {
   // Load the depth estimation model
-  depthEstimator = await ml5.depthEstimation('ARPortraitDepth', options);
-  // Try with a transformer model. Replace 'ARPortraitDepth' -> 'DepthAnything'
+  depthEstimator = await ml5.depthEstimation();
 
   // Create a canvas larger than the video and turn on WEBGL mode for 3D
   createCanvas(videoWidth * 2, videoHeight * 2, WEBGL);
@@ -90,26 +83,14 @@ function draw() {
           let c = voxelIndex + webcam.width; // y + 1 pixel
           let d = voxelIndex + webcam.width + 1; // x + 1 and y + 1 pixel
 
-          // Lets get the depth values for each of the 4 vertices
-          const aDepth = depthMap.getDepthAt(x, y);
-          const bDepth = depthMap.getDepthAt(x + 1, y);
-          const cDepth = depthMap.getDepthAt(x, y + 1);
-          const dDepth = depthMap.getDepthAt(x + 1, y + 1);
-
           // Each "zone" with 4 vertices consists of two
           // adjacent triangles: abc and bdc
 
-          // Only add them if they are not part of 
-          // the background, meaning their depth is not 0.
-          if (!(aDepth === 0 || bDepth === 0 || cDepth === 0)) {
-            // First triangle
-            mesh.faces.push([a, b, c]);
-          }
-          
-          if (!(bDepth === 0 || dDepth === 0 || cDepth === 0)) {
-            // Second triangle
-            mesh.faces.push([b, d, c]);
-          }
+          // First triangle
+          mesh.faces.push([a, b, c]);
+        
+          // Second triangle
+          mesh.faces.push([b, d, c]);
         }
       }
     }

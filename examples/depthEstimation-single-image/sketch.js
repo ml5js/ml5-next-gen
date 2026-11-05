@@ -15,8 +15,7 @@ async function setup() {
   img = await loadImage("face.png");
 
   // Load the depth estimation model
-  depthEstimator = await ml5.depthEstimation('ARPortraitDepth');
-  // Try with a transformer model. Replace 'ARPortraitDepth' -> 'DepthAnything'
+  depthEstimator = await ml5.depthEstimation();
 
   // Create a canvas twice the width of the image
   createCanvas(img.width * 2, img.height);
