@@ -34,6 +34,7 @@ export class SpeechToTextTransformer {
    * @param {function} callback
    */
   constructor(modelName = "Whisper", options = {}, callback) {
+    this.language = options.language;
     this.transcriber = null;
     this.mediaRecorder = null;
     this.audioChunks = [];
@@ -77,6 +78,7 @@ export class SpeechToTextTransformer {
     return await this.transcriber(url, {
       chunk_length_s: 30,
       stride_length_s: 5,
+      ...(this.language && { language: this.language }),
       ...options,
     });
   }

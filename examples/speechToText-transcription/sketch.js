@@ -8,8 +8,9 @@ async function setup() {
   speechToTextModel = await ml5.speechToText(
     "Whisper",
     {
-      // Called by Transformers.js while model files download
-      progress_callback: logProgress,
+      language: "english", // English is default but you can switch it any other supported language https://whisper-api.com/docs/languages/
+      progress_callback: logProgress, // Called by Transformers.js while model files download
+
     }
   );
 
