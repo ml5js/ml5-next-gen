@@ -1,6 +1,7 @@
 import { pipeline } from "@huggingface/transformers";
 import handleArguments, { isVideo } from "../utils/handleArguments";
 import { drawToCanvas } from "../utils/imageUtilities";
+import { chooseDevice, chooseDtypeForDevice } from "../utils/transformersUtilities";
 
 /**
  * Maps ml5-friendly model names to their Hugging Face model ids.
@@ -11,17 +12,6 @@ const TRANSFORMER_MODELS = {
   ViTBase: "Xenova/vit-base-patch16-224",
   SwinFood101: "onnx-community/swin-finetuned-food101-ONNX",
 };
-
-/**
- * Chooses the best available device for running the model.
- * Prefers WebGPU for better performance, falls back to WASM.
- * @returns {string} The device to use ("webgpu" or "wasm").
- * @private
- */
-function chooseDevice() {
-  if (typeof navigator !== "undefined" && navigator.gpu) return "webgpu";
-  return "wasm";
-}
 
 /**
  * Image classifier using Vision Transformer (ViT) model from Hugging Face Transformers.js
@@ -39,6 +29,7 @@ export class ImageClassifierTransformer {
     this.isClassifying = false;
     this.topk = options.topk || 3;
     this.device = options.device || chooseDevice();
+    this.dtype = options.dtype || chooseDtypeForDevice(this.device);
 
     const hfModelId = TRANSFORMER_MODELS[modelName];
     if (!hfModelId) {
@@ -51,11 +42,12 @@ export class ImageClassifierTransformer {
 
     // Print which underlying HF model is being loaded
     console.log(
-      `ml5.imageClassifier: loading "${modelName}" → Hugging Face model "${hfModelId}"`
+      `ml5.imageClassifier: loading "${modelName}" → Hugging Face model "${hfModelId}", with device "${this.device}" and dtype "${this.dtype}"`
     );
 
     this.ready = pipeline("image-classification", hfModelId, {
       device: this.device,
+      dtype: this.dtype,
       ...options,
     }).then((classifier) => {
       this.classifier = classifier;
