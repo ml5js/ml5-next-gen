@@ -19,14 +19,9 @@ let videoHeight = 240;
 // Whether the data in the depthMap is new
 let newDataAvailable = false;
 
-let options = {
-  // Default is 4, but since this image is smaller, we change it to 1 so as to not lose too much detail
-  dilationFactor: 1, 
-};
-
 async function setup() {
   // Load the depth estimation model
-  depthEstimator = await ml5.depthEstimation(options);
+  depthEstimator = await ml5.depthEstimation();
 
   // Create a canvas larger than the video and turn on WEBGL mode for 3D
   createCanvas(videoWidth * 2, videoHeight * 2, WEBGL);
@@ -88,8 +83,8 @@ function draw() {
             255
           );
 
-          // Draw a small sphere at this pixel's position with this pixel's color
-          sphere(0.3);
+          // Draw a small low-detail sphere at this pixel's position with this pixel's color
+          sphere(0.3, 3, 3);
 
           pop();
         }
