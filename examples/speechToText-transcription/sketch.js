@@ -7,7 +7,7 @@ async function setup() {
   speechToTextModel = await ml5.speechToText(
     "Whisper",
     {
-      language: "english", // English is default but you can switch it any other supported language https://whisper-api.com/docs/languages/
+      language: "english", // English is default but you can switch it any other supported language https://github.com/openai/whisper#available-models-and-languages
       progress_callback: logProgress, // Called by Transformers.js while model files download
 
     }
