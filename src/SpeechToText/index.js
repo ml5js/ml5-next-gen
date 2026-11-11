@@ -82,7 +82,7 @@ export class SpeechToTextTransformer {
 
     if (this.isListening) {
       console.warn(
-        "ml5.speechToText: already listening. Call stopListening() before starting again."
+        "ml5.speechToText: already listening. Call transcribeStop() before starting again."
       );
       return;
     }
