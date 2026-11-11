@@ -27,9 +27,9 @@ const withPreload = {
   handPose,
   imageClassifier,
   neuralNetwork,
+  objectDetection,
   sentiment,
   soundClassifier,
-  objectDetection,
   speechToText,
 };
 

@@ -1,4 +1,3 @@
-// sketch.js
 let speechToTextModel;
 let transcriptionText = "Transcription: ";
 
@@ -32,7 +31,7 @@ function draw() {
 }
 
 function logProgress(info) {
-  if(info.status === "progress_total") {
+  if(info.status == "progress_total") {
     console.log("Loading model: " + round(info.progress) + "%");
   }
 }
