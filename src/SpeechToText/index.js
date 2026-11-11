@@ -147,7 +147,14 @@ const speechToText = (modelName, optionsOrCallback, cb) => {
     options = {},
     callback,
   } = handleArguments(modelName, optionsOrCallback, cb);
-  return new SpeechToTextTransformer(string, options, callback);
+  // Match the model name ignoring case, e.g. "whisper" → "Whisper"
+  const name = handleModelName(
+    string,
+    Object.keys(TRANSFORMER_MODELS),
+    "Whisper",
+    "speechToText"
+  );
+  return new SpeechToTextTransformer(name, options, callback);
 };
 
 export default speechToText;
