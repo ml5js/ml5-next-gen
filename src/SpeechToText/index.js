@@ -1,27 +1,17 @@
 import { pipeline } from "@huggingface/transformers";
 import handleArguments from "../utils/handleArguments";
+import { chooseDevice, chooseDtype } from "../utils/transformersUtilities";
 
 /**
  * Maps ml5-friendly model names to their Hugging Face model ids.
  * Add new transformer-based speech recognizers here.
  */
 const TRANSFORMER_MODELS = {
-  Whisper: { id: "Xenova/whisper-base", dtype: "fp16" },
+  Whisper: { id: "Xenova/whisper-base", dtype: chooseDtype },
   WhisperTiny: { id: "Xenova/whisper-tiny" },
-  WhisperBase: { id: "Xenova/whisper-base", dtype: "fp16" },
-  WhisperSmall: { id: "Xenova/whisper-small", dtype: "fp16" },
+  WhisperBase: { id: "Xenova/whisper-base", dtype: chooseDtype },
+  WhisperSmall: { id: "Xenova/whisper-small", dtype: chooseDtype },
 };
-
-/**
- * Chooses the best available device for running the model.
- * Prefers WebGPU for better performance, falls back to WASM.
- * @returns {string} The device to use ("webgpu" or "wasm").
- * @private
- */
-function chooseDevice() {
-  if (typeof navigator !== "undefined" && navigator.gpu) return "webgpu";
-  return "wasm";
-}
 
 /**
  * Speech to text transcriber using a Whisper model from Hugging Face Transformers.js
@@ -38,7 +28,7 @@ export class SpeechToTextTransformer {
     this.transcriber = null;
     this.mediaRecorder = null;
     this.audioChunks = [];
-    this.device = options.device || chooseDevice();
+    this.device = options.device || chooseDevice;
     this.isListening = false;
 
     const model = TRANSFORMER_MODELS[modelName];
