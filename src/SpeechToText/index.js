@@ -1,6 +1,6 @@
 import { pipeline } from "@huggingface/transformers";
 import handleArguments from "../utils/handleArguments";
-import { chooseDevice, chooseDtype } from "../utils/transformersUtilities";
+import { chooseDevice, chooseDtypeForDevice } from "../utils/transformersUtilities";
 import { handleModelName } from "../utils/handleOptions";
 /**
  * Maps ml5-friendly model names to their Hugging Face model ids.
