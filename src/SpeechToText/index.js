@@ -28,7 +28,8 @@ export class SpeechToTextTransformer {
     this.transcriber = null;
     this.mediaRecorder = null;
     this.audioChunks = [];
-    this.device = options.device || chooseDevice;
+    this.device = options.device || chooseDevice();
+    this.dtype = options.dtype || chooseDtypeForDevice(this.device);
     this.isListening = false;
 
     const hfModelId = TRANSFORMER_MODELS[modelName];
