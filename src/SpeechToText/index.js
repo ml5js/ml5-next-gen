@@ -7,10 +7,10 @@ import { handleModelName } from "../utils/handleOptions";
  * Add new transformer-based speech recognizers here.
  */
 const TRANSFORMER_MODELS = {
-  Whisper: { id: "Xenova/whisper-base", dtype: chooseDtype },
-  WhisperTiny: { id: "Xenova/whisper-tiny" },
-  WhisperBase: { id: "Xenova/whisper-base", dtype: chooseDtype },
-  WhisperSmall: { id: "Xenova/whisper-small", dtype: chooseDtype },
+  Whisper: "Xenova/whisper-base",
+  WhisperTiny: "Xenova/whisper-tiny",
+  WhisperBase: "Xenova/whisper-base",
+  WhisperSmall: "Xenova/whisper-small",
 };
 
 /**
