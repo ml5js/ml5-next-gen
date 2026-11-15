@@ -1,7 +1,10 @@
 import { pipeline } from "@huggingface/transformers";
 import handleArguments, { isVideo } from "../utils/handleArguments";
 import { drawToCanvas } from "../utils/imageUtilities";
-import { chooseDevice, chooseDtypeForDevice } from "../utils/transformersUtilities";
+import {
+  chooseDevice,
+  chooseDtypeForDevice,
+} from "../utils/transformersUtilities";
 
 /**
  * Maps ml5-friendly model names to their Hugging Face model ids.
@@ -92,7 +95,7 @@ export class ImageClassifierTransformer {
     }));
 
     // Output the result via callback and/or promise
-    callback(normalized);
+    if (callback) callback(normalized);
     this.isClassifying = false;
     return normalized;
   }
