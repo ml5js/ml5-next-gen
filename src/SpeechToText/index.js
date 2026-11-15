@@ -31,13 +31,12 @@ export class SpeechToTextTransformer {
     this.device = options.device || chooseDevice;
     this.isListening = false;
 
-    const model = TRANSFORMER_MODELS[modelName];
-    if (!model) {
+    const hfModelId = TRANSFORMER_MODELS[modelName];
+    if (!hfModelId) {
       throw new Error(`Unknown transformer model "${modelName}". Options: ${Object.keys(
           TRANSFORMER_MODELS
         ).join(", ")}`);
     }
-    const hfModelId = model.id;
 
     // Print which underlying HF model is being loaded
     console.log(
