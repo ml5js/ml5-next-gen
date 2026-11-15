@@ -317,10 +317,23 @@ class ImageClassifier {
 const imageClassifier = (modelName, optionsOrCallback, cb) => {
   const args = handleArguments(modelName, optionsOrCallback, cb);
   const { string, options = {}, callback } = args;
-  const instance = TRANSFORMER_MODEL_NAMES.includes(string)
-    ? new ImageClassifierTransformer(string, options, callback)
-    : new ImageClassifier(string, options, callback);
-  return instance;
+
+  // URLs like Teachable Machine models go straight to ImageClassifier
+  if (typeof string === "string" && isHttpUrl(string)) {
+    return new ImageClassifier(string, options, callback);
+  }
+
+  // Use handleModelName to ignore case
+  const name = handleModelName(
+    string,
+    [...MODEL_OPTIONS, ...TRANSFORMER_MODEL_NAMES],
+    "mobilenet",
+    "imageClassifier"
+  );
+
+  return TRANSFORMER_MODEL_NAMES.includes(name)
+    ? new ImageClassifierTransformer(name, options, callback)
+    : new ImageClassifier(name, options, callback);
 };
 
 export default imageClassifier;
