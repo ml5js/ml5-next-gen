@@ -110,7 +110,7 @@ class TransformersDepthEstimation {
         },
         dtype: {
           type: "enum",
-          enums: ["fp32", "fp16", "q8", "q4"],
+          enums: ["fp32", "fp16", "q8", "int8", "uint8", "q4", "q4f16", "bnb4"],
           default: chooseDtype,
         },
       },
