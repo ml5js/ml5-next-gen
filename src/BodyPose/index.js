@@ -27,6 +27,7 @@ import handleOptions from "../utils/handleOptions";
 import { handleModelName } from "../utils/handleOptions";
 import objectRenameKey from "../utils/objectRenameKey";
 import { isVideo } from "../utils/handleArguments";
+import { resolveModelUrls } from "../utils/modelResolver";
 
 /**
  * User provided options object for BodyPose with MoveNet model.
@@ -44,6 +45,8 @@ import { isVideo } from "../utils/handleArguments";
  * @property {string} [trackerType]           - The type of tracker to use.
  * @property {object} [trackerConfig]         - Advanced tracker configurations.
  * @property {string} [modelUrl]              - The file path or URL to the MoveNet model.
+ * @property {string|boolean} [modelPath]     - A local model folder, a direct model folder, 'auto',
+ *                                             or false to skip local model auto-detection.
  */
 
 /**
@@ -64,6 +67,8 @@ import { isVideo } from "../utils/handleArguments";
  *                                              model. Only for `tfjs` runtime.
  * @property {string} [landmarkModelUrl]      - The file path or URL to the BlazePose landmark
  *                                              model. Only for `tfjs` runtime.
+ * @property {string|boolean} [modelPath]     - A local model folder, a direct model folder, 'auto',
+ *                                             or false to skip local model auto-detection.
  */
 
 /**
@@ -234,6 +239,13 @@ class BodyPose {
         MoveNetConfigSchema,
         "bodyPose"
       );
+      await tf.ready();
+      await resolveModelUrls({
+        modelName: "bodypose",
+        modelConfig,
+        userOptions: this.userOptions,
+        modelNameForBodyPose: this.modelName,
+      });
       // Map the modelType string to the `movenet.modelType` enum
       switch (modelConfig.modelType) {
         case "SINGLEPOSE_LIGHTNING":
@@ -257,6 +269,14 @@ class BodyPose {
     );
     // Load the TensorFlow.js detector instance
     await tf.ready();
+    if (this.modelName === "BlazePose") {
+      await resolveModelUrls({
+        modelName: "bodypose",
+        modelConfig,
+        userOptions: this.userOptions,
+        modelNameForBodyPose: this.modelName,
+      });
+    }
     this.model = await poseDetection.createDetector(pipeline, modelConfig);
     return this;
   }

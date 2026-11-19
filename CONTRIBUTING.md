@@ -24,6 +24,7 @@ Welcome to the ml5.js project! Developing ml5.js is not just about developing ma
     - [General Guidelines](#general-guidelines)
     - [Image/Video-Based Detection Models](#imagevideo-based-detection-models)
   - [Utils](#utils)
+    - [Updating offline model files](#updating-offline-model-files)
     - [handleOptions](#handleoptions)
       - [`userObject`](#userobject)
       - [`moldObject`](#moldobject)
@@ -321,6 +322,15 @@ This guideline provides a high-level concept of what the ml5.js library's API sh
 ## Utils
 
 This section documents the utility functions found in the `src/utils` folder.
+
+### Updating offline model files
+
+Offline model support uses `src/utils/modelRegistry.js` as the source of truth for TFJS model URLs and MediaPipe file lists. When bumping model packages or changing upstream URLs:
+
+1. Update `src/utils/modelRegistry.js`.
+2. Run `ml5 cache prefetch <model> --force` for each affected model.
+3. Run `ml5 cache verify <model>` to confirm the generated `manifest.json` checksums.
+4. Test the corresponding example with DevTools Network open and confirm model files are loaded from `localhost`.
 
 ### [handleOptions](src\utils\handleOptions.js)
 
